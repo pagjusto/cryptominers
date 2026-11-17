@@ -218,33 +218,33 @@ export default function AdminConstructionChestsTab({
               type="number"
               step="0.05"
               min="0.01"
-              max="5.0"
+              max="15.0"
               value={currentChestConfig.baseRateCommonPct}
-              onChange={e => handleUpdateParam('baseRateCommonPct', parseFloat(e.target.value) || 0.1)}
+              onChange={e => handleUpdateParam('baseRateCommonPct', parseFloat(e.target.value) || 15)}
               className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-amber-300 font-mono focus:outline-none focus:border-amber-400"
             />
             <p className="text-[10px] text-slate-500 leading-tight">
-              Base multiplicadora. A taxa antiga de 0,2381% foi substituída por este valor configurável.
+              Chance-base por sobrevivente comum participante de cada Boss derrotado.
             </p>
           </div>
 
           {/* Teto Máximo por Conta */}
           <div className="space-y-1.5 bg-slate-900 p-3.5 rounded-xl border border-slate-800">
             <div className="flex justify-between items-center text-xs">
-              <label className="text-slate-300 font-bold">Teto Máximo por Ciclo</label>
+              <label className="text-slate-300 font-bold">Teto Máximo por Boss</label>
               <span className="font-mono text-emerald-400 font-bold">{currentChestConfig.maxAccountChanceCapPct}%</span>
             </div>
             <input 
               type="number"
               step="0.5"
               min="1.0"
-              max="25.0"
+              max="40.0"
               value={currentChestConfig.maxAccountChanceCapPct}
-              onChange={e => handleUpdateParam('maxAccountChanceCapPct', parseFloat(e.target.value) || 10.0)}
+              onChange={e => handleUpdateParam('maxAccountChanceCapPct', parseFloat(e.target.value) || 40.0)}
               className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-emerald-300 font-mono focus:outline-none focus:border-emerald-400"
             />
             <p className="text-[10px] text-slate-500 leading-tight">
-              Teto absoluto obrigatório de 10% por conta por ciclo de 1 hora.
+              Teto máximo de 40% por jogador em cada Boss derrotado.
             </p>
           </div>
 
@@ -405,7 +405,7 @@ export default function AdminConstructionChestsTab({
 
         <div className="flex flex-wrap gap-2.5">
           <button
-            onClick={handleSimulateCycleRoll}
+            onClick={handleSimulateBossRoll}
             className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/40 text-xs font-bold transition cursor-pointer active:scale-95"
           >
             <Play size={14} />
@@ -413,7 +413,7 @@ export default function AdminConstructionChestsTab({
           </button>
 
           <button
-            onClick={handleExecuteRealCycleRoll}
+            onClick={handleExecuteRealBossRoll}
             className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 text-xs font-bold transition cursor-pointer active:scale-95"
           >
             <Sparkles size={14} />
