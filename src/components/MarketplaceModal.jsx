@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, ShoppingBag, Tag, Sparkles, Flame, Zap, Battery, ShieldCheck, ArrowRight, DollarSign, Check, AlertCircle } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { MARKETPLACE_FEE_PCT, FEE_SPLIT } from '../data/marketplaceData';
+import { MARKETPLACE_FEE_PCT } from '../data/marketplaceData';
 import { sfx } from '../utils/sfx';
 
 export default function MarketplaceModal({ 
@@ -114,25 +114,10 @@ export default function MarketplaceModal({
           </div>
         </div>
 
-        {/* BANNER DE TRANSPARÊNCIA: COMO A TAXA DO MERCADO GERA LUCRO */}
-        <div className="my-2.5 p-2.5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-slate-950 to-emerald-500/10 border border-slate-800 flex items-center justify-between text-xs font-tech shrink-0">
-          <div className="flex items-center gap-3">
-            <span className="flex items-center gap-1 text-amber-300 font-bold">
-              💼 3% Lucro do Estúdio ({FEE_SPLIT.studio}%)
-            </span>
-            <span>•</span>
-            <span className="flex items-center gap-1 text-emerald-400 font-bold">
-              🪙 2% Vai pro Reward Pool ({FEE_SPLIT.rewardPool}%)
-            </span>
-            <span>•</span>
-            <span className="flex items-center gap-1 text-rose-400 font-bold">
-              🔥 1% Queima Deflacionária ({FEE_SPLIT.burn}%)
-            </span>
-          </div>
-
-          <span className="text-[11px] text-slate-400">
-            Total Arrecadado pelo Estúdio: <b className="text-amber-300 font-mono">+{studioRevenue.toFixed(3)} BCOIN</b>
-          </span>
+        {/* Comissão oficial única de 5%: sem divisão interna não aprovada */}
+        <div className="my-2.5 p-3 rounded-2xl bg-gradient-to-r from-amber-500/10 via-slate-950 to-emerald-500/10 border border-slate-800 flex items-center justify-between text-xs font-tech shrink-0">
+          <span className="text-amber-300 font-bold">Comissão total da plataforma: {MARKETPLACE_FEE_PCT}%</span>
+          <span className="text-emerald-400 font-bold">Vendedor recebe 95% • Jogo recebe 5%</span>
         </div>
 
         {/* ABA 1: EXPLORAR MERCADO (COMPRA DE MINERADORES) */}
