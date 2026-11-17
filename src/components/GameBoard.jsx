@@ -12,9 +12,12 @@ import {
   BLOCK_TREASURE, 
   BLOCK_ANCIENT_ALTAR,
   BLOCK_DEPOSIT_EMERALD,
+  BLOCK_ZOMBIE,
+  BLOCK_BOSS,
   MINER_CLASSES 
 } from '../data/minersData';
 import { recordDepositDamage } from '../utils/individualMapEngine';
+import { syncEnemiesWithMap, updateEnemies, drawEnemyCharacter } from '../utils/enemySystem';
 import { BOMB_CRYPTO_REWARDS } from '../data/bombCryptoEconomy';
 import { 
   drawContinuousCaveFloor, 
@@ -100,16 +103,18 @@ export default function GameBoard({
 
   useEffect(() => {
     if (!mapData || !mapData.grid) return;
+    const currentKey = mapData.mapId || mapData.id;
     // Evita recarregar a malha e desincronizar o estado dos heróis se o id do mapa for o mesmo
-    if (mapData.id && mapData.id === lastMapIdRef.current && gameStateRef.current.grid) {
+    if (currentKey && currentKey === lastMapIdRef.current && gameStateRef.current.grid) {
       return;
     }
-    lastMapIdRef.current = mapData.id;
+    lastMapIdRef.current = currentKey;
     gameStateRef.current.grid = mapData.grid.map(row => [...row]);
     gameStateRef.current.hpMap = { ...(mapData.hpMap || {}) };
     gameStateRef.current.totalMapHp = Object.values(mapData.hpMap || {}).reduce((a, b) => a + b, 0);
     gameStateRef.current.isMapClearing = false;
-  }, [mapData?.id]);
+    gameStateRef.current.enemies = syncEnemiesWithMap([], mapData, gameStateRef.current.grid, gameStateRef.current.hpMap);
+  }, [mapData?.mapId, mapData?.id]);
 
   useEffect(() => {
     if (statsResetTrigger > 0) {
@@ -181,6 +186,12 @@ export default function GameBoard({
       const dt = Math.min(rawDt, 0.1) * gameSpeed;
       const isCanyon = (mine?.id === 'canyon' || !mine?.id);
 
+      // Atualiza movimentação de caminhada e combate dos Zumbis e Boss
+      if (mapData) {
+        state.enemies = syncEnemiesWithMap(state.enemies || [], mapData, state.grid, state.hpMap);
+        updateEnemies(state.enemies, state, dt, now, isCanyon);
+      }
+
       // 1. ATUALIZAR MINERADORES
       // Aura de Regeneração do Guardião Ancestral
       const hasWorkingLegendary = state.miners.some(m => m.classId === 'legendary' && m.status === 'work');
@@ -218,6 +229,46 @@ export default function GameBoard({
             m.moveCooldown = 0; // Libera movimento imediato para a próxima jazida
           }
         });
+
+        // Notifica e remove o inimigo (Zumbi ou Boss) correspondente
+        if (state.enemies) {
+          const eIdx = state.enemies.findIndex(e => e.gx === bx && e.gy === by);
+          if (eIdx !== -1) {
+            const defeated = state.enemies[eIdx];
+            state.enemies.splice(eIdx, 1);
+            const isBoss = defeated.type === 'boss';
+
+            for (let p = 0; p < (isBoss ? 28 : 12); p++) {
+              state.particles.push({
+                x: bx * TILE_SIZE + TILE_SIZE / 2,
+                y: by * TILE_SIZE + TILE_SIZE / 2,
+                vx: (Math.random() - 0.5) * (isBoss ? 200 : 130),
+                vy: (Math.random() - 0.5) * (isBoss ? 200 : 130) - 25,
+                color: isBoss ? '#ef4444' : '#84cc16',
+                size: Math.random() * 4 + 2,
+                life: 0.6,
+                maxLife: 0.6
+              });
+            }
+
+            if (isBoss) {
+              sfx.playChestOpen?.();
+              state.floatTexts.push({
+                text: '💀 BOSS MUTANTE DERROTADO! +BÔNUS',
+                x: bx * TILE_SIZE + TILE_SIZE / 2,
+                y: by * TILE_SIZE - 12,
+                color: '#facc15',
+                opacity: 1.0,
+                vy: -25
+              });
+              callbacksRef.current.onFindMysticChest?.({
+                type: 'boss_defeat_reward',
+                rewardMnc: 25,
+                title: 'Abominação Mutante Derrotada'
+              });
+            }
+          }
+        }
 
         // Rastreamento de estatísticas da rodada (Pedras destruídas pelo herói)
         if (hitter && hitter.id) {
@@ -617,158 +668,46 @@ export default function GameBoard({
         drawTunnelPortals(ctx, logicalWidth, railY);
       }
 
+      // 1. Paredões e Pilares Indestrutíveis da Caverna
       for (let r = 0; r < GRID_ROWS; r++) {
         for (let c = 0; c < GRID_COLS; c++) {
           const block = state.grid[r][c];
-          if (block === BLOCK_EMPTY) continue;
+          if (block !== BLOCK_BEDROCK) continue;
+          if (isCanyon && isCanyonTrackOrTunnel(c, r, GRID_COLS, GRID_ROWS)) continue;
 
-          // Regra do Usuário: Jazidas e pedras NÃO podem ficar sob o trilho ou sob a entrada da mina!
-          if (isCanyon && isCanyonTrackOrTunnel(c, r, GRID_COLS, GRID_ROWS)) {
+          // No Cânion, bordas são os próprios paredões naturais da arte de fundo
+          if (mine?.id === 'canyon' && (r === 0 || r === GRID_ROWS - 1 || c === 0 || c === GRID_COLS - 1)) {
             continue;
           }
 
           const px = c * TILE_SIZE;
           const py = r * TILE_SIZE;
-          const cellKey = `${c},${r}`;
-          const curHp = state.hpMap[cellKey] || 1;
+          const sprite = rockSpriteManager.sprites?.rock;
 
-          let oreType = 'rock';
-          let maxHp = BOMB_CRYPTO_REWARDS.rock.hp;
+          if (sprite) {
+            const aspect = (sprite.width && sprite.height) ? (sprite.width / sprite.height) : 1.05;
+            const bW = Math.floor(TILE_SIZE * 0.72);
+            const bH = Math.max(20, Math.floor(bW / aspect));
+            const bX = px + Math.floor((TILE_SIZE - bW) / 2);
+            const bY = py + TILE_SIZE - bH - 2;
 
-          if (block === BLOCK_BEDROCK) {
-            oreType = 'bedrock';
-            maxHp = 999;
-          } else if (block === BLOCK_ORE_COMMON) {
-            oreType = 'common';
-            maxHp = BOMB_CRYPTO_REWARDS.common.hp;
-          } else if (block === BLOCK_ORE_GOLD) {
-            oreType = 'gold';
-            maxHp = BOMB_CRYPTO_REWARDS.gold.hp;
-          } else if (block === BLOCK_ORE_CRYSTAL) {
-            oreType = 'crystal';
-            maxHp = BOMB_CRYPTO_REWARDS.crystal.hp;
-          } else if (block === BLOCK_DEPOSIT_EMERALD) {
-            oreType = 'emerald';
-            maxHp = 4000;
-          } else if (block === BLOCK_TREASURE) {
-            oreType = 'treasure';
-            maxHp = BOMB_CRYPTO_REWARDS.treasure.hp;
-          } else if (block === BLOCK_ANCIENT_ALTAR) {
-            oreType = 'altar';
-            maxHp = BOMB_CRYPTO_REWARDS.altar.hp;
-          }
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+            ctx.beginPath();
+            ctx.ellipse(px + TILE_SIZE / 2, py + TILE_SIZE - 2, bW * 0.42, 3.5, 0, 0, Math.PI * 2);
+            ctx.fill();
 
-          const hpRatio = Math.max(0, curHp / maxHp);
-
-          if (rockSpriteManager.loaded && rockSpriteManager.sprites) {
-            let sprite = null;
-
-            if (oreType === 'gold') sprite = rockSpriteManager.sprites.gold;
-            else if (oreType === 'crystal') sprite = rockSpriteManager.sprites.crystal;
-            else if (oreType === 'emerald') sprite = rockSpriteManager.sprites.emerald || rockSpriteManager.sprites.crystal;
-            else if (oreType === 'common') sprite = rockSpriteManager.sprites.rock; // Cobre 100% removido
-            else if (oreType === 'treasure') sprite = rockSpriteManager.sprites.chest || rockSpriteManager.sprites.gold;
-            else if (oreType === 'altar') sprite = rockSpriteManager.sprites.emerald;
-            else if (oreType === 'rock' || oreType === 'bedrock') {
-              sprite = rockSpriteManager.sprites.rock;
-            }
-
-            if (sprite) {
-              if (oreType === 'rock' || oreType === 'bedrock') {
-                // Na Mina do Cânion, o perímetro externo (bordas r=0, r=GRID_ROWS-1, c=0, c=GRID_COLS-1)
-                // são os próprios paredões naturais de arenito e rocha do cânion!
-                // Não desenhamos blocos cinzas para não cobrir a arte do relevo e os penhascos.
-                if (mine?.id === 'canyon' && oreType === 'bedrock' && (r === 0 || r === GRID_ROWS - 1 || c === 0 || c === GRID_COLS - 1)) {
-                  continue;
-                }
-
-                // Pilares internos do cânion: rocha de apoio natural em escala proporcional e reduzida
-                const aspect = (sprite.width && sprite.height) ? (sprite.width / sprite.height) : 1.05;
-                if (mine?.id === 'canyon' && oreType === 'bedrock') {
-                  const bW = Math.floor(TILE_SIZE * 0.72);
-                  const bH = Math.max(20, Math.floor(bW / aspect));
-                  const bX = px + Math.floor((TILE_SIZE - bW) / 2);
-                  const bY = py + TILE_SIZE - bH - 2;
-
-                  ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
-                  ctx.beginPath();
-                  ctx.ellipse(px + TILE_SIZE / 2, py + TILE_SIZE - 2, bW * 0.42, 3.5, 0, 0, Math.PI * 2);
-                  ctx.fill();
-
-                  ctx.drawImage(sprite, bX, bY, bW, bH);
-                  continue;
-                }
-
-                // Desenha a nova jazida de pedra na cor do chão do mapa em proporção reduzida
-                const rockW = Math.floor(TILE_SIZE * 0.74);
-                const rockH = Math.max(22, Math.floor(rockW / aspect));
-                const rockX = px + Math.floor((TILE_SIZE - rockW) / 2);
-                const rockY = py + TILE_SIZE - rockH - 2;
-
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.42)';
-                ctx.beginPath();
-                ctx.ellipse(px + TILE_SIZE / 2, py + TILE_SIZE - 2, rockW * 0.42, 3.5, 0, 0, Math.PI * 2);
-                ctx.fill();
-
-                ctx.drawImage(sprite, rockX, rockY, rockW, rockH);
-
-                if (oreType === 'bedrock') {
-                  ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
-                  ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
-                }
-              } else {
-                // Desenha as jazidas oficiais em proporção calibrada e reduzida
-                const aspect = (sprite.width && sprite.height) ? (sprite.width / sprite.height) : 1;
-                let dw, dh;
-                if (oreType === 'gold') {
-                  // Jazida de Ouro Oficial: proporção reduzida
-                  dw = Math.floor(TILE_SIZE * 0.72);
-                  dh = Math.max(20, Math.floor(dw / aspect));
-                } else if (oreType === 'treasure') {
-                  // Baú Místico de Tesouro
-                  dw = Math.floor(TILE_SIZE * 0.68);
-                  dh = Math.max(20, Math.floor(dw / aspect));
-                } else {
-                  // Diamante Azul ou Esmeralda
-                  dh = Math.floor(TILE_SIZE * 0.74);
-                  dw = Math.floor(dh * aspect);
-                }
-
-                const offsetX = px + Math.floor((TILE_SIZE - dw) / 2);
-                const offsetY = py + TILE_SIZE - dh - 2;
-
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
-                ctx.beginPath();
-                ctx.ellipse(px + TILE_SIZE / 2, py + TILE_SIZE - 2, dw * 0.4, 3.5, 0, 0, Math.PI * 2);
-                ctx.fill();
-
-                ctx.save();
-                if (oreType === 'gold') {
-                  ctx.shadowColor = 'rgba(250, 204, 21, 0.45)';
-                  ctx.shadowBlur = 8;
-                } else if (oreType === 'treasure') {
-                  ctx.shadowColor = 'rgba(245, 158, 11, 0.65)';
-                  ctx.shadowBlur = 10;
-                } else if (oreType === 'emerald') {
-                  ctx.shadowColor = 'rgba(16, 185, 129, 0.65)';
-                  ctx.shadowBlur = 9;
-                } else if (sprite === rockSpriteManager.sprites.crystal) {
-                  ctx.shadowColor = 'rgba(56, 189, 248, 0.55)';
-                  ctx.shadowBlur = 9;
-                } else {
-                  ctx.shadowColor = 'rgba(52, 211, 153, 0.55)';
-                  ctx.shadowBlur = 9;
-                }
-                ctx.drawImage(sprite, offsetX, offsetY, dw, dh);
-                ctx.restore();
-              }
-            } else {
-              drawVectorCartoonRock(ctx, px, py, TILE_SIZE, oreType, mine, hpRatio, now);
-            }
+            ctx.drawImage(sprite, bX, bY, bW, bH);
           } else {
-            drawVectorCartoonRock(ctx, px, py, TILE_SIZE, oreType, mine, hpRatio, now);
+            drawVectorCartoonRock(ctx, px, py, TILE_SIZE, 'bedrock', mine, 1, now);
           }
         }
+      }
+
+      // 2. RENDERIZAÇÃO DOS ZUMBIS E DO BOSS COM CAMINHADA E ATAQUE
+      if (state.enemies && state.enemies.length > 0) {
+        state.enemies.forEach(enemy => {
+          drawEnemyCharacter(ctx, enemy, now);
+        });
       }
 
       state.sparks.forEach(s => {

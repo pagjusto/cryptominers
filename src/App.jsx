@@ -1440,23 +1440,17 @@ export default function App() {
                 Ciclo #{mapData?.cycleNumber || 1}
               </span>
               <span className="text-emerald-400 font-bold bg-emerald-500/15 px-2 py-0.5 rounded-lg border border-emerald-500/30 text-[11px]">
-                Jazidas: {mapData?.remainingDeposits ?? mapData?.totalDeposits ?? 20} / {mapData?.totalDeposits || 20}
+                Inimigos: {mapData?.remainingDeposits ?? mapData?.totalDeposits ?? 21} / {mapData?.totalDeposits || 21}
               </span>
             </div>
 
-            {/* BADGES DOS 4 TIPOS OFICIAIS DE JAZIDAS GERADAS */}
+            {/* BADGES DOS ZUMBIS E DO BOSS */}
             <div className="flex items-center gap-2 text-[11px]">
-              <span className="flex items-center gap-1 bg-slate-950/80 text-slate-300 px-1.5 py-0.5 rounded border border-slate-800" title="Pedra Comum (50%)">
-                🪨 Pedra: <b className="text-white">{mapData?.countsByType?.stone ?? 10}</b> (50%)
+              <span className="flex items-center gap-1 bg-lime-950/70 text-lime-300 px-2 py-0.5 rounded border border-lime-500/40 font-bold" title="Zumbis restantes">
+                🧟 Zumbis: <b className="text-white">{mapData?.deposits?.filter(d => d.type === 'zombie' && !d.isCompleted).length ?? (mapData?.countsByType?.zombie ?? 20)}</b> / {mapData?.countsByType?.zombie ?? 20}
               </span>
-              <span className="flex items-center gap-1 bg-amber-950/40 text-amber-300 px-1.5 py-0.5 rounded border border-amber-500/30" title="Veio de Ouro (25%)">
-                🟡 Ouro: <b className="text-amber-200">{mapData?.countsByType?.gold ?? 5}</b> (25%)
-              </span>
-              <span className="flex items-center gap-1 bg-sky-950/40 text-sky-300 px-1.5 py-0.5 rounded border border-sky-500/30" title="Diamante Azul (17%)">
-                💎 Diamante: <b className="text-sky-200">{mapData?.countsByType?.diamond ?? 3}</b> (17%)
-              </span>
-              <span className="flex items-center gap-1 bg-emerald-950/40 text-emerald-300 px-1.5 py-0.5 rounded border border-emerald-500/30" title="Esmeralda Verde (8%)">
-                🟢 Esmeralda: <b className="text-emerald-200">{mapData?.countsByType?.emerald ?? 2}</b> (8%)
+              <span className="flex items-center gap-1 bg-red-950/70 text-red-300 px-2 py-0.5 rounded border border-red-500/40 font-bold" title="Boss Mutante">
+                💀 Boss: <b className="text-amber-300">{mapData?.deposits?.some(d => d.type === 'boss' && !d.isCompleted) ? 'Ativo' : 'Derrotado'}</b>
               </span>
             </div>
           </div>
@@ -1506,7 +1500,7 @@ export default function App() {
                 CICLO #{mapData?.cycleNumber || 1} CONCLUÍDO!
               </h2>
               <p className="text-slate-300 text-sm max-w-md mb-3">
-                Todas as 20 jazidas foram mineradas! Gerando um novo mapa exclusivo com 20 novas jazidas para o Ciclo #{((mapData?.cycleNumber || 1) + 1)}...
+                Todos os Zumbis e o Boss Mutante foram eliminados! Gerando um novo mapa exclusivo com novas criaturas para o Ciclo #{((mapData?.cycleNumber || 1) + 1)}...
               </p>
               <div className="flex items-center gap-2 bg-amber-500/20 text-amber-300 px-4 py-2 rounded-xl border border-amber-500/40 text-sm font-bold">
                 <span>🪙</span>

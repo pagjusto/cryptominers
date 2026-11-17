@@ -14,6 +14,8 @@ export const BLOCK_ORE_GOLD = 5;    // Veio de ouro puro
 export const BLOCK_TREASURE = 6;    // Baú secreto enterrado
 export const BLOCK_ANCIENT_ALTAR = 7; // Altar místico da mina
 export const BLOCK_DEPOSIT_EMERALD = 8; // Jazida oficial de esmeralda verde (8%)
+export const BLOCK_ZOMBIE = 9; // Zumbi oficial (substitui as jazidas com movimento e ataque)
+export const BLOCK_BOSS = 10; // Boss oficial (substitui o baú de tesouro com movimento e ataque)
 
 // As 6 Classes de Personagens (Elenco Oficial Bomb Crypto: Criaturas & Fantasia)
 export const MINER_CLASSES = {
