@@ -34,7 +34,7 @@ export default function HeroList({
   return (
     <div className="flex flex-col h-full bg-slate-900 border border-slate-800 rounded-3xl p-4 sm:p-5 shadow-2xl overflow-hidden font-tech text-white">
       
-      {/* 1. TOPO DA EQUIPE DE MINERAÇÃO (AMPLIADO LATERALMENTE) */}
+      {/* 1. TOPO DA EQUIPE DE SOBREVIVENTES */}
       <div className="pb-3 mb-3 border-b border-slate-800 shrink-0">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
           <div>
@@ -102,7 +102,7 @@ export default function HeroList({
         </button>
       </div>
 
-      {/* 3. BANNER DE PATROCÍNIO: RECUPERAÇÃO 100% DE ENERGIA */}
+      {/* 3. STATUS DO TRATAMENTO AUTOMÁTICO */}
       <div 
         className="mb-3.5 p-3 rounded-2xl bg-gradient-to-r from-amber-500/15 via-emerald-500/15 to-amber-500/15 border border-emerald-500/30 hover:border-emerald-400 transition flex items-center justify-between group shadow-sm shrink-0"
       >
@@ -130,7 +130,7 @@ export default function HeroList({
         </button>
       </div>
 
-      {/* 4. LISTA DE HERÓIS COM LAYOUT EXPANDIDO E ESPAÇOSO (SEM ACÚMULO) */}
+      {/* 4. LISTA DE SOBREVIVENTES */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden space-y-2.5 pr-1.5 no-scrollbar">
         {miners.map((miner) => {
           const classInfo = MINER_CLASSES[miner.classId] || MINER_CLASSES.miner;
@@ -243,7 +243,7 @@ export default function HeroList({
 
                 </div>
 
-                {/* Barra de Estamina & Botão 100% */}
+                {/* Barra de vida */}
                 <div className="flex items-center justify-between gap-1.5">
                   <div className="flex-1 flex items-center gap-1.5 min-w-0">
                     <span className="text-[10px] text-slate-400 font-mono w-7 shrink-0">
@@ -282,7 +282,7 @@ export default function HeroList({
                 </div>
               </div>
 
-              {/* COLUNA 3: STATUS, AÇÕES (TRABALHAR/DORMIR) & EVOLUÇÃO */}
+              {/* COLUNA 3: STATUS, COMBATE E EVOLUÇÃO */}
               <div className="flex md:flex-col items-center md:items-end justify-between md:justify-center gap-1.5 shrink-0 w-[125px]">
                 {/* Badge de Status Atual */}
                 <div>
