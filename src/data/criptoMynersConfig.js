@@ -284,18 +284,18 @@ export const DEFAULT_CRIPTO_MYNERS_CONFIG = {
     }
   },
 
-  // 6. SISTEMA OFICIAL DE BAÚS DE CONSTRUÇÃO (APARIÇÃO POR CICLO DE 1 HORA)
+  // 6. SISTEMA DE BAÚS DE CONSTRUÇÃO (SORTEIO POR BOSS DERROTADO)
   constructionChestConfig: {
     enabled: true,
-    baseRateCommonPct: 0.5, // Taxa-base configurável por herói comum (ex: 0.5%)
+    baseRateCommonPct: 15, // Chance-base de 15% por sobrevivente comum participante
     rarityMultipliers: {
       common: 1.0,      // 1x
       rare: 1.5,        // 1.5x
       epic: 2.0,        // 2x
       legendary: 3.0    // 3x
     },
-    maxAccountChanceCapPct: 10.0, // Teto absoluto de 10% por ciclo
-    cycleDurationSeconds: 3600,   // 1 hora de mineração ativa (3600s)
+    maxAccountChanceCapPct: 40.0, // Teto absoluto de 40% por Boss e por jogador
+    cycleDurationSeconds: 0,      // Sem ciclo horário; sorteio a cada Boss derrotado
     dailyLimitPerPlayer: 3,       // Máximo de 3 baús por dia
     timezone: 'America/Sao_Paulo',// Horário oficial de Brasília
     rewardFragmentCount: 1        // Exatamente 1 Fragmento de Construção por baú
