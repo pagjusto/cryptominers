@@ -52,7 +52,7 @@ import {
   executeConstructionCycleRoll,
   openConstructionChestById
 } from './utils/constructionChestEngine';
-import { autoRelayTeam, calculateMinerEfficiency } from './utils/minerRotationEngine';
+import { calculateMinerEfficiency } from './utils/minerRotationEngine';
 import { Calculator, Settings } from 'lucide-react';
 import { getSavedWalletState, saveWalletState, requestWalletConnection, disconnectWalletFromStorage } from './utils/web3Wallet';
 import MinerCatalogModal from './components/MinerCatalogModal';
@@ -279,7 +279,7 @@ export default function App() {
   const [constructionDailyStats, setConstructionDailyStats] = useState(() => getDailyConstructionStats());
   const [newlyFoundConstructionChest, setNewlyFoundConstructionChest] = useState(null);
   const [activeCombatSeconds, setActiveCombatSeconds] = useState(() => {
-    const saved = localStorage.getItem('crypto_miners_active_mining_seconds');
+    const saved = localStorage.getItem('crypto_myners_active_combat_seconds');
     return saved ? parseInt(saved, 10) || 0 : 0;
   });
 
@@ -295,7 +295,7 @@ export default function App() {
 
       setActiveCombatSeconds(prev => {
         const nextSeconds = prev + 1;
-        localStorage.setItem('crypto_miners_active_mining_seconds', nextSeconds.toString());
+        localStorage.setItem('crypto_myners_active_combat_seconds', nextSeconds.toString());
 
         const cycleLimit = criptoMynersConfig?.constructionChestConfig?.cycleDurationSeconds || 3600;
 
