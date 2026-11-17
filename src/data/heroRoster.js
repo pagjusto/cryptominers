@@ -131,13 +131,13 @@ export const WEAPON_CATALOG = [
   { id: 'pistol', name: 'Pistola', sourceIndex: 1, facing: 'right', category: 'pistola' },
   { id: 'flamethrower', name: 'Lança-chamas', sourceIndex: 2, facing: 'right', category: 'especial' },
   { id: 'energy-blaster', name: 'Canhão de Energia', sourceIndex: 3, facing: 'right', category: 'energia' },
-  { id: 'flare-launcher', name: 'Lançador de Sinalizadores', sourceIndex: 4, facing: 'right', category: 'especial' },
+  { id: 'flare-launcher', name: 'Lançador Incendiário', sourceIndex: 4, facing: 'right', category: 'especial' },
   { id: 'compact-rifle', name: 'Rifle Compacto', sourceIndex: 5, facing: 'right', category: 'rifle' },
   { id: 'medical-kit', name: 'Kit Médico', sourceIndex: 6, facing: 'right', category: 'suporte' },
   { id: 'grenade', name: 'Granada', sourceIndex: 7, facing: 'right', category: 'explosivo' },
-  { id: 'precision-rifle', name: 'Rifle de Precisão', sourceIndex: 8, facing: 'right', category: 'rifle' },
+  { id: 'heavy-machine-gun', name: 'Metralhadora Pesada', sourceIndex: 8, facing: 'right', category: 'pesada' },
   { id: 'shotgun', name: 'Escopeta', sourceIndex: 9, facing: 'right', category: 'escopeta' },
-  { id: 'rocket-launcher', name: 'Lança-foguetes', sourceIndex: null, facing: 'right', category: 'pesada', needsArtwork: true }
+  { id: 'rocket-launcher', name: 'Lança-foguetes', sourceIndex: 10, facing: 'right', category: 'pesada' }
 ];
 
 export function getHeroById(heroId) {
