@@ -49,7 +49,6 @@ import {
   saveStoredConstructionChests,
   getStoredConstructionFragments,
   saveStoredConstructionFragments,
-  executeConstructionCycleRoll,
   openConstructionChestById
 } from './utils/constructionChestEngine';
 import { calculateMinerEfficiency } from './utils/minerRotationEngine';
@@ -278,52 +277,8 @@ export default function App() {
   const [constructionFragments, setConstructionFragments] = useState(() => getStoredConstructionFragments());
   const [constructionDailyStats, setConstructionDailyStats] = useState(() => getDailyConstructionStats());
   const [newlyFoundConstructionChest, setNewlyFoundConstructionChest] = useState(null);
-  const [activeCombatSeconds, setActiveCombatSeconds] = useState(() => {
-    const saved = localStorage.getItem('crypto_myners_active_combat_seconds');
-    return saved ? parseInt(saved, 10) || 0 : 0;
-  });
 
-  // Loop de combate ativo e ciclo de Baús de Construção (1 hora de combate válido)
-  useEffect(() => {
-    const timer = setInterval(() => {
-      // Somente conta se a aba estiver visível e houver sobreviventes em combate
-      if (typeof document !== 'undefined' && document.hidden) return;
-
-      const hasActiveMiners = miners.some(m => m.status === 'work' && (m.currentHealth ?? 100) > 5);
-
-      if (!hasActiveMiners) return;
-
-      setActiveCombatSeconds(prev => {
-        const nextSeconds = prev + 1;
-        localStorage.setItem('crypto_myners_active_combat_seconds', nextSeconds.toString());
-
-        const cycleLimit = criptoMynersConfig?.constructionChestConfig?.cycleDurationSeconds || 3600;
-
-        if (nextSeconds >= cycleLimit) {
-          // Dispara a verificação oficial do ciclo
-          const rollResult = executeConstructionCycleRoll(miners, criptoMynersConfig?.constructionChestConfig);
-          if (rollResult.won) {
-            setConstructionChests(getStoredConstructionChests());
-            setNewlyFoundConstructionChest(rollResult.chest);
-            setConstructionDailyStats(rollResult.dailyStats);
-            sfx.playLevelUp();
-            confetti({
-              particleCount: 130,
-              spread: 80,
-              origin: { y: 0.6 },
-              colors: ['#f59e0b', '#38bdf8', '#ffffff']
-            });
-          }
-          return 0; // Reseta o ciclo para a próxima hora
-        }
-        return nextSeconds;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [miners, criptoMynersConfig]);
-
-  // Listener para eventos de concessão de Baú de Construção (inclusive via testes admin)
+  // Listener para eventos de concessão de Baú de Construção (inclusive via testes admin e derrota de Boss)
   useEffect(() => {
     const handleChestAwarded = (e) => {
       const chest = e.detail;
