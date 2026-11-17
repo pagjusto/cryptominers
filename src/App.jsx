@@ -278,26 +278,22 @@ export default function App() {
   const [constructionFragments, setConstructionFragments] = useState(() => getStoredConstructionFragments());
   const [constructionDailyStats, setConstructionDailyStats] = useState(() => getDailyConstructionStats());
   const [newlyFoundConstructionChest, setNewlyFoundConstructionChest] = useState(null);
-  const [activeMiningSeconds, setActiveMiningSeconds] = useState(() => {
+  const [activeCombatSeconds, setActiveCombatSeconds] = useState(() => {
     const saved = localStorage.getItem('crypto_miners_active_mining_seconds');
     return saved ? parseInt(saved, 10) || 0 : 0;
   });
 
-  // Loop de Mineração Ativa e Ciclo de Baús de Construção (1 hora = 3600s de mineração válida)
+  // Loop de combate ativo e ciclo de Baús de Construção (1 hora de combate válido)
   useEffect(() => {
     const timer = setInterval(() => {
-      // Somente conta se a aba estiver visível e houver heróis minerando ativamente no jogo
+      // Somente conta se a aba estiver visível e houver sobreviventes em combate
       if (typeof document !== 'undefined' && document.hidden) return;
 
-      const hasActiveMiners = miners.some(m => {
-        const isResting = m.status === 'house' || m.status === 'waiting_house' || m.status === 'rest';
-        const hasStamina = (m.currentStamina ?? 100) > 0;
-        return !isResting && hasStamina;
-      });
+      const hasActiveMiners = miners.some(m => m.status === 'work' && (m.currentHealth ?? 100) > 5);
 
       if (!hasActiveMiners) return;
 
-      setActiveMiningSeconds(prev => {
+      setActiveCombatSeconds(prev => {
         const nextSeconds = prev + 1;
         localStorage.setItem('crypto_miners_active_mining_seconds', nextSeconds.toString());
 
@@ -705,8 +701,8 @@ export default function App() {
     // Deduz BCOIN do comprador
     setBcoin(prev => parseFloat((prev - listing.priceBcoin).toFixed(3)));
 
-    // Calcula a taxa do estúdio (3% do valor da venda)
-    const studioProfit = parseFloat(((listing.priceBcoin * FEE_SPLIT.studio) / 100).toFixed(3));
+    // Receita da plataforma: 5% da comissão total do marketplace
+    const studioProfit = parseFloat(((listing.priceBcoin * FEE_SPLIT.platform) / 100).toFixed(3));
     setStudioRevenue(prev => parseFloat((prev + studioProfit).toFixed(3)));
 
     // Remove do mercado
@@ -1383,8 +1379,7 @@ export default function App() {
             onUpgradeMiner={handleUpgradeMiner}
             onToggleStatus={handleToggleStatus}
             onAllWork={handleAllWork}
-            onAllRest={handleAllRest}
-            onOpenEnergyBoostAd={() => handleOpenEnergyRecovery(null)}
+                        onOpenEnergyBoostAd={() => handleOpenEnergyRecovery(null)}
             onOpenEnergyRecoveryModal={handleOpenEnergyRecovery}
             onRepairMiner={handleRepairMiner}
             onDiversifyTeam={handleDiversifyTeam}
