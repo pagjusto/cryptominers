@@ -172,6 +172,9 @@ export default function HeroList({
                     <span className="text-[10px] px-1.5 py-0.2 rounded-md bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30 shrink-0">
                       Nv.{miner.level}
                     </span>
+                    <span className={`text-[8px] px-1 py-0.2 rounded border font-bold uppercase shrink-0 ${rosterHero.rarity === 'legendary' ? 'bg-amber-500/20 text-amber-300 border-amber-500/40' : rosterHero.rarity === 'epic' ? 'bg-purple-500/20 text-purple-300 border-purple-500/40' : rosterHero.rarity === 'rare' ? 'bg-sky-500/20 text-sky-300 border-sky-500/40' : 'bg-slate-700/60 text-slate-300 border-slate-600'}`}>
+                      {rosterHero.rarityName}
+                    </span>
                     {miner.stars && miner.stars > 1 && (
                       <span className="text-[9px] px-1 py-0.2 rounded-md bg-amber-500/20 text-amber-400 font-bold border border-amber-500/40 shrink-0">
                         {'★'.repeat(miner.stars)}
