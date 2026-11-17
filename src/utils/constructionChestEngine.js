@@ -1,7 +1,7 @@
 // CRIPTO MYNERS — SISTEMA OFICIAL DE APARIÇÃO DOS BAÚS DE CONSTRUÇÃO
 // Regras Oficiais:
-// - Verificação a cada ciclo de 1 hora (3600s) de mineração válida e ativa
-// - Somente heróis minerando ativamente participam do cálculo (status 'work' e energia > 0)
+// - Verificação a cada ciclo de 1 hora (3600s) de combate válido e ativo
+// - Somente sobreviventes em combate ativo participam do cálculo (status 'work' e energia > 0)
 // - Taxa-base configurável pelo administrador (Comum: 1x, Raro: 1.5x, Épico: 2x, Lendário: 3x)
 // - Teto absoluto de 10% de chance máxima por conta em cada ciclo
 // - Limite diário por jogador de no máximo 3 Baús de Construção por dia
@@ -20,7 +20,7 @@ export const DEFAULT_CONSTRUCTION_CHEST_CONFIG = {
     legendary: 3.0    // 3x
   },
   maxAccountChanceCapPct: 10.0, // Teto absoluto de 10% por ciclo
-  cycleDurationSeconds: 3600,   // 1 hora de mineração ativa (3600s)
+  cycleDurationSeconds: 3600,   // 1 hora de combate ativo (3600s)
   dailyLimitPerPlayer: 3,       // Máximo de 3 baús por dia
   timezone: 'America/Sao_Paulo',// Horário oficial de Brasília
   rewardFragmentCount: 1        // Exatamente 1 Fragmento de Construção por baú
@@ -76,24 +76,17 @@ export function normalizeHeroRarity(hero) {
 }
 
 /**
- * Calcula a probabilidade de aparição com base EXCLUSIVAMENTE nos heróis ativos minerando
- * Heróis descansando, sem energia ou fora da mina NÃO participam do cálculo
+ * Calcula a probabilidade de aparição com base EXCLUSIVAMENTE nos sobreviventes em combate ativo
+ * Sobreviventes feridos, em tratamento, na fila ou na reserva NÃO participam do cálculo
  */
 export function calculateActiveMinersChance(miners = [], config = DEFAULT_CONSTRUCTION_CHEST_CONFIG) {
   const baseRate = typeof config.baseRateCommonPct === 'number' ? config.baseRateCommonPct : DEFAULT_CONSTRUCTION_CHEST_CONFIG.baseRateCommonPct;
   const multipliers = config.rarityMultipliers || DEFAULT_CONSTRUCTION_CHEST_CONFIG.rarityMultipliers;
   const maxCap = config.maxAccountChanceCapPct || DEFAULT_CONSTRUCTION_CHEST_CONFIG.maxAccountChanceCapPct;
 
-  // Filtra somente heróis minerando ativamente:
-  // - status !== 'house' (não está na casa)
-  // - status !== 'waiting_house' (não está na fila de descanso)
-  // - status !== 'rest'
-  // - currentStamina > 0 (possui energia para trabalhar)
-  const activeMiners = miners.filter(m => {
-    const isResting = m.status === 'house' || m.status === 'waiting_house' || m.status === 'rest';
-    const hasStamina = (m.currentStamina ?? 100) > 0;
-    return !isResting && hasStamina;
-  });
+  // Somente sobreviventes realmente em combate participam do cálculo.
+  // Feridos, fila do abrigo, reservas e personagens pausados não geram Baú de Construção.
+  const activeMiners = miners.filter(m => m.status === 'work' && (m.currentHealth ?? 100) > 5);
 
   const breakdownByRarity = {
     common: 0,
@@ -362,7 +355,7 @@ export function executeConstructionCycleRoll(miners = [], config = DEFAULT_CONST
       icon: '🧱',
       color: '#f59e0b',
       tagline: 'Material Raro de Expansão',
-      description: 'Baú especial obtido durante a mineração ativa. Contém exatamente 1 Fragmento de Construção para evolução de casas.',
+      description: 'Baú especial obtido durante a combate ativo. Contém exatamente 1 Fragmento de Construção para evolução de casas.',
       foundAt: getBrasiliaTimeString(),
       foundDateBrasilia: dailyStats.date,
       rewardFragmentCount: 1,
