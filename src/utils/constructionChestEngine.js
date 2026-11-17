@@ -11,12 +11,12 @@
 
 export const DEFAULT_CONSTRUCTION_CHEST_CONFIG = {
   enabled: true,
-  baseRateCommonPct: 15, // 15% por sobrevivente comum participante
+  baseRateCommonPct: 2, // Comum: 2% por sobrevivente; demais raridades usam multiplicadores oficiais
   rarityMultipliers: {
-    common: 1.0,      // 1x
-    rare: 1.5,        // 1.5x
-    epic: 2.0,        // 2x
-    legendary: 3.0    // 3x
+    common: 1.0,              // 2,00% por sobrevivente
+    rare: 1.1,                // 2,20% por sobrevivente
+    epic: 1.1666666666666667, // 2,333333...% por sobrevivente
+    legendary: 1.3333333333333333 // 2,666666...% por sobrevivente
   },
   maxAccountChanceCapPct: 40.0, // Teto absoluto de 40% por Boss e por jogador
   cycleDurationSeconds: 0,      // Sem ciclo horário; sorteio a cada Boss derrotado
@@ -98,7 +98,7 @@ export function calculateActiveMinersChance(miners = [], config = DEFAULT_CONSTR
     const rarity = normalizeHeroRarity(m);
     breakdownByRarity[rarity] = (breakdownByRarity[rarity] || 0) + 1;
     const mult = multipliers[rarity] || 1.0;
-    const individualChance = parseFloat((baseRate * mult).toFixed(4));
+    const individualChance = baseRate * mult;
     return {
       heroId: m.id,
       name: m.name,
@@ -118,8 +118,8 @@ export function calculateActiveMinersChance(miners = [], config = DEFAULT_CONSTR
     contributions,
     breakdownByRarity,
     baseRateCommonPct: baseRate,
-    rawTotalChance: parseFloat(rawTotalChance.toFixed(3)),
-    finalChance: parseFloat(finalChance.toFixed(3)),
+    rawTotalChance,
+    finalChance,
     isCapped,
     maxCap
   };
