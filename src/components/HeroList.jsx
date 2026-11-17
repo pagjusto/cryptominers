@@ -167,7 +167,7 @@ export default function HeroList({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">
                     <span className="font-tech font-bold text-xs sm:text-sm text-white truncate max-w-[105px]" title={rosterHero.name}>
-                      {miner.name}
+                      {rosterHero.name}
                     </span>
                     <span className="text-[10px] px-1.5 py-0.2 rounded-md bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30 shrink-0">
                       Nv.{miner.level}
