@@ -198,9 +198,10 @@ export default function HouseModal({
 
                         <button
                           onClick={() => onToggleHouseRest(miner.id)}
-                          className="px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-bold transition cursor-pointer"
+                          disabled={(miner.currentHealth ?? 5) < (miner.maxHealth || 100)}
+                          className="px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-bold transition disabled:opacity-40 disabled:cursor-not-allowed"
                         >
-                          Retornar
+                          {(miner.currentHealth ?? 5) >= (miner.maxHealth || 100) ? 'Retornar à equipe' : 'Em tratamento'}
                         </button>
                       </div>
                     );
@@ -233,7 +234,7 @@ export default function HouseModal({
               </h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {miners.filter(m => m.status === 'work').map(miner => {
-                  const staminaPct = Math.round(((miner.currentStamina || 0) / (miner.maxStamina || 100)) * 100);
+                  const staminaPct = Math.round(((miner.currentHealth ?? 100) / (miner.maxHealth || 100)) * 100);
                   const canSend = availableSlots > 0;
                   return (
                     <div key={miner.id} className="p-2.5 rounded-2xl bg-slate-950/60 border border-slate-800 flex items-center justify-between">
@@ -245,17 +246,9 @@ export default function HouseModal({
                         </div>
                       </div>
 
-                      <button
-                        onClick={() => onToggleHouseRest(miner.id)}
-                        disabled={!canSend}
-                        className={`px-3 py-1 rounded-xl text-xs font-bold transition cursor-pointer ${
-                          canSend
-                            ? 'bg-amber-500/20 hover:bg-amber-500 hover:text-slate-950 text-amber-300 border border-amber-500/40'
-                            : 'bg-slate-800 text-slate-600 cursor-not-allowed border border-slate-800'
-                        }`}
-                      >
-                        {canSend ? '🩺 Enviar ao abrigo' : 'Casa Cheia'}
-                      </button>
+                      <span className="px-3 py-1 rounded-xl text-[10px] font-bold bg-emerald-950/40 border border-emerald-500/30 text-emerald-300">
+                        Combate automático
+                      </span>
                     </div>
                   );
                 })}
