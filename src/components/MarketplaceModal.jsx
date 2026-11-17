@@ -342,7 +342,7 @@ export default function MarketplaceModal({
                 </p>
               </div>
 
-              {/* LADO DIREITO: DEFINIR PREÇO & SIMULADOR DA TAXA DE 6% */}
+              {/* LADO DIREITO: DEFINIR PREÇO & SIMULADOR DA COMISSÃO DE 5% */}
               <div className="bg-slate-950/80 p-4 rounded-3xl border border-slate-800 flex flex-col justify-between">
                 <div>
                   <h4 className="font-tech font-bold text-xs text-amber-300 uppercase tracking-wider mb-3">
@@ -370,7 +370,7 @@ export default function MarketplaceModal({
                         </div>
                       </div>
 
-                      {/* Simulador da Taxa de 6% */}
+                      {/* Simulador da Comissão de 5% */}
                       <div className="bg-slate-900/90 p-3.5 rounded-2xl border border-slate-800 space-y-2 text-xs font-tech">
                         <div className="flex justify-between text-slate-400">
                           <span>Preço Bruto de Venda:</span>
