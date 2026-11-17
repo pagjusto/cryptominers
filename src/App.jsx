@@ -937,18 +937,10 @@ export default function App() {
   // Alocar minerador na cama da Casa para descanso acelerado
   const handleToggleHouseRest = (minerId) => {
     setMiners(prev => prev.map(m => {
-      if (m.id === minerId) {
-        if (m.status === 'house') {
-          return { ...m, status: 'work' };
-        } else {
-          const currentInHouse = prev.filter(x => x.status === 'house').length;
-          if (currentInHouse >= currentHouse.slots) {
-            return m; // sem vagas na casa
-          }
-          return { ...m, status: 'house' };
-        }
-      }
-      return m;
+      if (m.id !== minerId || m.status !== 'house') return m;
+      const maxHealth = m.maxHealth || 100;
+      if ((m.currentHealth || 0) < maxHealth) return m;
+      return { ...m, status: 'reserve' };
     }));
   };
 
