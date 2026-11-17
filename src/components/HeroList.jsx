@@ -4,7 +4,6 @@ import {
   Zap, 
   Battery, 
   Play, 
-  Moon, 
   ArrowUpCircle, 
   Wrench, 
   Sparkles, 
@@ -21,7 +20,6 @@ export default function HeroList({
   onUpgradeMiner, 
   onToggleStatus, 
   onAllWork, 
-  onAllRest,
   onOpenEnergyBoostAd,
   onOpenEnergyRecoveryModal,
   onRepairMiner,
@@ -77,14 +75,7 @@ export default function HeroList({
               <Play size={12} className="fill-emerald-300" />
               <span>Todos ao combate</span>
             </button>
-            <button
-              onClick={onAllRest}
-              className="px-3 py-1.5 rounded-xl bg-blue-600/30 border border-blue-500/50 hover:bg-blue-600 hover:text-white text-blue-300 font-tech text-xs font-bold flex items-center gap-1 transition cursor-pointer active:scale-95 shadow-sm"
-            >
-              <Moon size={12} className="fill-blue-300" />
-              <span>—</span>
-            </button>
-          </div>
+            </div>
         </div>
       </div>
 
@@ -113,12 +104,11 @@ export default function HeroList({
 
       {/* 3. BANNER DE PATROCÍNIO: RECUPERAÇÃO 100% DE ENERGIA */}
       <div 
-        onClick={() => (onOpenEnergyRecoveryModal ? onOpenEnergyRecoveryModal() : onOpenEnergyBoostAd?.())}
-        className="mb-3.5 p-3 rounded-2xl bg-gradient-to-r from-amber-500/15 via-emerald-500/15 to-amber-500/15 border border-emerald-500/30 hover:border-emerald-400 transition cursor-pointer flex items-center justify-between group shadow-sm shrink-0"
+        className="mb-3.5 p-3 rounded-2xl bg-gradient-to-r from-amber-500/15 via-emerald-500/15 to-amber-500/15 border border-emerald-500/30 hover:border-emerald-400 transition flex items-center justify-between group shadow-sm shrink-0"
       >
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xl group-hover:scale-110 transition shadow-inner">
-            ⚡
+            ❤️‍🩹
           </div>
           <div>
             <div className="flex items-center gap-2">
@@ -126,7 +116,7 @@ export default function HeroList({
                 Tratamento de ferimentos
               </span>
               <span className="text-[9px] bg-emerald-400/20 text-emerald-300 px-1.5 py-0.2 rounded-full border border-emerald-400/40 font-bold font-mono">
-                AD PATROCINADO 🍀
+                AUTOMÁTICO
               </span>
             </div>
             <span className="text-[11px] text-slate-400 font-tech block">
@@ -135,7 +125,7 @@ export default function HeroList({
           </div>
         </div>
 
-        <button className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 text-slate-950 font-arcade font-bold text-[10px] transition shrink-0 shadow-md cursor-pointer active:scale-95">
+        <button disabled className="px-3 py-1.5 rounded-xl bg-slate-800 text-slate-400 font-arcade font-bold text-[10px] shrink-0 cursor-not-allowed">
           EM BREVE
         </button>
       </div>
