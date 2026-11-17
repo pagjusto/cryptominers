@@ -323,7 +323,17 @@ export function getCriptoMynersConfig() {
       rarityAttributes: { ...DEFAULT_CRIPTO_MYNERS_CONFIG.rarityAttributes, ...(parsed.rarityAttributes || {}) },
       upgradesConfig: { ...DEFAULT_CRIPTO_MYNERS_CONFIG.upgradesConfig, ...(parsed.upgradesConfig || {}) },
       adsConfig: { ...DEFAULT_CRIPTO_MYNERS_CONFIG.adsConfig, ...(parsed.adsConfig || {}) },
-      constructionChestConfig: { ...DEFAULT_CRIPTO_MYNERS_CONFIG.constructionChestConfig, ...(parsed.constructionChestConfig || {}) }
+      constructionChestConfig: {
+        ...DEFAULT_CRIPTO_MYNERS_CONFIG.constructionChestConfig,
+        ...(parsed.constructionChestConfig || {}),
+        baseRateCommonPct: parsed.constructionChestConfig?.baseRateCommonPct === 0.5
+          ? 15
+          : (parsed.constructionChestConfig?.baseRateCommonPct ?? DEFAULT_CRIPTO_MYNERS_CONFIG.constructionChestConfig.baseRateCommonPct),
+        maxAccountChanceCapPct: parsed.constructionChestConfig?.maxAccountChanceCapPct === 10
+          ? 40
+          : (parsed.constructionChestConfig?.maxAccountChanceCapPct ?? DEFAULT_CRIPTO_MYNERS_CONFIG.constructionChestConfig.maxAccountChanceCapPct),
+        cycleDurationSeconds: 0
+      }
     };
   } catch (e) {
     console.error('Erro ao ler configuração do Cripto Myners:', e);
