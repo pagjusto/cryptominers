@@ -1,9 +1,8 @@
-// CRIPTO MYNERS — SISTEMA OFICIAL DE APARIÇÃO DOS BAÚS DE CONSTRUÇÃO
-// Regras Oficiais:
-// - Verificação a cada ciclo de 1 hora (3600s) de mineração válida e ativa
-// - Somente heróis minerando ativamente participam do cálculo (status 'work' e energia > 0)
-// - Taxa-base configurável pelo administrador (Comum: 1x, Raro: 1.5x, Épico: 2x, Lendário: 3x)
-// - Teto absoluto de 10% de chance máxima por conta em cada ciclo
+// CRIPTO MYNERS — BAÚ DE CONSTRUÇÃO POR BOSS DERROTADO
+// - Um sorteio individual por jogador a cada Boss derrotado
+// - Chance-base de 15% por sobrevivente participante, multiplicada pela raridade
+// - Multiplicadores: Comum 1x, Raro 1,5x, Épico 2x, Lendário 3x
+// - Soma das contribuições limitada ao teto máximo de 40% por Boss e por jogador
 // - Limite diário por jogador de no máximo 3 Baús de Construção por dia
 // - Renovação diária à meia-noite no horário de Brasília (America/Sao_Paulo)
 // - Recebimento automático no inventário sem necessidade de clicar no mapa
@@ -12,15 +11,15 @@
 
 export const DEFAULT_CONSTRUCTION_CHEST_CONFIG = {
   enabled: true,
-  baseRateCommonPct: 0.5, // 0.5% por herói comum (configurável pelo admin)
+  baseRateCommonPct: 2, // Comum: 2% por sobrevivente; demais raridades usam multiplicadores oficiais
   rarityMultipliers: {
-    common: 1.0,      // 1x
-    rare: 1.5,        // 1.5x
-    epic: 2.0,        // 2x
-    legendary: 3.0    // 3x
+    common: 1.0,              // 2,00% por sobrevivente
+    rare: 1.1,                // 2,20% por sobrevivente
+    epic: 1.1666666666666667, // 2,333333...% por sobrevivente
+    legendary: 1.3333333333333333 // 2,666666...% por sobrevivente
   },
-  maxAccountChanceCapPct: 10.0, // Teto absoluto de 10% por ciclo
-  cycleDurationSeconds: 3600,   // 1 hora de mineração ativa (3600s)
+  maxAccountChanceCapPct: 40.0, // Teto absoluto de 40% por Boss e por jogador
+  cycleDurationSeconds: 0,      // Sem ciclo horário; sorteio a cada Boss derrotado
   dailyLimitPerPlayer: 3,       // Máximo de 3 baús por dia
   timezone: 'America/Sao_Paulo',// Horário oficial de Brasília
   rewardFragmentCount: 1        // Exatamente 1 Fragmento de Construção por baú
@@ -76,24 +75,17 @@ export function normalizeHeroRarity(hero) {
 }
 
 /**
- * Calcula a probabilidade de aparição com base EXCLUSIVAMENTE nos heróis ativos minerando
- * Heróis descansando, sem energia ou fora da mina NÃO participam do cálculo
+ * Calcula a probabilidade de aparição com base EXCLUSIVAMENTE nos sobreviventes em combate ativo
+ * Sobreviventes feridos, em tratamento, na fila ou na reserva NÃO participam do cálculo
  */
 export function calculateActiveMinersChance(miners = [], config = DEFAULT_CONSTRUCTION_CHEST_CONFIG) {
   const baseRate = typeof config.baseRateCommonPct === 'number' ? config.baseRateCommonPct : DEFAULT_CONSTRUCTION_CHEST_CONFIG.baseRateCommonPct;
   const multipliers = config.rarityMultipliers || DEFAULT_CONSTRUCTION_CHEST_CONFIG.rarityMultipliers;
-  const maxCap = config.maxAccountChanceCapPct || DEFAULT_CONSTRUCTION_CHEST_CONFIG.maxAccountChanceCapPct;
+  const maxCap = config.maxAccountChanceCapPct ?? DEFAULT_CONSTRUCTION_CHEST_CONFIG.maxAccountChanceCapPct;
 
-  // Filtra somente heróis minerando ativamente:
-  // - status !== 'house' (não está na casa)
-  // - status !== 'waiting_house' (não está na fila de descanso)
-  // - status !== 'rest'
-  // - currentStamina > 0 (possui energia para trabalhar)
-  const activeMiners = miners.filter(m => {
-    const isResting = m.status === 'house' || m.status === 'waiting_house' || m.status === 'rest';
-    const hasStamina = (m.currentStamina ?? 100) > 0;
-    return !isResting && hasStamina;
-  });
+  // Somente sobreviventes realmente em combate participam do cálculo.
+  // Feridos, fila do abrigo, reservas e personagens pausados não geram Baú de Construção.
+  const activeMiners = miners.filter(m => m.status === 'work' && (m.currentHealth ?? 100) > 5);
 
   const breakdownByRarity = {
     common: 0,
@@ -106,7 +98,7 @@ export function calculateActiveMinersChance(miners = [], config = DEFAULT_CONSTR
     const rarity = normalizeHeroRarity(m);
     breakdownByRarity[rarity] = (breakdownByRarity[rarity] || 0) + 1;
     const mult = multipliers[rarity] || 1.0;
-    const individualChance = parseFloat((baseRate * mult).toFixed(4));
+    const individualChance = baseRate * mult;
     return {
       heroId: m.id,
       name: m.name,
@@ -126,8 +118,8 @@ export function calculateActiveMinersChance(miners = [], config = DEFAULT_CONSTR
     contributions,
     breakdownByRarity,
     baseRateCommonPct: baseRate,
-    rawTotalChance: parseFloat(rawTotalChance.toFixed(3)),
-    finalChance: parseFloat(finalChance.toFixed(3)),
+    rawTotalChance,
+    finalChance,
     isCapped,
     maxCap
   };
@@ -295,10 +287,10 @@ export function logConstructionAudit(action, details, adminName = 'Administrador
 }
 
 /**
- * Executa a verificação oficial de 1 ciclo de mineração (ou teste manual admin)
- * Retorna o resultado do sorteio, respeitando o teto de 10%, limite diário de 3 e status ativo.
+ * Executa o sorteio individual após a derrota de um Boss.
+ * Aplica o teto de 40%, limite diário de 3 e considera somente participantes ativos.
  */
-export function executeConstructionCycleRoll(miners = [], config = DEFAULT_CONSTRUCTION_CHEST_CONFIG, options = {}) {
+export function executeConstructionBossRoll(miners = [], config = DEFAULT_CONSTRUCTION_CHEST_CONFIG, options = {}) {
   const { isSimulated = false, forceSuccess = false } = options;
 
   // 1. Verifica se o sistema está habilitado
@@ -317,7 +309,7 @@ export function executeConstructionCycleRoll(miners = [], config = DEFAULT_CONST
     return {
       success: false,
       reason: 'no_active_miners',
-      message: 'Nenhum herói minerando ativamente no momento. Somente heróis na mina com energia participam.',
+      message: 'Nenhum sobrevivente ativo participou do combate contra o Boss.',
       activeChance
     };
   }
@@ -349,7 +341,7 @@ export function executeConstructionCycleRoll(miners = [], config = DEFAULT_CONST
     };
   }
 
-  // 4. Executa o sorteio criptograficamente seguro (0.00% a 100.00%)
+  // 4. Executa o sorteio do Boss com chance efetiva limitada a 40%.
   const roll = parseFloat((Math.random() * 100).toFixed(4));
   const won = forceSuccess || roll <= activeChance.finalChance;
 
@@ -362,7 +354,7 @@ export function executeConstructionCycleRoll(miners = [], config = DEFAULT_CONST
       icon: '🧱',
       color: '#f59e0b',
       tagline: 'Material Raro de Expansão',
-      description: 'Baú especial obtido durante a mineração ativa. Contém exatamente 1 Fragmento de Construção para evolução de casas.',
+      description: 'Baú especial obtido durante a combate ativo. Contém exatamente 1 Fragmento de Construção para evolução de casas.',
       foundAt: getBrasiliaTimeString(),
       foundDateBrasilia: dailyStats.date,
       rewardFragmentCount: 1,
@@ -412,12 +404,12 @@ export function executeConstructionCycleRoll(miners = [], config = DEFAULT_CONST
       }
     };
   } else {
-    // Sorteio não premiado neste ciclo
+    // Sorteio do Boss não premiado
     if (!isSimulated) {
       addConstructionHistoryEntry({
         id: `TRY-${Date.now().toString(36).toUpperCase()}`,
         timestamp: getBrasiliaTimeString(),
-        type: 'CYCLE_MISSED',
+        type: 'BOSS_CHEST_MISSED',
         activeMinersCount: activeChance.activeMinersCount,
         breakdownByRarity: activeChance.breakdownByRarity,
         chanceApplied: activeChance.finalChance,
@@ -436,6 +428,9 @@ export function executeConstructionCycleRoll(miners = [], config = DEFAULT_CONST
     };
   }
 }
+
+// Alias temporário para compatibilidade com chamadas antigas do painel.
+export const executeConstructionCycleRoll = executeConstructionBossRoll;
 
 /**
  * Abre um Baú de Construção do inventário de forma idempotente e segura
@@ -499,10 +494,10 @@ export function getConstructionAdminSummary(config = DEFAULT_CONSTRUCTION_CHEST_
 
   return {
     enabled: config.enabled !== false,
-    baseRateCommonPct: config.baseRateCommonPct ?? 0.5,
+    baseRateCommonPct: config.baseRateCommonPct ?? 15,
     rarityMultipliers: config.rarityMultipliers || DEFAULT_CONSTRUCTION_CHEST_CONFIG.rarityMultipliers,
-    maxCapPct: config.maxAccountChanceCapPct || 10.0,
-    cycleDurationSeconds: config.cycleDurationSeconds || 3600,
+    maxCapPct: config.maxAccountChanceCapPct ?? 40.0,
+    cycleDurationSeconds: config.cycleDurationSeconds ?? 0,
     dailyLimit: config.dailyLimitPerPlayer || 3,
     chestsAwardedToday: dailyStats.chestsAwardedToday,
     remainingDailyLimit: Math.max(0, (config.dailyLimitPerPlayer || 3) - dailyStats.chestsAwardedToday),

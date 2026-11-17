@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Home, Bed, Sparkles, Battery, ArrowUpRight, Check, Shield, Zap, Users } from 'lucide-react';
+import { X, Home, Sparkles, HeartPulse, ArrowUpRight, Check, Shield, Zap, Users } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { HOUSE_TIERS, resolveHouseTier } from '../data/housesData';
 import { sfx } from '../utils/sfx';
@@ -24,7 +24,6 @@ export default function HouseModal({
   const houseIndex = HOUSE_TIERS.findIndex(h => h.id === currentHouse.id);
   const minersInHouse = miners.filter(m => m.status === 'house');
   const minersWaiting = miners.filter(m => m.status === 'waiting_house');
-  const availableSlots = Math.max(0, currentHouse.slots - minersInHouse.length);
 
   // Custos em Fragmentos de Construção por categoria de casa
   const FRAGMENT_COSTS = {
@@ -78,7 +77,7 @@ export default function HouseModal({
         className="relative w-full max-w-2xl max-h-[90vh] rounded-3xl p-6 bg-slate-900 border-2 border-slate-700 text-slate-100 shadow-2xl flex flex-col overflow-hidden"
         onClick={e => e.stopPropagation()}
       >
-        {/* Cabeçalho da Casa */}
+        {/* Cabeçalho do Abrigo */}
         <div className="flex items-center justify-between pb-3 border-b border-slate-800 shrink-0">
           <div className="flex items-center gap-3">
             <div 
@@ -107,7 +106,7 @@ export default function HouseModal({
                 </span>
               </div>
               <p className="text-xs text-slate-400">
-                Capacidade: <b className="text-white">{minersInHouse.length}/{currentHouse.slots} camas ocupadas</b>
+                Capacidade: <b className="text-white">{minersInHouse.length}/{currentHouse.slots} leitos ocupados</b>
                 {minersWaiting.length > 0 && <span className="text-amber-400 ml-1.5 font-bold font-mono">({minersWaiting.length} na fila)</span>}
               </p>
             </div>
@@ -123,7 +122,7 @@ export default function HouseModal({
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
-                🛌 Camas ({minersInHouse.length}/{currentHouse.slots})
+                🩺 Tratamentos ({minersInHouse.length}/{currentHouse.slots})
               </button>
               <button
                 onClick={() => setActiveTab('upgrade')}
@@ -154,7 +153,7 @@ export default function HouseModal({
             <div className="p-3 rounded-2xl bg-slate-950/60 border border-slate-800 text-xs text-slate-300 flex items-center justify-between">
               <span className="flex items-center gap-1.5">
                 <Users size={15} className="text-emerald-400" />
-                <span>Revezamento Automático: Personagens recuperados (100% energia) voltam para a reserva da mina.</span>
+                <span>Revezamento automático: sobreviventes recuperados (100% de vida) retornam à reserva.</span>
               </span>
             </div>
 
@@ -162,22 +161,22 @@ export default function HouseModal({
             <div>
               <div className="flex items-center justify-between mb-2">
                 <h4 className="font-tech font-bold text-xs text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                  <Bed size={14} className="text-amber-400" />
-                  <span>Camas Ocupadas ({minersInHouse.length}/{currentHouse.slots}):</span>
+                  <HeartPulse size={14} className="text-rose-400" />
+                  <span>Leitos ocupados ({minersInHouse.length}/{currentHouse.slots}):</span>
                 </h4>
                 <span className="text-[10px] text-emerald-400 font-mono">
-                  Recuperação ativa a {currentHouse.recoverySpeedPct}%
+                  Tratamento ativo a {currentHouse.recoverySpeedPct}%
                 </span>
               </div>
 
               {minersInHouse.length === 0 ? (
                 <div className="p-6 rounded-2xl bg-slate-950/40 border border-dashed border-slate-800 text-center text-xs text-slate-500">
-                  Nenhum herói dormindo no momento. Quando a energia de um minerador na mina esgotar, ele virá para cá automaticamente.
+                  Nenhum sobrevivente em tratamento. Ao atingir 5% de vida, um combatente será enviado para cá automaticamente.
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {minersInHouse.map(miner => {
-                    const staminaPct = Math.round(((miner.currentStamina || 0) / (miner.maxStamina || 100)) * 100);
+                    const staminaPct = Math.round(((miner.currentHealth ?? 5) / (miner.maxHealth || 100)) * 100);
                     return (
                       <div 
                         key={miner.id}
@@ -190,17 +189,18 @@ export default function HouseModal({
                               {miner.name}
                             </span>
                             <div className="flex items-center gap-1 text-[10px] text-blue-300 font-mono">
-                              <Battery size={11} className="text-blue-400" />
-                              <span>{staminaPct}% ({Math.round(miner.currentStamina)}/{miner.maxStamina})</span>
+                              <HeartPulse size={11} className="text-rose-400" />
+                              <span>{staminaPct}% ({Math.round(miner.currentHealth ?? 5)}/{miner.maxHealth || 100} PV)</span>
                             </div>
                           </div>
                         </div>
 
                         <button
                           onClick={() => onToggleHouseRest(miner.id)}
-                          className="px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-bold transition cursor-pointer"
+                          disabled={(miner.currentHealth ?? 5) < (miner.maxHealth || 100)}
+                          className="px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-bold transition disabled:opacity-40 disabled:cursor-not-allowed"
                         >
-                          Acordar
+                          {(miner.currentHealth ?? 5) >= (miner.maxHealth || 100) ? 'Retornar à equipe' : 'Em tratamento'}
                         </button>
                       </div>
                     );
@@ -213,13 +213,13 @@ export default function HouseModal({
             {minersWaiting.length > 0 && (
               <div>
                 <h4 className="font-tech font-bold text-xs text-amber-400 uppercase tracking-wider mb-2">
-                  Fila de Espera por Cama ({minersWaiting.length} heróis aguardando vaga):
+                  Fila de espera por leito ({minersWaiting.length} sobreviventes aguardando vaga):
                 </h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {minersWaiting.map(miner => (
                     <div key={miner.id} className="p-2 rounded-xl bg-amber-950/20 border border-amber-500/30 flex items-center justify-between text-xs">
                       <span className="text-slate-300">{miner.avatar} {miner.name}</span>
-                      <span className="text-amber-300 font-mono text-[10px]">Aguardando vaga...</span>
+                      <span className="text-amber-300 font-mono text-[10px]">Aguardando leito...</span>
                     </div>
                   ))}
                 </div>
@@ -229,33 +229,24 @@ export default function HouseModal({
             {/* Mineradores Ativos na Mina */}
             <div>
               <h4 className="font-tech font-bold text-xs text-slate-400 uppercase tracking-wider mb-2">
-                Trabalhando na Mina (Máx 15 simultâneos):
+                Sobreviventes em combate (máx. 15 simultâneos):
               </h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {miners.filter(m => m.status === 'work').map(miner => {
-                  const staminaPct = Math.round(((miner.currentStamina || 0) / (miner.maxStamina || 100)) * 100);
-                  const canSend = availableSlots > 0;
-                  return (
+                  const staminaPct = Math.round(((miner.currentHealth ?? 100) / (miner.maxHealth || 100)) * 100);
+                                    return (
                     <div key={miner.id} className="p-2.5 rounded-2xl bg-slate-950/60 border border-slate-800 flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <span className="text-xl">{miner.avatar}</span>
                         <div>
                           <span className="font-bold text-xs text-white block">{miner.name}</span>
-                          <span className="text-[10px] text-emerald-400 font-mono">Energia: {staminaPct}%</span>
+                          <span className="text-[10px] text-emerald-400 font-mono">Vida: {staminaPct}%</span>
                         </div>
                       </div>
 
-                      <button
-                        onClick={() => onToggleHouseRest(miner.id)}
-                        disabled={!canSend}
-                        className={`px-3 py-1 rounded-xl text-xs font-bold transition cursor-pointer ${
-                          canSend
-                            ? 'bg-amber-500/20 hover:bg-amber-500 hover:text-slate-950 text-amber-300 border border-amber-500/40'
-                            : 'bg-slate-800 text-slate-600 cursor-not-allowed border border-slate-800'
-                        }`}
-                      >
-                        {canSend ? '🏠 Descansar' : 'Casa Cheia'}
-                      </button>
+                      <span className="px-3 py-1 rounded-xl text-[10px] font-bold bg-emerald-950/40 border border-emerald-500/30 text-emerald-300">
+                        Combate automático
+                      </span>
                     </div>
                   );
                 })}
@@ -278,14 +269,14 @@ export default function HouseModal({
                     {constructionFragments} FRAGMENTO{constructionFragments === 1 ? '' : 'S'} DE CONSTRUÇÃO DISPONÍVEIS
                   </span>
                   <span className="text-[11px] text-slate-400">
-                    Obtidos nos Baús de Construção da mineração. Evolua suas casas sem gastar moedas!
+                    Obtidos nos Baús de Construção. Evolua seu abrigo sem gastar moedas!
                   </span>
                 </div>
               </div>
             </div>
 
             <p className="text-xs text-slate-400">
-              Evolua sua casa para acomodar mais mineradores simultaneamente e acelerar o revezamento da mina:
+              Evolua seu abrigo para tratar mais sobreviventes simultaneamente e acelerar a recuperação:
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

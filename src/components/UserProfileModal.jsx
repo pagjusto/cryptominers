@@ -35,7 +35,7 @@ export default function UserProfileModal({
   totalMinedSession = 0,
   currentWithdrawalTax = 10,
   miners = [],
-  currentHouse = { name: 'Casa Básica', slots: 5 },
+  currentHouse = { name: 'Abrigo Básico', slots: 5 },
   currentMine = { name: 'Mina do Cânion' },
   constructionFragments = 0,
   constructionChests = []
@@ -58,7 +58,7 @@ export default function UserProfileModal({
 
   // Saque (Claim)
   const [withdrawAmount, setWithdrawAmount] = useState(() => {
-    return bcoinBalance >= 40 ? '40' : bcoinBalance.toFixed(2);
+    return bcoinBalance >= 5000 ? bcoinBalance.toFixed(2) : '5000';
   });
   const [withdrawSuccessReceipt, setWithdrawSuccessReceipt] = useState(null);
   const [withdrawHistory, setWithdrawHistory] = useState(() => {
@@ -79,10 +79,10 @@ export default function UserProfileModal({
       setActiveTab(initialTab || 'profile');
       setErrorMsg('');
       setWithdrawSuccessReceipt(null);
-      if (bcoinBalance >= 40) {
+      if (bcoinBalance >= minWithdrawMnc) {
         setWithdrawAmount(bcoinBalance.toFixed(2));
       } else {
-        setWithdrawAmount('40');
+        setWithdrawAmount(minWithdrawMnc.toString());
       }
     }
   }, [isOpen, initialTab, bcoinBalance]);
@@ -152,7 +152,7 @@ export default function UserProfileModal({
       return;
     }
     if (!isMinMet) {
-      alert('O valor mínimo de saque é de 40 MINER.');
+      alert(`O valor mínimo de saque é US$ ${minWithdrawUsd.toFixed(2)} (${minWithdrawMnc.toLocaleString()} MNC).`);
       return;
     }
     if (!hasEnoughBalance) {
@@ -830,7 +830,7 @@ export default function UserProfileModal({
                         </span>
                       </div>
                       <p className="text-[11px] text-slate-400">
-                        Saque mínimo de <b>40 MNC</b>. A taxa dinâmica protege o pool de liquidez do jogo.
+                        Saque mínimo de <b>US$ {minWithdrawUsd.toFixed(2)} ({minWithdrawMnc.toLocaleString()} MNC)</b>. A taxa dinâmica protege o pool de liquidez do jogo.
                       </p>
                     </div>
 
@@ -1020,7 +1020,7 @@ export default function UserProfileModal({
                   <div>
                     <h4 className="font-tech font-bold text-sm text-slate-300">Nenhum saque realizado ainda</h4>
                     <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1">
-                      Quando você atingir 40 MINER e efetuar seu primeiro saque na aba Saques, ele aparecerá aqui com todos os detalhes e comprovante.
+                      Quando você atingir o mínimo de US$ {minWithdrawUsd.toFixed(2)} e efetuar seu primeiro saque na aba Saques, ele aparecerá aqui com todos os detalhes e comprovante.
                     </p>
                   </div>
                   <button

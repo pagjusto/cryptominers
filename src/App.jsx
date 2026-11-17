@@ -31,7 +31,7 @@ import { MINER_ROSTER } from './data/minersCatalog';
 import { generateMineMap } from './utils/mapGenerator';
 import { getPlayerMap, generatePlayerMap, DEFAULT_PLAYER_ID } from './utils/individualMapEngine';
 import { sfx } from './utils/sfx';
-import GameBoard from './components/GameBoard';
+import ZombieSurvivalBoard from './components/ZombieSurvivalBoard';
 import HeroList from './components/HeroList';
 import SummonModal from './components/SummonModal';
 import WalletModal from './components/WalletModal';
@@ -49,10 +49,9 @@ import {
   saveStoredConstructionChests,
   getStoredConstructionFragments,
   saveStoredConstructionFragments,
-  executeConstructionCycleRoll,
   openConstructionChestById
 } from './utils/constructionChestEngine';
-import { autoRelayTeam, calculateMinerEfficiency } from './utils/minerRotationEngine';
+import { calculateMinerEfficiency } from './utils/minerRotationEngine';
 import { Calculator, Settings } from 'lucide-react';
 import { getSavedWalletState, saveWalletState, requestWalletConnection, disconnectWalletFromStorage } from './utils/web3Wallet';
 import MinerCatalogModal from './components/MinerCatalogModal';
@@ -278,56 +277,8 @@ export default function App() {
   const [constructionFragments, setConstructionFragments] = useState(() => getStoredConstructionFragments());
   const [constructionDailyStats, setConstructionDailyStats] = useState(() => getDailyConstructionStats());
   const [newlyFoundConstructionChest, setNewlyFoundConstructionChest] = useState(null);
-  const [activeMiningSeconds, setActiveMiningSeconds] = useState(() => {
-    const saved = localStorage.getItem('crypto_miners_active_mining_seconds');
-    return saved ? parseInt(saved, 10) || 0 : 0;
-  });
 
-  // Loop de Mineração Ativa e Ciclo de Baús de Construção (1 hora = 3600s de mineração válida)
-  useEffect(() => {
-    const timer = setInterval(() => {
-      // Somente conta se a aba estiver visível e houver heróis minerando ativamente no jogo
-      if (typeof document !== 'undefined' && document.hidden) return;
-
-      const hasActiveMiners = miners.some(m => {
-        const isResting = m.status === 'house' || m.status === 'waiting_house' || m.status === 'rest';
-        const hasStamina = (m.currentStamina ?? 100) > 0;
-        return !isResting && hasStamina;
-      });
-
-      if (!hasActiveMiners) return;
-
-      setActiveMiningSeconds(prev => {
-        const nextSeconds = prev + 1;
-        localStorage.setItem('crypto_miners_active_mining_seconds', nextSeconds.toString());
-
-        const cycleLimit = criptoMynersConfig?.constructionChestConfig?.cycleDurationSeconds || 3600;
-
-        if (nextSeconds >= cycleLimit) {
-          // Dispara a verificação oficial do ciclo
-          const rollResult = executeConstructionCycleRoll(miners, criptoMynersConfig?.constructionChestConfig);
-          if (rollResult.won) {
-            setConstructionChests(getStoredConstructionChests());
-            setNewlyFoundConstructionChest(rollResult.chest);
-            setConstructionDailyStats(rollResult.dailyStats);
-            sfx.playLevelUp();
-            confetti({
-              particleCount: 130,
-              spread: 80,
-              origin: { y: 0.6 },
-              colors: ['#f59e0b', '#38bdf8', '#ffffff']
-            });
-          }
-          return 0; // Reseta o ciclo para a próxima hora
-        }
-        return nextSeconds;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [miners, criptoMynersConfig]);
-
-  // Listener para eventos de concessão de Baú de Construção (inclusive via testes admin)
+  // Listener para eventos de concessão de Baú de Construção (inclusive via testes admin e derrota de Boss)
   useEffect(() => {
     const handleChestAwarded = (e) => {
       const chest = e.detail;
@@ -698,15 +649,15 @@ export default function App() {
     setMiners(prev => [...prev, ...newBatch]);
   };
 
-  // 1. COMPRA NO MARKETPLACE P2P COM TAXA DE 6%
+  // 1. COMPRA NO MARKETPLACE P2P COM TAXA DE 5%
   const handleBuyMarketplaceItem = (listing) => {
     if (bcoin < listing.priceBcoin) return;
 
     // Deduz BCOIN do comprador
     setBcoin(prev => parseFloat((prev - listing.priceBcoin).toFixed(3)));
 
-    // Calcula a taxa do estúdio (3% do valor da venda)
-    const studioProfit = parseFloat(((listing.priceBcoin * FEE_SPLIT.studio) / 100).toFixed(3));
+    // Receita da plataforma: 5% da comissão total do marketplace
+    const studioProfit = parseFloat(((listing.priceBcoin * FEE_SPLIT.platform) / 100).toFixed(3));
     setStudioRevenue(prev => parseFloat((prev + studioProfit).toFixed(3)));
 
     // Remove do mercado
@@ -937,18 +888,10 @@ export default function App() {
   // Alocar minerador na cama da Casa para descanso acelerado
   const handleToggleHouseRest = (minerId) => {
     setMiners(prev => prev.map(m => {
-      if (m.id === minerId) {
-        if (m.status === 'house') {
-          return { ...m, status: 'work' };
-        } else {
-          const currentInHouse = prev.filter(x => x.status === 'house').length;
-          if (currentInHouse >= currentHouse.slots) {
-            return m; // sem vagas na casa
-          }
-          return { ...m, status: 'house' };
-        }
-      }
-      return m;
+      if (m.id !== minerId || m.status !== 'house') return m;
+      const maxHealth = m.maxHealth || 100;
+      if ((m.currentHealth || 0) < maxHealth) return m;
+      return { ...m, status: 'reserve' };
     }));
   };
 
@@ -1061,21 +1004,21 @@ export default function App() {
 
   const handleToggleStatus = (minerId) => {
     setMiners(prev => prev.map(m => {
-      if (m.id === minerId) {
-        if (m.status === 'house') return { ...m, status: 'work' };
-        return { ...m, status: m.status === 'work' ? 'sleep' : 'work' };
-      }
-      return m;
+      if (m.id !== minerId) return m;
+      if (m.status === 'house' || m.status === 'waiting_house' || (m.currentHealth !== undefined && m.currentHealth <= 5)) return m;
+      return { ...m, status: m.status === 'work' ? 'reserve' : 'work' };
     }));
   };
 
   const handleAllWork = () => {
     setMiners(prev => {
-      const sorted = [...prev].sort((a, b) => calculateMinerEfficiency(b) - calculateMinerEfficiency(a));
+      const eligible = prev.filter(m => m.status !== 'house' && m.status !== 'waiting_house' && (m.currentHealth === undefined || m.currentHealth > 5));
+      const sorted = [...eligible].sort((a, b) => calculateMinerEfficiency(b) - calculateMinerEfficiency(a));
       const top15Ids = new Set(sorted.slice(0, 15).map(m => m.id));
       const updated = prev.map(m => {
+        if (m.status === 'house' || m.status === 'waiting_house') return m;
         if (top15Ids.has(m.id)) return { ...m, status: 'work' };
-        return { ...m, status: m.status === 'house' ? 'house' : 'reserve' };
+        return { ...m, status: 'reserve' };
       });
       localStorage.setItem('crypto_miners_team', JSON.stringify(updated));
       return updated;
@@ -1185,19 +1128,19 @@ export default function App() {
         {/* Marca: Crypto Miners */}
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-600 via-amber-500 to-yellow-300 flex items-center justify-center text-2xl shadow-lg border border-amber-300/40 animate-pulse">
-            ⛏️
+            🧟
           </div>
           <div>
             <div className="flex items-center gap-2">
               <h1 className="font-arcade text-sm sm:text-base tracking-wider text-amber-400">
-                CRYPTO MINERS
+                CRIPTO MYNERS
               </h1>
               <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
-                MAPA #{mapStage}
+                ONDA ZUMBI
               </span>
             </div>
             <p className="text-[11px] text-slate-400">
-              {currentMine.name} • Casa: {currentHouse.name}
+              Sobrevivência • Abrigo: {currentHouse.name.replace('Casa ', '')}
             </p>
           </div>
         </div>
@@ -1206,11 +1149,11 @@ export default function App() {
         <div className="flex items-center gap-3">
           {/* Saldo de Mineração MNC (Cotação Oficial: 1 MNC = US$ 0,01) */}
           <div 
-            title={`Saldo de Mineração: ${bcoin.toFixed(2)} MNC ≈ US$ ${(bcoin * currentMinerRate).toFixed(2)} (Cotação Oficial: 1 MNC = US$ 0,01)`}
+            title={`Saldo de Minercoin: ${bcoin.toFixed(2)} MNC ≈ US$ ${(bcoin * currentMinerRate).toFixed(2)} (Cotação de referência)`}
             className="flex items-center gap-2 bg-slate-950 px-3.5 py-1.5 rounded-2xl border border-amber-500/40 shadow-inner"
           >
             <div className="w-6 h-6 rounded-full bg-amber-500/20 border border-amber-400 flex items-center justify-center text-amber-300 font-bold font-arcade text-xs">
-              ⛏️
+              🪙
             </div>
             <div className="flex flex-col leading-none">
               <span className="text-[10px] uppercase text-slate-400 font-bold flex items-center gap-1">
@@ -1283,13 +1226,13 @@ export default function App() {
             </span>
           </button>
 
-          {/* BOTÃO DA CASA (HOUSE SYSTEM DO BOMBCRYPTO) */}
+          {/* BOTÃO DO ABRIGO MÉDICO */}
           <button
             onClick={() => setIsHouseOpen(true)}
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-blue-950/60 hover:bg-blue-900/70 text-blue-300 border border-blue-500/40 font-tech text-xs font-bold transition cursor-pointer shadow-sm"
           >
             <Home size={14} className="text-blue-400" />
-            <span>CASA</span>
+            <span>ABRIGO</span>
             <span className="px-1.5 py-0.2 rounded-full bg-blue-500 text-slate-950 text-[10px] font-bold font-mono">
               {minersInHouse.length}/{currentHouse.slots}
             </span>
@@ -1373,148 +1316,14 @@ export default function App() {
       {/* ÁREA DO JOGO */}
       <main className="flex-1 flex overflow-y-auto overflow-x-auto lg:overflow-x-hidden p-3 sm:p-4 gap-4 lg:gap-6 justify-center items-stretch relative w-full">
         
-        {/* TABULEIRO DE MINERAÇÃO */}
-        <div className="flex flex-col items-center justify-center relative">
-          
-          <div className="w-full max-w-[720px] flex items-center justify-between mb-2 px-2 text-xs text-slate-400 font-tech">
-            <div className="flex items-center gap-3">
-              <span className="flex items-center gap-2 text-xs">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span className="text-slate-400">Na Mina:</span>
-                <b className="text-emerald-400 font-bold">{miners.filter(m => m.status === 'work').length}/15</b>
-                <span className="text-slate-600">|</span>
-                <span className="text-slate-400">Na Casa:</span>
-                <b className="text-blue-400 font-bold">{miners.filter(m => m.status === 'house').length}/{currentHouse.slots}</b>
-                <span className="text-slate-600">|</span>
-                <span className="text-slate-400">Reservas:</span>
-                <b className="text-amber-400 font-bold">{miners.filter(m => m.status === 'reserve' || m.status === 'sleep').length}</b>
-              </span>
-              <span>•</span>
-              <span>Na Casa: <b className="text-blue-400">{minersInHouse.length} heróis</b></span>
-            </div>
-
-            <div className="flex items-center gap-1.5 text-xs">
-              <span className="text-slate-400">Farmado na Sessão:</span>
-              <b className="text-amber-400 font-mono">+{totalMinedSession.toFixed(3)} MINER</b>
-            </div>
-          </div>
-
-          {/* BANNER DE INTELIGÊNCIA & PREVISÃO DE CONCLUSÃO DO MAPA */}
-          <div className="w-full max-w-[720px] mb-2 p-2 rounded-2xl bg-gradient-to-r from-purple-950/50 via-slate-900/80 to-purple-950/50 border border-purple-500/30 flex items-center justify-between text-xs backdrop-blur-sm shadow-md">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1.5 text-purple-300 font-bold">
-                <Clock size={15} className="text-purple-400 animate-pulse" />
-                <span>Previsão:</span>
-                <span className="font-mono text-amber-300 bg-slate-950/80 px-2 py-0.5 rounded-md border border-purple-500/30">
-                  ⏱️ {formatEstimatedTime(statsData.estimatedSeconds)}
-                </span>
-                <span className="text-[11px] text-slate-400 font-normal">
-                  ({statsData.teamDps > 0 ? `${statsData.teamDps.toFixed(1)} DPS` : 'Pausado'})
-                </span>
-              </div>
-
-              {currentMvp && (
-                <div className="hidden sm:flex items-center gap-1.5 bg-amber-500/10 text-amber-300 px-2.5 py-0.5 rounded-md border border-amber-500/30 text-[11px]">
-                  <Trophy size={13} className="text-amber-400" />
-                  <span>MVP: <b className="text-white">{currentMvp.name.split(' ')[0]}</b> ({currentMvp.blocksBroken} 🪨)</span>
-                </div>
-              )}
-            </div>
-
-            <button
-              onClick={() => setIsStatsModalOpen(true)}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 border border-purple-400/40 font-bold text-[11px] transition cursor-pointer"
-            >
-              <Activity size={13} />
-              <span>Ver Estatísticas</span>
-            </button>
-          </div>
-
-          {/* BARRA HUD DO MAPA INDIVIDUAL & JAZIDAS (50% Pedra, 25% Ouro, 17% Diamante, 8% Esmeralda) */}
-          <div className="w-full max-w-[720px] mb-2 px-3 py-2 rounded-2xl bg-slate-900/90 border border-slate-700/80 flex flex-wrap items-center justify-between gap-2 text-xs shadow-md">
-            <div className="flex items-center gap-2">
-              <span className="flex items-center gap-1 font-bold text-amber-400 bg-amber-500/15 px-2 py-0.5 rounded-lg border border-amber-500/30 text-[11px]">
-                🗺️ Mapa Individual
-              </span>
-              <span className="font-mono text-slate-300 bg-slate-950 px-2 py-0.5 rounded-md border border-slate-800 text-[11px]">
-                Ciclo #{mapData?.cycleNumber || 1}
-              </span>
-              <span className="text-emerald-400 font-bold bg-emerald-500/15 px-2 py-0.5 rounded-lg border border-emerald-500/30 text-[11px]">
-                Jazidas: {mapData?.remainingDeposits ?? mapData?.totalDeposits ?? 20} / {mapData?.totalDeposits || 20}
-              </span>
-            </div>
-
-            {/* BADGES DOS 4 TIPOS OFICIAIS DE JAZIDAS GERADAS */}
-            <div className="flex items-center gap-2 text-[11px]">
-              <span className="flex items-center gap-1 bg-slate-950/80 text-slate-300 px-1.5 py-0.5 rounded border border-slate-800" title="Pedra Comum (50%)">
-                🪨 Pedra: <b className="text-white">{mapData?.countsByType?.stone ?? 10}</b> (50%)
-              </span>
-              <span className="flex items-center gap-1 bg-amber-950/40 text-amber-300 px-1.5 py-0.5 rounded border border-amber-500/30" title="Veio de Ouro (25%)">
-                🟡 Ouro: <b className="text-amber-200">{mapData?.countsByType?.gold ?? 5}</b> (25%)
-              </span>
-              <span className="flex items-center gap-1 bg-sky-950/40 text-sky-300 px-1.5 py-0.5 rounded border border-sky-500/30" title="Diamante Azul (17%)">
-                💎 Diamante: <b className="text-sky-200">{mapData?.countsByType?.diamond ?? 3}</b> (17%)
-              </span>
-              <span className="flex items-center gap-1 bg-emerald-950/40 text-emerald-300 px-1.5 py-0.5 rounded border border-emerald-500/30" title="Esmeralda Verde (8%)">
-                🟢 Esmeralda: <b className="text-emerald-200">{mapData?.countsByType?.emerald ?? 2}</b> (8%)
-              </span>
-            </div>
-          </div>
-
-          <GameBoard
-            mine={currentMine}
-            mapData={mapData}
-            miners={miners}
-            playerId={activePlayerId}
-            onDepositBroken={(res) => {
-              if (res?.currentMap) {
-                setMapData(res.currentMap);
-              } else {
-                setMapData(prev => ({
-                  ...prev,
-                  remainingDeposits: res?.remainingDeposits ?? prev.remainingDeposits
-                }));
-              }
-            }}
-            onMinersChange={setMiners}
-            onCollectBcoin={handleCollectBcoin}
-            onRescueMiner={handleRescueMiner}
-            onFindMysticChest={handleFindMysticChest}
-            onMapCleared={handleMapCleared}
-            onStatsUpdate={setStatsData}
-            onDropGear={handleDropGear}
-            statsResetTrigger={statsResetTrigger}
-            houseStaminaRate={currentHouse.staminaPerSec}
-            houseSlots={currentHouse.slots}
-            gameSpeed={gameSpeed}
+        {/* NOVO TABULEIRO DE SOBREVIVÊNCIA ZUMBI */}
+        <div className="flex-1 min-w-0 flex justify-center items-start overflow-auto">
+          <ZombieSurvivalBoard
+            survivors={miners}
+            onSurvivorsChange={setMiners}
+            house={currentHouse}
+            onOpenShelter={() => setIsHouseOpen(true)}
           />
-
-          {/* Legenda Oficial das Jazidas Visuais */}
-          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 mt-3 text-xs text-slate-400 font-tech bg-slate-900/60 px-5 py-1.5 rounded-full border border-slate-800">
-            <span className="flex items-center gap-1 text-slate-300 font-bold">🪨 Pedra (50%)</span>
-            <span className="flex items-center gap-1 text-amber-400 font-bold">🟡 Veio de Ouro (25%)</span>
-            <span className="flex items-center gap-1 text-sky-400 font-bold">💎 Diamante Azul (17%)</span>
-            <span className="flex items-center gap-1 text-emerald-400 font-bold">🟢 Esmeralda (8%)</span>
-            <span className="text-[10px] text-slate-400 border-l border-slate-700 pl-2">Jazidas visuais de ambientação • Produção em MNC</span>
-          </div>
-
-          {/* NOTIFICAÇÃO DE MAPA LIMPO (ESTILO BOMBCRYPTO CLEAR MAP!) */}
-          {mapClearNotice && (
-            <div className="absolute inset-0 bg-black/85 backdrop-blur-md rounded-3xl flex flex-col items-center justify-center z-30 animate-scaleUp p-6 text-center border-2 border-amber-400">
-              <span className="text-6xl mb-2 animate-bounce">🏆</span>
-              <h2 className="font-arcade text-2xl text-amber-300 mb-1">
-                CICLO #{mapData?.cycleNumber || 1} CONCLUÍDO!
-              </h2>
-              <p className="text-slate-300 text-sm max-w-md mb-3">
-                Todas as 20 jazidas foram mineradas! Gerando um novo mapa exclusivo com 20 novas jazidas para o Ciclo #{((mapData?.cycleNumber || 1) + 1)}...
-              </p>
-              <div className="flex items-center gap-2 bg-amber-500/20 text-amber-300 px-4 py-2 rounded-xl border border-amber-500/40 text-sm font-bold">
-                <span>🪙</span>
-                <span>Bônus de Vitória: +{mapClearNotice.bonus} MNC</span>
-              </div>
-            </div>
-          )}
-
         </div>
 
         {/* EQUIPE DE MINERADORES (AMPLIADO LATERALMENTE) */}
@@ -1525,8 +1334,7 @@ export default function App() {
             onUpgradeMiner={handleUpgradeMiner}
             onToggleStatus={handleToggleStatus}
             onAllWork={handleAllWork}
-            onAllRest={handleAllRest}
-            onOpenEnergyBoostAd={() => handleOpenEnergyRecovery(null)}
+                        onOpenEnergyBoostAd={() => handleOpenEnergyRecovery(null)}
             onOpenEnergyRecoveryModal={handleOpenEnergyRecovery}
             onRepairMiner={handleRepairMiner}
             onDiversifyTeam={handleDiversifyTeam}
@@ -1537,7 +1345,7 @@ export default function App() {
 
       </main>
 
-      {/* MODAL DO MARKETPLACE P2P (COMÉRCIO COM TAXA DE 6%) */}
+      {/* MODAL DO MARKETPLACE P2P (COMÉRCIO COM TAXA DE 5%) */}
       <MarketplaceModal
         isOpen={isMarketplaceOpen}
         onClose={() => setIsMarketplaceOpen(false)}

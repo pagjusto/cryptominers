@@ -9,7 +9,7 @@ import {
   calculateActiveMinersChance,
   getDailyConstructionStats,
   getConstructionAdminSummary,
-  executeConstructionCycleRoll,
+  executeConstructionBossRoll,
   logConstructionAudit,
   getBrasiliaTimeString
 } from '../utils/constructionChestEngine';
@@ -63,19 +63,19 @@ export default function AdminConstructionChestsTab({
     handleUpdateParam('rarityMultipliers', updatedMultipliers);
   };
 
-  // Teste de Sorteio de Ciclo (Simulado)
-  const handleSimulateCycleRoll = () => {
-    const result = executeConstructionCycleRoll(miners, currentChestConfig, { isSimulated: true });
+  // Teste de Sorteio por Boss (Simulado)
+  const handleSimulateBossRoll = () => {
+    const result = executeConstructionBossRoll(miners, currentChestConfig, { isSimulated: true });
     setTestResult(result);
     refreshSummary();
   };
 
-  // Teste de Sorteio de Ciclo com Concessão Real de Teste
-  const handleExecuteRealCycleRoll = () => {
+  // Teste de Sorteio por Boss com Concessão Real de Teste
+  const handleExecuteRealBossRoll = () => {
     const result = executeConstructionCycleRoll(miners, currentChestConfig, { isSimulated: false, forceSuccess: true });
     setTestResult(result);
     refreshSummary();
-    logConstructionAudit('TESTE_CICLO_FORCADO', 'Administrador forçou concessão de teste de 1 Baú de Construção.');
+    logConstructionAudit('TESTE_BOSS_FORCADO', 'Administrador forçou concessão de teste de 1 Baú de Construção.');
   };
 
   // Resetar contador diário para testes
@@ -114,7 +114,7 @@ export default function AdminConstructionChestsTab({
               </span>
             </div>
             <p className="text-xs text-slate-400 mt-0.5">
-              Controle de probabilidade por ciclo de 1 hora, limites diários e auditoria de distribuição de Fragmentos
+              Chance de Baú por Boss derrotado, teto de 40%, limite diário e auditoria de Fragmentos
             </p>
           </div>
         </div>
@@ -160,10 +160,10 @@ export default function AdminConstructionChestsTab({
             <b className="font-arcade text-xl text-emerald-400">
               {liveChance.finalChance}%
             </b>
-            <span className="text-xs text-emerald-400/80 font-mono">/ ciclo</span>
+            <span className="text-xs text-emerald-400/80 font-mono">/ Boss</span>
           </div>
           <span className="text-[10px] text-slate-400">
-            {liveChance.isCapped ? '⚠️ Teto de 10% aplicado' : `${liveChance.activeMinersCount} heróis ativos`}
+            {liveChance.isCapped ? '⚠️ Teto de 40% aplicado' : `${liveChance.activeMinersCount} sobreviventes ativos`}
           </span>
         </div>
 
@@ -218,33 +218,33 @@ export default function AdminConstructionChestsTab({
               type="number"
               step="0.05"
               min="0.01"
-              max="5.0"
+              max="15.0"
               value={currentChestConfig.baseRateCommonPct}
-              onChange={e => handleUpdateParam('baseRateCommonPct', parseFloat(e.target.value) || 0.1)}
+              onChange={e => handleUpdateParam('baseRateCommonPct', parseFloat(e.target.value) || 15)}
               className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-amber-300 font-mono focus:outline-none focus:border-amber-400"
             />
             <p className="text-[10px] text-slate-500 leading-tight">
-              Base multiplicadora. A taxa antiga de 0,2381% foi substituída por este valor configurável.
+              Chance-base por sobrevivente comum participante de cada Boss derrotado.
             </p>
           </div>
 
-          {/* Teto Máximo por Conta */}
+          {/* Teto Máximo por Boss */}
           <div className="space-y-1.5 bg-slate-900 p-3.5 rounded-xl border border-slate-800">
             <div className="flex justify-between items-center text-xs">
-              <label className="text-slate-300 font-bold">Teto Máximo por Ciclo</label>
+              <label className="text-slate-300 font-bold">Teto Máximo por Boss</label>
               <span className="font-mono text-emerald-400 font-bold">{currentChestConfig.maxAccountChanceCapPct}%</span>
             </div>
             <input 
               type="number"
               step="0.5"
               min="1.0"
-              max="25.0"
+              max="40.0"
               value={currentChestConfig.maxAccountChanceCapPct}
-              onChange={e => handleUpdateParam('maxAccountChanceCapPct', parseFloat(e.target.value) || 10.0)}
+              onChange={e => handleUpdateParam('maxAccountChanceCapPct', parseFloat(e.target.value) || 40.0)}
               className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-emerald-300 font-mono focus:outline-none focus:border-emerald-400"
             />
             <p className="text-[10px] text-slate-500 leading-tight">
-              Teto absoluto obrigatório de 10% por conta por ciclo de 1 hora.
+              Teto máximo de 40% por jogador em cada Boss derrotado.
             </p>
           </div>
 
@@ -338,9 +338,9 @@ export default function AdminConstructionChestsTab({
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="bg-slate-900 p-3.5 rounded-xl border border-slate-800 space-y-1.5">
-            <span className="text-xs text-slate-400 font-bold">Heróis Ativos na Mina:</span>
+            <span className="text-xs text-slate-400 font-bold">Sobreviventes em Combate:</span>
             <div className="font-arcade text-lg text-emerald-400">
-              {liveChance.activeMinersCount} heróis trabalhando
+              {liveChance.activeMinersCount} sobreviventes em combate
             </div>
             <p className="text-[10px] text-slate-500">
               Heróis descansando na casa ou sem energia são excluídos automaticamente.
@@ -358,17 +358,17 @@ export default function AdminConstructionChestsTab({
           </div>
 
           <div className="bg-slate-900 p-3.5 rounded-xl border border-slate-800 space-y-1.5">
-            <span className="text-xs text-slate-400 font-bold">Probabilidade Efetiva por Ciclo:</span>
+            <span className="text-xs text-slate-400 font-bold">Probabilidade Efetiva por Boss:</span>
             <div className="font-arcade text-lg text-emerald-400 flex items-center gap-2">
               <span>{liveChance.finalChance}%</span>
               {liveChance.isCapped && (
                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 font-tech font-bold">
-                  TETO 10%
+                  TETO 40%
                 </span>
               )}
             </div>
             <p className="text-[10px] text-slate-500">
-              Teto absoluto de 10% por ciclo por conta, conforme regulamento.
+              Teto absoluto de 40% por jogador em cada Boss derrotado.
             </p>
           </div>
         </div>
@@ -405,15 +405,15 @@ export default function AdminConstructionChestsTab({
 
         <div className="flex flex-wrap gap-2.5">
           <button
-            onClick={handleSimulateCycleRoll}
+            onClick={handleSimulateBossRoll}
             className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/40 text-xs font-bold transition cursor-pointer active:scale-95"
           >
             <Play size={14} />
-            <span>Simular Sorteio de Ciclo (Sem Concessão)</span>
+            <span>Simular Sorteio por Boss (Sem Concessão)</span>
           </button>
 
           <button
-            onClick={handleExecuteRealCycleRoll}
+            onClick={handleExecuteRealBossRoll}
             className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 text-xs font-bold transition cursor-pointer active:scale-95"
           >
             <Sparkles size={14} />
@@ -438,7 +438,7 @@ export default function AdminConstructionChestsTab({
           }`}>
             <div className="flex justify-between font-bold">
               <span>Resultado do Sorteio:</span>
-              <span>{testResult.won ? '🎉 SUCESSO: BAÚ CONCEDIDO!' : '❌ NÃO SORTEADO NESTE CICLO'}</span>
+              <span>{testResult.won ? '🎉 SUCESSO: BAÚ CONCEDIDO!' : '❌ NÃO SORTEADO NESTE BOSS'}</span>
             </div>
             <div>Roll do Sorteio: <b>{testResult.roll}%</b> (Necessário: ≤ {testResult.activeChance?.finalChance}%)</div>
             <div>Heróis Ativos no Cálculo: <b>{testResult.activeChance?.activeMinersCount}</b></div>
@@ -475,7 +475,7 @@ export default function AdminConstructionChestsTab({
               >
                 <div className="flex items-center gap-2">
                   <span className={evt.type === 'CHEST_FOUND' ? 'text-emerald-400 font-bold' : evt.type === 'CHEST_OPENED' ? 'text-amber-400 font-bold' : 'text-slate-400'}>
-                    {evt.type === 'CHEST_FOUND' ? '🧱 ENCONTRADO' : evt.type === 'CHEST_OPENED' ? '🔓 ABERTO (+1 FRAG)' : '⏱️ CICLO'}
+                    {evt.type === 'CHEST_FOUND' ? '🧱 ENCONTRADO' : evt.type === 'CHEST_OPENED' ? '🔓 ABERTO (+1 FRAG)' : '⏱️ BOSS'}
                   </span>
                   <span className="text-slate-500">{evt.timestamp}</span>
                 </div>
@@ -487,7 +487,7 @@ export default function AdminConstructionChestsTab({
           </div>
         ) : (
           <p className="text-xs text-slate-500 text-center py-4">
-            Nenhuma aparição registrada ainda. Os eventos de ciclo aparecerão aqui automaticamente.
+            Nenhuma aparição registrada ainda. Os sorteios por Boss aparecerão aqui automaticamente.
           </p>
         )}
       </div>
