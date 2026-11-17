@@ -35,7 +35,7 @@ export default function UserProfileModal({
   totalMinedSession = 0,
   currentWithdrawalTax = 10,
   miners = [],
-  currentHouse = { name: 'Casa Básica', slots: 5 },
+  currentHouse = { name: 'Abrigo Básico', slots: 5 },
   currentMine = { name: 'Mina do Cânion' },
   constructionFragments = 0,
   constructionChests = []
