@@ -47,7 +47,7 @@ function normalizeSurvivor(survivor, index) {
       : (wasInShelter ? 5 : maxHealth),
     x: Number.isFinite(survivor.x) ? survivor.x : 2 + (index % 4),
     y: Number.isFinite(survivor.y) ? survivor.y : 4 + (Math.floor(index / 4) % 3),
-    status: survivor.status || 'reserve',
+    status: survivor.status === 'sleep' ? 'reserve' : (survivor.status || 'reserve'),
     attackCooldown: survivor.attackCooldown || 0
   };
 }
@@ -66,6 +66,8 @@ function recoverOffline(survivors, house, elapsedMs) {
 
 function promoteReserves(survivors, capacity) {
   const next = survivors.map(s => ({ ...s }));
+  const active = next.filter(s => s.status === 'work').sort((a, b) => (b.power || 0) - (a.power || 0));
+  active.slice(ACTIVE_LIMIT).forEach(extra => { const item = next.find(s => s.id === extra.id); if (item) item.status = 'reserve'; });
   const activeCount = next.filter(s => s.status === 'work').length;
   const available = Math.max(0, ACTIVE_LIMIT - activeCount);
   const candidates = next
@@ -116,7 +118,7 @@ export default function ZombieSurvivalBoard({ survivors = [], onSurvivorsChange,
     if (!combatEnabled) return undefined;
     const timer = setInterval(() => {
       const now = Date.now();
-      const elapsed = Math.min(5000, Math.max(0, now - lastTickRef.current));
+      const elapsed = Math.max(0, now - lastTickRef.current);
       lastTickRef.current = now;
       localStorage.setItem('cripto_myners_last_recovery_at', String(now));
 
@@ -214,7 +216,6 @@ export default function ZombieSurvivalBoard({ survivors = [], onSurvivorsChange,
 
   const active = survivors.filter(s => s.status === 'work').length;
   const injured = survivors.filter(s => s.status === 'house' || s.status === 'waiting_house').length;
-  const defeated = survivors.filter(s => s.currentHealth <= 0 && s.status !== 'house' && s.status !== 'waiting_house').length;
   const aliveZombies = zombies.filter(z => z.hp > 0);
   const cells = useMemo(() => Array.from({ length: COLS * ROWS }, (_, index) => ({
     x: index % COLS,
@@ -245,7 +246,7 @@ export default function ZombieSurvivalBoard({ survivors = [], onSurvivorsChange,
             const key = `${cell.x},${cell.y}`;
             const wall = WALLS.has(key);
             const road = cell.y === 5 || cell.x === 7;
-            return <div key={key} className={`relative border-[0.5px] border-black/10 ${wall ? 'bg-gradient-to-br from-slate-600 to-slate-800' : road ? 'bg-[#4b5148]' : ((cell.x + cell.y) % 2 ? 'bg-[#263b30]' : 'bg-[#2d4435')}`}>
+            return <div key={key} className={`relative border-[0.5px] border-black/10 ${wall ? 'bg-gradient-to-br from-slate-600 to-slate-800' : road ? 'bg-[#4b5148]' : ((cell.x + cell.y) % 2 ? 'bg-[#263b30]' : 'bg-[#2d4435]')}`}>
               {wall && <span className="absolute inset-0 flex items-center justify-center text-lg opacity-80">🧱</span>}
               {road && !wall && <span className="absolute inset-0 border-y border-dashed border-yellow-900/40" />}
             </div>;
