@@ -177,7 +177,7 @@ export default function ZombieSurvivalBoard({ survivors = [], onSurvivorsChange,
               if (s.id !== target.id) return s;
               const currentHealth = Math.max(0, s.currentHealth - ZOMBIE_DEMO_CONFIG.zombieDamage);
               if ((currentHealth / s.maxHealth) * 100 <= INJURY_THRESHOLD_PCT) {
-                return { ...s, currentHealth: Math.max(0, currentHealth), status: 'waiting_house', attackCooldown: 0 };
+                return { ...s, currentHealth: s.maxHealth * (INJURY_THRESHOLD_PCT / 100), status: 'waiting_house', attackCooldown: 0 };
               }
               return { ...s, currentHealth };
             });
