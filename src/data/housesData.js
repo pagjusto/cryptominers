@@ -1,5 +1,5 @@
 // CRIPTO MYNERS — SISTEMA OFICIAL DE CASAS
-// 4 Categorias oficiais responsáveis pelo descanso e recuperação de energia dos personagens:
+// 4 Categorias oficiais responsáveis pelo tratamento e recuperação de vida dos personagens:
 // - Básica: Capacidade 5, Velocidade 100%
 // - Reforçada: Capacidade 10, Velocidade 125%
 // - Avançada: Capacidade 15, Velocidade 150%
@@ -20,7 +20,7 @@ export const HOUSE_TIERS = [
   },
   {
     id: 'basic',
-    name: 'Casa Básica',
+    name: 'Abrigo Básico',
     icon: '🛖',
     slots: 5,
     recoverySpeedPct: 100,
@@ -28,11 +28,11 @@ export const HOUSE_TIERS = [
     costUsdt: 25,
     costBcoin: 25,
     color: '#38bdf8',
-    description: 'Acomoda até 5 personagens descansando simultaneamente com 100% da velocidade padrão.'
+    description: 'Acomoda até 5 sobreviventes em tratamento simultaneamente com 100% da velocidade padrão.'
   },
   {
     id: 'reinforced',
-    name: 'Casa Reforçada',
+    name: 'Abrigo Reforçado',
     icon: '🏡',
     slots: 10,
     recoverySpeedPct: 125,
@@ -44,7 +44,7 @@ export const HOUSE_TIERS = [
   },
   {
     id: 'advanced',
-    name: 'Casa Avançada',
+    name: 'Abrigo Avançado',
     icon: '🏠',
     slots: 15,
     recoverySpeedPct: 150,
@@ -57,7 +57,7 @@ export const HOUSE_TIERS = [
   },
   {
     id: 'legendary',
-    name: 'Casa Lendária',
+    name: 'Abrigo Lendário',
     icon: '🏰',
     slots: 20,
     recoverySpeedPct: 200,
@@ -80,5 +80,5 @@ export function resolveHouseTier(houseId) {
     palace: 'legendary'
   };
   const resolvedId = aliasMap[houseId] || houseId;
-  return HOUSE_TIERS.find(h => h.id === resolvedId) || HOUSE_TIERS[1]; // Padrão: Casa Básica
+  return HOUSE_TIERS.find(h => h.id === resolvedId) || HOUSE_TIERS[1]; // Padrão: Abrigo Básico
 }
