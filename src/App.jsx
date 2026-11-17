@@ -698,7 +698,7 @@ export default function App() {
     setMiners(prev => [...prev, ...newBatch]);
   };
 
-  // 1. COMPRA NO MARKETPLACE P2P COM TAXA DE 6%
+  // 1. COMPRA NO MARKETPLACE P2P COM TAXA DE 5%
   const handleBuyMarketplaceItem = (listing) => {
     if (bcoin < listing.priceBcoin) return;
 
@@ -1395,7 +1395,7 @@ export default function App() {
 
       </main>
 
-      {/* MODAL DO MARKETPLACE P2P (COMÉRCIO COM TAXA DE 6%) */}
+      {/* MODAL DO MARKETPLACE P2P (COMÉRCIO COM TAXA DE 5%) */}
       <MarketplaceModal
         isOpen={isMarketplaceOpen}
         onClose={() => setIsMarketplaceOpen(false)}
