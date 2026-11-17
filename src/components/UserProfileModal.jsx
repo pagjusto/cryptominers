@@ -70,6 +70,9 @@ export default function UserProfileModal({
     }
   });
 
+  const config = useMemo(() => getCriptoMynersConfig(), []);
+  const minerRate = config?.minerCoinUsdtRate || 0.01;
+
   // Atualiza a aba inicial sempre que o modal abre
   useEffect(() => {
     if (isOpen) {
@@ -130,9 +133,6 @@ export default function UserProfileModal({
       setConnectingType(null);
     }
   };
-
-  const config = useMemo(() => getCriptoMynersConfig(), []);
-  const minerRate = config?.minerCoinUsdtRate || 1.0;
 
   // Cálculo de Saque com Base na Cotação da Minercoin
   const parsedWithdrawAmount = parseFloat(withdrawAmount) || 0;

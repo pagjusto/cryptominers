@@ -28,6 +28,7 @@ import { characterSpriteManager } from '../utils/characterSprites';
 import { rollMiningGearDrop } from '../data/gearData';
 import { sfx } from '../utils/sfx';
 import { getCanyonTrackPosition, isCanyonTrackOrTunnel } from '../utils/canyonGeometry';
+import { findNextHeroAction } from '../utils/minerPathfinding';
 
 export default function GameBoard({ 
   mine, 
@@ -116,8 +117,9 @@ export default function GameBoard({
       let initX = existing ? existing.x : m.x;
       let initY = existing ? existing.y : m.y;
 
-      // Se for no Cânion e a posição cair sobre os trilhos ou túnel, realoca para chão aberto de terra batida
-      if (isCanyon && (typeof initX !== 'number' || isNaN(initX) || isCanyonTrackOrTunnel(Math.round(initX), Math.round(initY), GRID_COLS, GRID_ROWS))) {
+      // Se for no Cânion e a posição for inválida ou cair dentro da estrutura da entrada da mina, realoca para chão aberto
+      const isInTunnelEntrance = Math.round(initX) >= 6 && Math.round(initX) <= 10 && Math.round(initY) >= 3 && Math.round(initY) <= 6;
+      if (typeof initX !== 'number' || isNaN(initX) || (isCanyon && isInTunnelEntrance)) {
         initX = 2 + (idx % 2);
         initY = 7 + (Math.floor(idx / 2) % 2);
       }
@@ -199,10 +201,13 @@ export default function GameBoard({
         const cKey = `${bx},${by}`;
         delete state.hpMap[cKey];
         state.grid[by][bx] = BLOCK_EMPTY;
-        if (hitter.targetBlock && hitter.targetBlock.x === bx && hitter.targetBlock.y === by) {
-          hitter.isMining = false;
-          hitter.targetBlock = null;
-        }
+        // Notifica todos os mineradores que estavam atacando esta jazida para liberarem o alvo
+        state.miners.forEach(m => {
+          if (m.targetBlock && m.targetBlock.x === bx && m.targetBlock.y === by) {
+            m.isMining = false;
+            m.targetBlock = null;
+          }
+        });
 
         // Rastreamento de estatísticas da rodada (Pedras destruídas pelo herói)
         if (hitter && hitter.id) {
@@ -434,49 +439,34 @@ export default function GameBoard({
         if (typeof miner.x !== 'number' || isNaN(miner.x)) miner.x = 2;
         if (typeof miner.y !== 'number' || isNaN(miner.y)) miner.y = 8;
 
-        // Regra Estrita do Usuário: Heróis JAMAIS podem ficar sobre os trilhos ou sob a entrada da mina!
-        if (isCanyon && isCanyonTrackOrTunnel(Math.round(miner.x), Math.round(miner.y), GRID_COLS, GRID_ROWS)) {
-          const safeSpots = [
-            { x: 2, y: 8 }, { x: 3, y: 8 }, { x: 2, y: 7 }, { x: 1, y: 8 },
-            { x: 2, y: 2 }, { x: 3, y: 2 }, { x: 1, y: 2 }, { x: 2, y: 3 }
-          ];
-          const safe = safeSpots.find(s => !isCanyonTrackOrTunnel(s.x, s.y, GRID_COLS, GRID_ROWS) && state.grid[s.y][s.x] === BLOCK_EMPTY) || { x: 2, y: 8 };
-          miner.x = safe.x;
-          miner.y = safe.y;
+        const mx = Math.max(1, Math.min(GRID_COLS - 2, Math.round(miner.x)));
+        const my = Math.max(1, Math.min(GRID_ROWS - 2, Math.round(miner.y)));
+
+        // Garante que nenhum herói fique preso dentro da estrutura física de madeira da entrada da mina
+        if (isCanyon && (mx >= 6 && mx <= 10 && my >= 3 && my <= 6)) {
+          miner.x = 2;
+          miner.y = 8;
           miner.targetBlock = null;
           miner.isMining = false;
         }
 
-        const mx = Math.max(0, Math.min(GRID_COLS - 1, Math.round(miner.x)));
-        const my = Math.max(0, Math.min(GRID_ROWS - 1, Math.round(miner.y)));
-
-        const neighbors = [
-          { x: mx, y: my - 1, dir: 1 },
-          { x: mx + 1, y: my, dir: 1 },
-          { x: mx, y: my + 1, dir: 1 },
-          { x: mx - 1, y: my, dir: -1 }
-        ];
-
+        // Se o herói já tem um bloco alvo, valida se ele ainda existe e se o herói ainda está adjacente
         if (miner.targetBlock) {
           const { x: tx, y: ty } = miner.targetBlock;
           const currentType = state.grid[ty] ? state.grid[ty][tx] : BLOCK_EMPTY;
-          if (currentType === BLOCK_EMPTY || currentType === BLOCK_BEDROCK) {
+          const isAdjacent = Math.abs(tx - mx) + Math.abs(ty - my) === 1;
+          if (currentType === BLOCK_EMPTY || currentType === BLOCK_BEDROCK || !isAdjacent) {
             miner.targetBlock = null;
             miner.isMining = false;
           }
         }
 
-        if (!miner.targetBlock) {
-          const validTarget = neighbors.find(n => {
-            if (n.x < 0 || n.x >= GRID_COLS || n.y < 0 || n.y >= GRID_ROWS) return false;
-            const t = state.grid[n.y][n.x];
-            return t !== BLOCK_EMPTY && t !== BLOCK_BEDROCK;
-          });
-
-          if (validTarget) {
-            miner.targetBlock = { x: validTarget.x, y: validTarget.y };
-            // Define direção voltada estritamente para o bloco alvo
-            miner.targetDir = validTarget.x < miner.x ? -1 : (validTarget.x > miner.x ? 1 : (miner.targetDir || 1));
+        // Se o herói está sem alvo ou não está minerando, busca a próxima jazida imediatamente
+        if (!miner.targetBlock || !miner.isMining) {
+          const decision = findNextHeroAction(miner, state.grid, state.miners, isCanyon);
+          if (decision.action === 'mine' && decision.targetBlock) {
+            miner.targetBlock = decision.targetBlock;
+            miner.targetDir = decision.targetDir;
             miner.isMining = true;
             miner.swingTimer = 0.5;
           }
@@ -646,23 +636,34 @@ export default function GameBoard({
           return;
         }
 
-        miner.moveCooldown = (miner.moveCooldown || 0) - dt * miner.speed;
+        // Navegação e marcha inteligente em direção à próxima jazida do mapa
+        miner.moveCooldown = (miner.moveCooldown || 0) - dt * (miner.speed || 1);
 
         if (miner.moveCooldown <= 0) {
-          miner.moveCooldown = 0.42;
+          miner.moveCooldown = 0.35; // Passo dinâmico calibrado pela velocidade
 
-          const openMoves = neighbors.filter(n => {
-            if (n.x <= 0 || n.x >= GRID_COLS - 1 || n.y <= 0 || n.y >= GRID_ROWS - 1) return false;
-            // Bloqueia qualquer movimento de heróis em direção aos trilhos ou entrada da mina
-            if (isCanyon && isCanyonTrackOrTunnel(n.x, n.y, GRID_COLS, GRID_ROWS)) return false;
-            return state.grid[n.y][n.x] === BLOCK_EMPTY;
-          });
+          const decision = findNextHeroAction(miner, state.grid, state.miners, isCanyon);
 
-          if (openMoves.length > 0) {
-            const next = openMoves[Math.floor(Math.random() * openMoves.length)];
-            miner.x = next.x;
-            miner.y = next.y;
-            miner.targetDir = next.dir;
+          if (decision.action === 'mine' && decision.targetBlock) {
+            miner.targetBlock = decision.targetBlock;
+            miner.targetDir = decision.targetDir;
+            miner.isMining = true;
+            miner.swingTimer = 0.5;
+          } else if (decision.action === 'move' && decision.nextStep) {
+            miner.x = decision.nextStep.x;
+            miner.y = decision.nextStep.y;
+            if (decision.nextStep.dir) {
+              miner.targetDir = decision.nextStep.dir;
+            }
+
+            // Ao dar o passo, checa imediatamente se já encostou na jazida
+            const immediateCheck = findNextHeroAction(miner, state.grid, state.miners, isCanyon);
+            if (immediateCheck.action === 'mine' && immediateCheck.targetBlock) {
+              miner.targetBlock = immediateCheck.targetBlock;
+              miner.targetDir = immediateCheck.targetDir;
+              miner.isMining = true;
+              miner.swingTimer = 0.5;
+            }
           }
         }
       });
