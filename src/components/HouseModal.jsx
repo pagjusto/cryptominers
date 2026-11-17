@@ -106,7 +106,7 @@ export default function HouseModal({
                 </span>
               </div>
               <p className="text-xs text-slate-400">
-                Capacidade: <b className="text-white">{minersInHouse.length}/{currentHouse.slots} camas ocupadas</b>
+                Capacidade: <b className="text-white">{minersInHouse.length}/{currentHouse.slots} leitos ocupados</b>
                 {minersWaiting.length > 0 && <span className="text-amber-400 ml-1.5 font-bold font-mono">({minersWaiting.length} na fila)</span>}
               </p>
             </div>
@@ -234,8 +234,7 @@ export default function HouseModal({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {miners.filter(m => m.status === 'work').map(miner => {
                   const staminaPct = Math.round(((miner.currentHealth ?? 100) / (miner.maxHealth || 100)) * 100);
-                  const canSend = availableSlots > 0;
-                  return (
+                                    return (
                     <div key={miner.id} className="p-2.5 rounded-2xl bg-slate-950/60 border border-slate-800 flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <span className="text-xl">{miner.avatar}</span>
