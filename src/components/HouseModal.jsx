@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Home, Bed, Sparkles, HeartPulse, ArrowUpRight, Check, Shield, Zap, Users } from 'lucide-react';
+import { X, Home, Sparkles, HeartPulse, ArrowUpRight, Check, Shield, Zap, Users } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { HOUSE_TIERS, resolveHouseTier } from '../data/housesData';
 import { sfx } from '../utils/sfx';
@@ -24,7 +24,6 @@ export default function HouseModal({
   const houseIndex = HOUSE_TIERS.findIndex(h => h.id === currentHouse.id);
   const minersInHouse = miners.filter(m => m.status === 'house');
   const minersWaiting = miners.filter(m => m.status === 'waiting_house');
-  const availableSlots = Math.max(0, currentHouse.slots - minersInHouse.length);
 
   // Custos em Fragmentos de Construção por categoria de casa
   const FRAGMENT_COSTS = {
