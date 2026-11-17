@@ -1,11 +1,9 @@
-// Dados Iniciais e Estrutura do Marketplace P2P do Crypto Miners
-// Taxa oficial da plataforma: 6% sobre cada negociação (3% Estúdio, 2% Reward Pool, 1% Burn)
+// Dados Iniciais e Estrutura do Marketplace P2P do Cripto Myners
+// Comissão oficial do jogo: exatamente 5% sobre cada venda (95% Vendedor, 5% Jogo)
 
-export const MARKETPLACE_FEE_PCT = 6;
+export const MARKETPLACE_FEE_PCT = 5;
 export const FEE_SPLIT = {
-  studio: 3, // 3% vai direto para a receita/lucro do criador
-  rewardPool: 2, // 2% abastece o cofre das pedras da mina
-  burn: 1 // 1% é queimado permanentemente da circulação
+  platform: 5 // 5% comissão oficial da plataforma/jogo
 };
 
 export const INITIAL_MARKET_LISTINGS = [

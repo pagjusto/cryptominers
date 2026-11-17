@@ -135,7 +135,9 @@ export function calculateRoiScenario({
   const activeBasePerHour = totalTeamBasePerHour * activeHeroesRatio;
   
   const effectiveCoinsPerHour = activeBasePerHour * effectiveUptime;
-  const effectiveCoinsPerDay = effectiveCoinsPerHour * 24;
+  // Regra Oficial 9.0: A projeção de ROI deve considerar 12 horas diárias como cenário médio de referência (não 24 horas obrigatórias)
+  const referenceHoursPerDay = 12;
+  const effectiveCoinsPerDay = effectiveCoinsPerHour * referenceHoursPerDay;
   const effectiveCoinsPerMonth = effectiveCoinsPerDay * 30;
 
   const dailyUsd = effectiveCoinsPerDay * rate;

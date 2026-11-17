@@ -614,9 +614,8 @@ export default function App() {
   };
 
   // MECÂNICA DE RENOVAÇÃO DO MAPA INDIVIDUAL: AO ELIMINAR AS 20 JAZIDAS, RENOVA O CICLO!
+  // Regra 7.0: A renovação do mapa visual NÃO concede bônus financeiro aleatório de MNC.
   const handleMapCleared = (newMapParam) => {
-    const clearBonus = parseFloat((Math.random() * 0.4 + 0.3).toFixed(3));
-    handleCollectBcoin(clearBonus);
     sfx.playLevelUp();
 
     confetti({
@@ -630,7 +629,7 @@ export default function App() {
     const nextCycle = currentCycle + 1;
     setMapStage(nextCycle);
     setMapClearNotice({
-      bonus: clearBonus,
+      bonus: 0,
       nextStage: nextCycle
     });
 
@@ -1468,10 +1467,14 @@ export default function App() {
             miners={miners}
             playerId={activePlayerId}
             onDepositBroken={(res) => {
-              setMapData(prev => ({
-                ...prev,
-                remainingDeposits: res.remainingDeposits ?? prev.remainingDeposits
-              }));
+              if (res?.currentMap) {
+                setMapData(res.currentMap);
+              } else {
+                setMapData(prev => ({
+                  ...prev,
+                  remainingDeposits: res?.remainingDeposits ?? prev.remainingDeposits
+                }));
+              }
             }}
             onMinersChange={setMiners}
             onCollectBcoin={handleCollectBcoin}

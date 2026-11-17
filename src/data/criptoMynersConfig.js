@@ -184,18 +184,20 @@ export const DEFAULT_CRIPTO_MYNERS_CONFIG = {
     }
   },
 
-  // 3. ATRIBUTOS DAS RARIDADES (Para cálculo de produção e atributos individuais)
+  // 3. ATRIBUTOS DAS RARIDADES (Conforme Regras Oficiais de Energia e Produção de Referência)
   rarityAttributes: {
     common: {
       rarityName: 'Comum',
       color: '#94a3b8',
       basePowerMin: 1.5,
       basePowerMax: 3.0,
-      coinsPerHourMin: 0.08,
-      coinsPerHourMax: 0.12,
-      maxEnergy: 100,
-      energyDrainPerMinute: 1.0, // 100 min (~1.6h de trabalho contínuo)
-      baseRecoveryMinutes: 240, // 4 horas na casa básica
+      coinsPerHourMin: 1.25,
+      coinsPerHourMax: 1.55, // média 1.40 MNC/h
+      maxEnergy: 100, // Regra Oficial: 100
+      energyDrainPerHour: 12, // Regra Oficial: 12/h (0.2/min)
+      energyDrainPerMinute: 0.20,
+      recoveryPerHourReinforced: 15, // Regra Oficial Casa Reforçada: 15/h
+      baseRecoveryMinutes: 400,
       badge: 'COMUM'
     },
     rare: {
@@ -203,35 +205,41 @@ export const DEFAULT_CRIPTO_MYNERS_CONFIG = {
       color: '#38bdf8',
       basePowerMin: 3.5,
       basePowerMax: 6.5,
-      coinsPerHourMin: 0.16,
-      coinsPerHourMax: 0.24,
-      maxEnergy: 150,
-      energyDrainPerMinute: 0.9,
-      baseRecoveryMinutes: 240,
+      coinsPerHourMin: 2.25,
+      coinsPerHourMax: 2.75, // média 2.50 MNC/h
+      maxEnergy: 120, // Regra Oficial: 120
+      energyDrainPerHour: 12, // Regra Oficial: 12/h (0.2/min)
+      energyDrainPerMinute: 0.20,
+      recoveryPerHourReinforced: 18, // Regra Oficial Casa Reforçada: 18/h
+      baseRecoveryMinutes: 400,
       badge: 'RARO'
     },
     epic: {
       rarityName: 'Épico',
       color: '#a855f7',
-      basePowerMin: 8.0,
-      basePowerMax: 14.0,
-      coinsPerHourMin: 0.32,
-      coinsPerHourMax: 0.46,
-      maxEnergy: 220,
-      energyDrainPerMinute: 0.8,
-      baseRecoveryMinutes: 240,
+      basePowerMin: 7.0,
+      basePowerMax: 13.0,
+      coinsPerHourMin: 3.50,
+      coinsPerHourMax: 4.10, // média 3.80 MNC/h
+      maxEnergy: 140, // Regra Oficial: 140
+      energyDrainPerHour: 12, // Regra Oficial: 12/h (0.2/min)
+      energyDrainPerMinute: 0.20,
+      recoveryPerHourReinforced: 21, // Regra Oficial Casa Reforçada: 21/h
+      baseRecoveryMinutes: 400,
       badge: 'ÉPICO'
     },
     legendary: {
       rarityName: 'Lendário',
       color: '#f59e0b',
-      basePowerMin: 16.0,
-      basePowerMax: 26.0,
-      coinsPerHourMin: 0.60,
-      coinsPerHourMax: 0.95,
-      maxEnergy: 300,
-      energyDrainPerMinute: 0.7,
-      baseRecoveryMinutes: 240,
+      basePowerMin: 14.0,
+      basePowerMax: 24.0,
+      coinsPerHourMin: 6.00,
+      coinsPerHourMax: 6.84, // média 6.42 MNC/h
+      maxEnergy: 160, // Regra Oficial: 160
+      energyDrainPerHour: 12, // Regra Oficial: 12/h (0.2/min)
+      energyDrainPerMinute: 0.20,
+      recoveryPerHourReinforced: 24, // Regra Oficial Casa Reforçada: 24/h
+      baseRecoveryMinutes: 400,
       badge: 'LENDÁRIO'
     }
   },

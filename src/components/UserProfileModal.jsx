@@ -134,11 +134,14 @@ export default function UserProfileModal({
     }
   };
 
+  const minWithdrawUsd = 50;
+  const minWithdrawMnc = Math.ceil(minWithdrawUsd / (minerRate || 0.01));
+
   // Cálculo de Saque com Base na Cotação da Minercoin
   const parsedWithdrawAmount = parseFloat(withdrawAmount) || 0;
-  const isMinMet = parsedWithdrawAmount >= 40;
-  const hasEnoughBalance = bcoinBalance >= parsedWithdrawAmount && parsedWithdrawAmount > 0;
   const withdrawGrossUsdt = parseFloat((parsedWithdrawAmount * minerRate).toFixed(2));
+  const isMinMet = withdrawGrossUsdt >= minWithdrawUsd;
+  const hasEnoughBalance = bcoinBalance >= parsedWithdrawAmount && parsedWithdrawAmount > 0;
   const withdrawFeeUsdt = parseFloat(((withdrawGrossUsdt * currentWithdrawalTax) / 100).toFixed(2));
   const withdrawNetUsdt = parseFloat((withdrawGrossUsdt - withdrawFeeUsdt).toFixed(2));
 
@@ -577,7 +580,7 @@ export default function UserProfileModal({
                         </span>
                       </div>
                       <span className="text-xs font-mono px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 font-bold">
-                        {network || 'BNB Smart Chain (BEP-20)'}
+                        {network || 'Solana (USDT SPL)'}
                       </span>
                     </div>
 
@@ -745,10 +748,10 @@ export default function UserProfileModal({
                   <div className="p-3.5 rounded-2xl bg-slate-950/50 border border-slate-800 text-[11px] text-slate-400 space-y-1">
                     <div className="flex items-center gap-1.5 font-bold text-slate-300">
                       <ShieldCheck size={14} className="text-emerald-400" />
-                      <span>Rede: BNB Smart Chain (BEP-20)</span>
+                      <span>Rede Oficial Planejada: Solana (USDT SPL)</span>
                     </div>
                     <p>
-                      Ambiente com transações ultrarrápidas e taxas mínimas. Totalmente compatível com contratos USDT e tokens BEP-20.
+                      Saques em <b>USDT SPL</b> na rede Solana. As taxas de rede (SOL) são assumidas pelo jogo como custo operacional. Nenhuma taxa de blockchain é cobrada do jogador.
                     </p>
                   </div>
                 </div>
@@ -880,23 +883,23 @@ export default function UserProfileModal({
                   {/* Campo de Entrada de Valor para Saque */}
                   <div className="p-4 rounded-2xl bg-slate-950/90 border border-slate-800 space-y-3">
                     <div className="flex items-center justify-between text-xs">
-                      <label className="font-bold text-slate-300">Quanto deseja sacar (MINER)?</label>
-                      <span className="text-[11px] text-slate-400 font-mono">Mínimo: 40 MINER</span>
+                      <label className="font-bold text-slate-300">Quanto deseja sacar (MNC)?</label>
+                      <span className="text-[11px] text-amber-300 font-mono font-bold">Mínimo: US$ 50 ({minWithdrawMnc.toLocaleString()} MNC)</span>
                     </div>
 
                     <div className="relative">
                       <input 
                         type="number"
-                        min="40"
-                        step="0.01"
+                        min={minWithdrawMnc}
+                        step="1"
                         max={bcoinBalance}
                         value={withdrawAmount}
                         onChange={e => setWithdrawAmount(e.target.value)}
-                        placeholder="Ex: 40"
+                        placeholder={`Ex: ${minWithdrawMnc}`}
                         className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-base text-amber-300 font-arcade focus:outline-none focus:border-amber-500/60"
                       />
                       <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-arcade text-slate-400">
-                        MINER
+                        MNC
                       </span>
                     </div>
 
@@ -904,15 +907,15 @@ export default function UserProfileModal({
                     <div className="flex items-center gap-2 pt-1">
                       <button
                         type="button"
-                        onClick={() => setWithdrawAmount('40')}
+                        onClick={() => setWithdrawAmount(minWithdrawMnc.toString())}
                         className="flex-1 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-bold transition cursor-pointer"
                       >
-                        40 (Mínimo)
+                        US$ 50 (Mínimo)
                       </button>
 
                       <button
                         type="button"
-                        onClick={() => setWithdrawAmount(Math.max(40, parseFloat((bcoinBalance * 0.5).toFixed(2))).toString())}
+                        onClick={() => setWithdrawAmount(Math.max(minWithdrawMnc, parseFloat((bcoinBalance * 0.5).toFixed(0))).toString())}
                         className="flex-1 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-bold transition cursor-pointer"
                       >
                         50%
@@ -960,7 +963,7 @@ export default function UserProfileModal({
                     </button>
                   ) : !isMinMet ? (
                     <div className="p-3 rounded-2xl bg-slate-950 border border-slate-800 text-center text-xs text-slate-400">
-                      ⚠️ O valor mínimo para realizar o saque é de <b>40 MINER</b>.
+                      ⚠️ O valor mínimo para realizar o saque é de <b>US$ 50 ({minWithdrawMnc.toLocaleString()} MNC)</b>.
                     </div>
                   ) : !hasEnoughBalance ? (
                     <div className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-center text-xs text-rose-400">

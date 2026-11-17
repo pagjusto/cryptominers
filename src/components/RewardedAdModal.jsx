@@ -100,7 +100,7 @@ export default function RewardedAdModal({
         <div className="flex items-center justify-between pb-3 border-b border-slate-800 shrink-0">
           <div className="flex items-center gap-2">
             <span className="text-[10px] font-arcade font-bold px-2 py-0.5 rounded-full bg-slate-800 text-amber-400 border border-slate-700">
-              ANÚNCIO PATROCINADO
+              [SIMULAÇÃO] ANÚNCIO PATROCINADO
             </span>
             <span className="text-[10px] font-tech text-slate-400">
               {isCompleted ? 'Recompensa liberada!' : `Aguarde ${timeLeft}s`}
@@ -115,6 +115,9 @@ export default function RewardedAdModal({
               <X size={18} />
             </button>
           )}
+        </div>
+        <div className="text-[10px] text-slate-400 font-tech text-left mt-1">
+          * Modo demonstração. Em produção (Vercel), os anúncios reais serão conectados via SDK oficial (Google/Unity) alimentando o pool de liquidez.
         </div>
 
         {/* Barra de progresso do patrocinador */}

@@ -92,21 +92,26 @@ export const ROI_PROFILES = [
   }
 ];
 
-// Regras Oficiais de Saque e Imposto de ROI do Bomb Crypto
+// Regras Oficiais de Saque e Taxas Regressivas por ROI — Cripto Myners
 export const WITHDRAWAL_RULES = {
-  minWithdrawBcoin: 40,
+  minWithdrawUsd: 50, // Saque mínimo oficial: US$ 50
+  getMinWithdrawMnc: (rate = 0.01) => Math.ceil(50 / (rate || 0.01)),
   taxTiers: [
-    { roiMax: 100, taxPct: 15, label: 'ROI abaixo de 100% (Pré-Breakeven)' },
-    { roiMax: 200, taxPct: 10, label: 'ROI entre 100% e 200% (No Lucro)' },
-    { roiMax: 999999, taxPct: 5, label: 'ROI acima de 200% (Veterano)' }
-  ]
+    { roiMin: 0, roiMax: 49, taxPct: 15, label: 'ROI de 0% a 49% (Taxa: 15%)' },
+    { roiMin: 50, roiMax: 99, taxPct: 10, label: 'ROI de 50% a 99% (Taxa: 10%)' },
+    { roiMin: 100, roiMax: 149, taxPct: 5, label: 'ROI de 100% a 149% (Taxa: 5%)' },
+    { roiMin: 150, roiMax: 999999, taxPct: 3, label: 'ROI de 150% ou superior (Taxa Fixa: 3%)' }
+  ],
+  dailyWithdrawLimit: 'PENDENTE_DE_DEFINICAO' // Limite diário pendente de definição oficial
 };
 
-export function calculateWithdrawalTax(totalInvested, totalMined, rate = 1.0) {
+export function calculateWithdrawalTax(totalInvested, totalMined, rate = 0.01) {
   if (totalInvested <= 0) return 15;
-  const minedValueUsdt = totalMined * rate;
+  const minedValueUsdt = totalMined * (rate || 0.01);
   const roiPct = (minedValueUsdt / totalInvested) * 100;
-  if (roiPct < 100) return 15;
-  if (roiPct < 200) return 10;
-  return 5;
+  
+  if (roiPct < 50) return 15;
+  if (roiPct < 100) return 10;
+  if (roiPct < 150) return 5;
+  return 3; // 3% fixa para ROI >= 150%
 }

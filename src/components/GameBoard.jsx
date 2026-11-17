@@ -86,6 +86,8 @@ export default function GameBoard({
     lastTime: performance.now()
   });
 
+  const lastMapIdRef = useRef(mapData?.id);
+
   useEffect(() => {
     initCanyonMap();
     initMinecartSprite();
@@ -97,11 +99,17 @@ export default function GameBoard({
   }, []);
 
   useEffect(() => {
-    gameStateRef.current.grid = mapData.grid;
-    gameStateRef.current.hpMap = mapData.hpMap;
-    gameStateRef.current.totalMapHp = Object.values(mapData.hpMap).reduce((a, b) => a + b, 0);
+    if (!mapData || !mapData.grid) return;
+    // Evita recarregar a malha e desincronizar o estado dos heróis se o id do mapa for o mesmo
+    if (mapData.id && mapData.id === lastMapIdRef.current && gameStateRef.current.grid) {
+      return;
+    }
+    lastMapIdRef.current = mapData.id;
+    gameStateRef.current.grid = mapData.grid.map(row => [...row]);
+    gameStateRef.current.hpMap = { ...(mapData.hpMap || {}) };
+    gameStateRef.current.totalMapHp = Object.values(mapData.hpMap || {}).reduce((a, b) => a + b, 0);
     gameStateRef.current.isMapClearing = false;
-  }, [mapData]);
+  }, [mapData?.id]);
 
   useEffect(() => {
     if (statsResetTrigger > 0) {
@@ -206,6 +214,8 @@ export default function GameBoard({
           if (m.targetBlock && m.targetBlock.x === bx && m.targetBlock.y === by) {
             m.isMining = false;
             m.targetBlock = null;
+            m.swingTimer = 0;
+            m.moveCooldown = 0; // Libera movimento imediato para a próxima jazida
           }
         });
 
@@ -230,149 +240,29 @@ export default function GameBoard({
           });
         }
 
-        let rewardData = null;
-        if (bType === BLOCK_ROCK) rewardData = BOMB_CRYPTO_REWARDS.rock;
-        else if (bType === BLOCK_ORE_COMMON) rewardData = BOMB_CRYPTO_REWARDS.common;
-        else if (bType === BLOCK_ORE_GOLD) rewardData = BOMB_CRYPTO_REWARDS.gold;
-        else if (bType === BLOCK_ORE_CRYSTAL) rewardData = BOMB_CRYPTO_REWARDS.crystal;
-        else if (bType === BLOCK_TREASURE) rewardData = BOMB_CRYPTO_REWARDS.treasure;
-        else if (bType === BLOCK_ANCIENT_ALTAR) {
-          callbacksRef.current.onRescueMiner?.();
-          sfx.playCrystalCollect();
-          state.floatTexts.push({
-            text: `HERÓI RESGATADO! 🎉`,
-            x: bx * TILE_SIZE + TILE_SIZE / 2,
-            y: by * TILE_SIZE - 12,
-            color: '#ec4899',
-            opacity: 1,
-            vy: -55
-          });
+        sfx.playRockHit();
+
+        // Registra a destruição da jazida no motor de mapas individuais (Lógica Estritamente Visual)
+        const pId = callbacksRef.current.playerId || 'player_default';
+        const mapDamageResult = recordDepositDamage(pId, bx, by, 999999);
+        if (mapDamageResult?.deposit) {
+          callbacksRef.current.onDepositBroken?.(mapDamageResult);
         }
 
-        if (rewardData && rewardData.maxBcoin > 0) {
-          let rawAmount = Math.random() * (rewardData.maxBcoin - rewardData.minBcoin) + rewardData.minBcoin;
-
-          // Passiva do Goblino (+50% em qualquer veio mineral)
-          if (hitter.classId === 'goblin') {
-            rawAmount *= 1.5;
-            state.floatTexts.push({
-              text: `🍀 FARO GOBLIN (+50%)`,
-              x: bx * TILE_SIZE + TILE_SIZE / 2,
-              y: by * TILE_SIZE - 28,
-              color: '#22c55e',
-              opacity: 1,
-              vy: -45
-            });
-          }
-
-          // Passiva do Mago dos Cristais (+35% em cristais e altares)
-          if (hitter.classId === 'mage' && (bType === BLOCK_ORE_CRYSTAL || bType === BLOCK_ORE_GOLD || bType === BLOCK_TREASURE)) {
-            rawAmount *= 1.35;
-            state.floatTexts.push({
-              text: `✨ MAGIA ARCANA (+35%)`,
-              x: bx * TILE_SIZE + TILE_SIZE / 2,
-              y: by * TILE_SIZE - 28,
-              color: '#c084fc',
-              opacity: 1,
-              vy: -45
-            });
-          }
-
-          // Relíquia: Amuleto Místico (Chance de 2x Lucky Drop de BCOIN)
-          if (hitter && hitter.equippedGear?.amulet?.doubleBcoinChance) {
-            if (Math.random() < hitter.equippedGear.amulet.doubleBcoinChance) {
-              rawAmount *= 2;
-              state.floatTexts.push({
-                text: `💍 2x MINER! (${hitter.equippedGear.amulet.name})`,
-                x: bx * TILE_SIZE + TILE_SIZE / 2,
-                y: by * TILE_SIZE - 46,
-                color: '#ec4899',
-                opacity: 1,
-                vy: -50
-              });
+        // Verificação se todas as 20 jazidas foram destruídas (Renovação de Ciclo do Mapa Individual)
+        let breakableCount = 0;
+        for (let r = 0; r < GRID_ROWS; r++) {
+          for (let c = 0; c < GRID_COLS; c++) {
+            const bt = state.grid[r][c];
+            if (bt !== BLOCK_EMPTY && bt !== BLOCK_BEDROCK) {
+              breakableCount++;
             }
           }
+        }
 
-          const bcoinAmount = parseFloat(rawAmount.toFixed(3));
-          callbacksRef.current.onCollectBcoin?.(bcoinAmount);
-          sfx.playGoldCollect();
-
-          // Rastreia BCOIN ganho pelo herói específico
-          if (hitter && hitter.id) {
-            const ms = state.minerStats[hitter.id] || { blocksBroken: 0, bcoinEarned: 0, damageDealt: 0 };
-            ms.bcoinEarned = parseFloat(((ms.bcoinEarned || 0) + bcoinAmount).toFixed(3));
-            state.minerStats[hitter.id] = ms;
-          }
-
-          state.floatTexts.push({
-            text: `+${bcoinAmount} BCOIN 🪙`,
-            x: bx * TILE_SIZE + TILE_SIZE / 2,
-            y: by * TILE_SIZE - 10,
-            color: '#fbbf24',
-            opacity: 1,
-            vy: -40
-          });
-
-          // Drop de Equipamentos & Relíquias Místicas (Veios de Ouro e Baús Místicos)
-          if (bType === BLOCK_ORE_GOLD || bType === BLOCK_TREASURE || bType === BLOCK_ANCIENT_ALTAR || bType === BLOCK_ORE_CRYSTAL) {
-            const oreKey = bType === BLOCK_ORE_GOLD ? 'gold' : (bType === BLOCK_TREASURE ? 'treasure' : (bType === BLOCK_ANCIENT_ALTAR ? 'altar' : 'crystal'));
-            const dropped = rollMiningGearDrop(oreKey);
-            if (dropped) {
-              callbacksRef.current.onDropGear?.(dropped);
-              sfx.playCrystalCollect();
-              state.floatTexts.push({
-                text: `🛡️ DROP: ${dropped.name}!`,
-                x: bx * TILE_SIZE + TILE_SIZE / 2,
-                y: by * TILE_SIZE - 60,
-                color: '#38bdf8',
-                opacity: 1,
-                vy: -35
-              });
-            }
-          }
-
-          // Chance de encontrar um Baú Místico Lacrado para o Inventário (Playable Ad)
-          if (bType === BLOCK_TREASURE || bType === BLOCK_ORE_GOLD || bType === BLOCK_ORE_CRYSTAL) {
-            if (Math.random() < 0.28) {
-              callbacksRef.current.onFindMysticChest?.({
-                id: 'chest-' + Date.now(),
-                title: bType === BLOCK_TREASURE ? 'Super Cofre de Titânio' : 'Baú Místico Lacrado',
-                foundAt: new Date().toLocaleTimeString()
-              });
-              sfx.playCrystalCollect();
-              state.floatTexts.push({
-                text: `🎁 BAÚ ENCONTRADO! (INVENTÁRIO)`,
-                x: bx * TILE_SIZE + TILE_SIZE / 2,
-                y: by * TILE_SIZE - 28,
-                color: '#38bdf8',
-                opacity: 1,
-                vy: -50
-              });
-            }
-          }
-
-          // Registra a destruição da jazida no motor de mapas individuais
-          const pId = callbacksRef.current.playerId || 'player_default';
-          const mapDamageResult = recordDepositDamage(pId, bx, by, 999999);
-          if (mapDamageResult?.deposit) {
-            callbacksRef.current.onDepositBroken?.(mapDamageResult);
-          }
-
-          // Verificação se todos os blocos quebráveis foram destruídos (MAPA LIMPO! - Bomb Crypto Map Clear)
-          let breakableCount = 0;
-          for (let r = 0; r < GRID_ROWS; r++) {
-            for (let c = 0; c < GRID_COLS; c++) {
-              const bt = state.grid[r][c];
-              if (bt !== BLOCK_EMPTY && bt !== BLOCK_BEDROCK) {
-                breakableCount++;
-              }
-            }
-          }
-
-          if ((breakableCount === 0 || mapDamageResult?.cycleCompleted) && !state.isMapClearing) {
-            state.isMapClearing = true;
-            callbacksRef.current.onMapCleared?.(mapDamageResult?.newMap);
-          }
+        if ((breakableCount === 0 || mapDamageResult?.cycleCompleted) && !state.isMapClearing) {
+          state.isMapClearing = true;
+          callbacksRef.current.onMapCleared?.(mapDamageResult?.newMap);
         }
       };
 
@@ -450,14 +340,17 @@ export default function GameBoard({
           miner.isMining = false;
         }
 
-        // Se o herói já tem um bloco alvo, valida se ele ainda existe e se o herói ainda está adjacente
+        // Se o herói já tem um bloco alvo, valida se ele ainda existe, se tem HP e se o herói ainda está adjacente
         if (miner.targetBlock) {
           const { x: tx, y: ty } = miner.targetBlock;
           const currentType = state.grid[ty] ? state.grid[ty][tx] : BLOCK_EMPTY;
           const isAdjacent = Math.abs(tx - mx) + Math.abs(ty - my) === 1;
-          if (currentType === BLOCK_EMPTY || currentType === BLOCK_BEDROCK || !isAdjacent) {
+          const cellKey = `${tx},${ty}`;
+          const hasHp = state.hpMap[cellKey] !== undefined && state.hpMap[cellKey] > 0;
+          if (currentType === BLOCK_EMPTY || currentType === BLOCK_BEDROCK || !isAdjacent || !hasHp) {
             miner.targetBlock = null;
             miner.isMining = false;
+            miner.moveCooldown = 0;
           }
         }
 
@@ -485,19 +378,37 @@ export default function GameBoard({
             miner.swingTimer = 0.85;
 
             const { x: tx, y: ty } = miner.targetBlock;
-            const blockType = state.grid[ty][tx];
+            const blockType = state.grid[ty] ? state.grid[ty][tx] : BLOCK_EMPTY;
+            const cellKey = `${tx},${ty}`;
+            const curHp = state.hpMap[cellKey];
+
+            if (curHp === undefined || curHp <= 0 || blockType === BLOCK_EMPTY || blockType === BLOCK_BEDROCK) {
+              miner.targetBlock = null;
+              miner.isMining = false;
+              miner.moveCooldown = 0;
+              return;
+            }
 
             if (blockType !== BLOCK_EMPTY && blockType !== BLOCK_BEDROCK) {
               const cid = miner.classId;
-              const cellKey = `${tx},${ty}`;
-              const curHp = state.hpMap[cellKey] || 1;
 
-              // Consumo de estamina calibrado (com bônus de Elmo / Capacete -20% a -30%)
-              let staminaCost = cid === 'miner' ? 0.05 : 0.08;
+              // Regra Oficial 4.0: Consumo de estamina de 12 por hora de trabalho ativo (0.20/min)
+              let staminaCost = parseFloat(((12 / 3600) * 0.85).toFixed(4));
               if (miner.equippedGear?.helmet?.staminaDiscount) {
                 staminaCost *= (1 - miner.equippedGear.helmet.staminaDiscount);
               }
               miner.currentStamina = Math.max(0, miner.currentStamina - staminaCost);
+
+              // Regra Oficial 3.1 & 7.0: Produção econômica de MNC contínua por tempo de trabalho ativo dos heróis
+              const strikeCoins = parseFloat((((miner.coinsPerHour || 1.40) / 3600) * 0.85).toFixed(4));
+              if (strikeCoins > 0) {
+                callbacksRef.current.onCollectBcoin?.(strikeCoins);
+                if (miner.id) {
+                  const ms = state.minerStats[miner.id] || { blocksBroken: 0, bcoinEarned: 0, damageDealt: 0 };
+                  ms.bcoinEarned = parseFloat(((ms.bcoinEarned || 0) + strikeCoins).toFixed(4));
+                  state.minerStats[miner.id] = ms;
+                }
+              }
 
               // Desgaste suave da durabilidade (ferramenta dura múltiplos mapas)
               if (miner.durability === undefined) miner.durability = 100;
@@ -850,20 +761,6 @@ export default function GameBoard({
                 }
                 ctx.drawImage(sprite, offsetX, offsetY, dw, dh);
                 ctx.restore();
-              }
-
-              if (hpRatio < 1 && oreType !== 'bedrock') {
-                const barW = Math.floor(TILE_SIZE * 0.65);
-                const barX = px + Math.floor((TILE_SIZE - barW) / 2);
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.9)';
-                ctx.beginPath();
-                ctx.roundRect(barX, py + TILE_SIZE - 4, barW, 3.5, 1.5);
-                ctx.fill();
-
-                ctx.fillStyle = hpRatio > 0.4 ? '#22c55e' : (hpRatio > 0.15 ? '#eab308' : '#ef4444');
-                ctx.beginPath();
-                ctx.roundRect(barX, py + TILE_SIZE - 4, barW * hpRatio, 3.5, 1.5);
-                ctx.fill();
               }
             } else {
               drawVectorCartoonRock(ctx, px, py, TILE_SIZE, oreType, mine, hpRatio, now);

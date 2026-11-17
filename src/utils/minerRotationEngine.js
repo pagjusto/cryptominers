@@ -1,5 +1,6 @@
-// CRIPTO MYNERS — MOTOR DE REVEZAMENTO AUTOMÁTICO E PROGRESSO OFFLINE
-// Gerencia a fila de 15 mineradores ativos, descanso na casa, reservas e transições offline.
+// CRIPTO MYNERS — MOTOR DE REVEZAMENTO AUTOMÁTICO E RECUPERAÇÃO OFFLINE
+// Regra Oficial 3.1: NÃO existe mineração offline. Sem conexão ativa, a produção de MNC para.
+// Apenas a recuperação de energia dos personagens na casa continua offline.
 
 export function calculateMinerEfficiency(miner) {
   if (!miner) return 0;
@@ -114,24 +115,8 @@ export function calculateOfflineProgress(miners, currentHouse, elapsedSeconds, c
   const steps = Math.floor(cappedSeconds / 60);
 
   for (let s = 0; s < steps; s++) {
-    // 1. Mineração ativa drena estamina e gera moedas
-    nextMiners = nextMiners.map(miner => {
-      if (miner.status === 'work' && miner.currentStamina > 0) {
-        // Produção por minuto
-        const basePerHour = miner.coinsPerHour || (miner.power * 0.05);
-        totalCoinsEarned += (basePerHour / 60);
-
-        // Drenagem por minuto
-        const drain = (miner.energyDrainRate || 1.0);
-        const nextStamina = Math.max(0, miner.currentStamina - drain);
-        return {
-          ...miner,
-          currentStamina: nextStamina,
-          status: nextStamina <= 0 ? 'waiting_house' : 'work'
-        };
-      }
-      return miner;
-    });
+    // Regra Oficial 3.1: Sem conexão/sessão aberta, a produção de MNC para. Não há mineração offline.
+    // Apenas a recuperação de energia na casa continua offline.
 
     // 2. Recuperação na casa
     const houseCapacity = currentHouse?.slots || 0;
@@ -180,7 +165,7 @@ export function calculateOfflineProgress(miners, currentHouse, elapsedSeconds, c
 
   return {
     updatedMiners: nextMiners,
-    offlineCoins: parseFloat(totalCoinsEarned.toFixed(3)),
+    offlineCoins: 0, // Regra Oficial: Não existe mineração offline
     offlineMinutes: Math.round(cappedSeconds / 60)
   };
 }

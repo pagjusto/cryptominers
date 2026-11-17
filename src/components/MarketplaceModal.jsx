@@ -404,10 +404,10 @@ export default function MarketplaceModal({
                       </div>
 
                       <div className="text-[10px] text-slate-400 font-tech space-y-0.5">
-                        <span className="block text-slate-500">Divisão transparente da taxa de {feeAmount.toFixed(3)} BCOIN:</span>
-                        <span className="block text-amber-300">• {FEE_SPLIT.studio}% para Lucro da Plataforma (+{(feeAmount * 0.5).toFixed(3)} B)</span>
-                        <span className="block text-emerald-300">• {FEE_SPLIT.rewardPool}% para o Cofre de Recompensas (+{(feeAmount * 0.333).toFixed(3)} B)</span>
-                        <span className="block text-rose-300">• {FEE_SPLIT.burn}% Queimado Permanentemente (-{(feeAmount * 0.167).toFixed(3)} B)</span>
+                        <span className="block text-slate-500">Regra Oficial do Marketplace:</span>
+                        <span className="block text-emerald-300">• 95% do valor creditado ao vendedor (+{sellerNetAmount.toFixed(3)} MNC)</span>
+                        <span className="block text-amber-300">• 5% de comissão retida pelo jogo (-{feeAmount.toFixed(3)} MNC)</span>
+                        <span className="block text-slate-400">• Sem taxas adicionais ou escondidas</span>
                       </div>
                     </div>
                   ) : (

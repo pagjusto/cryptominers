@@ -82,7 +82,7 @@ export default function WalletModal({
                     </span>
                   </div>
                   <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 font-bold">
-                    {network || 'BNB Smart Chain'}
+                    {network || 'Solana (USDT SPL)'}
                   </span>
                 </div>
 
@@ -239,14 +239,14 @@ export default function WalletModal({
                 </div>
               )}
 
-              {/* Nota de Segurança e Rede */}
+              {/* Nota de Segurança e Rede Oficial */}
               <div className="mt-3 p-3 rounded-2xl bg-slate-950/50 border border-slate-800 text-[11px] text-slate-400 space-y-1">
                 <div className="flex items-center gap-1.5 font-bold text-slate-300">
                   <ShieldCheck size={14} className="text-emerald-400" />
-                  <span>Rede Recomendada: BNB Smart Chain (BEP-20)</span>
+                  <span>Rede Oficial Planejada: Solana (USDT SPL)</span>
                 </div>
                 <p>
-                  Transações rápidas com taxa de gás insignificante. Suporte total a <b>USDT</b> e <b>MINER</b>.
+                  Pagamentos em <b>USDT SPL</b>. As taxas de rede são pagas em SOL e assumidas integralmente pelo jogo como custo operacional. Nenhuma taxa de rede adicional é cobrada do jogador.
                 </p>
               </div>
 

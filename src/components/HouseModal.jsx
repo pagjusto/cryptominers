@@ -290,11 +290,10 @@ export default function HouseModal({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {HOUSE_TIERS.filter(h => h.id !== 'none').map(house => {
+                const targetIndex = HOUSE_TIERS.findIndex(h => h.id === house.id);
                 const isOwned = currentHouse.id === house.id;
-                const isPast = HOUSE_TIERS.findIndex(h => h.id === house.id) < houseIndex;
-                const cost = house.costUsdt || house.costBcoin || 25;
+                const isPast = targetIndex < houseIndex;
                 const fragCost = FRAGMENT_COSTS[house.id] || 5;
-                const canAffordMoney = minerBalance >= cost || (walletState.isConnected && walletState.usdtBalance >= cost);
                 const canAffordFrags = constructionFragments >= fragCost;
 
                 return (
@@ -332,48 +331,40 @@ export default function HouseModal({
 
                     <div className="pt-2 border-t border-slate-800/80 space-y-2">
                       <div className="flex items-center justify-between text-xs">
-                        <span className="font-arcade text-amber-300 font-bold">
-                          ${cost} USDT/MINER
+                        <span className="font-tech text-slate-400">
+                          Requisito de Crafting:
                         </span>
                         <span className="font-mono text-emerald-400 font-bold">
-                          🧱 {fragCost} Frags
+                          🧱 {fragCost} Fragmentos
                         </span>
                       </div>
 
                       {isOwned ? (
-                        <span className="text-xs font-tech font-bold text-emerald-400 flex items-center justify-center gap-1 py-1">
-                          <Check size={14} /> Casa Atual
+                        <span className="text-xs font-tech font-bold text-emerald-400 flex items-center justify-center gap-1 py-1.5 bg-emerald-950/40 rounded-xl border border-emerald-500/30">
+                          <Check size={14} /> Casa Ativa do Jogador
                         </span>
                       ) : isPast ? (
-                        <span className="text-xs font-tech text-slate-500 text-center block py-1">Superada</span>
+                        <span className="text-xs font-tech text-slate-500 text-center block py-1.5 bg-slate-900/50 rounded-xl">
+                          Nível Anterior (Superado)
+                        </span>
+                      ) : targetIndex === houseIndex + 1 ? (
+                        /* Apenas a próxima casa sequencial pode ser evoluída por crafting */
+                        <button
+                          onClick={() => handleBuyUpgradeWithFragments(house)}
+                          disabled={!canAffordFrags}
+                          className={`w-full py-2.5 px-3 rounded-xl font-arcade text-xs font-bold transition shadow-sm cursor-pointer flex items-center justify-center gap-2 ${
+                            canAffordFrags 
+                              ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 shadow-emerald-950/40' 
+                              : 'bg-slate-800/80 text-slate-500 border border-slate-700/50 cursor-not-allowed'
+                          }`}
+                        >
+                          🔨 CRAFTAR EVOLUÇÃO (🧱 {fragCost} FRAGS)
+                        </button>
                       ) : (
-                        <div className="flex gap-2">
-                          {/* Botão de Evoluir com Fragmentos */}
-                          <button
-                            onClick={() => handleBuyUpgradeWithFragments(house)}
-                            disabled={!canAffordFrags}
-                            className={`flex-1 py-1.5 px-2 rounded-xl font-tech text-xs font-bold transition shadow-sm cursor-pointer ${
-                              canAffordFrags 
-                                ? 'bg-emerald-600 hover:bg-emerald-500 text-slate-950' 
-                                : 'bg-slate-800/60 text-slate-600 border border-slate-700/50 cursor-not-allowed'
-                            }`}
-                          >
-                            🧱 {fragCost} Frags
-                          </button>
-
-                          {/* Botão de Comprar com Moeda */}
-                          <button
-                            onClick={() => handleBuyUpgrade(house)}
-                            disabled={!canAffordMoney}
-                            className={`flex-1 py-1.5 px-2 rounded-xl font-arcade text-[10px] font-bold transition shadow-sm cursor-pointer ${
-                              canAffordMoney 
-                                ? 'bg-amber-500 hover:bg-amber-400 text-slate-950' 
-                                : 'bg-slate-800 text-slate-600 cursor-not-allowed'
-                            }`}
-                          >
-                            ${cost}
-                          </button>
-                        </div>
+                        /* Proibido pular níveis */
+                        <span className="text-xs font-tech text-slate-500 text-center block py-1.5 bg-slate-900/50 rounded-xl border border-slate-800">
+                          🔒 Requer {HOUSE_TIERS[targetIndex - 1]?.name || 'Nível Anterior'}
+                        </span>
                       )}
                     </div>
                   </div>

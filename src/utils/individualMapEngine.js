@@ -38,7 +38,7 @@ export const DEPOSIT_TYPES = {
     probability: 0.50, // 50%
     color: '#94a3b8',
     icon: '🪨',
-    baseHp: 1800,
+    baseHp: 2000, // Regra 7.0: Todas as jazidas possuem o mesmo tempo visual de mineração
     description: 'Jazida clássica de pedra bruta e ardósia cinza'
   },
   GOLD: {
@@ -48,7 +48,7 @@ export const DEPOSIT_TYPES = {
     probability: 0.25, // 25%
     color: '#f59e0b',
     icon: '🟡',
-    baseHp: 2400,
+    baseHp: 2000, // Regra 7.0: Todas as jazidas possuem o mesmo tempo visual de mineração
     description: 'Veio reluzente com pepitas de ouro amarelo'
   },
   DIAMOND: {
@@ -58,7 +58,7 @@ export const DEPOSIT_TYPES = {
     probability: 0.17, // 17%
     color: '#38bdf8',
     icon: '💎',
-    baseHp: 3200,
+    baseHp: 2000, // Regra 7.0: Todas as jazidas possuem o mesmo tempo visual de mineração
     description: 'Veio cintilante com cristais de diamante azul safira'
   },
   EMERALD: {
@@ -68,7 +68,7 @@ export const DEPOSIT_TYPES = {
     probability: 0.08, // 8%
     color: '#10b981',
     icon: '🟢',
-    baseHp: 4000,
+    baseHp: 2000, // Regra 7.0: Todas as jazidas possuem o mesmo tempo visual de mineração
     description: 'Veio raro com gemas verdes luminosas'
   }
 };
