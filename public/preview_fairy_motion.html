@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Preview: Fadinha das Asas & Varinha Estelar Prismática</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: radial-gradient(circle at 50% 30%, #1e112a 0%, #0c0714 100%);
+      color: #f1f5f9;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+    .header {
+      text-align: center;
+      max-width: 820px;
+    }
+    .header h1 {
+      font-size: 26px;
+      color: #f472b6;
+      text-shadow: 0 0 16px rgba(244, 114, 182, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    .header p {
+      color: #cbd5e1;
+      font-size: 14px;
+      margin-top: 6px;
+      line-height: 1.5;
+    }
+    .main-stage {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 960px;
+      width: 100%;
+    }
+    .canvas-card {
+      background: rgba(24, 16, 36, 0.85);
+      border: 1px solid rgba(244, 114, 182, 0.35);
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6), 0 0 20px rgba(244, 114, 182, 0.15);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+    canvas {
+      image-rendering: pixelated;
+      border-radius: 8px;
+      background: #0d0816;
+      border: 1px solid rgba(244, 114, 182, 0.25);
+    }
+    .controls {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: center;
+      width: 100%;
+    }
+    .btn {
+      background: linear-gradient(135deg, #db2777 0%, #be185d 100%);
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 2px 8px rgba(219, 39, 119, 0.4);
+    }
+    .btn:hover {
+      background: linear-gradient(135deg, #f472b6 0%, #db2777 100%);
+      transform: translateY(-1px);
+    }
+    .slider-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: #fbcfe8;
+    }
+    input[type="range"] {
+      accent-color: #f472b6;
+      cursor: pointer;
+    }
+    .info-panel {
+      max-width: 380px;
+      background: rgba(24, 16, 36, 0.85);
+      border: 1px solid rgba(244, 114, 182, 0.3);
+      border-radius: 12px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      font-size: 13px;
+    }
+    .info-panel h3 {
+      color: #fef08a;
+      font-size: 15px;
+      border-bottom: 1px solid rgba(244, 114, 182, 0.25);
+      padding-bottom: 6px;
+    }
+    .trait-badge {
+      display: inline-block;
+      background: rgba(244, 114, 182, 0.15);
+      color: #f472b6;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: bold;
+      border: 1px solid rgba(244, 114, 182, 0.35);
+    }
+    .phases-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 12px;
+    }
+    .phases-list li {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .filmstrip-card {
+      max-width: 960px;
+      width: 100%;
+      background: rgba(24, 16, 36, 0.85);
+      border: 1px solid rgba(244, 114, 182, 0.35);
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+    .filmstrip-card h3 {
+      color: #fef08a;
+      font-size: 14px;
+      align-self: flex-start;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>🧚‍♀️ Fadinha das Asas & Varinha Estelar Prismática</h1>
+    <p>Visualização e teste interativo da animação de voo gracioso, canalização cósmica e disparo de feixes de pó de estrelas com cometas e impacto prismático!</p>
+  </div>
+
+  <div class="main-stage">
+    <div class="canvas-card">
+      <canvas id="liveCanvas" width="560" height="280"></canvas>
+      <div class="controls">
+        <button id="modeBtn" class="btn">Alternar Modo (Mineração / Voo)</button>
+        <button id="pauseBtn" class="btn">⏸ Pausar</button>
+        <div class="slider-group">
+          <label for="speedSlider">Velocidade:</label>
+          <input type="range" id="speedSlider" min="0.2" max="2.0" step="0.1" value="1.0">
+          <span id="speedVal">1.0x</span>
+        </div>
+        <div class="slider-group">
+          <label for="scrubSlider">Progresso:</label>
+          <input type="range" id="scrubSlider" min="0" max="1" step="0.01" value="0" disabled>
+          <span id="scrubVal">Auto</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-panel">
+      <h3>✨ Especificações Técnicas</h3>
+      <p><span class="trait-badge">SUPER RARO</span> <strong>Fadinha das Asas</strong> (Classe #9)</p>
+      <p><strong>Arma:</strong> Varinha Estelar de Ouro & Cristal Prismático</p>
+      <p><strong>Habilidade:</strong> <em>Pó de Fada Estelar</em> &mdash; canaliza a energia de constelações ancestrais disparando feixes cósmicos que estilhaçam rochas com pó cintilante.</p>
+      
+      <h3>🎬 Fases da Animação</h3>
+      <ul class="phases-list">
+        <li><strong>0.00 a 0.22:</strong> 🌟 Ascensão no ar e vórtice de carregamento cósmico</li>
+        <li><strong>0.22 a 0.72:</strong> 🌈 Feixe Estelar Prismático, cometas e explosão estelar</li>
+        <li><strong>0.72 a 1.00:</strong> 💫 Pirueta celestial de 360° e chuva de purpurina</li>
+      </ul>
+
+      <p style="color:#94a3b8; font-size:11px; margin-top:4px;">
+        Sprites recortados com transparência alfa real em <code>public/fairy_sprite.png</code> e <code>public/fairy_wand.png</code>.
+      </p>
+    </div>
+  </div>
+
+  <div class="filmstrip-card">
+    <h3>🎞️ Filmstrip Sequencial de 8 Fases do Ciclo de Mineração Cósmica (0% a 100%)</h3>
+    <canvas id="filmstripCanvas" width="920" height="150"></canvas>
+  </div>
+
+  <script type="module">
+    import { drawFairy } from '/src/utils/characterRenderers.js';
+
+    const liveCanvas = document.getElementById('liveCanvas');
+    const liveCtx = liveCanvas.getContext('2d');
+    const filmstripCanvas = document.getElementById('filmstripCanvas');
+    const filmCtx = filmstripCanvas.getContext('2d');
+
+    const modeBtn = document.getElementById('modeBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const speedSlider = document.getElementById('speedSlider');
+    const speedVal = document.getElementById('speedVal');
+    const scrubSlider = document.getElementById('scrubSlider');
+    const scrubVal = document.getElementById('scrubVal');
+
+    let isMining = true;
+    let isPaused = false;
+    let speed = 1.0;
+    let manualProgress = 0.0;
+    let animTime = 0;
+    let lastStamp = performance.now();
+
+    modeBtn.addEventListener('click', () => {
+      isMining = !isMining;
+      modeBtn.textContent = isMining ? 'Alternar para Modo Voo' : 'Alternar para Mineração Estelar';
+    });
+
+    pauseBtn.addEventListener('click', () => {
+      isPaused = !isPaused;
+      pauseBtn.textContent = isPaused ? '▶ Reproduzir' : '⏸ Pausar';
+      scrubSlider.disabled = !isPaused;
+      if (!isPaused) {
+        scrubVal.textContent = 'Auto';
+      } else {
+        scrubVal.textContent = (manualProgress * 100).toFixed(0) + '%';
+      }
+    });
+
+    speedSlider.addEventListener('input', (e) => {
+      speed = parseFloat(e.target.value);
+      speedVal.textContent = speed.toFixed(1) + 'x';
+    });
+
+    scrubSlider.addEventListener('input', (e) => {
+      manualProgress = parseFloat(e.target.value);
+      scrubVal.textContent = (manualProgress * 100).toFixed(0) + '%';
+    });
+
+    // Bloco de Rocha Mística com Cristal
+    function drawCrystalRock(ctx, rx, ry, damageProgress = 0) {
+      ctx.save();
+      ctx.translate(rx, ry);
+
+      // Sombra
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+      ctx.beginPath();
+      ctx.ellipse(0, 22, 28, 8, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Rocha Facetada Roxa/Azulada
+      const rockGrad = ctx.createLinearGradient(-24, -30, 24, 24);
+      rockGrad.addColorStop(0, '#475569');
+      rockGrad.addColorStop(0.5, '#334155');
+      rockGrad.addColorStop(1, '#1e1b4b');
+      ctx.fillStyle = rockGrad;
+      ctx.strokeStyle = '#020617';
+      ctx.lineWidth = 2.4;
+
+      ctx.beginPath();
+      ctx.moveTo(-22, 20);
+      ctx.lineTo(-28, -6);
+      ctx.lineTo(-12, -28);
+      ctx.lineTo(16, -30);
+      ctx.lineTo(28, -4);
+      ctx.lineTo(22, 20);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Cristais de Ametista e Ouro incrustados
+      ctx.fillStyle = '#c084fc';
+      ctx.beginPath();
+      ctx.moveTo(-6, -14);
+      ctx.lineTo(2, -24);
+      ctx.lineTo(10, -12);
+      ctx.lineTo(0, -2);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = '#fef08a';
+      ctx.beginPath();
+      ctx.moveTo(8, 2);
+      ctx.lineTo(14, -6);
+      ctx.lineTo(18, 4);
+      ctx.closePath();
+      ctx.fill();
+
+      // Fissura de Luz Mágica se atingida
+      if (damageProgress >= 0.22 && damageProgress < 0.72) {
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        ctx.moveTo(-24, 0);
+        ctx.lineTo(-12, -4);
+        ctx.lineTo(-2, -12);
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    }
+
+    function render(now) {
+      const dt = (now - lastStamp) * 0.001;
+      lastStamp = now;
+
+      if (!isPaused) {
+        animTime += dt * speed;
+      }
+
+      const cycleDuration = 1.2;
+      const progress = isPaused ? manualProgress : (animTime % cycleDuration) / cycleDuration;
+
+      // Limpa Live Canvas
+      liveCtx.clearRect(0, 0, liveCanvas.width, liveCanvas.height);
+
+      // Fundo místico com grid estelar sutil
+      liveCtx.strokeStyle = 'rgba(244, 114, 182, 0.08)';
+      liveCtx.lineWidth = 1;
+      for (let x = 0; x < liveCanvas.width; x += 40) {
+        liveCtx.beginPath();
+        liveCtx.moveTo(x, 0);
+        liveCtx.lineTo(x, liveCanvas.height);
+        liveCtx.stroke();
+      }
+      for (let y = 0; y < liveCanvas.height; y += 40) {
+        liveCtx.beginPath();
+        liveCtx.moveTo(0, y);
+        liveCtx.lineTo(liveCanvas.width, y);
+        liveCtx.stroke();
+      }
+
+      // Linha de solo de cristal luminoso
+      liveCtx.strokeStyle = 'rgba(244, 114, 182, 0.35)';
+      liveCtx.lineWidth = 2;
+      liveCtx.beginPath();
+      liveCtx.moveTo(40, 230);
+      liveCtx.lineTo(520, 230);
+      liveCtx.stroke();
+
+      // Rocha à direita
+      drawCrystalRock(liveCtx, 340, 214, isMining ? progress : 0);
+
+      // Desenha Fadinha
+      liveCtx.save();
+      liveCtx.translate(210, 214);
+      drawFairy(liveCtx, animTime * 1000, 0, 0, progress, isMining);
+      liveCtx.restore();
+
+      // HUD de Métricas
+      liveCtx.fillStyle = '#f472b6';
+      liveCtx.font = 'bold 12px monospace';
+      liveCtx.textAlign = 'left';
+      liveCtx.fillText(`MODO: ${isMining ? 'MINERAÇÃO ESTELAR (STARBURST)' : 'VOO / LEVITAÇÃO'}`, 18, 26);
+      liveCtx.fillStyle = '#cbd5e1';
+      liveCtx.fillText(`PROGRESSO: ${(progress * 100).toFixed(0)}%`, 18, 44);
+      liveCtx.fillText(`FEIXE CÓSMICO: ${isMining && progress >= 0.22 && progress < 0.72 ? 'ATIVO (EXPLOSÃO ESTELAR)' : 'REPOUSO'}`, 18, 62);
+
+      requestAnimationFrame(render);
+    }
+
+    // Desenha Filmstrip de 8 fases estático/atualizado
+    function updateFilmstrip() {
+      filmCtx.clearRect(0, 0, filmstripCanvas.width, filmstripCanvas.height);
+      const phases = [
+        { p: 0.00, title: '0% Start' },
+        { p: 0.15, title: '15% Vórtice' },
+        { p: 0.28, title: '28% Feixe #1' },
+        { p: 0.42, title: '42% Cometas' },
+        { p: 0.56, title: '56% Estrela 8' },
+        { p: 0.70, title: '70% Dano -46' },
+        { p: 0.85, title: '85% Pirueta' },
+        { p: 1.00, title: '100% Pouso' }
+      ];
+
+      const colW = filmstripCanvas.width / phases.length;
+
+      phases.forEach((phase, idx) => {
+        const cx = idx * colW + colW / 2;
+
+        // Fundo do quadro
+        filmCtx.fillStyle = idx % 2 === 0 ? '#130d22' : '#0e091b';
+        filmCtx.fillRect(idx * colW, 0, colW, filmstripCanvas.height);
+
+        // Borda
+        filmCtx.strokeStyle = 'rgba(244, 114, 182, 0.2)';
+        filmCtx.lineWidth = 1;
+        filmCtx.strokeRect(idx * colW, 0, colW, filmstripCanvas.height);
+
+        // Chão
+        filmCtx.strokeStyle = 'rgba(244, 114, 182, 0.35)';
+        filmCtx.beginPath();
+        filmCtx.moveTo(idx * colW, 114);
+        filmCtx.lineTo(idx * colW + colW, 114);
+        filmCtx.stroke();
+
+        // Mini Rocha
+        drawCrystalRock(filmCtx, cx + 32, 106, phase.p);
+
+        // Fada no quadro
+        filmCtx.save();
+        filmCtx.translate(cx - 16, 106);
+        drawFairy(filmCtx, 1200 + idx * 300, 0, 0, phase.p, true);
+        filmCtx.restore();
+
+        // Título da fase
+        filmCtx.fillStyle = '#fef08a';
+        filmCtx.font = 'bold 10px monospace';
+        filmCtx.textAlign = 'center';
+        filmCtx.fillText(phase.title, cx, 138);
+      });
+    }
+
+    requestAnimationFrame(render);
+    setTimeout(updateFilmstrip, 800);
+    setInterval(updateFilmstrip, 3000);
+  </script>
+</body>
+</html>

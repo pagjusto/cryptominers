@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Preview: Bomb-Bot 3000 - Martelete Hidráulico Horizontal</title>
+  <style>
+    body {
+      background: #030712;
+      color: #f1f5f9;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      padding: 24px;
+      margin: 0;
+      text-align: center;
+    }
+    h1 { color: #38bdf8; margin-bottom: 8px; text-shadow: 0 0 25px rgba(56, 189, 248, 0.45); }
+    p { color: #94a3b8; font-size: 14px; margin-top: 0; }
+    .badge {
+      display: inline-block;
+      background: #082f49;
+      color: #7dd3fc;
+      padding: 4px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: bold;
+      border: 1px solid #0284c7;
+      margin-bottom: 12px;
+      box-shadow: 0 0 15px rgba(2, 132, 199, 0.35);
+    }
+    .canvas-container {
+      display: inline-block;
+      margin: 16px auto;
+      border: 2px solid #0284c7;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 10px 40px rgba(2, 132, 199, 0.35);
+      background: #0b1329;
+    }
+    canvas {
+      display: block;
+    }
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin: 14px 0;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    button {
+      background: #0284c7;
+      color: white;
+      border: none;
+      padding: 8px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.2s;
+    }
+    button:hover {
+      background: #38bdf8;
+      color: #082f49;
+    }
+    .slider-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: #7dd3fc;
+    }
+    .strip-container {
+      margin-top: 24px;
+      overflow-x: auto;
+      padding-bottom: 12px;
+    }
+    .phase-labels {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 8px;
+      font-size: 12px;
+    }
+    .phase-tag {
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      padding: 6px 12px;
+      border-radius: 8px;
+      color: #cbd5e1;
+    }
+    .phase-tag.active {
+      border-color: #38bdf8;
+      color: #38bdf8;
+      background: #082f49;
+      font-weight: bold;
+    }
+    .specs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 14px;
+      max-width: 820px;
+      margin: 20px auto 0;
+      text-align: left;
+    }
+    .spec-card {
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 13px;
+    }
+    .spec-title {
+      font-weight: bold;
+      color: #38bdf8;
+      margin-bottom: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="badge">PROJETO BOMBCRYPTO &bull; ROBÔ MINERADOR (BOMB-BOT 3000)</div>
+  <h1>Robô & Martelete Hidráulico Horizontal</h1>
+  <p>Animação de alta precisão com operação do martelete na <strong>horizontal (-90°)</strong>, percussão pneumática a 38Hz e britamento de rocha</p>
+
+  <div class="controls">
+    <button id="toggle-mode">⛏ Alternar Modo (Mineração / Repouso)</button>
+    <button id="toggle-btn">⏸ Pausar</button>
+    <div class="slider-box">
+      <span>Velocidade:</span>
+      <input type="range" id="speed-slider" min="0.2" max="2.0" step="0.1" value="1.0">
+      <span id="speed-val">1.0x</span>
+    </div>
+    <div class="slider-box">
+      <span>Avanço Manual:</span>
+      <input type="range" id="scrub-slider" min="0" max="1" step="0.01" value="0" disabled>
+      <span id="scrub-val">Auto</span>
+    </div>
+  </div>
+
+  <div class="phase-labels">
+    <div class="phase-tag" id="tag-p1">1. Alinhamento Horizontal (0-18%)</div>
+    <div class="phase-tag" id="tag-p2">2. Percussão Pneumática 38Hz (18-82%)</div>
+    <div class="phase-tag" id="tag-p3">3. Recuo & Resfriamento a Vapor (82-100%)</div>
+  </div>
+
+  <div class="canvas-container">
+    <canvas id="live-canvas" width="560" height="320"></canvas>
+  </div>
+
+  <div class="strip-container">
+    <h3>Sequência de Animação Quadro-a-Quadro (Filmstrip 8 Fases)</h3>
+    <div class="canvas-container" style="border-color: #0369a1;">
+      <canvas id="filmstrip-canvas" width="920" height="150"></canvas>
+    </div>
+  </div>
+
+  <div class="specs-grid">
+    <div class="spec-card">
+      <div class="spec-title">⚙️ Ângulo Operacional</div>
+      <div>-90.0° (Estritamente Horizontal). A ponteira de tungstênio atinge o centro da rocha perpendicularmente.</div>
+    </div>
+    <div class="spec-card">
+      <div class="spec-title">⚡ Frequência de Percussão</div>
+      <div>38 a 42 Hz. Curso do pistão oscila em ±4.2px simulando ciclo hidráulico industrial.</div>
+    </div>
+    <div class="spec-card">
+      <div class="spec-title">💥 Efeitos de Impacto</div>
+      <div>Fissuras dinâmicas na rocha, spray de faíscas incandescentes, estilhaços de cascalho e nuvem de pó.</div>
+    </div>
+    <div class="spec-card">
+      <div class="spec-title">🤖 Autômato Industrial</div>
+      <div>Tronco inclinado com torque, mãos mecânicas no cabo D, olhos ciano de laser e LED de alerta.</div>
+    </div>
+  </div>
+
+  <script>
+    const liveCanvas = document.getElementById('live-canvas');
+    const liveCtx = liveCanvas.getContext('2d');
+    const filmstripCanvas = document.getElementById('filmstrip-canvas');
+    const filmCtx = filmstripCanvas.getContext('2d');
+
+    const toggleMode = document.getElementById('toggle-mode');
+    const toggleBtn = document.getElementById('toggle-btn');
+    const speedSlider = document.getElementById('speed-slider');
+    const speedVal = document.getElementById('speed-val');
+    const scrubSlider = document.getElementById('scrub-slider');
+    const scrubVal = document.getElementById('scrub-val');
+
+    const tagP1 = document.getElementById('tag-p1');
+    const tagP2 = document.getElementById('tag-p2');
+    const tagP3 = document.getElementById('tag-p3');
+
+    // Carregamento dos Sprites
+    const robotImg = new Image();
+    robotImg.src = '/robot_bombbot.png';
+    let robotLoaded = false;
+    robotImg.onload = () => { robotLoaded = true; checkLoaded(); };
+
+    const hammerImg = new Image();
+    hammerImg.src = '/robot_jackhammer.png';
+    let hammerLoaded = false;
+    hammerImg.onload = () => { hammerLoaded = true; checkLoaded(); };
+
+    let isMiningMode = true;
+    let isPlaying = true;
+    let animSpeed = 1.0;
+    let manualProgress = 0;
+    let currentTime = 0;
+    let lastStamp = performance.now();
+
+    function checkLoaded() {
+      if (robotLoaded && hammerLoaded) {
+        drawFilmstrip();
+      }
+    }
+
+    toggleMode.addEventListener('click', () => {
+      isMiningMode = !isMiningMode;
+      toggleMode.textContent = isMiningMode ? '⛏ Alternar para Modo Repouso' : '⛏ Alternar para Modo Mineração';
+    });
+
+    speedSlider.addEventListener('input', (e) => {
+      animSpeed = parseFloat(e.target.value);
+      speedVal.textContent = animSpeed.toFixed(1) + 'x';
+    });
+
+    toggleBtn.addEventListener('click', () => {
+      isPlaying = !isPlaying;
+      toggleBtn.textContent = isPlaying ? '⏸ Pausar' : '▶ Reproduzir';
+      scrubSlider.disabled = isPlaying;
+      if (!isPlaying) {
+        scrubVal.textContent = (manualProgress * 100).toFixed(0) + '%';
+      } else {
+        scrubVal.textContent = 'Auto';
+      }
+    });
+
+    scrubSlider.addEventListener('input', (e) => {
+      manualProgress = parseFloat(e.target.value);
+      scrubVal.textContent = (manualProgress * 100).toFixed(0) + '%';
+    });
+
+    // Desenha Parede/Bloco de Rocha com Minério
+    function drawRockBlock(ctx, rx, ry, damageProgress = 0) {
+      ctx.save();
+      ctx.translate(rx, ry);
+
+      // Sombra da rocha no chão
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
+      ctx.beginPath();
+      ctx.ellipse(0, 24, 30, 9, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Rocha Facetada Industrial
+      const rockGrad = ctx.createLinearGradient(-26, -34, 26, 26);
+      rockGrad.addColorStop(0, '#64748b');
+      rockGrad.addColorStop(0.4, '#334155');
+      rockGrad.addColorStop(1, '#0f172a');
+      ctx.fillStyle = rockGrad;
+      ctx.strokeStyle = '#020617';
+      ctx.lineWidth = 2.6;
+
+      ctx.beginPath();
+      ctx.moveTo(-24, 22);
+      ctx.lineTo(-30, -6);
+      ctx.lineTo(-14, -32);
+      ctx.lineTo(16, -34);
+      ctx.lineTo(32, -4);
+      ctx.lineTo(24, 22);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Veio de Minério de Ouro / Cobre luminoso
+      ctx.fillStyle = '#f59e0b';
+      ctx.beginPath();
+      ctx.moveTo(-8, -16);
+      ctx.lineTo(4, -26);
+      ctx.lineTo(12, -12);
+      ctx.lineTo(0, -2);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = '#fde68a';
+      ctx.beginPath();
+      ctx.moveTo(-4, -16);
+      ctx.lineTo(3, -22);
+      ctx.lineTo(7, -14);
+      ctx.closePath();
+      ctx.fill();
+
+      // Fissura de impacto caso esteja sofrendo mineração
+      if (damageProgress > 0.18 && damageProgress < 0.82) {
+        ctx.strokeStyle = '#020617';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(-24, 0);
+        ctx.lineTo(-12, -4);
+        ctx.lineTo(-4, -14);
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    }
+
+    // Função de Renderização do Robô e Martelete
+    function renderBombBotSprite(ctx, now, swingProgress, isMining) {
+      if (!robotLoaded || !hammerLoaded) return;
+
+      const rw = 40;
+      const rh = 68;
+      const hw = 10;
+      const hh = 31;
+
+      // 1. MODO REPOUSO / IDLE
+      if (!isMining) {
+        ctx.save();
+        ctx.translate(0, 16);
+
+        const walkBob = Math.abs(Math.sin(now * 0.012)) * 1.8;
+        const bodySway = Math.sin(now * 0.012) * 0.04;
+        const breathY = 1 + Math.sin(now * 0.01) * 0.02;
+        const breathX = 1 - Math.sin(now * 0.01) * 0.01;
+
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+        ctx.beginPath();
+        ctx.ellipse(0, -1, 16, 5, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.translate(0, -walkBob);
+        ctx.rotate(bodySway);
+        ctx.scale(breathX, breathY);
+
+        ctx.drawImage(robotImg, -rw / 2, -rh + 4, rw, rh);
+
+        // Brilho dos olhos ciano
+        const eyeGlow = 0.5 + Math.sin(now * 0.015) * 0.3;
+        ctx.fillStyle = `rgba(56, 189, 248, ${0.45 * eyeGlow})`;
+        ctx.beginPath();
+        ctx.arc(-5.5, -rh + 24, 3.5, 0, Math.PI * 2);
+        ctx.arc(5.5, -rh + 24, 3.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Led vermelho da antena
+        ctx.fillStyle = Math.sin(now * 0.01) > 0 ? '#ef4444' : '#f87171';
+        ctx.beginPath();
+        ctx.arc(0, -rh + 2, 2.8, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Martelete em repouso
+        ctx.save();
+        ctx.translate(13, -14);
+        ctx.rotate(0.18 + Math.sin(now * 0.012) * 0.03);
+        ctx.shadowColor = '#38bdf8';
+        ctx.shadowBlur = 4;
+        ctx.drawImage(hammerImg, -hw / 2, 0, hw, hh);
+        ctx.restore();
+
+        ctx.restore();
+        return;
+      }
+
+      // 2. MODO MINERAÇÃO COM MARTELETE NA HORIZONTAL
+      ctx.save();
+      ctx.translate(0, 16);
+
+      let lungeX = 0;
+      let bodyAngle = 0;
+      let jackAngle = -Math.PI / 2; // -90 graus ESTRITAMENTE HORIZONTAL
+      let handX = 6;
+      let handY = -14;
+      let pistonStroke = 0;
+      let scaleY = 1;
+      let scaleX = 1;
+
+      if (swingProgress < 0.18) {
+        const p = swingProgress / 0.18;
+        lungeX = 3 * p;
+        bodyAngle = 0.08 * p;
+        jackAngle = 0.18 - p * (0.18 + Math.PI / 2);
+        handX = 13 - 7 * p;
+        handY = -14;
+      } else if (swingProgress < 0.82) {
+        const p = (swingProgress - 0.18) / 0.64;
+        lungeX = 4 + Math.sin(p * Math.PI) * 2;
+        bodyAngle = 0.12;
+        jackAngle = -Math.PI / 2 + Math.sin(now * 0.08) * 0.025;
+        pistonStroke = Math.sin(swingProgress * Math.PI * 42) * 4.2;
+        const recoilTremor = (Math.sin(now * 0.15) * 0.8);
+        handX = 4 + lungeX + pistonStroke;
+        handY = -14 + recoilTremor;
+        scaleY = 0.98 + Math.sin(swingProgress * Math.PI * 42) * 0.03;
+      } else {
+        const p = (swingProgress - 0.82) / 0.18;
+        lungeX = 4 * (1 - p);
+        bodyAngle = 0.12 * (1 - p);
+        jackAngle = -Math.PI / 2 + p * (0.18 + Math.PI / 2);
+        handX = 8 + 5 * p;
+        handY = -14;
+      }
+
+      // Sombra
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+      ctx.beginPath();
+      ctx.ellipse(lungeX, -1, 18, 6, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Robô
+      ctx.save();
+      ctx.translate(lungeX, 0);
+      ctx.rotate(bodyAngle);
+      ctx.scale(scaleX, scaleY);
+      ctx.drawImage(robotImg, -rw / 2, -rh + 4, rw, rh);
+
+      // Olhos em foco
+      ctx.fillStyle = '#00f0ff';
+      ctx.shadowColor = '#38bdf8';
+      ctx.shadowBlur = 6;
+      ctx.beginPath();
+      ctx.arc(-5.5, -rh + 24, 3.8, 0, Math.PI * 2);
+      ctx.arc(5.5, -rh + 24, 3.8, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Antena
+      ctx.fillStyle = (Math.floor(now * 0.03) % 2 === 0) ? '#ef4444' : '#ff0000';
+      ctx.beginPath();
+      ctx.arc(0, -rh + 2, 3.2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      // Martelete na Horizontal
+      ctx.save();
+      ctx.translate(handX, handY);
+      ctx.rotate(jackAngle);
+      ctx.shadowColor = '#06b6d4';
+      ctx.shadowBlur = (swingProgress >= 0.18 && swingProgress < 0.82) ? 12 : 4;
+      ctx.drawImage(hammerImg, -hw / 2, 0, hw, hh);
+      ctx.restore();
+
+      // Efeitos de Britamento na Rocha
+      if (swingProgress >= 0.18 && swingProgress < 0.82) {
+        const impactX = handX + hh - 2;
+        const impactY = handY;
+
+        // Fissuras
+        ctx.strokeStyle = '#0f172a';
+        ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        ctx.moveTo(impactX, impactY);
+        ctx.lineTo(impactX + 8, impactY - 6);
+        ctx.lineTo(impactX + 14, impactY - 10);
+        ctx.moveTo(impactX, impactY);
+        ctx.lineTo(impactX + 10, impactY + 5);
+        ctx.lineTo(impactX + 16, impactY + 8);
+        ctx.stroke();
+
+        // Faíscas
+        for (let i = 0; i < 6; i++) {
+          const spkAngle = Math.PI - 0.7 + (i * 0.3) + Math.sin(now * 0.05 + i) * 0.2;
+          const spkDist = 6 + ((now * 0.08 + i * 5) % 20);
+          const sx = impactX + Math.cos(spkAngle) * spkDist;
+          const sy = impactY + Math.sin(spkAngle) * spkDist * 0.7;
+          ctx.fillStyle = i % 2 === 0 ? '#fef08a' : (i % 3 === 0 ? '#38bdf8' : '#fb923c');
+          ctx.beginPath();
+          ctx.arc(sx, sy, 1.8, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Estilhaços de pedra
+        for (let k = 0; k < 4; k++) {
+          const chipAngle = Math.PI - 0.6 + (k * 0.4);
+          const chipDist = 8 + ((now * 0.05 + k * 7) % 22);
+          const cx = impactX + Math.cos(chipAngle) * chipDist;
+          const cy = impactY + Math.sin(chipAngle) * chipDist * 0.8;
+          ctx.fillStyle = k % 2 === 0 ? '#475569' : '#334155';
+          ctx.fillRect(cx - 1.5, cy - 1.5, 3, 3);
+        }
+
+        // Pó de pedra
+        const dustAlpha = 0.35 + Math.sin(now * 0.05) * 0.15;
+        ctx.fillStyle = `rgba(226, 232, 240, ${dustAlpha})`;
+        ctx.beginPath();
+        ctx.arc(impactX - 2, impactY + Math.sin(now * 0.06) * 4, 7, 0, Math.PI * 2);
+        ctx.arc(impactX + 4, impactY - 5, 5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Escapamento de ar comprimido
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.65)';
+        ctx.fillRect(handX + 9, handY - 9, 4.5, 2);
+
+        // Onda de choque circular
+        const shockWaveR = 6 + (Math.sin(swingProgress * Math.PI * 30) + 1) * 4;
+        ctx.strokeStyle = 'rgba(56, 189, 248, 0.6)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(impactX, impactY, shockWaveR, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Floating Damage
+        const floatY = impactY - 18 - (Math.sin(swingProgress * Math.PI) * 8);
+        ctx.save();
+        ctx.font = '900 11px monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.shadowColor = '#0284c7';
+        ctx.shadowBlur = 6;
+        ctx.fillStyle = '#09090b';
+        ctx.fillText('⚡ MARTELETE! -38', impactX + 2, floatY + 1);
+        ctx.fillStyle = '#38bdf8';
+        ctx.fillText('⚡ MARTELETE! -38', impactX + 2, floatY);
+        ctx.restore();
+      }
+
+      ctx.restore();
+    }
+
+    function render(timestamp) {
+      const delta = (timestamp - lastStamp) * 0.001;
+      lastStamp = timestamp;
+
+      if (isPlaying) {
+        currentTime += delta * animSpeed;
+      }
+
+      liveCtx.clearRect(0, 0, liveCanvas.width, liveCanvas.height);
+
+      // Fundo Industrial Mina Subterrânea
+      const bg = liveCtx.createRadialGradient(280, 180, 20, 280, 180, 300);
+      bg.addColorStop(0, '#0f1d3a');
+      bg.addColorStop(1, '#020617');
+      liveCtx.fillStyle = bg;
+      liveCtx.fillRect(0, 0, liveCanvas.width, liveCanvas.height);
+
+      // Grade no piso
+      liveCtx.strokeStyle = 'rgba(56, 189, 248, 0.07)';
+      liveCtx.lineWidth = 1;
+      for (let x = 0; x < liveCanvas.width; x += 40) {
+        liveCtx.beginPath();
+        liveCtx.moveTo(x, 0);
+        liveCtx.lineTo(x, liveCanvas.height);
+        liveCtx.stroke();
+      }
+      for (let y = 0; y < liveCanvas.height; y += 40) {
+        liveCtx.beginPath();
+        liveCtx.moveTo(0, y);
+        liveCtx.lineTo(liveCanvas.width, y);
+        liveCtx.stroke();
+      }
+
+      // Linha de chão de rocha sólida
+      liveCtx.strokeStyle = 'rgba(56, 189, 248, 0.35)';
+      liveCtx.lineWidth = 2;
+      liveCtx.beginPath();
+      liveCtx.moveTo(40, 236);
+      liveCtx.lineTo(520, 236);
+      liveCtx.stroke();
+
+      // Cálculo do ciclo de ataque
+      const cycleDuration = 1.0;
+      const progress = isPlaying ? (currentTime % cycleDuration) / cycleDuration : manualProgress;
+
+      // Atualização de tags visuais
+      tagP1.classList.toggle('active', isMiningMode && progress < 0.18);
+      tagP2.classList.toggle('active', isMiningMode && progress >= 0.18 && progress < 0.82);
+      tagP3.classList.toggle('active', isMiningMode && progress >= 0.82);
+
+      // Desenha Parede de Rocha à Direita
+      drawRockBlock(liveCtx, 280, 218, isMiningMode ? progress : 0);
+
+      // Desenha Robô Minerador
+      liveCtx.save();
+      liveCtx.translate(210, 220);
+      renderBombBotSprite(liveCtx, currentTime * 1000, progress, isMiningMode);
+      liveCtx.restore();
+
+      // Mira de Contato e Linha Horizontal Guia
+      if (isMiningMode && progress >= 0.18 && progress < 0.82) {
+        liveCtx.save();
+        liveCtx.strokeStyle = 'rgba(56, 189, 248, 0.25)';
+        liveCtx.setLineDash([4, 4]);
+        liveCtx.beginPath();
+        liveCtx.moveTo(180, 206);
+        liveCtx.lineTo(310, 206);
+        liveCtx.stroke();
+        liveCtx.restore();
+      }
+
+      // HUD de Métricas
+      liveCtx.fillStyle = '#38bdf8';
+      liveCtx.font = 'bold 12px monospace';
+      liveCtx.textAlign = 'left';
+      liveCtx.fillText(`MODO: ${isMiningMode ? 'MINERAÇÃO HORIZONTAL' : 'REPOUSO'}`, 18, 24);
+      liveCtx.fillStyle = '#94a3b8';
+      liveCtx.fillText(`PROGRESSO: ${(progress * 100).toFixed(0)}%`, 18, 42);
+      liveCtx.fillText(`ÂNGULO MARTELETE: ${isMiningMode && progress >= 0.18 && progress < 0.82 ? '-90.0° (HORIZONTAL)' : 'RECOLHIDO'}`, 18, 60);
+
+      requestAnimationFrame(render);
+    }
+
+    // Filmstrip de 8 Fases
+    function drawFilmstrip() {
+      filmCtx.clearRect(0, 0, filmstripCanvas.width, filmstripCanvas.height);
+      const phases = [
+        { p: 0.00, title: '0% Start' },
+        { p: 0.15, title: '15% Alinhando' },
+        { p: 0.30, title: '30% Horiz. #1' },
+        { p: 0.45, title: '45% Horiz. #2' },
+        { p: 0.60, title: '60% Fratura' },
+        { p: 0.75, title: '75% Faíscas' },
+        { p: 0.88, title: '88% Recuo' },
+        { p: 1.00, title: '100% Reset' }
+      ];
+
+      const colW = filmstripCanvas.width / phases.length;
+
+      phases.forEach((phase, idx) => {
+        const cx = idx * colW + colW / 2;
+
+        // Fundo do quadro
+        filmCtx.fillStyle = idx % 2 === 0 ? '#0b1329' : '#080e1e';
+        filmCtx.fillRect(idx * colW, 0, colW, filmstripCanvas.height);
+
+        // Divisória
+        filmCtx.strokeStyle = 'rgba(56, 189, 248, 0.15)';
+        filmCtx.lineWidth = 1;
+        filmCtx.strokeRect(idx * colW, 0, colW, filmstripCanvas.height);
+
+        // Chão
+        filmCtx.strokeStyle = 'rgba(56, 189, 248, 0.35)';
+        filmCtx.beginPath();
+        filmCtx.moveTo(idx * colW, 114);
+        filmCtx.lineTo(idx * colW + colW, 114);
+        filmCtx.stroke();
+
+        // Mini Rocha
+        drawRockBlock(filmCtx, cx + 48, 106, phase.p);
+
+        // Robô
+        filmCtx.save();
+        filmCtx.translate(cx - 12, 108);
+        renderBombBotSprite(filmCtx, 1200 + idx * 250, phase.p, true);
+        filmCtx.restore();
+
+        // Título da fase
+        filmCtx.fillStyle = '#7dd3fc';
+        filmCtx.font = 'bold 10px monospace';
+        filmCtx.textAlign = 'center';
+        filmCtx.fillText(phase.title, cx, 134);
+      });
+    }
+
+    requestAnimationFrame(render);
+  </script>
+</body>
+</html>

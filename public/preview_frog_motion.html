@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Preview: Sapo Ninja Shinobi - Arremesso de Kunai</title>
+  <style>
+    body {
+      background: #061109;
+      color: #f1f5f9;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      padding: 24px;
+      margin: 0;
+      text-align: center;
+    }
+    h1 { color: #4ade80; margin-bottom: 8px; text-shadow: 0 0 20px rgba(74, 222, 128, 0.4); }
+    p { color: #94a3b8; font-size: 14px; margin-top: 0; }
+    .badge {
+      display: inline-block;
+      background: #14532d;
+      color: #86efac;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: bold;
+      border: 1px solid #22c55e;
+      margin-bottom: 12px;
+    }
+    .canvas-container {
+      display: inline-block;
+      margin: 16px auto;
+      border: 2px solid #22c55e;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 10px 35px rgba(34, 197, 94, 0.3);
+      background: #091a10;
+    }
+    canvas {
+      display: block;
+    }
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin: 14px 0;
+      align-items: center;
+    }
+    button {
+      background: #15803d;
+      color: white;
+      border: none;
+      padding: 8px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.2s;
+    }
+    button:hover {
+      background: #22c55e;
+    }
+    .slider-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: #86efac;
+    }
+    .strip-container {
+      margin-top: 24px;
+      overflow-x: auto;
+      padding-bottom: 12px;
+    }
+    .phase-labels {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 8px;
+      font-size: 12px;
+    }
+    .phase-tag {
+      padding: 4px 8px;
+      border-radius: 6px;
+      background: rgba(34, 197, 94, 0.15);
+      border: 1px solid rgba(74, 222, 128, 0.3);
+      color: #bbf7d0;
+    }
+  </style>
+</head>
+<body>
+  <div class="badge">🐸 NOVO PERSONAGEM: SUPER RARO</div>
+  <h1>Sapo Ninja Shinobi - Arremesso de Kunai</h1>
+  <p>Visualização em tempo real do novo sprite pixel art e da física de arremesso da Kunai com lâmina de aço e veneno esmeralda.</p>
+
+  <div class="controls">
+    <button id="togglePlay">⏸ Pausar</button>
+    <div class="slider-box">
+      <span>Velocidade:</span>
+      <input type="range" id="speedSlider" min="0.2" max="2.0" step="0.1" value="1.0">
+      <span id="speedVal">1.0x</span>
+    </div>
+    <div class="slider-box">
+      <span>Quadro Manual:</span>
+      <input type="range" id="scrubSlider" min="0" max="1" step="0.01" value="0" disabled>
+      <span id="scrubVal">Auto</span>
+    </div>
+  </div>
+
+  <div class="canvas-container">
+    <canvas id="liveCanvas" width="520" height="360"></canvas>
+  </div>
+
+  <div class="phase-labels">
+    <span class="phase-tag">0%~22%: 🎯 Concentração de Chakra</span>
+    <span class="phase-tag">22%~48%: ⚡ Arremesso Giratório Ninja</span>
+    <span class="phase-tag">48%~72%: 💥 Impacto & Kunai Cravada</span>
+    <span class="phase-tag">72%~100%: 🔄 Reset & Recarregar</span>
+  </div>
+
+  <h2>🎞️ Quadro a Quadro do Movimento Completo</h2>
+  <div class="strip-container">
+    <canvas id="stripCanvas" width="1300" height="240"></canvas>
+  </div>
+
+  <script type="module">
+    import { drawFrogNinja, initFrogShinobi } from '/src/utils/characterRenderers.js';
+
+    initFrogShinobi();
+
+    const liveCanvas = document.getElementById('liveCanvas');
+    const liveCtx = liveCanvas.getContext('2d');
+
+    const stripCanvas = document.getElementById('stripCanvas');
+    const stripCtx = stripCanvas.getContext('2d');
+
+    const toggleBtn = document.getElementById('togglePlay');
+    const speedSlider = document.getElementById('speedSlider');
+    const speedVal = document.getElementById('speedVal');
+    const scrubSlider = document.getElementById('scrubSlider');
+    const scrubVal = document.getElementById('scrubVal');
+
+    let isPlaying = true;
+    let animSpeed = 1.0;
+    let manualProgress = 0;
+    let currentTime = 0;
+    let lastStamp = performance.now();
+
+    speedSlider.addEventListener('input', (e) => {
+      animSpeed = parseFloat(e.target.value);
+      speedVal.textContent = animSpeed.toFixed(1) + 'x';
+    });
+
+    toggleBtn.addEventListener('click', () => {
+      isPlaying = !isPlaying;
+      toggleBtn.textContent = isPlaying ? '⏸ Pausar' : '▶ Reproduzir';
+      scrubSlider.disabled = isPlaying;
+      if (!isPlaying) {
+        scrubVal.textContent = (manualProgress * 100).toFixed(0) + '%';
+      } else {
+        scrubVal.textContent = 'Auto';
+      }
+    });
+
+    scrubSlider.addEventListener('input', (e) => {
+      manualProgress = parseFloat(e.target.value);
+      scrubVal.textContent = (manualProgress * 100).toFixed(0) + '%';
+    });
+
+    // Desenha Rocha de Minério Alvo
+    function drawRock(ctx, rx, ry) {
+      ctx.save();
+      ctx.translate(rx, ry);
+
+      // Sombra da rocha
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+      ctx.beginPath();
+      ctx.ellipse(0, 20, 24, 8, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Rocha Facetada
+      const rockGrad = ctx.createLinearGradient(-20, -30, 20, 20);
+      rockGrad.addColorStop(0, '#52525b');
+      rockGrad.addColorStop(0.5, '#3f3f46');
+      rockGrad.addColorStop(1, '#18181b');
+      ctx.fillStyle = rockGrad;
+      ctx.strokeStyle = '#09090b';
+      ctx.lineWidth = 2.5;
+
+      ctx.beginPath();
+      ctx.moveTo(-18, 18);
+      ctx.lineTo(-24, -4);
+      ctx.lineTo(-12, -26);
+      ctx.lineTo(14, -28);
+      ctx.lineTo(26, -2);
+      ctx.lineTo(20, 18);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Cristal Esmeralda Rúnico incrustado na rocha
+      ctx.fillStyle = '#22c55e';
+      ctx.beginPath();
+      ctx.moveTo(-6, -14);
+      ctx.lineTo(4, -22);
+      ctx.lineTo(10, -10);
+      ctx.lineTo(0, -2);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = '#86efac';
+      ctx.beginPath();
+      ctx.moveTo(-2, -14);
+      ctx.lineTo(3, -20);
+      ctx.lineTo(6, -12);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    function render(timestamp) {
+      const delta = (timestamp - lastStamp) * 0.001;
+      lastStamp = timestamp;
+
+      if (isPlaying) {
+        currentTime += delta * animSpeed;
+      }
+
+      liveCtx.clearRect(0, 0, liveCanvas.width, liveCanvas.height);
+
+      // Fundo Caverna Esmeralda
+      const bg = liveCtx.createRadialGradient(260, 180, 20, 260, 180, 280);
+      bg.addColorStop(0, '#0c2415');
+      bg.addColorStop(1, '#030a05');
+      liveCtx.fillStyle = bg;
+      liveCtx.fillRect(0, 0, liveCanvas.width, liveCanvas.height);
+
+      // Grade sutil de piso de masmorra
+      liveCtx.strokeStyle = 'rgba(34, 197, 94, 0.08)';
+      liveCtx.lineWidth = 1;
+      for (let x = 0; x < liveCanvas.width; x += 40) {
+        liveCtx.beginPath();
+        liveCtx.moveTo(x, 0);
+        liveCtx.lineTo(x, liveCanvas.height);
+        liveCtx.stroke();
+      }
+      for (let y = 0; y < liveCanvas.height; y += 40) {
+        liveCtx.beginPath();
+        liveCtx.moveTo(0, y);
+        liveCtx.lineTo(liveCanvas.width, y);
+        liveCtx.stroke();
+      }
+
+      // Linha de chão
+      liveCtx.strokeStyle = 'rgba(74, 222, 128, 0.3)';
+      liveCtx.lineWidth = 2;
+      liveCtx.beginPath();
+      liveCtx.moveTo(40, 240);
+      liveCtx.lineTo(480, 240);
+      liveCtx.stroke();
+
+      // Cálculo do ciclo de ataque (1.1 segundos por arremesso)
+      const cycleDuration = 1.1;
+      let progress = 0;
+      if (isPlaying) {
+        progress = (currentTime % cycleDuration) / cycleDuration;
+      } else {
+        progress = manualProgress;
+      }
+
+      // 1. Lado Esquerdo: Sapinho em Modo Repouso / Caminhada
+      liveCtx.save();
+      liveCtx.translate(110, 224);
+      liveCtx.scale(1.2, 1.2);
+
+      // Aura suave
+      const aura = liveCtx.createRadialGradient(0, 8, 4, 0, 8, 44);
+      aura.addColorStop(0, 'rgba(34, 197, 94, 0.45)');
+      aura.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      liveCtx.fillStyle = aura;
+      liveCtx.beginPath();
+      liveCtx.arc(0, 8, 44, 0, Math.PI * 2);
+      liveCtx.fill();
+
+      // Sombra
+      liveCtx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+      liveCtx.beginPath();
+      liveCtx.ellipse(0, 18, 18, 6, 0, 0, Math.PI * 2);
+      liveCtx.fill();
+
+      drawFrogNinja(liveCtx, currentTime * 1000, 0, 0, 0, false);
+      liveCtx.restore();
+
+      liveCtx.fillStyle = '#86efac';
+      liveCtx.font = 'bold 12px sans-serif';
+      liveCtx.textAlign = 'center';
+      liveCtx.fillText('MODO REPOUSO (IDLE)', 110, 275);
+      liveCtx.font = '11px sans-serif';
+      liveCtx.fillStyle = '#94a3b8';
+      liveCtx.fillText('Kunai em Guarda & Respiração', 110, 292);
+
+      // 2. Lado Direito: Sapinho em Modo Ataque com Arremesso e Rocha Alvo
+      const minerX = 320;
+      const rockX = minerX + 48 * 1.35; // Alinhado com a distância do arremesso
+
+      // Desenha a Rocha Alvo
+      drawRock(liveCtx, rockX, 224);
+
+      liveCtx.save();
+      liveCtx.translate(minerX, 224);
+      liveCtx.scale(1.2, 1.2);
+
+      // Sombra
+      liveCtx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+      liveCtx.beginPath();
+      liveCtx.ellipse(0, 18, 18, 6, 0, 0, Math.PI * 2);
+      liveCtx.fill();
+
+      drawFrogNinja(liveCtx, currentTime * 1000, 0, 0, progress, true);
+      liveCtx.restore();
+
+      // Indicador de fase de ataque
+      let phaseName = '';
+      let phaseColor = '#86efac';
+      if (progress < 0.22) {
+        phaseName = 'FASE 1: Concentração & Mira';
+        phaseColor = '#facc15';
+      } else if (progress < 0.48) {
+        phaseName = 'FASE 2: Arremesso Giratório Ninja (Estilo Batman)';
+        phaseColor = '#38bdf8';
+      } else if (progress < 0.72) {
+        phaseName = 'FASE 3: IMPACTO! Kunai Cravada na Rocha';
+        phaseColor = '#4ade80';
+      } else {
+        phaseName = 'FASE 4: Reset & Nova Kunai';
+        phaseColor = '#a78bfa';
+      }
+
+      liveCtx.fillStyle = phaseColor;
+      liveCtx.font = 'bold 12px sans-serif';
+      liveCtx.textAlign = 'center';
+      liveCtx.fillText(phaseName, 360, 275);
+      liveCtx.font = '11px sans-serif';
+      liveCtx.fillStyle = '#94a3b8';
+      liveCtx.fillText(`Progresso do Golpe: ${(progress * 100).toFixed(0)}%`, 360, 292);
+
+      // Renderiza Filmstrip
+      renderFilmstrip();
+
+      requestAnimationFrame(render);
+    }
+
+    function renderFilmstrip() {
+      stripCtx.clearRect(0, 0, stripCanvas.width, stripCanvas.height);
+
+      const frames = [
+        { progress: 0.05, label: '05% - Mira', desc: 'Chakra na lâmina' },
+        { progress: 0.18, label: '18% - Puxada', desc: 'Recuo do corpo' },
+        { progress: 0.28, label: '28% - Disparo', desc: 'Lunge à frente' },
+        { progress: 0.38, label: '38% - Voo', desc: 'Rastro laser' },
+        { progress: 0.52, label: '52% - IMPACTO', desc: 'Kunai perfura' },
+        { progress: 0.64, label: '64% - Crítico', desc: 'Onda ácida' },
+        { progress: 0.82, label: '82% - Pouch', desc: 'Mão no cinto' },
+        { progress: 0.95, label: '95% - Recarga', desc: 'Nova Kunai' }
+      ];
+
+      const colW = stripCanvas.width / frames.length;
+
+      frames.forEach((f, idx) => {
+        const cx = idx * colW + colW / 2;
+
+        // Fundo de cada quadro
+        stripCtx.fillStyle = idx % 2 === 0 ? '#0a1a0f' : '#08140c';
+        stripCtx.fillRect(idx * colW, 0, colW, stripCanvas.height);
+        stripCtx.strokeStyle = 'rgba(34, 197, 94, 0.2)';
+        stripCtx.strokeRect(idx * colW, 0, colW, stripCanvas.height);
+
+        // Rocha miniaturizada para quadros de voo e impacto
+        if (f.progress >= 0.25 && f.progress <= 0.75) {
+          drawRock(stripCtx, cx + 46, 140);
+        }
+
+        stripCtx.save();
+        stripCtx.translate(cx, 140);
+        stripCtx.scale(0.95, 0.95);
+
+        // Sombra
+        stripCtx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        stripCtx.beginPath();
+        stripCtx.ellipse(0, 18, 16, 5, 0, 0, Math.PI * 2);
+        stripCtx.fill();
+
+        drawFrogNinja(stripCtx, 1000, 0, 0, f.progress, true);
+        stripCtx.restore();
+
+        // Rótulo
+        stripCtx.fillStyle = f.progress >= 0.48 && f.progress <= 0.68 ? '#4ade80' : '#86efac';
+        stripCtx.font = 'bold 11px sans-serif';
+        stripCtx.textAlign = 'center';
+        stripCtx.fillText(f.label, cx, 205);
+        stripCtx.font = '10px sans-serif';
+        stripCtx.fillStyle = '#64748b';
+        stripCtx.fillText(f.desc, cx, 222);
+      });
+    }
+
+    requestAnimationFrame(render);
+  </script>
+</body>
+</html>

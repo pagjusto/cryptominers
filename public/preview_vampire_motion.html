@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Preview: Conde Vampiro - Golpe da Foice Noturna</title>
+  <style>
+    body {
+      background: #0f0508;
+      color: #f1f5f9;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      padding: 24px;
+      margin: 0;
+      text-align: center;
+    }
+    h1 { color: #f87171; margin-bottom: 8px; text-shadow: 0 0 25px rgba(239, 68, 68, 0.45); }
+    p { color: #94a3b8; font-size: 14px; margin-top: 0; }
+    .badge {
+      display: inline-block;
+      background: #450a0a;
+      color: #fca5a5;
+      padding: 4px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: bold;
+      border: 1px solid #dc2626;
+      margin-bottom: 12px;
+      box-shadow: 0 0 15px rgba(220, 38, 38, 0.35);
+    }
+    .canvas-container {
+      display: inline-block;
+      margin: 16px auto;
+      border: 2px solid #dc2626;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 10px 40px rgba(220, 38, 38, 0.35);
+      background: #1a080d;
+    }
+    canvas {
+      display: block;
+    }
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin: 14px 0;
+      align-items: center;
+    }
+    button {
+      background: #991b1b;
+      color: white;
+      border: none;
+      padding: 8px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.2s;
+    }
+    button:hover {
+      background: #dc2626;
+    }
+    .slider-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: #fca5a5;
+    }
+    .strip-container {
+      margin-top: 24px;
+      overflow-x: auto;
+      padding-bottom: 12px;
+    }
+    .phase-labels {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 8px;
+      font-size: 12px;
+    }
+    .phase-tag {
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: rgba(220, 38, 38, 0.15);
+      border: 1px solid rgba(220, 38, 38, 0.35);
+      color: #fecaca;
+    }
+  </style>
+</head>
+<body>
+  <div class="badge">🧛 NOVO PERSONAGEM: ÉPICO</div>
+  <h1>Conde Vampiro - Golpe da Foice Noturna</h1>
+  <p>Visualização em tempo real do novo sprite pixel art e da física aristocrática de corte com a Foice de Sangue e asas de morcego.</p>
+
+  <div class="controls">
+    <button id="togglePlay">⏸ Pausar</button>
+    <div class="slider-box">
+      <span>Velocidade:</span>
+      <input type="range" id="speedSlider" min="0.2" max="2.0" step="0.1" value="1.0">
+      <span id="speedVal">1.0x</span>
+    </div>
+    <div class="slider-box">
+      <span>Quadro Manual:</span>
+      <input type="range" id="scrubSlider" min="0" max="1" step="0.01" value="0" disabled>
+      <span id="scrubVal">Auto</span>
+    </div>
+  </div>
+
+  <div class="canvas-container">
+    <canvas id="liveCanvas" width="520" height="360"></canvas>
+  </div>
+
+  <div class="phase-labels">
+    <span class="phase-tag">0%~28%: 🦇 Antecipação Horizontal</span>
+    <span class="phase-tag">28%~58%: 🩸 Ceifada Horizontal de Sangue</span>
+    <span class="phase-tag">58%~78%: 💥 Impacto & Cravação Horizontal</span>
+    <span class="phase-tag">78%~100%: 💨 Retração Nobre</span>
+  </div>
+
+  <h2>🎞️ Quadro a Quadro do Movimento Completo</h2>
+  <div class="strip-container">
+    <canvas id="stripCanvas" width="1300" height="240"></canvas>
+  </div>
+
+  <script type="module">
+    import { drawVampire, initVampire } from '/src/utils/characterRenderers.js';
+
+    initVampire();
+
+    const liveCanvas = document.getElementById('liveCanvas');
+    const liveCtx = liveCanvas.getContext('2d');
+
+    const stripCanvas = document.getElementById('stripCanvas');
+    const stripCtx = stripCanvas.getContext('2d');
+
+    const toggleBtn = document.getElementById('togglePlay');
+    const speedSlider = document.getElementById('speedSlider');
+    const speedVal = document.getElementById('speedVal');
+    const scrubSlider = document.getElementById('scrubSlider');
+    const scrubVal = document.getElementById('scrubVal');
+
+    let isPlaying = true;
+    let animSpeed = 1.0;
+    let manualProgress = 0;
+    let currentTime = 0;
+    let lastStamp = performance.now();
+
+    speedSlider.addEventListener('input', (e) => {
+      animSpeed = parseFloat(e.target.value);
+      speedVal.textContent = animSpeed.toFixed(1) + 'x';
+    });
+
+    toggleBtn.addEventListener('click', () => {
+      isPlaying = !isPlaying;
+      toggleBtn.textContent = isPlaying ? '⏸ Pausar' : '▶ Reproduzir';
+      scrubSlider.disabled = isPlaying;
+      if (!isPlaying) {
+        scrubVal.textContent = (manualProgress * 100).toFixed(0) + '%';
+      } else {
+        scrubVal.textContent = 'Auto';
+      }
+    });
+
+    scrubSlider.addEventListener('input', (e) => {
+      manualProgress = parseFloat(e.target.value);
+      scrubVal.textContent = (manualProgress * 100).toFixed(0) + '%';
+    });
+
+    // Desenha Rocha de Minério Alvo
+    function drawRock(ctx, rx, ry) {
+      ctx.save();
+      ctx.translate(rx, ry);
+
+      // Sombra da rocha
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+      ctx.beginPath();
+      ctx.ellipse(0, 20, 24, 8, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Rocha Facetada
+      const rockGrad = ctx.createLinearGradient(-20, -30, 20, 20);
+      rockGrad.addColorStop(0, '#52525b');
+      rockGrad.addColorStop(0.5, '#3f3f46');
+      rockGrad.addColorStop(1, '#18181b');
+      ctx.fillStyle = rockGrad;
+      ctx.strokeStyle = '#09090b';
+      ctx.lineWidth = 2.5;
+
+      ctx.beginPath();
+      ctx.moveTo(-18, 18);
+      ctx.lineTo(-24, -4);
+      ctx.lineTo(-12, -26);
+      ctx.lineTo(14, -28);
+      ctx.lineTo(26, -2);
+      ctx.lineTo(20, 18);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Rubi Carmesim incrustado na rocha
+      ctx.fillStyle = '#dc2626';
+      ctx.beginPath();
+      ctx.moveTo(-6, -14);
+      ctx.lineTo(4, -22);
+      ctx.lineTo(10, -10);
+      ctx.lineTo(0, -2);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = '#fca5a5';
+      ctx.beginPath();
+      ctx.moveTo(-2, -14);
+      ctx.lineTo(3, -20);
+      ctx.lineTo(6, -12);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    function render(timestamp) {
+      const delta = (timestamp - lastStamp) * 0.001;
+      lastStamp = timestamp;
+
+      if (isPlaying) {
+        currentTime += delta * animSpeed;
+      }
+
+      liveCtx.clearRect(0, 0, liveCanvas.width, liveCanvas.height);
+
+      // Fundo Cripta Carmesim
+      const bg = liveCtx.createRadialGradient(260, 180, 20, 260, 180, 280);
+      bg.addColorStop(0, '#2d0912');
+      bg.addColorStop(1, '#090204');
+      liveCtx.fillStyle = bg;
+      liveCtx.fillRect(0, 0, liveCanvas.width, liveCanvas.height);
+
+      // Grade mística no piso
+      liveCtx.strokeStyle = 'rgba(220, 38, 38, 0.08)';
+      liveCtx.lineWidth = 1;
+      for (let x = 0; x < liveCanvas.width; x += 40) {
+        liveCtx.beginPath();
+        liveCtx.moveTo(x, 0);
+        liveCtx.lineTo(x, liveCanvas.height);
+        liveCtx.stroke();
+      }
+      for (let y = 0; y < liveCanvas.height; y += 40) {
+        liveCtx.beginPath();
+        liveCtx.moveTo(0, y);
+        liveCtx.lineTo(liveCanvas.width, y);
+        liveCtx.stroke();
+      }
+
+      // Linha de chão
+      liveCtx.strokeStyle = 'rgba(220, 38, 38, 0.35)';
+      liveCtx.lineWidth = 2;
+      liveCtx.beginPath();
+      liveCtx.moveTo(40, 240);
+      liveCtx.lineTo(480, 240);
+      liveCtx.stroke();
+
+      // Ciclo de corte da foice (1.1 segundos por golpe)
+      const cycleDuration = 1.1;
+      let progress = 0;
+      if (isPlaying) {
+        progress = (currentTime % cycleDuration) / cycleDuration;
+      } else {
+        progress = manualProgress;
+      }
+
+      // 1. Lado Esquerdo: Vampiro em Modo Repouso / Levitação
+      liveCtx.save();
+      liveCtx.translate(110, 224);
+      liveCtx.scale(1.2, 1.2);
+
+      // Aura carmesim
+      const aura = liveCtx.createRadialGradient(0, 8, 4, 0, 8, 44);
+      aura.addColorStop(0, 'rgba(220, 38, 38, 0.45)');
+      aura.addColorStop(0.5, 'rgba(153, 27, 27, 0.2)');
+      aura.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      liveCtx.fillStyle = aura;
+      liveCtx.beginPath();
+      liveCtx.arc(0, 8, 44, 0, Math.PI * 2);
+      liveCtx.fill();
+
+      // Sombra
+      liveCtx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+      liveCtx.beginPath();
+      liveCtx.ellipse(0, 18, 18, 6, 0, 0, Math.PI * 2);
+      liveCtx.fill();
+
+      drawVampire(liveCtx, currentTime * 1000, 0, 0, 0, false);
+      liveCtx.restore();
+
+      liveCtx.fillStyle = '#fca5a5';
+      liveCtx.font = 'bold 12px sans-serif';
+      liveCtx.textAlign = 'center';
+      liveCtx.fillText('MODO REPOUSO (IDLE)', 110, 275);
+      liveCtx.font = '11px sans-serif';
+      liveCtx.fillStyle = '#94a3b8';
+      liveCtx.fillText('Foice Noturna em Guarda & Nobreza', 110, 292);
+
+      // 2. Lado Direito: Vampiro em Modo Ataque com Golpe de Foice e Rocha Alvo
+      const minerX = 320;
+      const rockX = minerX + 48 * 1.35;
+
+      // Desenha a Rocha Alvo
+      drawRock(liveCtx, rockX, 224);
+
+      liveCtx.save();
+      liveCtx.translate(minerX, 224);
+      liveCtx.scale(1.2, 1.2);
+
+      // Sombra
+      liveCtx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+      liveCtx.beginPath();
+      liveCtx.ellipse(0, 18, 18, 6, 0, 0, Math.PI * 2);
+      liveCtx.fill();
+
+      drawVampire(liveCtx, currentTime * 1000, 0, 0, progress, true);
+      liveCtx.restore();
+
+      // Indicador de fase
+      let phaseName = '';
+      let phaseColor = '#fca5a5';
+      if (progress < 0.28) {
+        phaseName = 'FASE 1: Antecipação & Foice Erguida';
+        phaseColor = '#facc15';
+      } else if (progress < 0.58) {
+        phaseName = 'FASE 2: Golpe Ceifador Rasgante!';
+        phaseColor = '#f87171';
+      } else if (progress < 0.78) {
+        phaseName = 'FASE 3: IMPACTO! Foice Cravada & Dreno';
+        phaseColor = '#dc2626';
+      } else {
+        phaseName = 'FASE 4: Retração Nobre';
+        phaseColor = '#e879f9';
+      }
+
+      liveCtx.fillStyle = phaseColor;
+      liveCtx.font = 'bold 12px sans-serif';
+      liveCtx.textAlign = 'center';
+      liveCtx.fillText(phaseName, 360, 275);
+      liveCtx.font = '11px sans-serif';
+      liveCtx.fillStyle = '#94a3b8';
+      liveCtx.fillText(`Progresso do Golpe: ${(progress * 100).toFixed(0)}%`, 360, 292);
+
+      // Renderiza Filmstrip
+      renderFilmstrip();
+
+      requestAnimationFrame(render);
+    }
+
+    function renderFilmstrip() {
+      stripCtx.clearRect(0, 0, stripCanvas.width, stripCanvas.height);
+
+      const frames = [
+        { progress: 0.10, label: '10% - Recuo', desc: 'Aura nas sombras' },
+        { progress: 0.24, label: '24% - Erguida', desc: 'Foice no alto' },
+        { progress: 0.38, label: '38% - Descida', desc: 'Arco inicial' },
+        { progress: 0.50, label: '50% - Ceifador', desc: 'Arco carmesim' },
+        { progress: 0.62, label: '62% - IMPACTO', desc: 'Foice cravada' },
+        { progress: 0.74, label: '74% - Dreno', desc: 'Choque & crítico' },
+        { progress: 0.86, label: '86% - Retorno', desc: 'Capa ao vento' },
+        { progress: 0.96, label: '96% - Pronto', desc: 'Guarda nobre' }
+      ];
+
+      const colW = stripCanvas.width / frames.length;
+
+      frames.forEach((f, idx) => {
+        const cx = idx * colW + colW / 2;
+
+        stripCtx.fillStyle = idx % 2 === 0 ? '#18070d' : '#120409';
+        stripCtx.fillRect(idx * colW, 0, colW, stripCanvas.height);
+        stripCtx.strokeStyle = 'rgba(220, 38, 38, 0.25)';
+        stripCtx.strokeRect(idx * colW, 0, colW, stripCanvas.height);
+
+        // Rocha miniaturizada para quadros de golpe e impacto
+        if (f.progress >= 0.35 && f.progress <= 0.80) {
+          drawRock(stripCtx, cx + 46, 140);
+        }
+
+        stripCtx.save();
+        stripCtx.translate(cx, 140);
+        stripCtx.scale(0.95, 0.95);
+
+        // Sombra
+        stripCtx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        stripCtx.beginPath();
+        stripCtx.ellipse(0, 18, 16, 5, 0, 0, Math.PI * 2);
+        stripCtx.fill();
+
+        drawVampire(stripCtx, 1000, 0, 0, f.progress, true);
+        stripCtx.restore();
+
+        // Rótulo
+        stripCtx.fillStyle = f.progress >= 0.58 && f.progress <= 0.78 ? '#f87171' : '#fca5a5';
+        stripCtx.font = 'bold 11px sans-serif';
+        stripCtx.textAlign = 'center';
+        stripCtx.fillText(f.label, cx, 205);
+        stripCtx.font = '10px sans-serif';
+        stripCtx.fillStyle = '#94a3b8';
+        stripCtx.fillText(f.desc, cx, 222);
+      });
+    }
+
+    requestAnimationFrame(render);
+  </script>
+</body>
+</html>

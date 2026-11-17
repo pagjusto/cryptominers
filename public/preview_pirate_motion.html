@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Preview: Capitão Pirata - Disparo de Bacamarte Flintlock</title>
+  <style>
+    body {
+      background: #020617;
+      color: #f1f5f9;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      padding: 24px;
+      margin: 0;
+      text-align: center;
+    }
+    h1 { color: #f97316; margin-bottom: 8px; text-shadow: 0 0 25px rgba(249, 115, 22, 0.45); }
+    p { color: #94a3b8; font-size: 14px; margin-top: 0; }
+    .badge {
+      display: inline-block;
+      background: #450a0a;
+      color: #fca5a5;
+      padding: 4px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: bold;
+      border: 1px solid #dc2626;
+      margin-bottom: 12px;
+      box-shadow: 0 0 15px rgba(220, 38, 38, 0.35);
+    }
+    .canvas-container {
+      display: inline-block;
+      margin: 16px auto;
+      border: 2px solid #dc2626;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 10px 40px rgba(220, 38, 38, 0.35);
+      background: #0f172a;
+    }
+    canvas {
+      display: block;
+    }
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin: 14px 0;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    button {
+      background: #dc2626;
+      color: white;
+      border: none;
+      padding: 8px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.2s;
+    }
+    button:hover {
+      background: #ef4444;
+    }
+    .slider-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: #fca5a5;
+    }
+    .strip-container {
+      margin-top: 24px;
+      overflow-x: auto;
+      padding-bottom: 12px;
+    }
+    .phase-labels {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 8px;
+      font-size: 12px;
+    }
+    .phase-tag {
+      background: #1e293b;
+      border: 1px solid #334155;
+      padding: 6px 12px;
+      border-radius: 8px;
+      color: #cbd5e1;
+    }
+    .phase-tag.active {
+      border-color: #f97316;
+      color: #fed7aa;
+      background: #7c2d12;
+      font-weight: bold;
+    }
+    .specs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 14px;
+      max-width: 820px;
+      margin: 20px auto 0;
+      text-align: left;
+    }
+    .spec-card {
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 13px;
+    }
+    .spec-title {
+      font-weight: bold;
+      color: #f97316;
+      margin-bottom: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="badge">PROJETO BOMBCRYPTO &bull; CAPITÃO PIRATA (CLASSE PIRATE)</div>
+  <h1>Capitão Pirata & Bacamarte Flintlock</h1>
+  <p>Animação de alta fidelidade: mira precisa, muzzle flash de fogo, coice de recuo da arma, nuvem de fumaça de pólvora negra e detonação na rocha</p>
+
+  <div class="controls">
+    <button id="toggle-mode">💣 Alternar Modo (Disparo / Repouso)</button>
+    <button id="toggle-btn">⏸ Pausar</button>
+    <div class="slider-box">
+      <span>Velocidade:</span>
+      <input type="range" id="speed-slider" min="0.2" max="2.0" step="0.1" value="1.0">
+      <span id="speed-val">1.0x</span>
+    </div>
+    <div class="slider-box">
+      <span>Avanço Manual:</span>
+      <input type="range" id="scrub-slider" min="0" max="1" step="0.01" value="0" disabled>
+      <span id="scrub-val">Auto</span>
+    </div>
+  </div>
+
+  <div class="phase-labels">
+    <div class="phase-tag" id="tag-p1">1. Mira & Engatilhamento (0-32%)</div>
+    <div class="phase-tag" id="tag-p2">2. Disparo & Recuo Brutal (32-48%)</div>
+    <div class="phase-tag" id="tag-p3">3. Detonação & Fumaça Negra (48-75%)</div>
+    <div class="phase-tag" id="tag-p4">4. Recuperação (75-100%)</div>
+  </div>
+
+  <div class="canvas-container">
+    <canvas id="live-canvas" width="560" height="320"></canvas>
+  </div>
+
+  <div class="strip-container">
+    <h3>Sequência de Animação Quadro-a-Quadro (Filmstrip 8 Fases)</h3>
+    <div class="canvas-container" style="border-color: #991b1b;">
+      <canvas id="filmstrip-canvas" width="920" height="150"></canvas>
+    </div>
+  </div>
+
+  <div class="specs-grid">
+    <div class="spec-card">
+      <div class="spec-title">🔫 Bacamarte Flintlock</div>
+      <div>Cano de bronze alargado (blunderbuss bell-mouth), coronha de madeira curvada e cão com pederneira.</div>
+    </div>
+    <div class="spec-card">
+      <div class="spec-title">💥 Muzzle Flash & Projétil</div>
+      <div>Cone explosivo de chamas incandescentes e esfera pesada de chumbo cortando o ar em alta velocidade.</div>
+    </div>
+    <div class="spec-card">
+      <div class="spec-title">💨 Pólvora Negra Autêntica</div>
+      <div>Fumaça densa volumétrica expandindo na boca do cano com recuo físico empurrando o corpo do pirata.</div>
+    </div>
+    <div class="spec-card">
+      <div class="spec-title">🏴‍☠️ Corsário Destemido</div>
+      <div>Tricórnio preto com caveira e borda dourada, tapa-olho de couro, bandana esvoaçante e ginga de marujo.</div>
+    </div>
+  </div>
+
+  <script>
+    const liveCanvas = document.getElementById('live-canvas');
+    const liveCtx = liveCanvas.getContext('2d');
+    const filmstripCanvas = document.getElementById('filmstrip-canvas');
+    const filmCtx = filmstripCanvas.getContext('2d');
+
+    const toggleMode = document.getElementById('toggle-mode');
+    const toggleBtn = document.getElementById('toggle-btn');
+    const speedSlider = document.getElementById('speed-slider');
+    const speedVal = document.getElementById('speed-val');
+    const scrubSlider = document.getElementById('scrub-slider');
+    const scrubVal = document.getElementById('scrub-val');
+
+    const tagP1 = document.getElementById('tag-p1');
+    const tagP2 = document.getElementById('tag-p2');
+    const tagP3 = document.getElementById('tag-p3');
+    const tagP4 = document.getElementById('tag-p4');
+
+    // Carregamento dos Sprites
+    const pirateImg = new Image();
+    pirateImg.src = '/pirate_captain.png';
+    let pirateLoaded = false;
+    pirateImg.onload = () => { pirateLoaded = true; checkLoaded(); };
+
+    const gunImg = new Image();
+    gunImg.src = '/pirate_flintlock.png';
+    let gunLoaded = false;
+    gunImg.onload = () => { gunLoaded = true; checkLoaded(); };
+
+    let isMiningMode = true;
+    let isPlaying = true;
+    let animSpeed = 1.0;
+    let manualProgress = 0;
+    let currentTime = 0;
+    let lastStamp = performance.now();
+
+    function checkLoaded() {
+      if (pirateLoaded && gunLoaded) {
+        drawFilmstrip();
+      }
+    }
+
+    toggleMode.addEventListener('click', () => {
+      isMiningMode = !isMiningMode;
+      toggleMode.textContent = isMiningMode ? '💣 Alternar para Modo Repouso' : '💣 Alternar para Modo Disparo';
+    });
+
+    speedSlider.addEventListener('input', (e) => {
+      animSpeed = parseFloat(e.target.value);
+      speedVal.textContent = animSpeed.toFixed(1) + 'x';
+    });
+
+    toggleBtn.addEventListener('click', () => {
+      isPlaying = !isPlaying;
+      toggleBtn.textContent = isPlaying ? '⏸ Pausar' : '▶ Reproduzir';
+      scrubSlider.disabled = isPlaying;
+      if (!isPlaying) {
+        scrubVal.textContent = (manualProgress * 100).toFixed(0) + '%';
+      } else {
+        scrubVal.textContent = 'Auto';
+      }
+    });
+
+    scrubSlider.addEventListener('input', (e) => {
+      manualProgress = parseFloat(e.target.value);
+      scrubVal.textContent = (manualProgress * 100).toFixed(0) + '%';
+    });
+
+    // Desenha Rocha Alvo
+    function drawRockBlock(ctx, rx, ry, damageProgress = 0) {
+      ctx.save();
+      ctx.translate(rx, ry);
+
+      // Sombra
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
+      ctx.beginPath();
+      ctx.ellipse(0, 24, 32, 10, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Bloco de Rocha
+      const rockGrad = ctx.createLinearGradient(-26, -34, 26, 26);
+      rockGrad.addColorStop(0, '#64748b');
+      rockGrad.addColorStop(0.4, '#334155');
+      rockGrad.addColorStop(1, '#0f172a');
+      ctx.fillStyle = rockGrad;
+      ctx.strokeStyle = '#020617';
+      ctx.lineWidth = 2.6;
+
+      ctx.beginPath();
+      ctx.moveTo(-24, 22);
+      ctx.lineTo(-30, -6);
+      ctx.lineTo(-14, -32);
+      ctx.lineTo(16, -34);
+      ctx.lineTo(32, -4);
+      ctx.lineTo(24, 22);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Veio de Minério
+      ctx.fillStyle = '#f59e0b';
+      ctx.beginPath();
+      ctx.moveTo(-10, -18);
+      ctx.lineTo(6, -28);
+      ctx.lineTo(14, -12);
+      ctx.lineTo(2, -2);
+      ctx.closePath();
+      ctx.fill();
+
+      // Fissura de cratera
+      if (damageProgress > 0.45 && damageProgress < 0.75) {
+        ctx.strokeStyle = '#020617';
+        ctx.lineWidth = 2.6;
+        ctx.beginPath();
+        ctx.moveTo(-24, 6);
+        ctx.lineTo(-10, 0);
+        ctx.lineTo(-2, -12);
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    }
+
+    // Função de Renderização do Pirata e Bacamarte
+    function renderPirateSprite(ctx, now, swingProgress, isMining) {
+      if (!pirateLoaded || !gunLoaded) return;
+
+      const pw = 44;
+      const ph = 55;
+      const gw = 38;
+      const gh = 20;
+
+      // 1. MODO REPOUSO / IDLE
+      if (!isMining) {
+        ctx.save();
+        ctx.translate(0, 16);
+
+        const walkBob = Math.abs(Math.sin(now * 0.012)) * 1.8;
+        const bodySway = Math.sin(now * 0.012) * 0.05;
+        const breathY = 1 + Math.sin(now * 0.01) * 0.02;
+        const breathX = 1 - Math.sin(now * 0.01) * 0.01;
+
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+        ctx.beginPath();
+        ctx.ellipse(0, -1, 16, 5, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.translate(0, -walkBob);
+        ctx.rotate(bodySway);
+        ctx.scale(breathX, breathY);
+
+        ctx.drawImage(pirateImg, -pw / 2, -ph + 6, pw, ph);
+
+        // Faixas da bandana
+        const ribbonWave = Math.sin(now * 0.018) * 2.5;
+        ctx.fillStyle = '#dc2626';
+        ctx.beginPath();
+        ctx.moveTo(-16, -ph + 32);
+        ctx.quadraticCurveTo(-22, -ph + 36 + ribbonWave, -26, -ph + 34 + ribbonWave);
+        ctx.lineTo(-24, -ph + 38 + ribbonWave);
+        ctx.quadraticCurveTo(-20, -ph + 39 + ribbonWave, -15, -ph + 35);
+        ctx.closePath();
+        ctx.fill();
+
+        // Bacamarte em repouso
+        ctx.save();
+        ctx.translate(11, -12);
+        ctx.rotate(0.35 + Math.sin(now * 0.012) * 0.04);
+        ctx.drawImage(gunImg, -6, -11, gw, gh);
+
+        // Mão
+        ctx.fillStyle = '#fed7aa';
+        ctx.strokeStyle = '#1c1917';
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.arc(0, 0, 3.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+
+        ctx.restore();
+        return;
+      }
+
+      // 2. MODO ATAQUE / DISPARO
+      ctx.save();
+      ctx.translate(0, 16);
+
+      let lungeX = 0;
+      let bodyAngle = 0;
+      let gunAngle = 0;
+      let handX = 10;
+      let handY = -14;
+      let recoilDist = 0;
+      let scaleY = 1;
+      let scaleX = 1;
+
+      if (swingProgress < 0.32) {
+        const p = swingProgress / 0.32;
+        lungeX = 2 * p;
+        bodyAngle = 0.06 * p;
+        gunAngle = 0.35 - p * 0.35;
+        handX = 11 + 2 * p;
+        handY = -12 - 2 * p;
+      } else if (swingProgress < 0.48) {
+        const p = (swingProgress - 0.32) / 0.16;
+        recoilDist = Math.sin(p * Math.PI) * 7;
+        lungeX = 2 - recoilDist * 0.6;
+        bodyAngle = 0.06 - Math.sin(p * Math.PI) * 0.15;
+        gunAngle = -Math.sin(p * Math.PI) * 0.42;
+        handX = 13 - recoilDist;
+        handY = -14;
+        scaleX = 1 - Math.sin(p * Math.PI) * 0.05;
+        scaleY = 1 + Math.sin(p * Math.PI) * 0.03;
+      } else if (swingProgress < 0.75) {
+        const p = (swingProgress - 0.48) / 0.27;
+        lungeX = 2 * (1 - p);
+        bodyAngle = -0.04 * (1 - p);
+        gunAngle = -0.15 * (1 - p);
+        handX = 13 - 1 * p;
+        handY = -14;
+      } else {
+        const p = (swingProgress - 0.75) / 0.25;
+        gunAngle = p * 0.35;
+        handX = 12 - 1 * p;
+        handY = -14 + 2 * p;
+      }
+
+      // Sombra
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+      ctx.beginPath();
+      ctx.ellipse(lungeX, -1, 18, 6, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Pirata
+      ctx.save();
+      ctx.translate(lungeX, 0);
+      ctx.rotate(bodyAngle);
+      ctx.scale(scaleX, scaleY);
+      ctx.drawImage(pirateImg, -pw / 2, -ph + 6, pw, ph);
+      ctx.restore();
+
+      // Bacamarte
+      ctx.save();
+      ctx.translate(handX, handY);
+      ctx.rotate(gunAngle);
+      ctx.drawImage(gunImg, -6, -11, gw, gh);
+
+      // Mão
+      ctx.fillStyle = '#fed7aa';
+      ctx.strokeStyle = '#1c1917';
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.arc(0, 0, 3.2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      const muzzleLocalX = 32;
+      const muzzleLocalY = -3;
+
+      // Muzzle Flash
+      if (swingProgress >= 0.32 && swingProgress <= 0.42) {
+        const flashP = (swingProgress - 0.32) / 0.10;
+        const flashSize = 14 + (1 - flashP) * 10;
+        ctx.save();
+        ctx.shadowColor = '#f59e0b';
+        ctx.shadowBlur = 15;
+
+        const flashGrad = ctx.createRadialGradient(muzzleLocalX, muzzleLocalY, 2, muzzleLocalX + flashSize, muzzleLocalY, flashSize * 1.5);
+        flashGrad.addColorStop(0, '#ffffff');
+        flashGrad.addColorStop(0.3, '#fef08a');
+        flashGrad.addColorStop(0.7, '#f97316');
+        flashGrad.addColorStop(1, 'rgba(239, 68, 68, 0)');
+        ctx.fillStyle = flashGrad;
+
+        ctx.beginPath();
+        ctx.moveTo(muzzleLocalX, muzzleLocalY - 4);
+        ctx.lineTo(muzzleLocalX + flashSize * 1.6, muzzleLocalY - 9);
+        ctx.lineTo(muzzleLocalX + flashSize * 1.8, muzzleLocalY);
+        ctx.lineTo(muzzleLocalX + flashSize * 1.6, muzzleLocalY + 9);
+        ctx.lineTo(muzzleLocalX, muzzleLocalY + 4);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+
+      ctx.restore(); // Fecha arma
+
+      // Projétil de chumbo
+      const muzzleWorldX = handX + 32;
+      const muzzleWorldY = handY - 3;
+      const rockTargetX = 54;
+      const rockTargetY = -8;
+
+      if (swingProgress >= 0.33 && swingProgress <= 0.46) {
+        const bulletP = (swingProgress - 0.33) / 0.13;
+        const bx = muzzleWorldX + (rockTargetX - muzzleWorldX) * bulletP;
+        const by = muzzleWorldY + (rockTargetY - muzzleWorldY) * bulletP;
+
+        ctx.save();
+        ctx.strokeStyle = 'rgba(251, 146, 60, 0.7)';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(muzzleWorldX, muzzleWorldY);
+        ctx.lineTo(bx, by);
+        ctx.stroke();
+
+        ctx.fillStyle = '#334155';
+        ctx.shadowColor = '#f97316';
+        ctx.shadowBlur = 6;
+        ctx.beginPath();
+        ctx.arc(bx, by, 3.2, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#fef08a';
+        ctx.beginPath();
+        ctx.arc(bx + 1, by - 1, 1.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // Nuvem de Fumaça
+      if (swingProgress >= 0.34 && swingProgress <= 0.75) {
+        const smokeP = (swingProgress - 0.34) / 0.41;
+        const smokeAlpha = (1 - smokeP) * 0.55;
+        const smokeDist = smokeP * 18;
+
+        ctx.save();
+        ctx.fillStyle = `rgba(226, 232, 240, ${smokeAlpha})`;
+        ctx.beginPath();
+        ctx.arc(muzzleWorldX + 6 + smokeDist * 0.5, muzzleWorldY - 2 - smokeDist * 0.3, 7 + smokeP * 8, 0, Math.PI * 2);
+        ctx.arc(muzzleWorldX + 12 + smokeDist, muzzleWorldY + 3, 5 + smokeP * 7, 0, Math.PI * 2);
+        ctx.arc(muzzleWorldX - 2, muzzleWorldY - 6 - smokeDist * 0.2, 6 + smokeP * 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // Impacto na Rocha
+      if (swingProgress >= 0.45 && swingProgress <= 0.75) {
+        const impactP = (swingProgress - 0.45) / 0.30;
+        const impactX = rockTargetX;
+        const impactY = rockTargetY;
+
+        // Fissuras
+        ctx.strokeStyle = '#020617';
+        ctx.lineWidth = 2.4;
+        ctx.beginPath();
+        ctx.moveTo(impactX, impactY);
+        ctx.lineTo(impactX + 10, impactY - 8);
+        ctx.lineTo(impactX + 18, impactY - 14);
+        ctx.moveTo(impactX, impactY);
+        ctx.lineTo(impactX + 12, impactY + 6);
+        ctx.lineTo(impactX + 20, impactY + 12);
+        ctx.stroke();
+
+        // Faíscas
+        for (let i = 0; i < 6; i++) {
+          const spkAngle = Math.PI - 0.8 + (i * 0.32) + Math.sin(now * 0.05 + i) * 0.2;
+          const spkDist = 6 + ((now * 0.08 + i * 5) % 24);
+          const sx = impactX + Math.cos(spkAngle) * spkDist;
+          const sy = impactY + Math.sin(spkAngle) * spkDist * 0.75;
+          ctx.fillStyle = i % 2 === 0 ? '#fef08a' : (i % 3 === 0 ? '#f97316' : '#ef4444');
+          ctx.beginPath();
+          ctx.arc(sx, sy, 2.0, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Estilhaços e moedas
+        for (let k = 0; k < 4; k++) {
+          const chipAngle = Math.PI - 0.7 + (k * 0.45);
+          const chipDist = 8 + ((now * 0.05 + k * 8) % 26);
+          const cx = impactX + Math.cos(chipAngle) * chipDist;
+          const cy = impactY + Math.sin(chipAngle) * chipDist * 0.8;
+          ctx.fillStyle = k % 2 === 0 ? '#fbbf24' : '#334155';
+          ctx.fillRect(cx - 1.5, cy - 1.5, 3.5, 3.5);
+        }
+
+        // Onda de choque
+        const shockWaveR = 8 + impactP * 18;
+        ctx.strokeStyle = `rgba(249, 115, 22, ${1 - impactP})`;
+        ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        ctx.arc(impactX, impactY, shockWaveR, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Floating Damage
+        const floatY = impactY - 20 - (Math.sin(swingProgress * Math.PI) * 9);
+        ctx.save();
+        ctx.font = '900 11px monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.shadowColor = '#ea580c';
+        ctx.shadowBlur = 7;
+        ctx.fillStyle = '#020617';
+        ctx.fillText('💣 BACAMARTE! -48', impactX + 2, floatY + 1);
+        ctx.fillStyle = '#f97316';
+        ctx.fillText('💣 BACAMARTE! -48', impactX + 2, floatY);
+        ctx.restore();
+      }
+
+      ctx.restore();
+    }
+
+    function render(timestamp) {
+      const delta = (timestamp - lastStamp) * 0.001;
+      lastStamp = timestamp;
+
+      if (isPlaying) {
+        currentTime += delta * animSpeed;
+      }
+
+      liveCtx.clearRect(0, 0, liveCanvas.width, liveCanvas.height);
+
+      // Fundo Covil Pirata
+      const bg = liveCtx.createRadialGradient(280, 180, 20, 280, 180, 300);
+      bg.addColorStop(0, '#1e293b');
+      bg.addColorStop(1, '#020617');
+      liveCtx.fillStyle = bg;
+      liveCtx.fillRect(0, 0, liveCanvas.width, liveCanvas.height);
+
+      // Grade no piso
+      liveCtx.strokeStyle = 'rgba(239, 68, 68, 0.06)';
+      liveCtx.lineWidth = 1;
+      for (let x = 0; x < liveCanvas.width; x += 40) {
+        liveCtx.beginPath();
+        liveCtx.moveTo(x, 0);
+        liveCtx.lineTo(x, liveCanvas.height);
+        liveCtx.stroke();
+      }
+      for (let y = 0; y < liveCanvas.height; y += 40) {
+        liveCtx.beginPath();
+        liveCtx.moveTo(0, y);
+        liveCtx.lineTo(liveCanvas.width, y);
+        liveCtx.stroke();
+      }
+
+      // Linha de chão de tábuas de carvalho
+      liveCtx.strokeStyle = 'rgba(239, 68, 68, 0.35)';
+      liveCtx.lineWidth = 2;
+      liveCtx.beginPath();
+      liveCtx.moveTo(40, 236);
+      liveCtx.lineTo(520, 236);
+      liveCtx.stroke();
+
+      const cycleDuration = 1.0;
+      const progress = isPlaying ? (currentTime % cycleDuration) / cycleDuration : manualProgress;
+
+      tagP1.classList.toggle('active', isMiningMode && progress < 0.32);
+      tagP2.classList.toggle('active', isMiningMode && progress >= 0.32 && progress < 0.48);
+      tagP3.classList.toggle('active', isMiningMode && progress >= 0.48 && progress < 0.75);
+      tagP4.classList.toggle('active', isMiningMode && progress >= 0.75);
+
+      drawRockBlock(liveCtx, 340, 218, isMiningMode ? progress : 0);
+
+      liveCtx.save();
+      liveCtx.translate(210, 220);
+      renderPirateSprite(liveCtx, currentTime * 1000, progress, isMiningMode);
+      liveCtx.restore();
+
+      liveCtx.fillStyle = '#f97316';
+      liveCtx.font = 'bold 12px monospace';
+      liveCtx.textAlign = 'left';
+      liveCtx.fillText(`MODO: ${isMiningMode ? 'DISPARO DE BACAMARTE' : 'REPOUSO'}`, 18, 24);
+      liveCtx.fillStyle = '#94a3b8';
+      liveCtx.fillText(`PROGRESSO: ${(progress * 100).toFixed(0)}%`, 18, 42);
+      liveCtx.fillText(`ARMA: BACAMARTE FLINTLOCK`, 18, 60);
+
+      requestAnimationFrame(render);
+    }
+
+    // Filmstrip de 8 Fases
+    function drawFilmstrip() {
+      filmCtx.clearRect(0, 0, filmstripCanvas.width, filmstripCanvas.height);
+      const phases = [
+        { p: 0.00, title: '0% Start' },
+        { p: 0.20, title: '20% Alinhando' },
+        { p: 0.32, title: '32% Pronto' },
+        { p: 0.40, title: '40% DISPARO' },
+        { p: 0.50, title: '50% IMPACTO' },
+        { p: 0.62, title: '62% Fumaça' },
+        { p: 0.80, title: '80% Recuo' },
+        { p: 1.00, title: '100% Reset' }
+      ];
+
+      const colW = filmstripCanvas.width / phases.length;
+
+      phases.forEach((phase, idx) => {
+        const cx = idx * colW + colW / 2;
+
+        filmCtx.fillStyle = idx % 2 === 0 ? '#0f172a' : '#080d1a';
+        filmCtx.fillRect(idx * colW, 0, colW, filmstripCanvas.height);
+
+        filmCtx.strokeStyle = 'rgba(239, 68, 68, 0.15)';
+        filmCtx.lineWidth = 1;
+        filmCtx.strokeRect(idx * colW, 0, colW, filmstripCanvas.height);
+
+        filmCtx.strokeStyle = 'rgba(239, 68, 68, 0.35)';
+        filmCtx.beginPath();
+        filmCtx.moveTo(idx * colW, 114);
+        filmCtx.lineTo(idx * colW + colW, 114);
+        filmCtx.stroke();
+
+        drawRockBlock(filmCtx, cx + 28, 106, phase.p);
+
+        filmCtx.save();
+        filmCtx.translate(cx - 12, 108);
+        renderPirateSprite(filmCtx, 1200 + idx * 250, phase.p, true);
+        filmCtx.restore();
+
+        filmCtx.fillStyle = '#fed7aa';
+        filmCtx.font = 'bold 10px monospace';
+        filmCtx.textAlign = 'center';
+        filmCtx.fillText(phase.title, cx, 134);
+      });
+    }
+
+    requestAnimationFrame(render);
+  </script>
+</body>
+</html>

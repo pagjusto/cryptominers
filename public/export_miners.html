@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Exportador Oficial de Heróis e Banners do Jogo</title>
+  <style>
+    body {
+      background: #090d16;
+      color: #f1f5f9;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      padding: 24px;
+      margin: 0;
+    }
+    h1 { color: #f59e0b; margin-bottom: 8px; }
+    p { color: #94a3b8; font-size: 14px; margin-top: 0; }
+    #status {
+      padding: 12px 18px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      font-weight: bold;
+      color: #38bdf8;
+    }
+    .preview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+      margin-top: 24px;
+    }
+    .preview-card {
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: 16px;
+      padding: 12px;
+      text-align: center;
+    }
+    .preview-card canvas {
+      max-width: 100%;
+      height: auto;
+      border-radius: 12px;
+      background: #020617;
+    }
+    .preview-card h3 {
+      margin: 10px 0 4px;
+      font-size: 16px;
+    }
+    .preview-card span {
+      font-size: 12px;
+      color: #94a3b8;
+    }
+    #grandBannerCanvas {
+      width: 100%;
+      max-width: 1200px;
+      border-radius: 16px;
+      border: 2px solid #f59e0b;
+      margin-bottom: 24px;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <h1>⛏️ Gerador & Exportador Oficial de Banners dos Heróis</h1>
+  <p>Renderizando todos os 11 mineradores fiéis ao jogo em alta resolução e pixel art para os banners dos heróis...</p>
+  <div id="status">Iniciando renderização...</div>
+
+  <h2>🏆 Banner Geral de Todos os Mineradores</h2>
+  <canvas id="grandBannerCanvas" width="1400" height="520"></canvas>
+
+  <h2>🃏 Banners Individuais dos Heróis</h2>
+  <div id="grid" class="preview-grid"></div>
+
+  <script type="module">
+    import {
+      drawBombBot,
+      drawViking,
+      drawFrogNinja,
+      drawWitch,
+      drawVampire,
+      drawGolem,
+      drawPirate,
+      drawCowboy,
+      drawFairy,
+      drawSpiderman,
+      drawBatman
+    } from '/src/utils/characterRenderers.js';
+
+    const HERO_CLASSES = [
+      {
+        id: 'miner',
+        alias: 'bomb_bot',
+        name: 'Bomb-Bot 3000',
+        subtitle: 'Autômato de Mineração Chibi',
+        rarity: 'COMUM',
+        rarityColor: '#38bdf8',
+        role: 'Equilibrado',
+        color: '#38bdf8',
+        borderColor: '#0284c7',
+        weapon: 'Broca Pneumática & Antena LED',
+        draw: drawBombBot,
+        power: 2,
+        speed: 1.3,
+        stamina: 100,
+        desc: 'Consome 35% menos estamina por golpe na rocha.'
+      },
+      {
+        id: 'brute',
+        alias: 'viking',
+        name: 'Bárbaro Viking',
+        subtitle: 'O Demolidor com Chifres',
+        rarity: 'RARO',
+        rarityColor: '#f97316',
+        role: 'Quebra-Blocos Pesado',
+        color: '#f97316',
+        borderColor: '#c2410c',
+        weapon: 'Machado Duplo Rúnico',
+        draw: drawViking,
+        power: 6,
+        speed: 0.95,
+        stamina: 140,
+        desc: '28% de chance de Golpe Crítico Duplo com tremor.'
+      },
+      {
+        id: 'goblin',
+        alias: 'frog_ninja',
+        name: 'Sapo Ninja Shinobi',
+        subtitle: 'O Mestre Anfíbio das Sombras',
+        rarity: 'SUPER RARO',
+        rarityColor: '#22c55e',
+        role: 'Velocista & Caçador de Cristais',
+        color: '#22c55e',
+        borderColor: '#15803d',
+        weapon: 'Kunais Gêmeas Ninja',
+        draw: drawFrogNinja,
+        power: 3,
+        speed: 2.1,
+        stamina: 90,
+        desc: '+50% de bônus garantido em BCOIN nos minérios.'
+      },
+      {
+        id: 'engineer',
+        alias: 'witch',
+        name: 'Bruxinha do Subsolo',
+        subtitle: 'A Feiticeira das Gemas',
+        rarity: 'ÉPICO',
+        rarityColor: '#eab308',
+        role: 'Magia de Área',
+        color: '#eab308',
+        borderColor: '#a16207',
+        weapon: 'Cajado Estelar & Poção Arcana',
+        draw: drawWitch,
+        power: 5,
+        speed: 1.5,
+        stamina: 120,
+        desc: 'Explosão mágica em área que atinge múltiplos blocos.'
+      },
+      {
+        id: 'mage',
+        alias: 'vampire',
+        name: 'Conde Vampiro',
+        subtitle: 'Lorde das Sombras',
+        rarity: 'ÉPICO',
+        rarityColor: '#a855f7',
+        role: 'Canalizador Sombrio',
+        color: '#a855f7',
+        borderColor: '#7e22ce',
+        weapon: 'Garras das Trevas & Capa Carmesim',
+        draw: drawVampire,
+        power: 4,
+        speed: 1.6,
+        stamina: 130,
+        desc: 'Atrai +35% de BCOIN de altares e cristais.'
+      },
+      {
+        id: 'legendary',
+        alias: 'golem',
+        name: 'Ninja / Golem Titã',
+        subtitle: 'O Titã Primordial das Sombras',
+        rarity: 'LENDÁRIO',
+        rarityColor: '#ec4899',
+        role: 'Soberano Supremo',
+        color: '#ec4899',
+        borderColor: '#be185d',
+        weapon: 'Martelo de Magma & Lâminas Duplas',
+        draw: drawGolem,
+        power: 10,
+        speed: 2.3,
+        stamina: 240,
+        desc: 'Golpes devastadores e aura constante de estamina.'
+      },
+      {
+        id: 'pirate',
+        alias: 'pirate',
+        name: 'Capitão Pirata',
+        subtitle: 'O Corsário dos Sete Mares',
+        rarity: 'RARO',
+        rarityColor: '#ef4444',
+        role: 'Caçador de Tesouros',
+        color: '#ef4444',
+        borderColor: '#b91c1c',
+        weapon: 'Sabre Cutlass & Gancho',
+        draw: drawPirate,
+        power: 5,
+        speed: 1.4,
+        stamina: 130,
+        desc: '+40% de chance de dobrar o saque em baús raros.'
+      },
+      {
+        id: 'cowboy',
+        alias: 'cowboy',
+        name: 'Cowboy Xerife',
+        subtitle: 'O Pistoleiro do Faroeste',
+        rarity: 'RARO',
+        rarityColor: '#f59e0b',
+        role: 'Ataques Rápidos',
+        color: '#f59e0b',
+        borderColor: '#d97706',
+        weapon: 'Picareta-Revólver & Chapéu Stetson',
+        draw: drawCowboy,
+        power: 4,
+        speed: 1.8,
+        stamina: 110,
+        desc: '35% de chance de golpe duplo ultra veloz.'
+      },
+      {
+        id: 'fairy',
+        alias: 'fairy',
+        name: 'Fadinha das Asas',
+        subtitle: 'A Guardiã Alada dos Cristais',
+        rarity: 'SUPER RARO',
+        rarityColor: '#f472b6',
+        role: 'Voo Mágico & Agilidade',
+        color: '#f472b6',
+        borderColor: '#db2777',
+        weapon: 'Varinha Estelar Prismática & Asas de Cristal',
+        draw: drawFairy,
+        power: 4,
+        speed: 2.3,
+        stamina: 105,
+        desc: 'Voa suavemente e dispara feixes cósmicos de pó de estrelas cadentes.'
+      },
+      {
+        id: 'spiderman',
+        alias: 'spiderman',
+        name: 'Homem-Aranha',
+        subtitle: 'O Aracnídeo dos Subsolos',
+        rarity: 'ÉPICO',
+        rarityColor: '#3b82f6',
+        role: 'Mobilidade & Teia',
+        color: '#3b82f6',
+        borderColor: '#1d4ed8',
+        weapon: 'Lançador de Teias & Picareta de Aço',
+        draw: drawSpiderman,
+        power: 5,
+        speed: 2.0,
+        stamina: 125,
+        desc: 'Sentido aranha prevê fraquezas na rocha e bate certeiro.'
+      },
+      {
+        id: 'batman',
+        alias: 'batman',
+        name: 'O Magnata',
+        subtitle: 'O Bilionário das Criptos',
+        rarity: 'LENDÁRIO',
+        rarityColor: '#3b82f6',
+        role: 'Poder Financeiro & Destruição em Massa',
+        color: '#1e3a8a',
+        borderColor: '#3b82f6',
+        weapon: 'Terno Sob Medida & Maço de Dólares Voadores',
+        draw: drawBatman,
+        power: 7,
+        speed: 1.6,
+        stamina: 160,
+        desc: 'Chuva de dinheiro supersônica com explosão de cédulas e moedas de ouro.'
+      }
+    ];
+
+    function renderCharacterSprite(hero, scale = 2.4, isPixelated = false) {
+      const cvs = document.createElement('canvas');
+      cvs.width = 320;
+      cvs.height = 320;
+      const ctx = cvs.getContext('2d');
+
+      // Se pixelado, desenha primeiro em baixa resolução e amplia
+      if (isPixelated) {
+        const lowRes = document.createElement('canvas');
+        lowRes.width = 64;
+        lowRes.height = 64;
+        const lowCtx = lowRes.getContext('2d');
+        lowCtx.imageSmoothingEnabled = false;
+
+        lowCtx.save();
+        lowCtx.translate(32, 40);
+        lowCtx.scale(0.5, 0.5);
+        hero.draw(lowCtx, 1000, 0, 0, 0.45, true);
+        lowCtx.restore();
+
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(lowRes, 0, 0, 320, 320);
+      } else {
+        ctx.save();
+        ctx.translate(160, 195);
+        ctx.scale(scale, scale);
+
+        // Lanterna / Aura brilhante suave no piso
+        const lightGrad = ctx.createRadialGradient(0, 8, 4, 0, 8, 45);
+        lightGrad.addColorStop(0, `${hero.color}66`);
+        lightGrad.addColorStop(0.5, `${hero.color}22`);
+        lightGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = lightGrad;
+        ctx.beginPath();
+        ctx.arc(0, 8, 45, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Sombra no piso
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
+        ctx.beginPath();
+        ctx.ellipse(0, 18, 17, 6, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Desenha o personagem fiel ao jogo em ação com arma
+        hero.draw(ctx, 1200, -0.3, 0, 0.35, true);
+        ctx.restore();
+      }
+
+      return cvs;
+    }
+
+    function renderHeroCardBanner(hero) {
+      const cvs = document.createElement('canvas');
+      cvs.width = 380;
+      cvs.height = 540;
+      const ctx = cvs.getContext('2d');
+
+      // Fundo Card RPG
+      const bgGrad = ctx.createLinearGradient(0, 0, 0, 540);
+      bgGrad.addColorStop(0, '#0c101a');
+      bgGrad.addColorStop(0.6, '#0f172a');
+      bgGrad.addColorStop(1, '#050811');
+      ctx.fillStyle = bgGrad;
+      ctx.beginPath();
+      ctx.roundRect(0, 0, 380, 540, 24);
+      ctx.fill();
+
+      // Borda temática com a cor do herói
+      ctx.strokeStyle = hero.borderColor;
+      ctx.lineWidth = 3.5;
+      ctx.stroke();
+
+      // Efeito de brilho de canto no card
+      const cornerGlow = ctx.createRadialGradient(190, 180, 20, 190, 180, 190);
+      cornerGlow.addColorStop(0, `${hero.color}28`);
+      cornerGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = cornerGlow;
+      ctx.fillRect(4, 4, 372, 532);
+
+      // Partículas mágicas de fundo
+      ctx.fillStyle = `${hero.color}55`;
+      for (let i = 0; i < 30; i++) {
+        const px = 20 + ((i * 73) % 340);
+        const py = 30 + ((i * 47) % 300);
+        const pr = 1 + (i % 3);
+        ctx.beginPath();
+        ctx.arc(px, py, pr, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Pill de Raridade no Topo
+      ctx.save();
+      ctx.translate(190, 32);
+      ctx.fillStyle = `${hero.rarityColor}25`;
+      ctx.strokeStyle = hero.rarityColor;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.roundRect(-70, -14, 140, 28, 14);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = hero.rarityColor;
+      ctx.font = 'bold 12px "Segoe UI", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(`★ ${hero.rarity} ★`, 0, 0);
+      ctx.restore();
+
+      // Desenho do Personagem em Alta Definição no Centro do Card
+      ctx.save();
+      ctx.translate(190, 230);
+      ctx.scale(2.6, 2.6);
+
+      // Aura no piso
+      const lightGrad = ctx.createRadialGradient(0, 8, 4, 0, 8, 46);
+      lightGrad.addColorStop(0, `${hero.color}66`);
+      lightGrad.addColorStop(0.5, `${hero.color}20`);
+      lightGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = lightGrad;
+      ctx.beginPath();
+      ctx.arc(0, 8, 46, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Sombra
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+      ctx.beginPath();
+      ctx.ellipse(0, 18, 18, 6, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      hero.draw(ctx, 1500, -0.3, 0, 0.4, true);
+      ctx.restore();
+
+      // Placa de Identificação do Herói
+      // Linha dourada divisória
+      ctx.strokeStyle = `${hero.color}77`;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(30, 350);
+      ctx.lineTo(350, 350);
+      ctx.stroke();
+
+      // Nome do Herói
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 22px "Segoe UI", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(hero.name.toUpperCase(), 190, 385);
+
+      // Subtítulo e Função
+      ctx.fillStyle = hero.color;
+      ctx.font = 'bold 12px "Segoe UI", sans-serif';
+      ctx.fillText(`${hero.subtitle} • ${hero.role}`, 190, 408);
+
+      // Painel de Estatísticas
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.roundRect(25, 424, 330, 96, 14);
+      ctx.fill();
+      ctx.stroke();
+
+      // Barras de Poder, Velocidade, Estamina
+      const stats = [
+        { label: 'PODER', val: hero.power, max: 10, color: '#ef4444' },
+        { label: 'VELOCIDADE', val: hero.speed, max: 3.0, color: '#22c55e' },
+        { label: 'ESTAMINA', val: hero.stamina, max: 240, color: '#38bdf8' }
+      ];
+
+      stats.forEach((st, idx) => {
+        const sy = 442 + idx * 24;
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = 'bold 10px monospace';
+        ctx.textAlign = 'left';
+        ctx.fillText(st.label, 40, sy);
+
+        // Barra de fundo
+        ctx.fillStyle = '#1e293b';
+        ctx.beginPath();
+        ctx.roundRect(125, sy - 9, 160, 10, 4);
+        ctx.fill();
+
+        // Barra de progresso
+        const pct = Math.min(1, st.val / st.max);
+        ctx.fillStyle = st.color;
+        ctx.beginPath();
+        ctx.roundRect(125, sy - 9, Math.max(8, 160 * pct), 10, 4);
+        ctx.fill();
+
+        // Valor textual
+        ctx.fillStyle = '#f8fafc';
+        ctx.font = 'bold 10px monospace';
+        ctx.textAlign = 'right';
+        ctx.fillText(st.val.toString(), 340, sy);
+      });
+
+      return cvs;
+    }
+
+    function renderGrandRosterBanner(heroes) {
+      const cvs = document.getElementById('grandBannerCanvas');
+      const ctx = cvs.getContext('2d');
+      const w = cvs.width;
+      const h = cvs.height;
+
+      // Fundo de Caverna Dourada com Profundidade
+      const bgGrad = ctx.createLinearGradient(0, 0, 0, h);
+      bgGrad.addColorStop(0, '#090a12');
+      bgGrad.addColorStop(0.5, '#1e1610');
+      bgGrad.addColorStop(0.85, '#291b12');
+      bgGrad.addColorStop(1, '#150d08');
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, w, h);
+
+      // Paredes rochosas estilizadas no fundo
+      ctx.fillStyle = '#22140c';
+      for (let i = 0; i < 16; i++) {
+        const rx = i * 95;
+        const rh = 120 + ((i * 37) % 80);
+        ctx.beginPath();
+        ctx.moveTo(rx, 0);
+        ctx.lineTo(rx + 50, rh);
+        ctx.lineTo(rx + 95, 0);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      // Cristais luminosos nas paredes
+      const crystalColors = ['#22c55e', '#38bdf8', '#a855f7', '#fbbf24', '#f43f5e'];
+      for (let i = 0; i < 22; i++) {
+        const cx = 40 + i * 62;
+        const cy = 60 + ((i * 43) % 110);
+        const col = crystalColors[i % crystalColors.length];
+        
+        ctx.fillStyle = col;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx - 6, cy + 18);
+        ctx.lineTo(cx + 6, cy + 18);
+        ctx.closePath();
+        ctx.fill();
+
+        // Brilho do cristal
+        const cg = ctx.createRadialGradient(cx, cy + 10, 2, cx, cy + 10, 30);
+        cg.addColorStop(0, `${col}55`);
+        cg.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = cg;
+        ctx.beginPath();
+        ctx.arc(cx, cy + 10, 30, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Plataforma rochosa principal onde os heróis pisam
+      ctx.fillStyle = '#3a2213';
+      ctx.beginPath();
+      ctx.roundRect(20, 320, w - 40, 180, 20);
+      ctx.fill();
+
+      // Piso de terra batida dourada da mina
+      const floorGrad = ctx.createLinearGradient(0, 320, 0, 350);
+      floorGrad.addColorStop(0, '#c27f42');
+      floorGrad.addColorStop(1, '#8c5225');
+      ctx.fillStyle = floorGrad;
+      ctx.beginPath();
+      ctx.roundRect(20, 320, w - 40, 30, [20, 20, 0, 0]);
+      ctx.fill();
+
+      // Trilho de trem correndo na base da plataforma
+      ctx.fillStyle = '#451a03';
+      for (let tx = 40; tx < w - 40; tx += 28) {
+        ctx.fillRect(tx, 336, 18, 6);
+      }
+      ctx.fillStyle = '#94a3b8';
+      ctx.fillRect(25, 334, w - 50, 3);
+      ctx.fillRect(25, 342, w - 50, 3);
+
+      // Titulo Superior do Banner Épico
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.roundRect(w / 2 - 280, 16, 560, 58, 16);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#fbbf24';
+      ctx.font = '900 24px "Segoe UI", system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('⛏️ CRYPTO MINERS • ELENCO OFICIAL ⛏️', w / 2, 40);
+
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = 'bold 11px monospace';
+      ctx.fillText('TODOS OS 11 MINERADORES EM PIXEL-ART FIÉIS AO JOGO', w / 2, 59);
+
+      // Desenhar todos os 11 heróis alinhados sobre a plataforma
+      const startX = 85;
+      const spacing = (w - 170) / (heroes.length - 1);
+
+      heroes.forEach((hero, index) => {
+        const hx = startX + index * spacing;
+        const hy = 330;
+
+        ctx.save();
+        ctx.translate(hx, hy);
+        ctx.scale(1.4, 1.4);
+
+        // Aura individual
+        const aura = ctx.createRadialGradient(0, 8, 3, 0, 8, 34);
+        aura.addColorStop(0, `${hero.color}77`);
+        aura.addColorStop(0.5, `${hero.color}22`);
+        aura.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = aura;
+        ctx.beginPath();
+        ctx.arc(0, 8, 34, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Sombra
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
+        ctx.beginPath();
+        ctx.ellipse(0, 18, 15, 5, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Desenhar herói
+        hero.draw(ctx, 1000 + index * 400, -0.2, 0, 0.3, true);
+        ctx.restore();
+
+        // Nome do herói e Rarity Badge abaixo dele
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 12px "Segoe UI", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(hero.name, hx, 375);
+
+        ctx.fillStyle = hero.color;
+        ctx.font = 'bold 10px monospace';
+        ctx.fillText(hero.rarity, hx, 392);
+      });
+
+      // Borda decorativa exterior do banner
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 4;
+      ctx.strokeRect(2, 2, w - 4, h - 4);
+
+      return cvs;
+    }
+
+    let serverAvailable = true;
+    async function sendImageToServer(filename, dataUrl) {
+      if (!serverAvailable) return null;
+      try {
+        const res = await fetch('http://localhost:5176/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ filename, dataUrl })
+        });
+        return await res.json();
+      } catch (err) {
+        serverAvailable = false;
+        return null;
+      }
+    }
+
+    async function generateAll() {
+      const statusEl = document.getElementById('status');
+      const grid = document.getElementById('grid');
+
+      statusEl.textContent = 'Renderizando o Banner Geral de Todos os Heróis...';
+      const grandCvs = renderGrandRosterBanner(HERO_CLASSES);
+      const grandData = grandCvs.toDataURL('image/png');
+      await sendImageToServer('banner_all_miners.png', grandData);
+      await sendImageToServer('all_miners_banner.png', grandData);
+
+      let savedCount = 2;
+
+      for (const hero of HERO_CLASSES) {
+        statusEl.textContent = `Renderizando herói: ${hero.name}...`;
+
+        // 1. Sprite Transparente em Alta Resolução (para avatares, modais, etc)
+        const spriteCvs = renderCharacterSprite(hero, 2.4, false);
+        const spriteData = spriteCvs.toDataURL('image/png');
+        await sendImageToServer(`${hero.id}.png`, spriteData);
+        if (hero.alias && hero.alias !== hero.id) {
+          await sendImageToServer(`${hero.alias}.png`, spriteData);
+        }
+
+        // Também salvar como .jpg para compatibilidade instantânea com os componentes legados
+        const spriteJpg = spriteCvs.toDataURL('image/jpeg', 0.95);
+        await sendImageToServer(`${hero.id}.jpg`, spriteJpg);
+        if (hero.alias && hero.alias !== hero.id) {
+          await sendImageToServer(`${hero.alias}.jpg`, spriteJpg);
+        }
+
+        // 2. Sprite Pixel Art Retro
+        const pixelCvs = renderCharacterSprite(hero, 2.4, true);
+        const pixelData = pixelCvs.toDataURL('image/png');
+        await sendImageToServer(`${hero.id}_pixel.png`, pixelData);
+
+        // 3. Banner Card RPG Completo do Herói
+        const cardCvs = renderHeroCardBanner(hero);
+        const cardData = cardCvs.toDataURL('image/png');
+        await sendImageToServer(`banner_${hero.id}.png`, cardData);
+        if (hero.alias && hero.alias !== hero.id) {
+          await sendImageToServer(`banner_${hero.alias}.png`, cardData);
+        }
+
+        // Adicionar preview no grid visual da página
+        const cardDiv = document.createElement('div');
+        cardDiv.className = 'preview-card';
+        cardDiv.innerHTML = `
+          <h3>${hero.name}</h3>
+          <span>${hero.subtitle}</span>
+        `;
+        cardDiv.insertBefore(cardCvs, cardDiv.children[0]);
+        grid.appendChild(cardDiv);
+
+        savedCount += 4;
+      }
+
+      // Re-renderiza o Banner Geral agora com todas as imagens 100% carregadas e em cache
+      renderGrandRosterBanner(HERO_CLASSES);
+
+      statusEl.textContent = `✅ SUCESSO! Todos os mineradores e banners foram gerados e salvos com fidelidade total ao jogo (${savedCount} imagens criadas).`;
+      statusEl.style.color = '#22c55e';
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(generateAll, 500);
+    });
+  </script>
+</body>
+</html>

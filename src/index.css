@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-arcade: 'Press Start 2P', monospace;
+    --font-tech: 'Chakra Petch', sans-serif;
+  }
+}
+
+.font-arcade {
+  font-family: var(--font-arcade);
+}
+
+.font-tech {
+  font-family: var(--font-tech);
+}
+
+/* Renderização nítida de pixel art */
+canvas.pixelated {
+  image-rendering: -moz-crisp-edges;
+  image-rendering: -webkit-crisp-edges;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(234, 179, 8, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(234, 179, 8, 0.8);
+  }
+}
+
+.animate-glow-gold {
+  animation: pulseGlow 2s infinite ease-in-out;
+}
