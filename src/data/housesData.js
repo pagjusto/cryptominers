@@ -1,5 +1,5 @@
-// CRIPTO MYNERS — SISTEMA OFICIAL DE CASAS
-// 4 Categorias oficiais responsáveis pelo tratamento e recuperação de vida dos personagens:
+// CRIPTO MYNERS — SISTEMA OFICIAL DE ABRIGOS
+// 4 categorias de abrigo para tratamento e recuperação da vida dos sobreviventes:
 // - Básica: Capacidade 5, Velocidade 100%
 // - Reforçada: Capacidade 10, Velocidade 125%
 // - Avançada: Capacidade 15, Velocidade 150%
@@ -8,7 +8,7 @@
 export const HOUSE_TIERS = [
   {
     id: 'none',
-    name: 'Sem Casa (Chão da Mina)',
+    name: 'Sem Abrigo',
     icon: '⛺',
     slots: 0,
     recoverySpeedPct: 50,
@@ -16,7 +16,7 @@ export const HOUSE_TIERS = [
     costUsdt: 0,
     costBcoin: 0,
     color: '#64748b',
-    description: 'Os mineradores dormem no chão de pedra da mina. Recuperação básica de energia.'
+    description: 'Sem abrigo médico: sobreviventes feridos aguardam tratamento.'
   },
   {
     id: 'basic',
@@ -40,7 +40,7 @@ export const HOUSE_TIERS = [
     costUsdt: 50,
     costBcoin: 50,
     color: '#22c55e',
-    description: 'Acomoda até 10 personagens com velocidade de recuperação de 125% (25% mais rápida que a básica).'
+    description: 'Trata até 10 sobreviventes simultaneamente, com recuperação 125% mais rápida que a básica.'
   },
   {
     id: 'advanced',
@@ -53,7 +53,7 @@ export const HOUSE_TIERS = [
     costBcoin: 85,
     popular: true,
     color: '#f59e0b',
-    description: 'Acomoda até 15 personagens com velocidade de recuperação de 150% (+50% mais rápida). Ideal para manter a mina com revezamento ágil.'
+    description: 'Trata até 15 sobreviventes simultaneamente, com recuperação 150% da velocidade básica.'
   },
   {
     id: 'legendary',
@@ -66,7 +66,7 @@ export const HOUSE_TIERS = [
     costBcoin: 135,
     badge: 'MÁXIMO (2.0x)',
     color: '#ec4899',
-    description: 'Acomoda até 20 personagens. Velocidade de recuperação de 200% (o dobro da velocidade da básica). Exemplo: recupera energia completa em metade do tempo.'
+    description: 'Trata até 20 sobreviventes simultaneamente, com recuperação duas vezes mais rápida que a básica.'
   }
 ];
 
