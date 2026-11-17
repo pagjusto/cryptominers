@@ -4482,3 +4482,351 @@ export function drawExecutive(ctx, now, swingAngle, legAngle, swingProgress = 0,
 
 // Alias para garantir compatibilidade com slot 'batman'
 export const drawBatman = drawExecutive;
+
+// ============================================================================
+// 12. HERÓIS DO ROSTER (11 Sobreviventes e 11 Armas de public/assets/)
+// Animação de Tiro com Mira, Recuo, Muzzle Flash, Balística e Impacto (estilo Pirata)
+// ============================================================================
+let heroRosterImg = null;
+let heroRosterLoaded = false;
+let weaponRosterImg = null;
+let weaponRosterLoaded = false;
+
+export function initRosterSprites() {
+  if (typeof window === 'undefined') return;
+  if (!heroRosterImg) {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.src = '/assets/hero-roster.png';
+    img.onload = () => {
+      heroRosterImg = img;
+      heroRosterLoaded = true;
+    };
+  }
+  if (!weaponRosterImg) {
+    const wImg = new Image();
+    wImg.crossOrigin = 'anonymous';
+    wImg.src = '/assets/weapon-roster.png';
+    wImg.onload = () => {
+      weaponRosterImg = wImg;
+      weaponRosterLoaded = true;
+    };
+  }
+}
+
+if (typeof window !== 'undefined') {
+  initRosterSprites();
+}
+
+/**
+ * Renderiza qualquer herói sobrevivente do HERO_ROSTER com sua arma do WEAPON_CATALOG,
+ * utilizando a consagrada mecânica de animação de tiro, mira horizontal, recuo e muzzle flash do Pirata.
+ */
+export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swingProgress = 0, isMining = false) {
+  initRosterSprites();
+
+  const pw = 42; // Largura proporcional do herói
+  const ph = 46; // Altura proporcional do herói
+  const gw = 38; // Largura da arma
+  const gh = 21; // Altura da arma
+
+  const spriteIndex = hero?.spriteIndex ?? 0;
+  const sourceIndex = weapon?.sourceIndex ?? spriteIndex ?? 0;
+  const sx = spriteIndex * 32;
+  const sy = 0;
+  const sw = 32;
+  const sh = 32;
+
+  const wsx = sourceIndex * 64;
+  const wsy = 0;
+  const wsw = 64;
+  const wsh = 36;
+
+  // =========================================================================
+  // 1. MODO REPOUSO & CAMINHADA (IDLE / WALKING)
+  // =========================================================================
+  if (!isMining) {
+    ctx.save();
+    ctx.translate(0, 16); // Pivot na base dos pés
+
+    // Swagger / ginga de caminhada e respiração
+    const walkBob = Math.abs(Math.sin(now * 0.012)) * 1.8;
+    const bodySway = Math.sin(now * 0.012) * 0.04;
+    const breathY = 1 + Math.sin(now * 0.01) * 0.02;
+    const breathX = 1 - Math.sin(now * 0.01) * 0.01;
+
+    // Sombra suave sob os pés
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+    ctx.beginPath();
+    ctx.ellipse(0, -1, 16, 5, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.translate(0, -walkBob);
+    ctx.rotate(bodySway);
+    ctx.scale(breathX, breathY);
+
+    // Desenha corpo do Herói com pixel art nítido
+    if (heroRosterLoaded && heroRosterImg) {
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(heroRosterImg, sx, sy, sw, sh, -pw / 2, -ph + 6, pw, ph);
+    } else {
+      ctx.fillStyle = '#38bdf8';
+      ctx.fillRect(-pw / 2, -ph + 6, pw, ph);
+    }
+
+    // Arma em repouso na mão direita, apontada diagonalmente para baixo
+    if (weaponRosterLoaded && weaponRosterImg) {
+      ctx.save();
+      ctx.translate(11, -12);
+      ctx.rotate(0.35 + Math.sin(now * 0.012) * 0.04);
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(weaponRosterImg, wsx, wsy, wsw, wsh, -6, -11, gw, gh);
+
+      // Mão do herói segurando a coronha / empunhadura
+      ctx.fillStyle = '#fed7aa';
+      ctx.strokeStyle = '#1c1917';
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.arc(0, 0, 3.2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    ctx.restore();
+    return;
+  }
+
+  // =========================================================================
+  // 2. MODO ATAQUE: DISPARO DE ARMA COM RECUO, MUZZLE FLASH E BALÍSTICA (PIRATA)
+  // =========================================================================
+  ctx.save();
+  ctx.translate(0, 16); // Pivot nos pés
+
+  let lungeX = 0;
+  let bodyAngle = 0;
+  let gunAngle = 0;
+  let handX = 10;
+  let handY = -14;
+  let recoilDist = 0;
+  let scaleY = 1;
+  let scaleX = 1;
+
+  // FASE 1: MIRA & ENGATILHAMENTO HORIZONTAL (0.00 a 0.32)
+  if (swingProgress < 0.32) {
+    const p = swingProgress / 0.32;
+    lungeX = 2 * p;
+    bodyAngle = 0.06 * p; // Postura firme de atirador
+    gunAngle = 0.35 - p * 0.35; // Alinha rigorosamente na horizontal (0.0 rad)
+    handX = 11 + 2 * p;
+    handY = -12 - 2 * p;
+  }
+  // FASE 2: DETONAÇÃO, DISPARO E RECUO BRUTAL (0.32 a 0.48)
+  else if (swingProgress < 0.48) {
+    const p = (swingProgress - 0.32) / 0.16;
+    // Recuo forte jogando o braço e tronco para trás
+    recoilDist = Math.sin(p * Math.PI) * 7;
+    lungeX = 2 - recoilDist * 0.6;
+    bodyAngle = 0.06 - Math.sin(p * Math.PI) * 0.15; // Tronco empurrado para trás
+    gunAngle = -Math.sin(p * Math.PI) * 0.42; // Cano dá coice para cima
+    handX = 13 - recoilDist;
+    handY = -14;
+    scaleX = 1 - Math.sin(p * Math.PI) * 0.05;
+    scaleY = 1 + Math.sin(p * Math.PI) * 0.03;
+  }
+  // FASE 3: SUSTENTAÇÃO DE IMPACTO NA ROCHA & FUMAÇA (0.48 a 0.75)
+  else if (swingProgress < 0.75) {
+    const p = (swingProgress - 0.48) / 0.27;
+    lungeX = 2 * (1 - p);
+    bodyAngle = -0.04 * (1 - p);
+    gunAngle = -0.15 * (1 - p);
+    handX = 13 - 1 * p;
+    handY = -14;
+  }
+  // FASE 4: RECUPERAÇÃO E RETORNO (0.75 a 1.00)
+  else {
+    const p = (swingProgress - 0.75) / 0.25;
+    gunAngle = p * 0.35;
+    handX = 12 - 1 * p;
+    handY = -14 + 2 * p;
+  }
+
+  // Sombra no chão
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+  ctx.beginPath();
+  ctx.ellipse(lungeX, -1, 18, 6, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Desenha Corpo do Herói
+  ctx.save();
+  ctx.translate(lungeX, 0);
+  ctx.rotate(bodyAngle);
+  ctx.scale(scaleX, scaleY);
+  if (heroRosterLoaded && heroRosterImg) {
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(heroRosterImg, sx, sy, sw, sh, -pw / 2, -ph + 6, pw, ph);
+  } else {
+    ctx.fillStyle = '#38bdf8';
+    ctx.fillRect(-pw / 2, -ph + 6, pw, ph);
+  }
+  ctx.restore();
+
+  // Desenha a Arma do Herói com empunhadura
+  if (weaponRosterLoaded && weaponRosterImg) {
+    ctx.save();
+    ctx.translate(handX, handY);
+    ctx.rotate(gunAngle);
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(weaponRosterImg, wsx, wsy, wsw, wsh, -6, -11, gw, gh);
+
+    // Mão do herói segurando a empunhadura
+    ctx.fillStyle = '#fed7aa';
+    ctx.strokeStyle = '#1c1917';
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.arc(0, 0, 3.2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // Posição da boca do cano (Muzzle)
+    const muzzleLocalX = 32;
+    const muzzleLocalY = -3;
+
+    // 1. FLASH DE DISPARO DA BOCA DO CANO (0.32 a 0.42)
+    if (swingProgress >= 0.32 && swingProgress <= 0.42) {
+      const flashP = (swingProgress - 0.32) / 0.10;
+      const flashSize = 14 + (1 - flashP) * 10;
+      const category = weapon?.category || 'rifle';
+
+      ctx.save();
+      if (category === 'energia') {
+        ctx.shadowColor = '#38bdf8';
+        ctx.shadowBlur = 16;
+        ctx.fillStyle = '#38bdf8';
+      } else if (category === 'especial') {
+        ctx.shadowColor = '#f97316';
+        ctx.shadowBlur = 16;
+        ctx.fillStyle = '#ea580c';
+      } else if (category === 'suporte') {
+        ctx.shadowColor = '#34d399';
+        ctx.shadowBlur = 14;
+        ctx.fillStyle = '#10b981';
+      } else {
+        ctx.shadowColor = '#f59e0b';
+        ctx.shadowBlur = 15;
+        ctx.fillStyle = '#fef08a';
+      }
+
+      ctx.beginPath();
+      ctx.moveTo(muzzleLocalX, muzzleLocalY - 4);
+      ctx.lineTo(muzzleLocalX + flashSize * 1.6, muzzleLocalY - 9);
+      ctx.lineTo(muzzleLocalX + flashSize * 1.8, muzzleLocalY);
+      ctx.lineTo(muzzleLocalX + flashSize * 1.6, muzzleLocalY + 9);
+      ctx.lineTo(muzzleLocalX, muzzleLocalY + 4);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
+    ctx.restore(); // Fecha arma
+  }
+
+  // 2. PROJÉTIL EM VOO ULTRARRÁPIDO (0.33 a 0.46)
+  const muzzleWorldX = handX + 32;
+  const muzzleWorldY = handY - 3;
+  const targetX = 54;
+  const targetY = -8;
+
+  if (swingProgress >= 0.33 && swingProgress <= 0.46) {
+    const bulletP = (swingProgress - 0.33) / 0.13;
+    const bx = muzzleWorldX + (targetX - muzzleWorldX) * bulletP;
+    const by = muzzleWorldY + (targetY - muzzleWorldY) * bulletP;
+    const category = weapon?.category || 'rifle';
+
+    ctx.save();
+    if (category === 'energia') {
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.85)';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(muzzleWorldX, muzzleWorldY);
+      ctx.lineTo(bx, by);
+      ctx.stroke();
+
+      ctx.fillStyle = '#e0f2fe';
+      ctx.shadowColor = '#38bdf8';
+      ctx.shadowBlur = 8;
+      ctx.beginPath();
+      ctx.arc(bx, by, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+    } else {
+      ctx.strokeStyle = 'rgba(251, 146, 60, 0.7)';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(muzzleWorldX, muzzleWorldY);
+      ctx.lineTo(bx, by);
+      ctx.stroke();
+
+      ctx.fillStyle = '#334155';
+      ctx.shadowColor = '#f97316';
+      ctx.shadowBlur = 6;
+      ctx.beginPath();
+      ctx.arc(bx, by, 3.2, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#fef08a';
+      ctx.beginPath();
+      ctx.arc(bx + 1, by - 1, 1.2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  // 3. NUVEM DE FUMAÇA DO DISPARO (0.34 a 0.75)
+  if (swingProgress >= 0.34 && swingProgress <= 0.75) {
+    const smokeP = (swingProgress - 0.34) / 0.41;
+    const smokeAlpha = (1 - smokeP) * 0.55;
+    const smokeDist = smokeP * 18;
+
+    ctx.save();
+    ctx.fillStyle = `rgba(226, 232, 240, ${smokeAlpha})`;
+    ctx.beginPath();
+    ctx.arc(muzzleWorldX + 6 + smokeDist * 0.5, muzzleWorldY - 2 - smokeDist * 0.3, 7 + smokeP * 8, 0, Math.PI * 2);
+    ctx.arc(muzzleWorldX + 12 + smokeDist, muzzleWorldY + 3, 5 + smokeP * 7, 0, Math.PI * 2);
+    ctx.arc(muzzleWorldX - 2, muzzleWorldY - 6 - smokeDist * 0.2, 6 + smokeP * 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // 4. DETONAÇÃO & IMPACTO NO ALVO (0.45 a 0.75)
+  if (swingProgress >= 0.45 && swingProgress <= 0.75) {
+    const impactX = targetX;
+    const impactY = targetY;
+
+    // Fissuras e cratera de impacto
+    ctx.strokeStyle = '#020617';
+    ctx.lineWidth = 2.4;
+    ctx.beginPath();
+    ctx.moveTo(impactX, impactY);
+    ctx.lineTo(impactX + 10, impactY - 8);
+    ctx.lineTo(impactX + 18, impactY - 14);
+    ctx.moveTo(impactX, impactY);
+    ctx.lineTo(impactX + 12, impactY + 6);
+    ctx.lineTo(impactX + 20, impactY + 12);
+    ctx.stroke();
+
+    // Faíscas incandescentes
+    for (let i = 0; i < 6; i++) {
+      const spkAngle = Math.PI - 0.8 + (i * 0.32) + Math.sin(now * 0.05 + i) * 0.2;
+      const spkDist = 6 + ((now * 0.08 + i * 5) % 24);
+      const sx = impactX + Math.cos(spkAngle) * spkDist;
+      const sy = impactY + Math.sin(spkAngle) * spkDist * 0.75;
+      ctx.fillStyle = i % 2 === 0 ? '#fef08a' : (i % 3 === 0 ? '#f97316' : '#ef4444');
+      ctx.beginPath();
+      ctx.arc(sx, sy, 2.0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  ctx.restore();
+}

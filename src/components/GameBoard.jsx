@@ -724,7 +724,7 @@ export default function GameBoard({
         ctx.fill();
       });
 
-      state.miners.forEach(miner => {
+      state.miners.forEach((miner, minerIndex) => {
         if (miner.status === 'house' || miner.status === 'waiting_house' || miner.status === 'reserve') return;
         const classInfo = MINER_CLASSES[miner.classId] || MINER_CLASSES.miner;
         const mx = miner.x * TILE_SIZE + TILE_SIZE / 2;
@@ -738,7 +738,7 @@ export default function GameBoard({
           else if (miner.targetBlock.x > miner.x) faceDir = 1;
         }
 
-        drawMinerCharacter(ctx, mx, my, miner, classInfo, now, swingProgress, faceDir);
+        drawMinerCharacter(ctx, mx, my, miner, classInfo, now, swingProgress, faceDir, minerIndex);
       });
 
       // Carrinhos de Minérios Estáticos (conforme solicitação do usuário: um no começo e outro entre a 2ª e 3ª curva)

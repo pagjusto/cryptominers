@@ -174,6 +174,138 @@ export const MINER_CLASSES = {
     specialty: 'Chuva de Dinheiro: Arremessa maços maciços de dólares voadores',
     description: 'Bilionário magnata de terno azul marinho e gravata vermelha que destrói blocos arremessando pilhas maciças de dinheiro.',
     chance: 0.02
+  },
+
+  // 11 Novas Classes Oficiais de Sobreviventes (HERO_ROSTER)
+  explorer: {
+    id: 'explorer',
+    name: 'Verdant',
+    subtitle: 'Explorador da Vanguarda',
+    avatar: '🧭',
+    color: '#34d399',
+    basePower: 3,
+    baseSpeed: 1.5,
+    baseStamina: 100,
+    specialty: 'Reconhecimento & Mobilidade Ágil com Rifle de Assalto',
+    description: 'Explorador tático com camuflagem de sobrevivência e rifle de assalto de tiro rápido.',
+    chance: 0.35
+  },
+  tank: {
+    id: 'tank',
+    name: 'Granito',
+    subtitle: 'O Colosso Protetor',
+    avatar: '🛡️',
+    color: '#fbbf24',
+    basePower: 7,
+    baseSpeed: 0.9,
+    baseStamina: 160,
+    specialty: 'Absorção de Dano & Fogo Pesado com Metralhadora',
+    description: 'Tanque pesado lendário equipado com blindagem reforçada e metralhadora giratória.',
+    chance: 0.05
+  },
+  fighter: {
+    id: 'fighter',
+    name: 'Nox',
+    subtitle: 'Combatente de Energia',
+    avatar: '⚡',
+    color: '#38bdf8',
+    basePower: 5,
+    baseSpeed: 1.4,
+    baseStamina: 120,
+    specialty: 'Canhão de Energia & Disparos Contínuos de Plasma',
+    description: 'Combatente tático com exoesqueleto avançado e canhão de feixe de plasma.',
+    chance: 0.20
+  },
+  assault: {
+    id: 'assault',
+    name: 'Brasa & Fênix',
+    subtitle: 'Especialista em Fogo de Supressão',
+    avatar: '🔥',
+    color: '#f87171',
+    basePower: 6,
+    baseSpeed: 1.3,
+    baseStamina: 110,
+    specialty: 'Lança-chamas & Rajadas Incendiárias em Área',
+    description: 'Tropa de assalto com projéteis incendiários e alta taxa de supressão.',
+    chance: 0.15
+  },
+  medic: {
+    id: 'medic',
+    name: 'Íris',
+    subtitle: 'Médica Tática de Campo',
+    avatar: '💉',
+    color: '#c084fc',
+    basePower: 4,
+    baseSpeed: 1.5,
+    baseStamina: 110,
+    specialty: 'Kit Médico & Suporte a Sobreviventes Feridos',
+    description: 'Especialista de suporte médico de emergência com kit de bio-energia de campo.',
+    chance: 0.10
+  },
+  survivor: {
+    id: 'survivor',
+    name: 'Múmia',
+    subtitle: 'Sobrevivente Resiliente',
+    avatar: '🧟‍♂️',
+    color: '#fb923c',
+    basePower: 4,
+    baseSpeed: 1.2,
+    baseStamina: 130,
+    specialty: 'Escopeta & Impacto Devastador a Curta Distância',
+    description: 'Sobrevivente endurecido com bandagens de proteção e escopeta de cano duplo.',
+    chance: 0.30
+  },
+  specialist: {
+    id: 'specialist',
+    name: 'Polar',
+    subtitle: 'Especialista Tático Glacial',
+    avatar: '🎯',
+    color: '#60a5fa',
+    basePower: 5,
+    baseSpeed: 1.6,
+    baseStamina: 115,
+    specialty: 'Rifle Compacto & Disparos de Precisão Cirúrgica',
+    description: 'Atirador de elite treinado em climas extremos armado com rifle tático compacto.',
+    chance: 0.18
+  },
+  infiltrator: {
+    id: 'infiltrator',
+    name: 'Sombra',
+    subtitle: 'Infiltrador Silencioso',
+    avatar: '👤',
+    color: '#94a3b8',
+    basePower: 5,
+    baseSpeed: 1.8,
+    baseStamina: 105,
+    specialty: 'Ataques Silenciosos & Tiroteio de Precisão',
+    description: 'Agente camuflado de infiltração armada para eliminação rápida de alvos.',
+    chance: 0.15
+  },
+  heavy: {
+    id: 'heavy',
+    name: 'Iron',
+    subtitle: 'Demolidor Blindado',
+    avatar: '💣',
+    color: '#a855f7',
+    basePower: 6,
+    baseSpeed: 1.1,
+    baseStamina: 140,
+    specialty: 'Granadas Explosivas & Controle de Multidão',
+    description: 'Blindado pesado especialista em artilharia portátil de granadas de concussão.',
+    chance: 0.12
+  },
+  juggernaut: {
+    id: 'juggernaut',
+    name: 'Colosso',
+    subtitle: 'Tanque de Elite Juggernaut',
+    avatar: '🚀',
+    color: '#eab308',
+    basePower: 8,
+    baseSpeed: 1.0,
+    baseStamina: 180,
+    specialty: 'Lança-Foguetes & Explosão de Alto Impacto',
+    description: 'A vanguarda destrutiva armada com lançador de foguetes teleguiados pesados.',
+    chance: 0.05
   }
 };
 
@@ -303,8 +435,14 @@ export const MINES = [
 export const INITIAL_MINERS = [
   {
     id: 'miner-1',
-    name: 'Bomb-Bot Alpha',
-    classId: 'miner',
+    name: 'Verdant',
+    heroId: 'verdant',
+    weaponId: 'assault-rifle',
+    spriteIndex: 0,
+    classId: 'explorer',
+    className: 'Explorador',
+    rarity: 'common',
+    rarityName: 'Comum',
     level: 1,
     power: 2,
     speed: 1.3,
@@ -313,13 +451,19 @@ export const INITIAL_MINERS = [
     status: 'work',
     x: 1,
     y: 1,
-    avatar: '🤖',
-    color: '#38bdf8'
+    avatar: '🧭',
+    color: '#34d399'
   },
   {
     id: 'miner-2',
-    name: 'Ragnar Chifre-de-Ferro',
-    classId: 'brute',
+    name: 'Granito',
+    heroId: 'granito',
+    weaponId: 'heavy-machine-gun',
+    spriteIndex: 1,
+    classId: 'tank',
+    className: 'Tanque',
+    rarity: 'legendary',
+    rarityName: 'Lendário',
     level: 1,
     power: 6,
     speed: 0.95,
@@ -328,13 +472,19 @@ export const INITIAL_MINERS = [
     status: 'work',
     x: 1,
     y: 9,
-    avatar: '🪓',
-    color: '#f97316'
+    avatar: '🛡️',
+    color: '#fbbf24'
   },
   {
     id: 'miner-3',
-    name: 'Kero Shinobi',
-    classId: 'goblin',
+    name: 'Nox',
+    heroId: 'nox',
+    weaponId: 'energy-blaster',
+    spriteIndex: 2,
+    classId: 'fighter',
+    className: 'Combatente',
+    rarity: 'rare',
+    rarityName: 'Raro',
     level: 1,
     power: 3,
     speed: 2.1,
@@ -343,7 +493,7 @@ export const INITIAL_MINERS = [
     status: 'work',
     x: 13,
     y: 1,
-    avatar: '🐸',
-    color: '#22c55e'
+    avatar: '⚡',
+    color: '#38bdf8'
   }
 ];

@@ -18,8 +18,10 @@ import {
   drawBallerina,
   drawSpiderman,
   drawBatman,
-  drawExecutive
+  drawExecutive,
+  drawRosterHero
 } from './characterRenderers';
+import { HERO_ROSTER, WEAPON_CATALOG, getHeroById, getWeaponById } from '../data/heroRoster';
 
 // ============================================================================
 // CANYON MINE MAP IMAGE MANAGER (O MAPA REAL DO CÂNION EM ALTA DEFINIÇÃO)
@@ -341,7 +343,7 @@ export function drawVectorCartoonRock(ctx, x, y, size, oreType, mine, hpRatio, n
 // ----------------------------------------------------------------------------
 // 3. BONECOS 2D DE ALTA DEFINIÇÃO (11 Classes com traço vetorial de cel-shading)
 // ----------------------------------------------------------------------------
-export function drawMinerCharacter(ctx, mx, my, miner, classInfo, now, swingProgress = 0, targetDir = 1) {
+export function drawMinerCharacter(ctx, mx, my, miner, classInfo, now, swingProgress = 0, targetDir = 1, minerIndex = 0) {
   ctx.save();
 
   const isWorking = miner.status === 'work';
@@ -358,59 +360,21 @@ export function drawMinerCharacter(ctx, mx, my, miner, classInfo, now, swingProg
 
   const cid = miner.classId || 'miner';
 
-  // 1. Lanterna / Aura no Piso Específica por Classe
+  // Resolução do herói oficial do HERO_ROSTER e sua arma do WEAPON_CATALOG
+  const rosterHero = (miner.heroId && getHeroById(miner.heroId)) 
+    || HERO_ROSTER.find(h => h.classId === cid || h.id === cid)
+    || HERO_ROSTER[minerIndex % HERO_ROSTER.length];
+  const rosterWeapon = (miner.weaponId && getWeaponById(miner.weaponId))
+    || (rosterHero && getWeaponById(rosterHero.weaponId))
+    || WEAPON_CATALOG[rosterHero?.spriteIndex % WEAPON_CATALOG.length];
+
+  // 1. Lanterna / Aura no Piso Específica por Classe / Herói
   const lightGrad = ctx.createRadialGradient(0, 8, 4, 0, 8, 44);
-  switch (cid) {
-    case 'miner':
-      lightGrad.addColorStop(0, 'rgba(56, 189, 248, 0.45)');
-      lightGrad.addColorStop(0.5, 'rgba(2, 132, 199, 0.2)');
-      break;
-    case 'brute':
-      lightGrad.addColorStop(0, 'rgba(249, 115, 22, 0.45)');
-      lightGrad.addColorStop(0.5, 'rgba(180, 83, 9, 0.2)');
-      break;
-    case 'goblin':
-      lightGrad.addColorStop(0, 'rgba(34, 197, 94, 0.45)');
-      lightGrad.addColorStop(0.5, 'rgba(16, 185, 129, 0.2)');
-      break;
-    case 'engineer':
-      lightGrad.addColorStop(0, 'rgba(168, 85, 247, 0.45)');
-      lightGrad.addColorStop(0.5, 'rgba(147, 51, 234, 0.2)');
-      break;
-    case 'mage':
-      lightGrad.addColorStop(0, 'rgba(239, 68, 68, 0.45)');
-      lightGrad.addColorStop(0.5, 'rgba(15, 23, 42, 0.3)');
-      break;
-    case 'legendary':
-      lightGrad.addColorStop(0, 'rgba(251, 191, 36, 0.55)');
-      lightGrad.addColorStop(0.5, 'rgba(234, 88, 12, 0.3)');
-      break;
-    case 'pirate':
-      lightGrad.addColorStop(0, 'rgba(239, 68, 68, 0.45)');
-      lightGrad.addColorStop(0.5, 'rgba(234, 179, 8, 0.2)');
-      break;
-    case 'cowboy':
-      lightGrad.addColorStop(0, 'rgba(245, 158, 11, 0.45)');
-      lightGrad.addColorStop(0.5, 'rgba(180, 83, 9, 0.2)');
-      break;
-    case 'fairy':
-    case 'ballerina':
-      lightGrad.addColorStop(0, 'rgba(244, 114, 182, 0.65)');
-      lightGrad.addColorStop(0.5, 'rgba(56, 189, 248, 0.35)');
-      break;
-    case 'spiderman':
-      lightGrad.addColorStop(0, 'rgba(239, 68, 68, 0.45)');
-      lightGrad.addColorStop(0.5, 'rgba(59, 130, 246, 0.25)');
-      break;
-    case 'batman':
-      lightGrad.addColorStop(0, 'rgba(15, 23, 42, 0.75)');
-      lightGrad.addColorStop(0.5, 'rgba(250, 204, 21, 0.2)');
-      break;
-    default:
-      lightGrad.addColorStop(0, 'rgba(56, 189, 248, 0.45)');
-      lightGrad.addColorStop(0.5, 'rgba(2, 132, 199, 0.2)');
-      break;
-  }
+  const heroColor = classInfo?.color 
+    || (rosterHero?.rarity === 'legendary' ? '#eab308' : rosterHero?.rarity === 'epic' ? '#a855f7' : rosterHero?.rarity === 'rare' ? '#38bdf8' : '#34d399');
+  
+  lightGrad.addColorStop(0, heroColor + '80');
+  lightGrad.addColorStop(0.5, heroColor + '30');
   lightGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
   ctx.fillStyle = lightGrad;
   ctx.beginPath();
@@ -418,7 +382,7 @@ export function drawMinerCharacter(ctx, mx, my, miner, classInfo, now, swingProg
   ctx.fill();
 
   // 2. Sombra Suave no Piso
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
   ctx.beginPath();
   ctx.ellipse(0, 18, 17, 6, 0, 0, Math.PI * 2);
   ctx.fill();
@@ -429,98 +393,51 @@ export function drawMinerCharacter(ctx, mx, my, miner, classInfo, now, swingProg
     ctx.scale(-1, 1);
   }
 
-  // Pernas e Botas Animadas
-  ctx.lineWidth = 2.2;
-  ctx.strokeStyle = '#09090b';
-  ctx.lineCap = 'round';
-  ctx.lineJoin = 'round';
-
-  const bootColors = {
-    miner: '#0369a1',
-    brute: '#78350f',
-    goblin: '#14532d',
-    engineer: '#3b0764',
-    mage: '#18181b',
-    legendary: '#1c1917',
-    pirate: '#0f172a',
-    cowboy: '#78350f',
-    fairy: '#f472b6',
-    ballerina: '#f472b6',
-    spiderman: '#dc2626',
-    batman: '#0f172a'
-  };
-  const bootColor = bootColors[cid] || '#0369a1';
-
-  // Botas Animadas (puladas para personagens com sprites pixel-art dedicados)
-  if (cid !== 'brute' && cid !== 'goblin' && cid !== 'engineer' && cid !== 'mage' && cid !== 'miner' && cid !== 'legendary' && cid !== 'pirate' && cid !== 'cowboy' && cid !== 'fairy' && cid !== 'ballerina' && cid !== 'batman' && cid !== 'executive' && cid !== 'spiderman') {
-    // Bota Esquerda
-    ctx.fillStyle = bootColor;
-    ctx.beginPath();
-    ctx.roundRect(-10 + legAngle, 12, 8, 8, 3);
-    ctx.fill();
-    ctx.stroke();
-    ctx.fillStyle = '#09090b';
-    ctx.fillRect(-10 + legAngle, 18, 8, 2);
-
-    // Bota Direita
-    ctx.fillStyle = bootColor;
-    ctx.beginPath();
-    ctx.roundRect(2 - legAngle, 12, 8, 8, 3);
-    ctx.fill();
-    ctx.stroke();
-    ctx.fillStyle = '#09090b';
-    ctx.fillRect(2 - legAngle, 18, 8, 2);
-  }
-
-  // Brilho mágico de pó de fada nos tornozelos
-  if (cid === 'fairy' || cid === 'ballerina') {
-    ctx.fillStyle = '#fef08a';
-    ctx.beginPath();
-    ctx.arc(-6 + legAngle, 16, 1.5, 0, Math.PI * 2);
-    ctx.arc(6 - legAngle, 16, 1.5, 0, Math.PI * 2);
-    ctx.fill();
-  }
-
-  // Renderizador específico da classe com movimentos e armas dedicadas
-  switch (cid) {
-    case 'miner':
-      drawBombBot(ctx, now, swingAngle, legAngle, swingProgress, isMining);
-      break;
-    case 'brute':
-      drawViking(ctx, now, swingAngle, legAngle, swingProgress, isMining);
-      break;
-    case 'goblin':
-      drawFrogNinja(ctx, now, swingAngle, legAngle, swingProgress, isMining);
-      break;
-    case 'engineer':
-      drawWitch(ctx, now, swingAngle, legAngle, swingProgress, isMining);
-      break;
-    case 'mage':
-      drawVampire(ctx, now, swingAngle, legAngle, swingProgress, isMining);
-      break;
-    case 'legendary':
-      drawGolem(ctx, now, swingAngle, legAngle, swingProgress, isMining);
-      break;
-    case 'pirate':
-      drawPirate(ctx, now, swingAngle, legAngle, swingProgress, isMining);
-      break;
-    case 'cowboy':
-      drawCowboy(ctx, now, swingAngle, legAngle, swingProgress, isMining);
-      break;
-    case 'fairy':
-    case 'ballerina':
-      drawFairy(ctx, now, swingAngle, legAngle, swingProgress, isMining);
-      break;
-    case 'spiderman':
-      drawSpiderman(ctx, now, swingAngle, legAngle, swingProgress, isMining);
-      break;
-    case 'executive':
-    case 'batman':
-      drawExecutive(ctx, now, swingAngle, legAngle, swingProgress, isMining);
-      break;
-    default:
-      drawBombBot(ctx, now, swingAngle, legAngle, swingProgress, isMining);
-      break;
+  // Se o herói for do HERO_ROSTER, renderiza com seu sprite e arma dedicada (animação de tiro estilo Pirata)
+  if (rosterHero) {
+    drawRosterHero(ctx, rosterHero, rosterWeapon, now, swingAngle, legAngle, swingProgress, isMining);
+  } else {
+    // Fallback legado
+    switch (cid) {
+      case 'miner':
+        drawBombBot(ctx, now, swingAngle, legAngle, swingProgress, isMining);
+        break;
+      case 'brute':
+        drawViking(ctx, now, swingAngle, legAngle, swingProgress, isMining);
+        break;
+      case 'goblin':
+        drawFrogNinja(ctx, now, swingAngle, legAngle, swingProgress, isMining);
+        break;
+      case 'engineer':
+        drawWitch(ctx, now, swingAngle, legAngle, swingProgress, isMining);
+        break;
+      case 'mage':
+        drawVampire(ctx, now, swingAngle, legAngle, swingProgress, isMining);
+        break;
+      case 'legendary':
+        drawGolem(ctx, now, swingAngle, legAngle, swingProgress, isMining);
+        break;
+      case 'pirate':
+        drawPirate(ctx, now, swingAngle, legAngle, swingProgress, isMining);
+        break;
+      case 'cowboy':
+        drawCowboy(ctx, now, swingAngle, legAngle, swingProgress, isMining);
+        break;
+      case 'fairy':
+      case 'ballerina':
+        drawFairy(ctx, now, swingAngle, legAngle, swingProgress, isMining);
+        break;
+      case 'spiderman':
+        drawSpiderman(ctx, now, swingAngle, legAngle, swingProgress, isMining);
+        break;
+      case 'executive':
+      case 'batman':
+        drawExecutive(ctx, now, swingAngle, legAngle, swingProgress, isMining);
+        break;
+      default:
+        drawBombBot(ctx, now, swingAngle, legAngle, swingProgress, isMining);
+        break;
+    }
   }
 
   ctx.restore(); // Fecha ctx.scale(-1, 1)

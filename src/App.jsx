@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { MINES, INITIAL_MINERS, MINER_CLASSES } from './data/minersData';
+import { HERO_ROSTER, WEAPON_CATALOG, getHeroById, getWeaponById } from './data/heroRoster';
 import { HOUSE_TIERS } from './data/housesData';
 import { ENTRY_PACKAGES, calculateWithdrawalTax } from './data/investmentData';
 import { INITIAL_MARKET_LISTINGS, MARKETPLACE_FEE_PCT, FEE_SPLIT } from './data/marketplaceData';
@@ -159,6 +160,32 @@ export default function App() {
             });
             localStorage.setItem('crypto_miners_team', JSON.stringify(balanced));
             return balanced;
+          }
+
+          // Sincronização definitiva dos 11 novos Heróis e Armas do HERO_ROSTER
+          const needsRosterSync = parsed.some(m => !m.heroId || !m.weaponId);
+          if (needsRosterSync) {
+            const synced = parsed.map((m, idx) => {
+              const rosterHero = HERO_ROSTER.find(h => h.id === m.heroId) || HERO_ROSTER[idx % HERO_ROSTER.length];
+              const cInfo = MINER_CLASSES[rosterHero.classId] || MINER_CLASSES.miner;
+              return {
+                ...m,
+                heroId: rosterHero.id,
+                weaponId: m.weaponId || rosterHero.weaponId,
+                classId: rosterHero.classId,
+                className: rosterHero.className,
+                rarity: m.rarity || rosterHero.rarity,
+                rarityName: rosterHero.rarityName,
+                spriteIndex: rosterHero.spriteIndex,
+                name: (m.name && !m.name.startsWith('Bomb-Bot') && !m.name.startsWith('Ragnar') && !m.name.startsWith('Kero') && !m.name.startsWith('Morgana') && !m.name.startsWith('Vlad') && !m.name.startsWith('Minerador') && !m.name.startsWith('Capitão') && !m.name.startsWith('Cowboy') && !m.name.startsWith('Fadinha') && !m.name.startsWith('Homem-Aranha') && !m.name.startsWith('Bruce') && !m.name.startsWith('Bilionário'))
+                  ? m.name
+                  : rosterHero.name,
+                avatar: cInfo.avatar,
+                color: cInfo.color
+              };
+            });
+            localStorage.setItem('crypto_miners_team', JSON.stringify(synced));
+            return synced;
           }
           return parsed;
         }
