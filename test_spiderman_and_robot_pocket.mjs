@@ -10,9 +10,9 @@ console.log('================================================================\n'
 const map = generatePlayerMap('player_test_pocket', 1);
 
 // 2. Simula o exato cenário da foto do usuário:
-// Limpa todas as jazidas dentro do bolsão superior esquerdo (c: 1..3, r: 1..4)
-for (let r = 1; r <= 4; r++) {
-  for (let c = 1; c <= 3; c++) {
+// Limpa todas as jazidas dentro do bolsão superior esquerdo ao redor dos heróis (c: 1..4, r: 1..5)
+for (let r = 1; r <= 5; r++) {
+  for (let c = 1; c <= 4; c++) {
     map.grid[r][c] = BLOCK_EMPTY;
   }
 }

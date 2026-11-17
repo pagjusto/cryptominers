@@ -24,7 +24,7 @@ import {
   BLOCK_ZOMBIE,
   BLOCK_BOSS
 } from '../data/minersData.js';
-import { isCanyonTrackOrTunnel } from './canyonGeometry.js';
+import { isCityBuilding, isCanyonTrackOrTunnel } from './cityMapGeometry.js';
 import { ENEMIES } from '../data/enemiesCatalog.js';
 
 export const DEPOSIT_TYPES = {
@@ -106,21 +106,18 @@ export function rollDepositType() {
 }
 
 /**
- * Localiza todas as células válidas e permitidas da mina onde inimigos/jazidas podem surgir.
- * Garante que NENHUMA entidade apareça sob trilhos, sob túneis ou fora da área válida.
+ * Localiza todas as células válidas e permitidas da cidade onde zumbis e boss podem surgir.
+ * Regra Oficial: Zumbis e heróis NÃO podem subir para os prédios, somente ruas e grama.
  */
 export function getValidDepositCells(cols = GRID_COLS, rows = GRID_ROWS) {
   const validCells = [];
 
   for (let r = 1; r < rows - 1; r++) {
     for (let c = 1; c < cols - 1; c++) {
-      // Pilares indestrutíveis padrão de xadrez
-      if (r % 2 === 0 && c % 2 === 0) continue;
+      // Bloqueia edifícios, ruínas, muros e estruturas fortificadas da cidade
+      if (isCityBuilding(c, r)) continue;
 
-      // Trilhos e túnel da entrada no Cânion
-      if (isCanyonTrackOrTunnel(c, r, cols, rows)) continue;
-
-      // Área livre e permitida
+      // Área livre e permitida: ruas asfaltadas, caminhos de terra e gramados
       validCells.push({ c, r });
     }
   }
@@ -156,14 +153,14 @@ export function generatePlayerMap(playerId = DEFAULT_PLAYER_ID, cycleNumber = 1)
   const deposits = [];
   const hpMap = {};
 
-  // Inicializa matriz grid com limites e vazios
+  // Inicializa matriz grid com limites perimetrais e prédios como rocha sólida intransponível
   const grid = [];
   for (let r = 0; r < GRID_ROWS; r++) {
     const row = [];
     for (let c = 0; c < GRID_COLS; c++) {
       if (r === 0 || r === GRID_ROWS - 1 || c === 0 || c === GRID_COLS - 1) {
         row.push(BLOCK_BEDROCK);
-      } else if (r % 2 === 0 && c % 2 === 0) {
+      } else if (isCityBuilding(c, r)) {
         row.push(BLOCK_BEDROCK);
       } else {
         row.push(BLOCK_EMPTY);
@@ -288,15 +285,17 @@ export function getPlayerMap(playerId = DEFAULT_PLAYER_ID) {
       return generatePlayerMap(playerId, 1);
     }
 
-    // MIGRAÇÃO AUTOMÁTICA: Se o mapa armazenado ainda tiver as antigas jazidas de pedra/ouro/etc.,
-    // regenera imediatamente para o formato com Zumbis e Boss!
+    // MIGRAÇÃO AUTOMÁTICA: Se o mapa armazenado tiver entidades antigas, entidades em prédios,
+    // ou se ainda contiver os pilares antigos de xadrez do cânion:
     const hasOldDeposits = parsed.deposits.some(d => 
       d.type === 'stone' || d.type === 'gold' || d.type === 'diamond' || d.type === 'emerald'
     );
     const hasZombies = parsed.deposits.some(d => d.type === 'zombie');
+    const hasAnyInBuilding = parsed.deposits.some(d => !d.isCompleted && isCityBuilding(d.c, d.r));
+    const hasOldPillars = parsed.grid && parsed.grid[2] && parsed.grid[2][2] === BLOCK_BEDROCK && !isCityBuilding(2, 2);
 
-    if (hasOldDeposits || !hasZombies) {
-      console.log('🔄 Migrando mapa individual antigo para Zumbis e Boss...');
+    if (hasOldDeposits || !hasZombies || hasAnyInBuilding || hasOldPillars) {
+      console.log('🔄 Migrando mapa individual para nova geometria da cidade de sobrevivência...');
       return generatePlayerMap(playerId, parsed.cycleNumber || 1);
     }
 

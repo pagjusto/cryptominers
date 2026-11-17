@@ -8,7 +8,7 @@
 // ============================================================================
 
 import { TILE_SIZE, BLOCK_EMPTY, BLOCK_BEDROCK, BLOCK_ZOMBIE, BLOCK_BOSS } from '../data/minersData.js';
-import { isCanyonTrackOrTunnel } from './canyonGeometry.js';
+import { isCityBuilding, isCanyonTrackOrTunnel } from './cityMapGeometry.js';
 import { ENEMIES } from '../data/enemiesCatalog.js';
 
 class EnemySpriteManager {
@@ -223,8 +223,7 @@ export function updateEnemies(enemies, state, dt, now, isCanyon = true) {
           { x: enemy.gx, y: enemy.gy - 1 }
         ].filter(pos => {
           if (pos.x <= 0 || pos.x >= GRID_COLS - 1 || pos.y <= 0 || pos.y >= GRID_ROWS - 1) return false;
-          if (pos.y % 2 === 0 && pos.x % 2 === 0) return false; // Pilares
-          if (isCanyon && isCanyonTrackOrTunnel(pos.x, pos.y, GRID_COLS, GRID_ROWS)) return false; // Túnel da mina
+          if (isCityBuilding(pos.x, pos.y)) return false; // Prédios e estruturas da cidade (apenas ruas e grama)
           if (state.grid[pos.y] && state.grid[pos.y][pos.x] !== BLOCK_EMPTY) return false; // Bloqueado por rocha/outro
 
           // Não anda em cima de outro minerador

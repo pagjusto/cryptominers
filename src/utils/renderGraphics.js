@@ -24,10 +24,31 @@ import {
 import { HERO_ROSTER, WEAPON_CATALOG, getHeroById, getWeaponById } from '../data/heroRoster';
 
 // ============================================================================
-// CANYON MINE MAP IMAGE MANAGER (O MAPA REAL DO CÂNION EM ALTA DEFINIÇÃO)
+// CITY SURVIVAL MAP & CANYON MAP IMAGE MANAGERS
 // ============================================================================
+let cityBgImg = null;
+let cityBgLoaded = false;
 let canyonBgImg = null;
 let canyonBgLoaded = false;
+
+export function initCityMap(onLoaded) {
+  if (cityBgLoaded && cityBgImg) {
+    if (onLoaded) onLoaded();
+    return;
+  }
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.src = `/city_map.webp?v=1`;
+  img.onload = () => {
+    cityBgImg = img;
+    cityBgLoaded = true;
+    if (onLoaded) onLoaded();
+  };
+  img.onerror = () => {
+    console.error('Falha ao carregar /city_map.webp');
+    initCanyonMap(onLoaded);
+  };
+}
 
 export function initCanyonMap(onLoaded) {
   if (canyonBgLoaded && canyonBgImg) {
@@ -36,7 +57,7 @@ export function initCanyonMap(onLoaded) {
   }
   const img = new Image();
   img.crossOrigin = 'anonymous';
-  img.src = `/canyon_mine_map.png?v=${Date.now()}`;
+  img.src = `/canyon_mine_map.png?v=1`;
   img.onload = () => {
     canyonBgImg = img;
     canyonBgLoaded = true;
@@ -47,30 +68,34 @@ export function initCanyonMap(onLoaded) {
   };
 }
 
-// 1. Chão da Caverna Contínuo / Mapa Real do Cânion
+// 1. Chão do Mapa: Cidade de Sobrevivência Zumbi em Alta Definição
 export function drawContinuousCaveFloor(ctx, width, height, mine, now) {
-  // Se for a Mina do Cânion Subterrâneo (ou quando a imagem do cânion estiver pronta)
-  if (mine?.id === 'canyon' || (canyonBgLoaded && canyonBgImg && (!mine || mine.id === 'canyon'))) {
-    if (canyonBgLoaded && canyonBgImg) {
-      // 1. Renderiza o mapa completo do cânion plano em altíssima definição
-      ctx.drawImage(canyonBgImg, 0, 0, width, height);
-
-      // 2. Iluminação dinâmica sutil: pulsar suave das tochas na entrada da mina
-      const torchFlicker = Math.sin(now * 0.008) * 0.08 + 0.92;
-
-      // Brilho quente suave na entrada da mina em vigas de carvalho no topo
-      const torchGlow = ctx.createRadialGradient(width * 0.50, height * 0.14, 10, width * 0.50, height * 0.14, 130);
-      torchGlow.addColorStop(0, `rgba(251, 191, 36, ${0.16 * torchFlicker})`);
-      torchGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
-      ctx.fillStyle = torchGlow;
-      ctx.fillRect(0, 0, width, height);
-
-      return;
-    }
+  if (!cityBgImg && typeof window !== 'undefined') {
+    initCityMap();
   }
 
-  // Chão tradicional das outras minas (pedra, vulcão, etc.)
-  ctx.fillStyle = mine?.bgFloor || '#1e293b';
+  // 1. Prioridade Oficial: Mapa da Cidade de Sobrevivência Zumbi
+  if (cityBgLoaded && cityBgImg) {
+    ctx.drawImage(cityBgImg, 0, 0, width, height);
+
+    // Efeito suave de luz solar e calor na cidade
+    const sunPulse = Math.sin((now || 0) * 0.002) * 0.03 + 0.97;
+    const sunGlow = ctx.createRadialGradient(width * 0.5, height * 0.3, 80, width * 0.5, height * 0.3, width * 0.85);
+    sunGlow.addColorStop(0, `rgba(255, 255, 230, ${0.05 * sunPulse})`);
+    sunGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    ctx.fillStyle = sunGlow;
+    ctx.fillRect(0, 0, width, height);
+    return;
+  }
+
+  // 2. Fallback enquanto a imagem carrega
+  if (canyonBgLoaded && canyonBgImg) {
+    ctx.drawImage(canyonBgImg, 0, 0, width, height);
+    return;
+  }
+
+  // 3. Fallback gradiente de cor verde/terra
+  ctx.fillStyle = mine?.bgFloor || '#4d6836';
   ctx.fillRect(0, 0, width, height);
 
   ctx.fillStyle = mine?.bgFloorAlt || '#0f172a';

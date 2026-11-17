@@ -23,14 +23,15 @@ import {
   drawContinuousCaveFloor, 
   drawVectorCartoonRock, 
   drawMinerCharacter,
-  initCanyonMap
+  initCanyonMap,
+  initCityMap
 } from '../utils/renderGraphics';
 import { drawMinecart, drawTunnelPortals, initMinecartSprite } from '../utils/minecartRenderer';
 import { rockSpriteManager } from '../utils/rockSprites';
 import { characterSpriteManager } from '../utils/characterSprites';
 import { rollMiningGearDrop } from '../data/gearData';
 import { sfx } from '../utils/sfx';
-import { getCanyonTrackPosition, isCanyonTrackOrTunnel } from '../utils/canyonGeometry';
+import { isCityBuilding, getSafeHeroSpawn, isCanyonTrackOrTunnel } from '../utils/cityMapGeometry';
 import { findNextHeroAction } from '../utils/minerPathfinding';
 
 export default function GameBoard({ 
@@ -92,6 +93,7 @@ export default function GameBoard({
   const lastMapIdRef = useRef(mapData?.id);
 
   useEffect(() => {
+    initCityMap();
     initCanyonMap();
     initMinecartSprite();
     rockSpriteManager.init(() => {
@@ -123,18 +125,19 @@ export default function GameBoard({
   }, [statsResetTrigger]);
 
   useEffect(() => {
-    const isCanyon = (mine?.id === 'canyon' || !mine?.id);
     const current = gameStateRef.current.miners;
     gameStateRef.current.miners = miners.map((m, idx) => {
       const existing = current.find(em => em.id === m.id);
       let initX = existing ? existing.x : m.x;
       let initY = existing ? existing.y : m.y;
 
-      // Se for no Cânion e a posição for inválida ou cair dentro da estrutura da entrada da mina, realoca para chão aberto
-      const isInTunnelEntrance = Math.round(initX) >= 6 && Math.round(initX) <= 10 && Math.round(initY) >= 3 && Math.round(initY) <= 6;
-      if (typeof initX !== 'number' || isNaN(initX) || (isCanyon && isInTunnelEntrance)) {
-        initX = 2 + (idx % 2);
-        initY = 7 + (Math.floor(idx / 2) % 2);
+      // Se a posição for inválida ou cair dentro de edifícios/muros da cidade, realoca para rua/grama aberta
+      const insideBuilding = isCityBuilding(Math.round(initX), Math.round(initY));
+      const outOfBounds = initX <= 0 || initX >= GRID_COLS - 1 || initY <= 0 || initY >= GRID_ROWS - 1;
+      if (typeof initX !== 'number' || isNaN(initX) || insideBuilding || outOfBounds) {
+        const safePt = getSafeHeroSpawn(idx);
+        initX = safePt.x;
+        initY = safePt.y;
       }
 
       if (existing) {
@@ -669,36 +672,35 @@ export default function GameBoard({
       }
 
       // 1. Paredões e Pilares Indestrutíveis da Caverna
-      for (let r = 0; r < GRID_ROWS; r++) {
-        for (let c = 0; c < GRID_COLS; c++) {
-          const block = state.grid[r][c];
-          if (block !== BLOCK_BEDROCK) continue;
-          if (isCanyon && isCanyonTrackOrTunnel(c, r, GRID_COLS, GRID_ROWS)) continue;
+      // No Mapa da Cidade de Sobrevivência (mine.id === 'canyon'), os edifícios e ruínas já estão
+      // perfeitamente ilustrados na arte de fundo (/city_map.webp). Nenhuma pedra de caverna é desenhada.
+      if (mine?.id !== 'canyon') {
+        for (let r = 0; r < GRID_ROWS; r++) {
+          for (let c = 0; c < GRID_COLS; c++) {
+            const block = state.grid[r][c];
+            if (block !== BLOCK_BEDROCK) continue;
+            if (r === 0 || r === GRID_ROWS - 1 || c === 0 || c === GRID_COLS - 1) continue;
 
-          // No Cânion, bordas são os próprios paredões naturais da arte de fundo
-          if (mine?.id === 'canyon' && (r === 0 || r === GRID_ROWS - 1 || c === 0 || c === GRID_COLS - 1)) {
-            continue;
-          }
+            const px = c * TILE_SIZE;
+            const py = r * TILE_SIZE;
+            const sprite = rockSpriteManager.sprites?.rock;
 
-          const px = c * TILE_SIZE;
-          const py = r * TILE_SIZE;
-          const sprite = rockSpriteManager.sprites?.rock;
+            if (sprite) {
+              const aspect = (sprite.width && sprite.height) ? (sprite.width / sprite.height) : 1.05;
+              const bW = Math.floor(TILE_SIZE * 0.72);
+              const bH = Math.max(20, Math.floor(bW / aspect));
+              const bX = px + Math.floor((TILE_SIZE - bW) / 2);
+              const bY = py + TILE_SIZE - bH - 2;
 
-          if (sprite) {
-            const aspect = (sprite.width && sprite.height) ? (sprite.width / sprite.height) : 1.05;
-            const bW = Math.floor(TILE_SIZE * 0.72);
-            const bH = Math.max(20, Math.floor(bW / aspect));
-            const bX = px + Math.floor((TILE_SIZE - bW) / 2);
-            const bY = py + TILE_SIZE - bH - 2;
+              ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+              ctx.beginPath();
+              ctx.ellipse(px + TILE_SIZE / 2, py + TILE_SIZE - 2, bW * 0.42, 3.5, 0, 0, Math.PI * 2);
+              ctx.fill();
 
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
-            ctx.beginPath();
-            ctx.ellipse(px + TILE_SIZE / 2, py + TILE_SIZE - 2, bW * 0.42, 3.5, 0, 0, Math.PI * 2);
-            ctx.fill();
-
-            ctx.drawImage(sprite, bX, bY, bW, bH);
-          } else {
-            drawVectorCartoonRock(ctx, px, py, TILE_SIZE, 'bedrock', mine, 1, now);
+              ctx.drawImage(sprite, bX, bY, bW, bH);
+            } else {
+              drawVectorCartoonRock(ctx, px, py, TILE_SIZE, 'bedrock', mine, 1, now);
+            }
           }
         }
       }
@@ -741,28 +743,13 @@ export default function GameBoard({
         drawMinerCharacter(ctx, mx, my, miner, classInfo, now, swingProgress, faceDir, minerIndex);
       });
 
-      // Carrinhos de Minérios Estáticos (conforme solicitação do usuário: um no começo e outro entre a 2ª e 3ª curva)
-      if (isCanyon) {
-        // 1. Carrinho estático no começo dos trilhos (reta horizontal inicial)
-        const cartPos1 = getCanyonTrackPosition(0.08, logicalWidth, logicalHeight);
-        drawMinecart(ctx, cartPos1.x, cartPos1.y, 0, cartPos1.angle);
-
-        // 2. Carrinho estático no topo, entre a 2ª e a 3ª curva (reta horizontal superior)
-        const cartPos2 = getCanyonTrackPosition(0.46, logicalWidth, logicalHeight);
-        drawMinecart(ctx, cartPos2.x, cartPos2.y, 0, cartPos2.angle);
-      } else {
-        // Mapa clássico: dois carrinhos estáticos sobre os trilhos da linha 5
-        drawMinecart(ctx, 120, railY, 0, 0);
-        drawMinecart(ctx, logicalWidth * 0.55, railY, 0, 0);
-      }
-
-      // Vinheta atmosférica (suave no cânion para exaltar o visual dourado e os detalhes dos penhascos)
+      // Vinheta suave atmosférica para exaltar o visual da cidade
       const vignette = ctx.createRadialGradient(
-        logicalWidth / 2, logicalHeight / 2, logicalWidth * 0.35,
-        logicalWidth / 2, logicalHeight / 2, logicalWidth * 0.68
+        logicalWidth / 2, logicalHeight / 2, logicalWidth * 0.40,
+        logicalWidth / 2, logicalHeight / 2, logicalWidth * 0.75
       );
       vignette.addColorStop(0, 'rgba(0, 0, 0, 0)');
-      vignette.addColorStop(1, mine?.id === 'canyon' ? 'rgba(30, 16, 7, 0.35)' : 'rgba(3, 7, 18, 0.55)');
+      vignette.addColorStop(1, 'rgba(15, 23, 42, 0.22)');
       ctx.fillStyle = vignette;
       ctx.fillRect(0, 0, logicalWidth, logicalHeight);
 

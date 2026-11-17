@@ -11,7 +11,7 @@ import {
   BLOCK_DEPOSIT_EMERALD 
 } from '../data/minersData';
 import { BOMB_CRYPTO_REWARDS } from '../data/bombCryptoEconomy';
-import { isCanyonTrackOrTunnel } from './canyonGeometry';
+import { isCityBuilding, isCanyonTrackOrTunnel } from './cityMapGeometry';
 import { generatePlayerMap, getPlayerMap, DEFAULT_PLAYER_ID, MAX_DEPOSITS_PER_MAP } from './individualMapEngine';
 
 /**

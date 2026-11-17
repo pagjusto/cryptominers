@@ -7,24 +7,22 @@
 // ============================================================================
 
 import { GRID_COLS, GRID_ROWS, BLOCK_EMPTY, BLOCK_BEDROCK } from '../data/minersData.js';
+import { isCityBuilding } from './cityMapGeometry.js';
 
 /**
  * Determina se a célula contém um obstáculo intransponível para caminhada.
- * - Bordas do mapa (rocha matriz)
- * - Pilares indestrutíveis clássicos (x par e y par)
- * - Entrada da mina de madeira no Cânion (c=6..10, r=3..6)
- * - Jazidas e pedras sólidas (o herói para ao lado, não atravessa rocha)
- * NOTA: Trilhos de ferrovia no chão são transitáveis para passagem dos heróis.
+ * - Bordas do mapa (rocha matriz perimetral)
+ * - Prédios e estruturas da cidade (zumbis e heróis NÃO podem subir nos prédios, somente ruas e grama)
+ * - Jazidas e rochas sólidas (o herói para ao lado, não atravessa rocha ou obstáculos)
  */
 export function isSolidTerrain(x, y, grid, isCanyon = true) {
   if (x <= 0 || x >= GRID_COLS - 1 || y <= 0 || y >= GRID_ROWS - 1) return true;
-  if (y % 2 === 0 && x % 2 === 0) return true;
 
-  // Entrada do túnel da mina (estrutura física de rocha e vigas de madeira no centro)
-  if (isCanyon && x >= 6 && x <= 10 && y >= 3 && y <= 6) return true;
+  // Prédios, ruínas e bases fortificadas da cidade
+  if (isCityBuilding(x, y)) return true;
 
-  // Jazidas e rochas sólidas (não se pode atravessar rochas intactas)
-  if (grid[y] && grid[y][x] !== BLOCK_EMPTY) return true;
+  // Jazidas, zumbis bloqueadores e rochas sólidas
+  if (grid && grid[y] && grid[y][x] !== BLOCK_EMPTY) return true;
 
   return false;
 }
