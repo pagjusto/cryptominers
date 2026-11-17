@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { HERO_ROSTER, getWeaponById } from '../data/heroRoster';
 
 const COLS = 15;
 const ROWS = 11;
@@ -251,12 +252,20 @@ export default function ZombieSurvivalBoard({ survivors = [], onSurvivorsChange,
               {road && !wall && <span className="absolute inset-0 border-y border-dashed border-yellow-900/40" />}
             </div>;
           })}
-          {survivors.filter(s => s.status === 'work').map(s => (
-            <div key={s.id} className="absolute z-10 flex flex-col items-center justify-center" style={{ left: s.x * 40, top: s.y * 40, width: 40, height: 40 }}>
-              <span className="text-xl drop-shadow-[0_2px_2px_rgba(0,0,0,0.9)]">{s.avatar || '🧑‍🚀'}</span>
-              <span className="absolute bottom-0 w-8 h-1 rounded bg-slate-900 overflow-hidden"><span className="block h-full bg-emerald-400" style={{ width: `${Math.max(0, s.currentHealth / s.maxHealth * 100)}%` }} /></span>
-            </div>
-          ))}
+          {survivors.filter(s => s.status === 'work').map(s => {
+            const rosterIndex = Math.max(0, survivors.findIndex(item => item.id === s.id)) % HERO_ROSTER.length;
+            const hero = HERO_ROSTER.find(item => item.id === s.heroId) || HERO_ROSTER[rosterIndex];
+            const weapon = getWeaponById(hero.weaponId);
+            return (
+              <div key={s.id} title={`${hero.name} • ${weapon?.name || 'Sem arma'}`} className="absolute z-10 flex flex-col items-center justify-center" style={{ left: s.x * 40, top: s.y * 40, width: 40, height: 40 }}>
+                <span className="w-7 h-7 rounded-lg border border-emerald-300 bg-slate-950 shadow-lg block"
+                  style={{ backgroundImage: 'url(/assets/hero-roster.png)', backgroundRepeat: 'no-repeat', backgroundSize: '308px 28px', backgroundPosition: `-${hero.spriteIndex * 28}px 0`, imageRendering: 'pixelated' }} />
+                <span className="absolute -right-3 top-0 w-5 h-3 bg-no-repeat"
+                  style={{ backgroundImage: 'url(/assets/weapon-roster.png)', backgroundSize: '234.7px 12px', backgroundPosition: `-${(weapon?.sourceIndex || 0) * 18}px center`, imageRendering: 'pixelated' }} />
+                <span className="absolute bottom-0 w-8 h-1 rounded bg-slate-900 overflow-hidden"><span className="block h-full bg-emerald-400" style={{ width: `${Math.max(0, s.currentHealth / s.maxHealth * 100)}%` }} /></span>
+              </div>
+            );
+          })}
           {aliveZombies.map(z => (
             <div key={z.id} className="absolute z-20 flex flex-col items-center justify-center" style={{ left: z.x * 40, top: z.y * 40, width: 40, height: 40 }}>
               <span className="text-xl drop-shadow-[0_2px_2px_rgba(0,0,0,0.9)]">🧟</span>

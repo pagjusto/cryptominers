@@ -13,6 +13,7 @@ import {
   Clock
 } from 'lucide-react';
 import { MINER_CLASSES } from '../data/minersData';
+import { HERO_ROSTER, getWeaponById } from '../data/heroRoster';
 
 export default function HeroList({ 
   miners, 
@@ -132,7 +133,9 @@ export default function HeroList({
 
       {/* 4. LISTA DE SOBREVIVENTES */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden space-y-2.5 pr-1.5 no-scrollbar">
-        {miners.map((miner) => {
+        {miners.map((miner, index) => {
+          const rosterHero = HERO_ROSTER.find(hero => hero.id === miner.heroId) || HERO_ROSTER[index % HERO_ROSTER.length];
+          const rosterWeapon = getWeaponById(rosterHero.weaponId);
           const classInfo = MINER_CLASSES[miner.classId] || MINER_CLASSES.miner;
           const upgradeCost = parseFloat((2.5 * Math.pow(1.6, miner.level - 1)).toFixed(2));
           const canUpgrade = gold >= upgradeCost;
@@ -150,35 +153,27 @@ export default function HeroList({
             >
               {/* COLUNA 1: IDENTIDADE DO HERÓI (AVATAR, NOME, CLASSE, TRAIT) */}
               <div className="flex items-center gap-2.5 shrink-0 w-[185px] min-w-0">
-                <div 
-                  className="w-11 h-11 rounded-2xl border-2 flex items-center justify-center text-xl shadow-inner overflow-hidden relative shrink-0"
-                  style={{ 
-                    borderColor: classInfo.color,
-                    backgroundColor: `${classInfo.color}15`
-                  }}
-                >
-                  <img 
-                    src={miner.image || `/miners/${miner.classId}.png`} 
-                    alt={miner.name} 
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      if (e.target.src.endsWith('.png')) {
-                        e.target.src = `/miners/${miner.classId}.jpg`;
-                      } else {
-                        e.target.style.display = 'none';
-                      }
-                    }}
-                  />
-                  <span className="absolute -z-0">{miner.avatar}</span>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <div className="w-11 h-11 rounded-2xl border-2 shadow-inner shrink-0 bg-slate-950"
+                    title={rosterHero.name}
+                    style={{ borderColor: classInfo.color, backgroundImage: 'url(/assets/hero-roster.png)', backgroundRepeat: 'no-repeat', backgroundSize: '440px 40px', backgroundPosition: `-${rosterHero.spriteIndex * 40}px 0`, imageRendering: 'pixelated' }} />
+                  <div className="w-12 h-11 rounded-xl border border-slate-700 bg-slate-900 flex flex-col items-center justify-center px-1">
+                    <div className="w-10 h-6 bg-no-repeat" title={rosterWeapon?.name}
+                      style={{ backgroundImage: 'url(/assets/weapon-roster.png)', backgroundRepeat: 'no-repeat', backgroundSize: '488.9px 25px', backgroundPosition: `-${(rosterWeapon?.sourceIndex || 0) * 44}px center`, imageRendering: 'pixelated' }} />
+                    <span className="text-[7px] text-slate-400 text-center leading-tight">{rosterWeapon?.name || 'Sem arma'}</span>
+                  </div>
                 </div>
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">
-                    <span className="font-tech font-bold text-xs sm:text-sm text-white truncate max-w-[105px]" title={miner.name}>
-                      {miner.name}
+                    <span className="font-tech font-bold text-xs sm:text-sm text-white truncate max-w-[105px]" title={rosterHero.name}>
+                      {rosterHero.name}
                     </span>
                     <span className="text-[10px] px-1.5 py-0.2 rounded-md bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30 shrink-0">
                       Nv.{miner.level}
+                    </span>
+                    <span className={`text-[8px] px-1 py-0.2 rounded border font-bold uppercase shrink-0 ${rosterHero.rarity === 'legendary' ? 'bg-amber-500/20 text-amber-300 border-amber-500/40' : rosterHero.rarity === 'epic' ? 'bg-purple-500/20 text-purple-300 border-purple-500/40' : rosterHero.rarity === 'rare' ? 'bg-sky-500/20 text-sky-300 border-sky-500/40' : 'bg-slate-700/60 text-slate-300 border-slate-600'}`}>
+                      {rosterHero.rarityName}
                     </span>
                     {miner.stars && miner.stars > 1 && (
                       <span className="text-[9px] px-1 py-0.2 rounded-md bg-amber-500/20 text-amber-400 font-bold border border-amber-500/40 shrink-0">
@@ -192,7 +187,7 @@ export default function HeroList({
                     style={{ color: classInfo.color }}
                     title={miner.passiveTrait ? miner.passiveTrait.description : classInfo.specialty}
                   >
-                    {classInfo.name}
+                    {rosterHero.className}
                   </span>
 
                   {miner.passiveTrait && (
