@@ -2,13 +2,13 @@ import React from 'react';
 import { 
   Flame, 
   Zap, 
-  Battery, 
-  Play, 
+  HeartPulse, 
+  Play,
+  Pause, 
   ArrowUpCircle, 
   Wrench, 
   Sparkles, 
   Lock, 
-  Coins,
   Shield,
   Clock
 } from 'lucide-react';
@@ -236,14 +236,11 @@ export default function HeroList({
                       <Zap size={11} /> {miner.speed.toFixed(1)}
                     </span>
                     <span className="flex items-center gap-0.5 text-sky-400 font-bold" title="Vida máxima">
-                      <Battery size={11} /> {miner.maxStamina}
+                      <HeartPulse size={11} /> {miner.maxHealth || 100}
                     </span>
                   </div>
 
-                  <span className="text-[10px] text-emerald-400 font-bold flex items-center gap-1 font-mono shrink-0" title="Produção de MNC de referência">
-                    <Coins size={11} />
-                    <span>{(miner.coinsPerHour || 0.15).toFixed(2)}/h</span>
-                  </span>
+
                 </div>
 
                 {/* Barra de Estamina & Botão 100% */}
@@ -262,20 +259,7 @@ export default function HeroList({
                     </div>
                   </div>
 
-                  {miner.currentStamina < miner.maxStamina && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (onOpenEnergyRecoveryModal) onOpenEnergyRecoveryModal(miner.id);
-                        else if (onOpenEnergyBoostAd) onOpenEnergyBoostAd();
-                      }}
-                      title="Recuperar 100% de Energia deste herói via Anúncio Patrocinado"
-                      className="px-1.5 py-0.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500 hover:text-slate-950 text-emerald-300 border border-emerald-500/40 text-[9px] font-bold font-tech transition flex items-center gap-0.5 cursor-pointer shrink-0"
-                    >
-                      <Zap size={9} />
-                      <span>100%</span>
-                    </button>
-                  )}
+
                 </div>
 
                 {/* Barra de Durabilidade da Picareta */}
@@ -303,13 +287,13 @@ export default function HeroList({
                 {/* Badge de Status Atual */}
                 <div>
                   {miner.status === 'house' && (
-                    <span className="text-[9px] font-bold font-tech px-2 py-0.5 rounded-xl bg-blue-500/20 text-blue-300 border border-blue-500/40 flex items-center gap-1 animate-pulse" title="Recuperando energia na cama da Casa">
-                      🏠 NA CASA
+                    <span className="text-[9px] font-bold font-tech px-2 py-0.5 rounded-xl bg-blue-500/20 text-blue-300 border border-blue-500/40 flex items-center gap-1 animate-pulse" title="Recuperando vida no abrigo">
+                      🩺 NO ABRIGO
                     </span>
                   )}
                   {miner.status === 'waiting_house' && (
-                    <span className="text-[9px] font-bold font-tech px-2 py-0.5 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/40 flex items-center gap-1" title="Aguardando vaga livre de cama na Casa">
-                      ⏳ FILA CASA
+                    <span className="text-[9px] font-bold font-tech px-2 py-0.5 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/40 flex items-center gap-1" title="Aguardando leito no abrigo">
+                      ⏳ FILA DO ABRIGO
                     </span>
                   )}
                   {miner.status === 'reserve' && (
@@ -318,8 +302,8 @@ export default function HeroList({
                     </span>
                   )}
                   {miner.status === 'work' && (
-                    <span className="text-[9px] font-bold font-tech px-2 py-0.5 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1" title="Minerando na mina">
-                      ⛏️ MINERANDO
+                    <span className="text-[9px] font-bold font-tech px-2 py-0.5 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1" title="Combatendo zumbis automaticamente">
+                      ⚔️ EM COMBATE
                     </span>
                   )}
                 </div>
@@ -328,6 +312,7 @@ export default function HeroList({
                 <div className="flex items-center gap-1 w-full justify-end">
                   <button
                     onClick={() => onToggleStatus(miner.id)}
+                    disabled={miner.status === 'house' || miner.status === 'waiting_house'}
                     className={`px-2 py-1.5 rounded-xl text-[9px] font-tech font-bold flex items-center justify-center gap-0.5 transition cursor-pointer active:scale-95 shadow-sm shrink-0 ${
                       isWorking
                         ? 'bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700'
@@ -338,13 +323,13 @@ export default function HeroList({
                                 : 'bg-emerald-500 text-slate-950 hover:bg-emerald-400'))
                     }`}
                   >
-                    {isWorking ? <Moon size={9} /> : <Play size={9} className="fill-current" />}
+                    {isWorking ? <Pause size={9} /> : <Play size={9} className="fill-current" />}
                     <span>
                       {isWorking 
                         ? 'PAUSAR' 
                         : (miner.status === 'house' 
-                            ? 'ACORDAR' 
-                            : (miner.status === 'waiting_house' ? 'ESPERANDO' : 'TRABALHAR'))}
+                            ? 'TRATANDO' 
+                            : (miner.status === 'waiting_house' ? 'AGUARDANDO' : 'ATIVAR'))}
                     </span>
                   </button>
 
