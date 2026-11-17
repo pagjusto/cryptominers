@@ -270,15 +270,7 @@ export function drawEnemyCharacter(ctx, enemy, now) {
   const px = enemy.visualX * TILE_SIZE + TILE_SIZE / 2;
   const py = enemy.visualY * TILE_SIZE + TILE_SIZE / 2;
 
-  // 1. Sombra circular projetada no chão
-  const shadowW = isBoss ? TILE_SIZE * 0.75 : TILE_SIZE * 0.44;
-  const shadowH = isBoss ? 7 : 4;
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
-  ctx.beginPath();
-  ctx.ellipse(px, py + TILE_SIZE / 2 - 2, shadowW, shadowH, 0, 0, Math.PI * 2);
-  ctx.fill();
-
-  // 2. Animação de Caminhada (bobbing vertical + gingado dos ombros)
+  // 1. Animação de Caminhada (bobbing vertical + gingado dos ombros)
   const bobbing = enemy.isWalking 
     ? Math.sin(enemy.walkTimer) * (isBoss ? 3.8 : 2.8) 
     : Math.sin(now * 0.003 + enemy.index) * 1.2;
@@ -287,7 +279,7 @@ export function drawEnemyCharacter(ctx, enemy, now) {
     ? Math.cos(enemy.walkTimer) * (isBoss ? 0.06 : 0.09) 
     : 0;
 
-  // 3. Animação de Ataque (investida com garras afiadas)
+  // 2. Animação de Ataque (investida com garras afiadas)
   let lungeX = 0;
   let attackTilt = 0;
   let attackScale = 1;
@@ -310,25 +302,20 @@ export function drawEnemyCharacter(ctx, enemy, now) {
     }
   }
 
-  // 4. Desenho do Sprite do Inimigo com Transformações
+  // 3. Desenho do Sprite do Inimigo com Transformações
   ctx.save();
   ctx.translate(px + lungeX, py + bobbing);
   ctx.scale(enemy.facingDir * attackScale, attackScale);
   ctx.rotate(walkTilt + attackTilt);
 
-  const drawW = isBoss ? Math.floor(TILE_SIZE * 1.75) : Math.floor(TILE_SIZE * 0.95);
+  // Zumbis mais largos e imponentes conforme solicitado (largura expandida de 0.95 para 1.32)
+  const drawW = isBoss ? Math.floor(TILE_SIZE * 1.75) : Math.floor(TILE_SIZE * 1.32);
   const drawH = isBoss ? Math.floor(TILE_SIZE * 1.75) : Math.floor(TILE_SIZE * 1.15);
 
   if (img && img.complete && img.naturalWidth > 0) {
     // Efeito de flash vermelho ao receber golpe do herói
     if (enemy.hitFlash > 0) {
       ctx.filter = `brightness(1.5) drop-shadow(0 0 6px #ef4444)`;
-    } else if (isBoss) {
-      ctx.shadowColor = 'rgba(239, 68, 68, 0.45)';
-      ctx.shadowBlur = 10;
-    } else {
-      ctx.shadowColor = 'rgba(132, 204, 22, 0.35)';
-      ctx.shadowBlur = 6;
     }
 
     ctx.drawImage(img, -drawW / 2, -drawH + TILE_SIZE / 2 - 2, drawW, drawH);
