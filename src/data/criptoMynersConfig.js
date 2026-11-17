@@ -138,21 +138,21 @@ export const DEFAULT_CRIPTO_MYNERS_CONFIG = {
       costUsdt: 0,
       icon: '⛺',
       color: '#64748b',
-      description: 'Os heróis descansam no chão da caverna. Recuperação lenta.'
+      description: 'Os sobreviventes aguardam no chão da caverna. Recuperação lenta.'
     },
     basic: {
       id: 'basic',
-      name: 'Casa Básica',
+      name: 'Abrigo Básico',
       slots: 5,
       recoverySpeedMultiplier: 1.0, // 100% de velocidade base
       costUsdt: 25,
       icon: '🛖',
       color: '#38bdf8',
-      description: 'Acomoda até 5 personagens descansando simultaneamente com 100% da velocidade padrão.'
+      description: 'Acomoda até 5 sobreviventes em tratamento simultaneamente com 100% da velocidade padrão.'
     },
     reinforced: {
       id: 'reinforced',
-      name: 'Casa Reforçada',
+      name: 'Abrigo Reforçado',
       slots: 10,
       recoverySpeedMultiplier: 1.25, // 125%
       costUsdt: 50,
@@ -162,7 +162,7 @@ export const DEFAULT_CRIPTO_MYNERS_CONFIG = {
     },
     advanced: {
       id: 'advanced',
-      name: 'Casa Avançada',
+      name: 'Abrigo Avançado',
       slots: 15,
       recoverySpeedMultiplier: 1.50, // 150%
       costUsdt: 85,
@@ -173,7 +173,7 @@ export const DEFAULT_CRIPTO_MYNERS_CONFIG = {
     },
     legendary: {
       id: 'legendary',
-      name: 'Casa Lendária',
+      name: 'Abrigo Lendário',
       slots: 20,
       recoverySpeedMultiplier: 2.00, // 200% (2x mais veloz)
       costUsdt: 135,
@@ -196,7 +196,7 @@ export const DEFAULT_CRIPTO_MYNERS_CONFIG = {
       maxEnergy: 100, // Regra Oficial: 100
       energyDrainPerHour: 12, // Regra Oficial: 12/h (0.2/min)
       energyDrainPerMinute: 0.20,
-      recoveryPerHourReinforced: 15, // Regra Oficial Casa Reforçada: 15/h
+      recoveryPerHourReinforced: 15, // Regra Oficial Abrigo Reforçado: 15/h
       baseRecoveryMinutes: 400,
       badge: 'COMUM'
     },
@@ -210,7 +210,7 @@ export const DEFAULT_CRIPTO_MYNERS_CONFIG = {
       maxEnergy: 120, // Regra Oficial: 120
       energyDrainPerHour: 12, // Regra Oficial: 12/h (0.2/min)
       energyDrainPerMinute: 0.20,
-      recoveryPerHourReinforced: 18, // Regra Oficial Casa Reforçada: 18/h
+      recoveryPerHourReinforced: 18, // Regra Oficial Abrigo Reforçado: 18/h
       baseRecoveryMinutes: 400,
       badge: 'RARO'
     },
@@ -224,7 +224,7 @@ export const DEFAULT_CRIPTO_MYNERS_CONFIG = {
       maxEnergy: 140, // Regra Oficial: 140
       energyDrainPerHour: 12, // Regra Oficial: 12/h (0.2/min)
       energyDrainPerMinute: 0.20,
-      recoveryPerHourReinforced: 21, // Regra Oficial Casa Reforçada: 21/h
+      recoveryPerHourReinforced: 21, // Regra Oficial Abrigo Reforçado: 21/h
       baseRecoveryMinutes: 400,
       badge: 'ÉPICO'
     },
@@ -238,7 +238,7 @@ export const DEFAULT_CRIPTO_MYNERS_CONFIG = {
       maxEnergy: 160, // Regra Oficial: 160
       energyDrainPerHour: 12, // Regra Oficial: 12/h (0.2/min)
       energyDrainPerMinute: 0.20,
-      recoveryPerHourReinforced: 24, // Regra Oficial Casa Reforçada: 24/h
+      recoveryPerHourReinforced: 24, // Regra Oficial Abrigo Reforçado: 24/h
       baseRecoveryMinutes: 400,
       badge: 'LENDÁRIO'
     }
@@ -284,18 +284,18 @@ export const DEFAULT_CRIPTO_MYNERS_CONFIG = {
     }
   },
 
-  // 6. SISTEMA OFICIAL DE BAÚS DE CONSTRUÇÃO (APARIÇÃO POR CICLO DE 1 HORA)
+  // 6. SISTEMA DE BAÚS DE CONSTRUÇÃO (SORTEIO POR BOSS DERROTADO)
   constructionChestConfig: {
     enabled: true,
-    baseRateCommonPct: 0.5, // Taxa-base configurável por herói comum (ex: 0.5%)
+    baseRateCommonPct: 2, // Comum: 2% por sobrevivente
     rarityMultipliers: {
-      common: 1.0,      // 1x
-      rare: 1.5,        // 1.5x
-      epic: 2.0,        // 2x
-      legendary: 3.0    // 3x
+      common: 1.0,              // 2,00% por sobrevivente
+      rare: 1.1,                // 2,20% por sobrevivente
+      epic: 1.1666666666666667, // 2,333333...% por sobrevivente
+      legendary: 1.3333333333333333 // 2,666666...% por sobrevivente
     },
-    maxAccountChanceCapPct: 10.0, // Teto absoluto de 10% por ciclo
-    cycleDurationSeconds: 3600,   // 1 hora de mineração ativa (3600s)
+    maxAccountChanceCapPct: 40.0, // Teto absoluto de 40% por Boss e por jogador
+    cycleDurationSeconds: 0,      // Sem ciclo horário; sorteio a cada Boss derrotado
     dailyLimitPerPlayer: 3,       // Máximo de 3 baús por dia
     timezone: 'America/Sao_Paulo',// Horário oficial de Brasília
     rewardFragmentCount: 1        // Exatamente 1 Fragmento de Construção por baú
@@ -323,7 +323,18 @@ export function getCriptoMynersConfig() {
       rarityAttributes: { ...DEFAULT_CRIPTO_MYNERS_CONFIG.rarityAttributes, ...(parsed.rarityAttributes || {}) },
       upgradesConfig: { ...DEFAULT_CRIPTO_MYNERS_CONFIG.upgradesConfig, ...(parsed.upgradesConfig || {}) },
       adsConfig: { ...DEFAULT_CRIPTO_MYNERS_CONFIG.adsConfig, ...(parsed.adsConfig || {}) },
-      constructionChestConfig: { ...DEFAULT_CRIPTO_MYNERS_CONFIG.constructionChestConfig, ...(parsed.constructionChestConfig || {}) }
+      constructionChestConfig: {
+        ...DEFAULT_CRIPTO_MYNERS_CONFIG.constructionChestConfig,
+        ...(parsed.constructionChestConfig || {}),
+        rarityMultipliers: DEFAULT_CRIPTO_MYNERS_CONFIG.constructionChestConfig.rarityMultipliers,
+        baseRateCommonPct: [0.5, 15].includes(parsed.constructionChestConfig?.baseRateCommonPct)
+          ? 2
+          : (parsed.constructionChestConfig?.baseRateCommonPct ?? DEFAULT_CRIPTO_MYNERS_CONFIG.constructionChestConfig.baseRateCommonPct),
+        maxAccountChanceCapPct: parsed.constructionChestConfig?.maxAccountChanceCapPct === 10
+          ? 40
+          : (parsed.constructionChestConfig?.maxAccountChanceCapPct ?? DEFAULT_CRIPTO_MYNERS_CONFIG.constructionChestConfig.maxAccountChanceCapPct),
+        cycleDurationSeconds: 0
+      }
     };
   } catch (e) {
     console.error('Erro ao ler configuração do Cripto Myners:', e);

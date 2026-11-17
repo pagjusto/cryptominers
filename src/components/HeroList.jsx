@@ -2,18 +2,18 @@ import React from 'react';
 import { 
   Flame, 
   Zap, 
-  Battery, 
-  Play, 
-  Moon, 
+  HeartPulse, 
+  Play,
+  Pause, 
   ArrowUpCircle, 
   Wrench, 
   Sparkles, 
   Lock, 
-  Coins,
   Shield,
   Clock
 } from 'lucide-react';
 import { MINER_CLASSES } from '../data/minersData';
+import { HERO_ROSTER, getWeaponById } from '../data/heroRoster';
 
 export default function HeroList({ 
   miners, 
@@ -21,7 +21,6 @@ export default function HeroList({
   onUpgradeMiner, 
   onToggleStatus, 
   onAllWork, 
-  onAllRest,
   onOpenEnergyBoostAd,
   onOpenEnergyRecoveryModal,
   onRepairMiner,
@@ -36,23 +35,23 @@ export default function HeroList({
   return (
     <div className="flex flex-col h-full bg-slate-900 border border-slate-800 rounded-3xl p-4 sm:p-5 shadow-2xl overflow-hidden font-tech text-white">
       
-      {/* 1. TOPO DA EQUIPE DE MINERAÇÃO (AMPLIADO LATERALMENTE) */}
+      {/* 1. TOPO DA EQUIPE DE SOBREVIVENTES */}
       <div className="pb-3 mb-3 border-b border-slate-800 shrink-0">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
           <div>
             <div className="flex items-center gap-2">
               <h3 className="font-arcade text-xs sm:text-sm text-amber-400 tracking-wide">
-                EQUIPE DE MINERADORES
+                EQUIPE DE SOBREVIVENTES
               </h3>
               <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/40 text-[10px] font-mono">
-                {workingCount}/15 ATIVOS
+                {workingCount}/15 EM COMBATE
               </span>
               <span className="px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 font-bold border border-slate-700 text-[10px] font-mono">
                 {miners.length} TOTAL
               </span>
             </div>
             <div className="flex items-center gap-2 text-[11px] text-slate-400 mt-1">
-              <span>🏠 Na Casa: <b className="text-blue-400">{houseCount}</b></span>
+              <span>🩺 No abrigo: <b className="text-blue-400">{houseCount}</b></span>
               <span>•</span>
               <span>🛡️ Reservas: <b className="text-amber-400">{reserveCount}</b></span>
             </div>
@@ -75,16 +74,9 @@ export default function HeroList({
               className="px-3 py-1.5 rounded-xl bg-emerald-600/30 border border-emerald-500/50 hover:bg-emerald-600 hover:text-white text-emerald-300 font-tech text-xs font-bold flex items-center gap-1 transition cursor-pointer active:scale-95 shadow-sm"
             >
               <Play size={12} className="fill-emerald-300" />
-              <span>Todos Mina</span>
+              <span>Todos ao combate</span>
             </button>
-            <button
-              onClick={onAllRest}
-              className="px-3 py-1.5 rounded-xl bg-blue-600/30 border border-blue-500/50 hover:bg-blue-600 hover:text-white text-blue-300 font-tech text-xs font-bold flex items-center gap-1 transition cursor-pointer active:scale-95 shadow-sm"
-            >
-              <Moon size={12} className="fill-blue-300" />
-              <span>Dormir</span>
-            </button>
-          </div>
+            </div>
         </div>
       </div>
 
@@ -111,43 +103,44 @@ export default function HeroList({
         </button>
       </div>
 
-      {/* 3. BANNER DE PATROCÍNIO: RECUPERAÇÃO 100% DE ENERGIA */}
+      {/* 3. STATUS DO TRATAMENTO AUTOMÁTICO */}
       <div 
-        onClick={() => (onOpenEnergyRecoveryModal ? onOpenEnergyRecoveryModal() : onOpenEnergyBoostAd?.())}
-        className="mb-3.5 p-3 rounded-2xl bg-gradient-to-r from-amber-500/15 via-emerald-500/15 to-amber-500/15 border border-emerald-500/30 hover:border-emerald-400 transition cursor-pointer flex items-center justify-between group shadow-sm shrink-0"
+        className="mb-3.5 p-3 rounded-2xl bg-gradient-to-r from-amber-500/15 via-emerald-500/15 to-amber-500/15 border border-emerald-500/30 hover:border-emerald-400 transition flex items-center justify-between group shadow-sm shrink-0"
       >
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xl group-hover:scale-110 transition shadow-inner">
-            ⚡
+            ❤️‍🩹
           </div>
           <div>
             <div className="flex items-center gap-2">
               <span className="font-tech font-bold text-xs sm:text-sm text-emerald-300">
-                Recuperação 100% de Energia
+                Tratamento de ferimentos
               </span>
               <span className="text-[9px] bg-emerald-400/20 text-emerald-300 px-1.5 py-0.2 rounded-full border border-emerald-400/40 font-bold font-mono">
-                AD PATROCINADO 🍀
+                AUTOMÁTICO
               </span>
             </div>
             <span className="text-[11px] text-slate-400 font-tech block">
-              Assista a um anúncio rápido para restaurar imediatamente toda a energia de qualquer herói
+              Recurso de tratamento acelerado será integrado após a rede de anúncios real
             </span>
           </div>
         </div>
 
-        <button className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 text-slate-950 font-arcade font-bold text-[10px] transition shrink-0 shadow-md cursor-pointer active:scale-95">
-          RECARREGAR
+        <button disabled className="px-3 py-1.5 rounded-xl bg-slate-800 text-slate-400 font-arcade font-bold text-[10px] shrink-0 cursor-not-allowed">
+          EM BREVE
         </button>
       </div>
 
-      {/* 4. LISTA DE HERÓIS COM LAYOUT EXPANDIDO E ESPAÇOSO (SEM ACÚMULO) */}
+      {/* 4. LISTA DE SOBREVIVENTES */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden space-y-2.5 pr-1.5 no-scrollbar">
-        {miners.map((miner) => {
+        {miners.map((miner, index) => {
+          const rosterHero = HERO_ROSTER.find(hero => hero.id === miner.heroId) || HERO_ROSTER[index % HERO_ROSTER.length];
+          const rosterWeapon = getWeaponById(rosterHero.weaponId);
           const classInfo = MINER_CLASSES[miner.classId] || MINER_CLASSES.miner;
           const upgradeCost = parseFloat((2.5 * Math.pow(1.6, miner.level - 1)).toFixed(2));
           const canUpgrade = gold >= upgradeCost;
           const isWorking = miner.status === 'work';
-          const staminaPct = Math.round((miner.currentStamina / miner.maxStamina) * 100);
+          const staminaPct = Math.round(((miner.currentHealth ?? miner.maxHealth ?? 100) / (miner.maxHealth || 100)) * 100);
           const durability = miner.durability !== undefined ? Math.round(miner.durability) : 100;
           const isDull = durability <= 20;
 
@@ -160,35 +153,27 @@ export default function HeroList({
             >
               {/* COLUNA 1: IDENTIDADE DO HERÓI (AVATAR, NOME, CLASSE, TRAIT) */}
               <div className="flex items-center gap-2.5 shrink-0 w-[185px] min-w-0">
-                <div 
-                  className="w-11 h-11 rounded-2xl border-2 flex items-center justify-center text-xl shadow-inner overflow-hidden relative shrink-0"
-                  style={{ 
-                    borderColor: classInfo.color,
-                    backgroundColor: `${classInfo.color}15`
-                  }}
-                >
-                  <img 
-                    src={miner.image || `/miners/${miner.classId}.png`} 
-                    alt={miner.name} 
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      if (e.target.src.endsWith('.png')) {
-                        e.target.src = `/miners/${miner.classId}.jpg`;
-                      } else {
-                        e.target.style.display = 'none';
-                      }
-                    }}
-                  />
-                  <span className="absolute -z-0">{miner.avatar}</span>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <div className="w-11 h-11 rounded-2xl border-2 shadow-inner shrink-0 bg-slate-950"
+                    title={rosterHero.name}
+                    style={{ borderColor: classInfo.color, backgroundImage: 'url(/assets/hero-roster.png)', backgroundRepeat: 'no-repeat', backgroundSize: '440px 40px', backgroundPosition: `-${rosterHero.spriteIndex * 40}px 0`, imageRendering: 'pixelated' }} />
+                  <div className="w-12 h-11 rounded-xl border border-slate-700 bg-slate-900 flex flex-col items-center justify-center px-1">
+                    <div className="w-10 h-6 bg-no-repeat" title={rosterWeapon?.name}
+                      style={{ backgroundImage: 'url(/assets/weapon-roster.png)', backgroundRepeat: 'no-repeat', backgroundSize: '488.9px 25px', backgroundPosition: `-${(rosterWeapon?.sourceIndex || 0) * 44}px center`, imageRendering: 'pixelated' }} />
+                    <span className="text-[7px] text-slate-400 text-center leading-tight">{rosterWeapon?.name || 'Sem arma'}</span>
+                  </div>
                 </div>
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">
-                    <span className="font-tech font-bold text-xs sm:text-sm text-white truncate max-w-[105px]" title={miner.name}>
-                      {miner.name}
+                    <span className="font-tech font-bold text-xs sm:text-sm text-white truncate max-w-[105px]" title={rosterHero.name}>
+                      {rosterHero.name}
                     </span>
                     <span className="text-[10px] px-1.5 py-0.2 rounded-md bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30 shrink-0">
                       Nv.{miner.level}
+                    </span>
+                    <span className={`text-[8px] px-1 py-0.2 rounded border font-bold uppercase shrink-0 ${rosterHero.rarity === 'legendary' ? 'bg-amber-500/20 text-amber-300 border-amber-500/40' : rosterHero.rarity === 'epic' ? 'bg-purple-500/20 text-purple-300 border-purple-500/40' : rosterHero.rarity === 'rare' ? 'bg-sky-500/20 text-sky-300 border-sky-500/40' : 'bg-slate-700/60 text-slate-300 border-slate-600'}`}>
+                      {rosterHero.rarityName}
                     </span>
                     {miner.stars && miner.stars > 1 && (
                       <span className="text-[9px] px-1 py-0.2 rounded-md bg-amber-500/20 text-amber-400 font-bold border border-amber-500/40 shrink-0">
@@ -202,7 +187,7 @@ export default function HeroList({
                     style={{ color: classInfo.color }}
                     title={miner.passiveTrait ? miner.passiveTrait.description : classInfo.specialty}
                   >
-                    {classInfo.name}
+                    {rosterHero.className}
                   </span>
 
                   {miner.passiveTrait && (
@@ -234,29 +219,26 @@ export default function HeroList({
                 </div>
               </div>
 
-              {/* COLUNA 2: ATRIBUTOS, ESTAMINA & DURABILIDADE (ESPAÇOSO NO MEIO) */}
+              {/* COLUNA 2: ATRIBUTOS, VIDA & EQUIPAMENTOS (ESPAÇOSO NO MEIO) */}
               <div className="flex-1 flex flex-col justify-center gap-1 bg-slate-900/60 p-2 sm:p-2.5 rounded-xl border border-slate-800/80 min-w-0">
                 {/* Linha de Atributos */}
                 <div className="flex items-center justify-between text-xs font-mono">
                   <div className="flex items-center gap-2">
-                    <span className="flex items-center gap-0.5 text-rose-400 font-bold" title="Poder da Picareta">
+                    <span className="flex items-center gap-0.5 text-rose-400 font-bold" title="Poder de ataque">
                       <Flame size={11} /> {miner.power}
                     </span>
-                    <span className="flex items-center gap-0.5 text-amber-400 font-bold" title="Velocidade de Movimento">
+                    <span className="flex items-center gap-0.5 text-amber-400 font-bold" title="Velocidade de movimento">
                       <Zap size={11} /> {miner.speed.toFixed(1)}
                     </span>
-                    <span className="flex items-center gap-0.5 text-sky-400 font-bold" title="Estamina Máxima">
-                      <Battery size={11} /> {miner.maxStamina}
+                    <span className="flex items-center gap-0.5 text-sky-400 font-bold" title="Vida máxima">
+                      <HeartPulse size={11} /> {miner.maxHealth || 100}
                     </span>
                   </div>
 
-                  <span className="text-[10px] text-emerald-400 font-bold flex items-center gap-1 font-mono shrink-0" title="Produção por hora estimada">
-                    <Coins size={11} />
-                    <span>{(miner.coinsPerHour || 0.15).toFixed(2)}/h</span>
-                  </span>
+
                 </div>
 
-                {/* Barra de Estamina & Botão 100% */}
+                {/* Barra de vida */}
                 <div className="flex items-center justify-between gap-1.5">
                   <div className="flex-1 flex items-center gap-1.5 min-w-0">
                     <span className="text-[10px] text-slate-400 font-mono w-7 shrink-0">
@@ -272,20 +254,7 @@ export default function HeroList({
                     </div>
                   </div>
 
-                  {miner.currentStamina < miner.maxStamina && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (onOpenEnergyRecoveryModal) onOpenEnergyRecoveryModal(miner.id);
-                        else if (onOpenEnergyBoostAd) onOpenEnergyBoostAd();
-                      }}
-                      title="Recuperar 100% de Energia deste herói via Anúncio Patrocinado"
-                      className="px-1.5 py-0.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500 hover:text-slate-950 text-emerald-300 border border-emerald-500/40 text-[9px] font-bold font-tech transition flex items-center gap-0.5 cursor-pointer shrink-0"
-                    >
-                      <Zap size={9} />
-                      <span>100%</span>
-                    </button>
-                  )}
+
                 </div>
 
                 {/* Barra de Durabilidade da Picareta */}
@@ -308,18 +277,18 @@ export default function HeroList({
                 </div>
               </div>
 
-              {/* COLUNA 3: STATUS, AÇÕES (TRABALHAR/DORMIR) & EVOLUÇÃO */}
+              {/* COLUNA 3: STATUS, COMBATE E EVOLUÇÃO */}
               <div className="flex md:flex-col items-center md:items-end justify-between md:justify-center gap-1.5 shrink-0 w-[125px]">
                 {/* Badge de Status Atual */}
                 <div>
                   {miner.status === 'house' && (
-                    <span className="text-[9px] font-bold font-tech px-2 py-0.5 rounded-xl bg-blue-500/20 text-blue-300 border border-blue-500/40 flex items-center gap-1 animate-pulse" title="Recuperando energia na cama da Casa">
-                      🏠 NA CASA
+                    <span className="text-[9px] font-bold font-tech px-2 py-0.5 rounded-xl bg-blue-500/20 text-blue-300 border border-blue-500/40 flex items-center gap-1 animate-pulse" title="Recuperando vida no abrigo">
+                      🩺 NO ABRIGO
                     </span>
                   )}
                   {miner.status === 'waiting_house' && (
-                    <span className="text-[9px] font-bold font-tech px-2 py-0.5 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/40 flex items-center gap-1" title="Aguardando vaga livre de cama na Casa">
-                      ⏳ FILA CASA
+                    <span className="text-[9px] font-bold font-tech px-2 py-0.5 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/40 flex items-center gap-1" title="Aguardando leito no abrigo">
+                      ⏳ FILA DO ABRIGO
                     </span>
                   )}
                   {miner.status === 'reserve' && (
@@ -328,8 +297,8 @@ export default function HeroList({
                     </span>
                   )}
                   {miner.status === 'work' && (
-                    <span className="text-[9px] font-bold font-tech px-2 py-0.5 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1" title="Minerando na mina">
-                      ⛏️ MINERANDO
+                    <span className="text-[9px] font-bold font-tech px-2 py-0.5 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1" title="Combatendo zumbis automaticamente">
+                      ⚔️ EM COMBATE
                     </span>
                   )}
                 </div>
@@ -338,6 +307,7 @@ export default function HeroList({
                 <div className="flex items-center gap-1 w-full justify-end">
                   <button
                     onClick={() => onToggleStatus(miner.id)}
+                    disabled={miner.status === 'house' || miner.status === 'waiting_house'}
                     className={`px-2 py-1.5 rounded-xl text-[9px] font-tech font-bold flex items-center justify-center gap-0.5 transition cursor-pointer active:scale-95 shadow-sm shrink-0 ${
                       isWorking
                         ? 'bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700'
@@ -348,13 +318,13 @@ export default function HeroList({
                                 : 'bg-emerald-500 text-slate-950 hover:bg-emerald-400'))
                     }`}
                   >
-                    {isWorking ? <Moon size={9} /> : <Play size={9} className="fill-current" />}
+                    {isWorking ? <Pause size={9} /> : <Play size={9} className="fill-current" />}
                     <span>
                       {isWorking 
                         ? 'PAUSAR' 
                         : (miner.status === 'house' 
-                            ? 'ACORDAR' 
-                            : (miner.status === 'waiting_house' ? 'ESPERANDO' : 'TRABALHAR'))}
+                            ? 'TRATANDO' 
+                            : (miner.status === 'waiting_house' ? 'AGUARDANDO' : 'ATIVAR'))}
                     </span>
                   </button>
 
