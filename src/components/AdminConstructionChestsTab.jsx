@@ -160,10 +160,10 @@ export default function AdminConstructionChestsTab({
             <b className="font-arcade text-xl text-emerald-400">
               {liveChance.finalChance}%
             </b>
-            <span className="text-xs text-emerald-400/80 font-mono">/ ciclo</span>
+            <span className="text-xs text-emerald-400/80 font-mono">/ Boss</span>
           </div>
           <span className="text-[10px] text-slate-400">
-            {liveChance.isCapped ? '⚠️ Teto de 10% aplicado' : `${liveChance.activeMinersCount} heróis ativos`}
+            {liveChance.isCapped ? '⚠️ Teto de 40% aplicado' : `${liveChance.activeMinersCount} sobreviventes ativos`}
           </span>
         </div>
 
@@ -228,7 +228,7 @@ export default function AdminConstructionChestsTab({
             </p>
           </div>
 
-          {/* Teto Máximo por Conta */}
+          {/* Teto Máximo por Boss */}
           <div className="space-y-1.5 bg-slate-900 p-3.5 rounded-xl border border-slate-800">
             <div className="flex justify-between items-center text-xs">
               <label className="text-slate-300 font-bold">Teto Máximo por Boss</label>
@@ -338,9 +338,9 @@ export default function AdminConstructionChestsTab({
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="bg-slate-900 p-3.5 rounded-xl border border-slate-800 space-y-1.5">
-            <span className="text-xs text-slate-400 font-bold">Heróis Ativos na Mina:</span>
+            <span className="text-xs text-slate-400 font-bold">Sobreviventes em Combate:</span>
             <div className="font-arcade text-lg text-emerald-400">
-              {liveChance.activeMinersCount} heróis trabalhando
+              {liveChance.activeMinersCount} sobreviventes em combate
             </div>
             <p className="text-[10px] text-slate-500">
               Heróis descansando na casa ou sem energia são excluídos automaticamente.
