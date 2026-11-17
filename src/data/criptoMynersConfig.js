@@ -138,21 +138,21 @@ export const DEFAULT_CRIPTO_MYNERS_CONFIG = {
       costUsdt: 0,
       icon: '⛺',
       color: '#64748b',
-      description: 'Os heróis descansam no chão da caverna. Recuperação lenta.'
+      description: 'Os sobreviventes aguardam no chão da caverna. Recuperação lenta.'
     },
     basic: {
       id: 'basic',
-      name: 'Casa Básica',
+      name: 'Abrigo Básico',
       slots: 5,
       recoverySpeedMultiplier: 1.0, // 100% de velocidade base
       costUsdt: 25,
       icon: '🛖',
       color: '#38bdf8',
-      description: 'Acomoda até 5 personagens descansando simultaneamente com 100% da velocidade padrão.'
+      description: 'Acomoda até 5 sobreviventes em tratamento simultaneamente com 100% da velocidade padrão.'
     },
     reinforced: {
       id: 'reinforced',
-      name: 'Casa Reforçada',
+      name: 'Abrigo Reforçado',
       slots: 10,
       recoverySpeedMultiplier: 1.25, // 125%
       costUsdt: 50,
@@ -162,7 +162,7 @@ export const DEFAULT_CRIPTO_MYNERS_CONFIG = {
     },
     advanced: {
       id: 'advanced',
-      name: 'Casa Avançada',
+      name: 'Abrigo Avançado',
       slots: 15,
       recoverySpeedMultiplier: 1.50, // 150%
       costUsdt: 85,
@@ -173,7 +173,7 @@ export const DEFAULT_CRIPTO_MYNERS_CONFIG = {
     },
     legendary: {
       id: 'legendary',
-      name: 'Casa Lendária',
+      name: 'Abrigo Lendário',
       slots: 20,
       recoverySpeedMultiplier: 2.00, // 200% (2x mais veloz)
       costUsdt: 135,
@@ -196,7 +196,7 @@ export const DEFAULT_CRIPTO_MYNERS_CONFIG = {
       maxEnergy: 100, // Regra Oficial: 100
       energyDrainPerHour: 12, // Regra Oficial: 12/h (0.2/min)
       energyDrainPerMinute: 0.20,
-      recoveryPerHourReinforced: 15, // Regra Oficial Casa Reforçada: 15/h
+      recoveryPerHourReinforced: 15, // Regra Oficial Abrigo Reforçado: 15/h
       baseRecoveryMinutes: 400,
       badge: 'COMUM'
     },
@@ -210,7 +210,7 @@ export const DEFAULT_CRIPTO_MYNERS_CONFIG = {
       maxEnergy: 120, // Regra Oficial: 120
       energyDrainPerHour: 12, // Regra Oficial: 12/h (0.2/min)
       energyDrainPerMinute: 0.20,
-      recoveryPerHourReinforced: 18, // Regra Oficial Casa Reforçada: 18/h
+      recoveryPerHourReinforced: 18, // Regra Oficial Abrigo Reforçado: 18/h
       baseRecoveryMinutes: 400,
       badge: 'RARO'
     },
@@ -224,7 +224,7 @@ export const DEFAULT_CRIPTO_MYNERS_CONFIG = {
       maxEnergy: 140, // Regra Oficial: 140
       energyDrainPerHour: 12, // Regra Oficial: 12/h (0.2/min)
       energyDrainPerMinute: 0.20,
-      recoveryPerHourReinforced: 21, // Regra Oficial Casa Reforçada: 21/h
+      recoveryPerHourReinforced: 21, // Regra Oficial Abrigo Reforçado: 21/h
       baseRecoveryMinutes: 400,
       badge: 'ÉPICO'
     },
@@ -238,7 +238,7 @@ export const DEFAULT_CRIPTO_MYNERS_CONFIG = {
       maxEnergy: 160, // Regra Oficial: 160
       energyDrainPerHour: 12, // Regra Oficial: 12/h (0.2/min)
       energyDrainPerMinute: 0.20,
-      recoveryPerHourReinforced: 24, // Regra Oficial Casa Reforçada: 24/h
+      recoveryPerHourReinforced: 24, // Regra Oficial Abrigo Reforçado: 24/h
       baseRecoveryMinutes: 400,
       badge: 'LENDÁRIO'
     }
