@@ -326,6 +326,7 @@ export function getCriptoMynersConfig() {
       constructionChestConfig: {
         ...DEFAULT_CRIPTO_MYNERS_CONFIG.constructionChestConfig,
         ...(parsed.constructionChestConfig || {}),
+        rarityMultipliers: DEFAULT_CRIPTO_MYNERS_CONFIG.constructionChestConfig.rarityMultipliers,
         baseRateCommonPct: [0.5, 15].includes(parsed.constructionChestConfig?.baseRateCommonPct)
           ? 2
           : (parsed.constructionChestConfig?.baseRateCommonPct ?? DEFAULT_CRIPTO_MYNERS_CONFIG.constructionChestConfig.baseRateCommonPct),
