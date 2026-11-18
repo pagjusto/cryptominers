@@ -23,9 +23,7 @@ export default function HeroList({
   onOpenEnergyBoostAd,
   onOpenEnergyRecoveryModal,
   onRepairMiner,
-  onDiversifyTeam,
-  onOpenFusionModal,
-  onOpenGearModal
+  onDiversifyTeam
 }) {
   const workingCount = miners.filter(m => m.status === 'work').length;
   const houseCount = miners.filter(m => m.status === 'house').length;
@@ -79,26 +77,28 @@ export default function HeroList({
         </div>
       </div>
 
-      {/* 2. RECURSOS RPG: FUSÃO (QUEIMA DE HERÓIS) & RELÍQUIAS MÍSTICAS */}
+      {/* 2. RECURSOS RPG: FUSÃO (QUEIMA DE HERÓIS) & RELÍQUIAS MÍSTICAS (BLOQUEADOS) */}
       <div className="grid grid-cols-2 gap-2.5 mb-3 shrink-0">
         <button
-          onClick={onOpenFusionModal}
-          title="Fusão de Heróis (Recurso trancado por enquanto)"
-          className="flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-gradient-to-r from-rose-950/40 via-slate-900 to-slate-900 border border-rose-500/30 hover:border-amber-400/60 text-slate-300 hover:text-white font-tech text-xs font-bold transition shadow-sm cursor-pointer group"
+          type="button"
+          disabled
+          title="Fusão de Heróis (Recurso bloqueado)"
+          className="flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-slate-900/60 border border-slate-800 text-slate-500 font-tech text-xs font-bold shadow-sm cursor-not-allowed opacity-60 select-none"
         >
-          <Lock size={12} className="text-amber-400 group-hover:scale-110 transition shrink-0" />
-          <Flame size={13} className="text-rose-400 shrink-0" />
-          <span>FUSÃO DE HERÓIS (★)</span>
+          <Lock size={12} className="text-amber-500/60 shrink-0" />
+          <Flame size={13} className="text-slate-500 shrink-0" />
+          <span>FUSÃO (BLOQUEADO)</span>
         </button>
 
         <button
-          onClick={onOpenGearModal}
-          title="Relíquias Místicas (Recurso trancado por enquanto)"
-          className="flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-gradient-to-r from-sky-950/40 via-slate-900 to-slate-900 border border-sky-500/30 hover:border-amber-400/60 text-slate-300 hover:text-white font-tech text-xs font-bold transition shadow-sm cursor-pointer group"
+          type="button"
+          disabled
+          title="Relíquias & Itens (Recurso bloqueado)"
+          className="flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-slate-900/60 border border-slate-800 text-slate-500 font-tech text-xs font-bold shadow-sm cursor-not-allowed opacity-60 select-none"
         >
-          <Lock size={12} className="text-amber-400 group-hover:scale-110 transition shrink-0" />
-          <Shield size={13} className="text-sky-400 shrink-0" />
-          <span>RELÍQUIAS & ITENS</span>
+          <Lock size={12} className="text-amber-500/60 shrink-0" />
+          <Shield size={13} className="text-slate-500 shrink-0" />
+          <span>RELÍQUIAS (BLOQUEADO)</span>
         </button>
       </div>
 

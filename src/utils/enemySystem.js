@@ -116,14 +116,16 @@ export function syncEnemiesWithMap(existingEnemies = [], mapData, grid, hpMap) {
         attackProgress: 0,
         attackCooldown: 0,
         hitFlash: 0,
-        hp: isBoss ? (dep.currentHp || 6000) : (dep.currentHp > 2 ? 2 : (dep.currentHp || 2)),
-        maxHp: isBoss ? (dep.maxHp || 6000) : 2
+        hp: isBoss ? (dep.currentHp > 30 ? 30 : (dep.currentHp || 30)) : (dep.currentHp > 2 ? 2 : (dep.currentHp || 2)),
+        maxHp: isBoss ? 30 : 2
       };
     } else {
       // Sincroniza HP com mapa individual
       const cellKey = `${entity.gx},${entity.gy}`;
       if (hpMap[cellKey] !== undefined) {
-        const targetHp = entity.type === 'zombie' && hpMap[cellKey] > 2 ? 2 : hpMap[cellKey];
+        let targetHp = hpMap[cellKey];
+        if (entity.type === 'zombie' && targetHp > 2) targetHp = 2;
+        if (entity.type === 'boss' && targetHp > 30) targetHp = 30;
         if (targetHp < entity.hp) {
           entity.hitFlash = 0.25; // Pisca em vermelho ao levar golpe
         }

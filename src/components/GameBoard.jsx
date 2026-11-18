@@ -549,9 +549,13 @@ export default function GameBoard({
               }
 
               const isZombie = blockType === BLOCK_ZOMBIE;
-              const effectiveCurHp = isZombie ? (curHp > 2 ? 2 : curHp) : curHp;
+              const isBoss = blockType === BLOCK_BOSS;
+              const effectiveCurHp = isZombie 
+                ? (curHp > 2 ? 2 : curHp) 
+                : (isBoss ? (curHp > 30 ? 30 : curHp) : curHp);
               // Para zumbis: morrem com exatamente 2 tiros (1 por tiro normal, ou 2 se for crítico)
-              const hitDamageApplied = isZombie ? (isCrit ? 2 : 1) : hitDamage;
+              // Para o boss: morre com exatamente 30 tiros (1 por tiro normal, ou 2 se for crítico)
+              const hitDamageApplied = (isZombie || isBoss) ? (isCrit ? 2 : 1) : hitDamage;
               const newHp = Math.max(0, effectiveCurHp - hitDamageApplied);
 
               // Textos flutuantes otimizados para manter 60 FPS
@@ -573,6 +577,27 @@ export default function GameBoard({
                     color: isCrit ? '#ef4444' : '#84cc16',
                     opacity: 1,
                     vy: -40
+                  });
+                }
+              } else if (isBoss) {
+                const shotCount = 30 - newHp;
+                if (newHp <= 0) {
+                  state.floatTexts.push({
+                    text: '💥 BOSS DERROTADO! (30/30)',
+                    x: tx * TILE_SIZE + TILE_SIZE / 2,
+                    y: ty * TILE_SIZE + 10,
+                    color: '#ef4444',
+                    opacity: 1,
+                    vy: -45
+                  });
+                } else {
+                  state.floatTexts.push({
+                    text: isCrit ? `💥 CRÍTICO! (${shotCount}/30)` : `🎯 TIRO (${shotCount}/30)`,
+                    x: tx * TILE_SIZE + TILE_SIZE / 2,
+                    y: ty * TILE_SIZE + 10,
+                    color: isCrit ? '#f97316' : '#eab308',
+                    opacity: 1,
+                    vy: -35
                   });
                 }
               } else {
@@ -613,7 +638,7 @@ export default function GameBoard({
               // Rastreia dano total infligido pelo herói
               if (miner && miner.id) {
                 const ms = state.minerStats[miner.id] || { blocksBroken: 0, bcoinEarned: 0, damageDealt: 0 };
-                ms.damageDealt = (ms.damageDealt || 0) + (isZombie ? hitDamageApplied : hitDamage);
+                ms.damageDealt = (ms.damageDealt || 0) + ((isZombie || isBoss) ? hitDamageApplied : hitDamage);
                 state.minerStats[miner.id] = ms;
               }
 

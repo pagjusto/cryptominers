@@ -205,7 +205,7 @@ export function generatePlayerMap(playerId = DEFAULT_PLAYER_ID, cycleNumber = 1)
     const bossConfig = ENEMIES.BOSS;
     const bossCellKey = `${bossPos.c},${bossPos.r}`;
     const bossId = `boss_${mapId}_0`;
-    const bossHp = bossConfig.baseHp || 6000;
+    const bossHp = bossConfig.baseHp || 30;
 
     const bossObj = {
       id: bossId,

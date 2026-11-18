@@ -1502,8 +1502,6 @@ export default function App() {
             onOpenEnergyRecoveryModal={handleOpenEnergyRecovery}
             onRepairMiner={handleRepairMiner}
             onDiversifyTeam={handleDiversifyTeam}
-            onOpenFusionModal={() => setIsFusionModalOpen(true)}
-            onOpenGearModal={() => setIsGearModalOpen(true)}
           />
         </aside>
 

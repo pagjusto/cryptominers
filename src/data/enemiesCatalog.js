@@ -35,7 +35,7 @@ export const ENEMIES = {
     sprite: '/enemies/boss.png',
     cleanSprite: '/enemies/boss_clean.png',
     speed: 0.38, // Movimentação mais pesada
-    baseHp: 6000, // HP do Boss
+    baseHp: 30, // Morre com exatamente 30 tiros conforme regra do usuário
     attackDamage: 0, // Visual apenas
     attackRange: 1.4,
     walkCadence: 4.0,
