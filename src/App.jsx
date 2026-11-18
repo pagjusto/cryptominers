@@ -187,6 +187,21 @@ export default function App() {
             localStorage.setItem('crypto_miners_team', JSON.stringify(synced));
             return synced;
           }
+          // Sincronização dos novos heróis Hunter e Scarlet
+          if (!parsed.some(m => m.heroId === 'hunter') || !parsed.some(m => m.heroId === 'scarlet')) {
+            const updated = [...parsed];
+            if (!updated.some(m => m.heroId === 'hunter') && updated.length < 15) {
+              const hunter = INITIAL_MINERS.find(m => m.heroId === 'hunter');
+              if (hunter) updated.push({ ...hunter, id: 'miner-' + Date.now() + '-hunter' });
+            }
+            if (!updated.some(m => m.heroId === 'scarlet') && updated.length < 15) {
+              const scarlet = INITIAL_MINERS.find(m => m.heroId === 'scarlet');
+              if (scarlet) updated.push({ ...scarlet, id: 'miner-' + Date.now() + '-scarlet' });
+            }
+            localStorage.setItem('crypto_miners_team', JSON.stringify(updated));
+            return updated;
+          }
+
           return parsed;
         }
       } catch (e) {}
