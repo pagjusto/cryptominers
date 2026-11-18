@@ -4489,6 +4489,9 @@ export const drawBatman = drawExecutive;
 // ============================================================================
 let heroRosterImg = null;
 let heroRosterLoaded = false;
+let heroRosterUpperImg = null;
+let heroRosterLegLeftImg = null;
+let heroRosterLegRightImg = null;
 let weaponRosterImg = null;
 let weaponRosterLoaded = false;
 
@@ -4501,6 +4504,30 @@ export function initRosterSprites() {
     img.onload = () => {
       heroRosterImg = img;
       heroRosterLoaded = true;
+    };
+  }
+  if (!heroRosterUpperImg) {
+    const uImg = new Image();
+    uImg.crossOrigin = 'anonymous';
+    uImg.src = '/assets/hero-roster-upper.png';
+    uImg.onload = () => {
+      heroRosterUpperImg = uImg;
+    };
+  }
+  if (!heroRosterLegLeftImg) {
+    const llImg = new Image();
+    llImg.crossOrigin = 'anonymous';
+    llImg.src = '/assets/hero-roster-leg-left.png';
+    llImg.onload = () => {
+      heroRosterLegLeftImg = llImg;
+    };
+  }
+  if (!heroRosterLegRightImg) {
+    const lrImg = new Image();
+    lrImg.crossOrigin = 'anonymous';
+    lrImg.src = '/assets/hero-roster-leg-right.png';
+    lrImg.onload = () => {
+      heroRosterLegRightImg = lrImg;
     };
   }
   if (!weaponRosterImg) {
@@ -4549,6 +4576,18 @@ export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swi
   const wsx = sourceIndex * wsw;
   const wsy = 0;
 
+  const dx = -pw / 2;
+  const dy = -ph + 9;
+
+  // Pontos de pivô anatômicos do quadril para os 11 heróis (proporcionais à moldura 128x128)
+  const hipLeftX = dx + pw * (58 / 128);
+  const hipLeftY = dy + ph * (71 / 128);
+
+  const hipRightX = dx + pw * (76 / 128);
+  const hipRightY = dy + ph * (71 / 128);
+
+  const hasParts = heroRosterUpperImg?.complete && heroRosterLegLeftImg?.complete && heroRosterLegRightImg?.complete;
+
   // =========================================================================
   // 1. MODO REPOUSO & CAMINHADA (IDLE / WALKING)
   // =========================================================================
@@ -4556,49 +4595,78 @@ export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swi
     ctx.save();
     ctx.translate(0, 14); // Pivot exatamente na base dos pés
 
-    // Swagger / ginga de caminhada e respiração
-    const walkBob = Math.abs(Math.sin(now * 0.012)) * 1.5;
-    const bodySway = Math.sin(now * 0.012) * 0.035;
-    const breathY = 1 + Math.sin(now * 0.01) * 0.02;
-    const breathX = 1 - Math.sin(now * 0.01) * 0.01;
+    // Frequência dinâmica dos passos (mesmo ritmo e amplitude de passada dos zumbis)
+    const stepPhase = now * 0.016;
+    const heroLegSwing = Math.sin(stepPhase) * 0.42; // ~24 graus de passada alternada
+    const stepBob = Math.abs(Math.sin(stepPhase)) * 1.6;
+    const torsoSway = Math.sin(stepPhase) * 0.035;
 
-    ctx.translate(0, -walkBob);
-    ctx.rotate(bodySway);
-    ctx.scale(breathX, breathY);
-
-    // Desenha corpo do Herói com renderização vetorial suave e pés tocando o solo
-    if (heroRosterLoaded && heroRosterImg) {
+    if (hasParts) {
       ctx.save();
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = 'high';
       ctx.filter = 'drop-shadow(0px 1px 1.5px rgba(0,0,0,0.55))';
-      ctx.drawImage(heroRosterImg, sx, sy, sw, sh, -pw / 2, -ph + 9, pw, ph);
+
+      // 1. Perna Direita (trás / fundo)
+      ctx.save();
+      ctx.translate(hipRightX, hipRightY);
+      ctx.rotate(-heroLegSwing);
+      ctx.translate(-hipRightX, -hipRightY);
+      ctx.drawImage(heroRosterLegRightImg, sx, sy, sw, sh, dx, dy, pw, ph);
+      ctx.restore();
+
+      // 2. Perna Esquerda (frente)
+      ctx.save();
+      ctx.translate(hipLeftX, hipLeftY);
+      ctx.rotate(heroLegSwing);
+      ctx.translate(-hipLeftX, -hipLeftY);
+      ctx.drawImage(heroRosterLegLeftImg, sx, sy, sw, sh, dx, dy, pw, ph);
+      ctx.restore();
+
+      // 3. Tronco Superior (Cabeça, Jaqueta, Torso, Braços)
+      ctx.save();
+      ctx.translate(0, -stepBob);
+      ctx.rotate(torsoSway);
+      ctx.drawImage(heroRosterUpperImg, sx, sy, sw, sh, dx, dy, pw, ph);
+
+      // Arma apoiada na mão direita do herói em marcha
+      if (weaponRosterLoaded && weaponRosterImg) {
+        ctx.save();
+        ctx.translate(11, -11);
+        ctx.rotate(0.35 + Math.sin(stepPhase) * 0.04);
+        ctx.drawImage(weaponRosterImg, wsx, wsy, wsw, wsh, -6, -10, gw, gh);
+
+        // Mão do herói segurando a coronha / empunhadura
+        ctx.fillStyle = '#fed7aa';
+        ctx.strokeStyle = '#1c1917';
+        ctx.lineWidth = 1.3;
+        ctx.beginPath();
+        ctx.arc(0, 0, 2.8, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.restore();
+      }
+
+      ctx.restore(); // Fecha tronco
+      ctx.restore(); // Fecha filtros
+    } else if (heroRosterLoaded && heroRosterImg) {
+      ctx.save();
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.filter = 'drop-shadow(0px 1px 1.5px rgba(0,0,0,0.55))';
+      ctx.drawImage(heroRosterImg, sx, sy, sw, sh, dx, dy, pw, ph);
+      if (weaponRosterLoaded && weaponRosterImg) {
+        ctx.save();
+        ctx.translate(11, -11);
+        ctx.rotate(0.35);
+        ctx.drawImage(weaponRosterImg, wsx, wsy, wsw, wsh, -6, -10, gw, gh);
+        ctx.restore();
+      }
       ctx.restore();
     } else {
       ctx.fillStyle = '#38bdf8';
-      ctx.fillRect(-pw / 2, -ph + 9, pw, ph);
-    }
-
-    // Arma em repouso na mão direita, apontada diagonalmente para baixo
-    if (weaponRosterLoaded && weaponRosterImg) {
-      ctx.save();
-      ctx.translate(11, -11);
-      ctx.rotate(0.35 + Math.sin(now * 0.012) * 0.04);
-      ctx.imageSmoothingEnabled = true;
-      ctx.imageSmoothingQuality = 'high';
-      ctx.filter = 'drop-shadow(0px 1px 1.5px rgba(0,0,0,0.55))';
-      ctx.drawImage(weaponRosterImg, wsx, wsy, wsw, wsh, -6, -10, gw, gh);
-
-      // Mão do herói segurando a coronha / empunhadura
-      ctx.fillStyle = '#fed7aa';
-      ctx.strokeStyle = '#1c1917';
-      ctx.lineWidth = 1.3;
-      ctx.beginPath();
-      ctx.arc(0, 0, 2.8, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
-
-      ctx.restore();
+      ctx.fillRect(dx, dy, pw, ph);
     }
 
     ctx.restore();
@@ -4659,21 +4727,40 @@ export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swi
     handY = -12 + 2 * p;
   }
 
-  // Desenha Corpo do Herói com contorno vetorial e suavização
-  ctx.save();
-  ctx.translate(lungeX, 0);
-  ctx.rotate(bodyAngle);
-  ctx.scale(scaleX, scaleY);
-  if (heroRosterLoaded && heroRosterImg) {
+  // Desenha Corpo do Herói: pernas firmes no chão e tronco absorvendo recuo
+  if (hasParts) {
+    ctx.save();
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
     ctx.filter = 'drop-shadow(0px 1px 1.5px rgba(0,0,0,0.55))';
-    ctx.drawImage(heroRosterImg, sx, sy, sw, sh, -pw / 2, -ph + 9, pw, ph);
+
+    // Ambas as pernas desenhadas alinhadas e firmes no solo
+    ctx.drawImage(heroRosterLegRightImg, sx, sy, sw, sh, dx, dy, pw, ph);
+    ctx.drawImage(heroRosterLegLeftImg, sx, sy, sw, sh, dx, dy, pw, ph);
+
+    // Tronco Superior com recuo e lungeX
+    ctx.save();
+    ctx.translate(lungeX, 0);
+    ctx.rotate(bodyAngle);
+    ctx.scale(scaleX, scaleY);
+    ctx.drawImage(heroRosterUpperImg, sx, sy, sw, sh, dx, dy, pw, ph);
+    ctx.restore();
+
+    ctx.restore();
+  } else if (heroRosterLoaded && heroRosterImg) {
+    ctx.save();
+    ctx.translate(lungeX, 0);
+    ctx.rotate(bodyAngle);
+    ctx.scale(scaleX, scaleY);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.filter = 'drop-shadow(0px 1px 1.5px rgba(0,0,0,0.55))';
+    ctx.drawImage(heroRosterImg, sx, sy, sw, sh, dx, dy, pw, ph);
+    ctx.restore();
   } else {
     ctx.fillStyle = '#38bdf8';
-    ctx.fillRect(-pw / 2, -ph + 9, pw, ph);
+    ctx.fillRect(dx, dy, pw, ph);
   }
-  ctx.restore();
 
   // Desenha a Arma do Herói com empunhadura
   if (weaponRosterLoaded && weaponRosterImg) {

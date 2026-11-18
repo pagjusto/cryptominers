@@ -373,7 +373,7 @@ export function drawMinerCharacter(ctx, mx, my, miner, classInfo, now, swingProg
 
   const isWorking = miner.status === 'work';
   const isMining = miner.isMining;
-  const bounceY = isWorking && !isMining ? Math.sin(now * 0.015) * 2.5 : 0;
+  const bounceY = 0;
   const legAngle = isWorking && !isMining ? Math.sin(now * 0.02) * 5 : 0;
   const swingAngle = isMining && swingProgress > 0 ? -Math.sin(swingProgress * Math.PI) * 1.35 : 0;
 
