@@ -239,11 +239,11 @@
       { id: 'verdant', name: 'Verdant', classId: 'explorer', className: 'Explorador', rarity: 'common', rarityName: 'Comum', spriteIndex: 0, weaponId: 'assault-rifle', role: 'Reconhecimento e mobilidade' },
       { id: 'granito', name: 'Granito', classId: 'tank', className: 'Tanque', rarity: 'legendary', rarityName: 'Lendário', spriteIndex: 1, weaponId: 'heavy-machine-gun', role: 'Absorção de dano e proteção' },
       { id: 'nox', name: 'Nox', classId: 'fighter', className: 'Combatente', rarity: 'rare', rarityName: 'Raro', spriteIndex: 2, weaponId: 'energy-blaster', role: 'Combate equilibrado' },
-      { id: 'brasa', name: 'Brasa', classId: 'assault', className: 'Assalto', rarity: 'common', rarityName: 'Comum', spriteIndex: 3, weaponId: 'flamethrower', role: 'Pressão ofensiva em curta distância' },
+      { id: 'brasa', name: 'Brasa', classId: 'assault', className: 'Assalto (Molotov)', rarity: 'common', rarityName: 'Comum', spriteIndex: 3, weaponId: 'molotov', role: 'Arremesso de coquetel molotov e poça incendiária em área' },
       { id: 'iris', name: 'Íris', classId: 'medic', className: 'Médica', rarity: 'epic', rarityName: 'Épico', spriteIndex: 4, weaponId: 'medical-kit', role: 'Suporte médico e salvaguarda' },
       { id: 'mumia', name: 'Múmia', classId: 'survivor', className: 'Sobrevivente', rarity: 'common', rarityName: 'Comum', spriteIndex: 5, weaponId: 'shotgun', role: 'Resistência e combate próximo' },
       { id: 'polar', name: 'Polar', classId: 'specialist', className: 'Especialista', rarity: 'rare', rarityName: 'Raro', spriteIndex: 6, weaponId: 'compact-rifle', role: 'Precisão e suporte tático' },
-      { id: 'fenix', name: 'Fênix', classId: 'assault', className: 'Assalto (Molotov)', rarity: 'epic', rarityName: 'Épico', spriteIndex: 7, weaponId: 'molotov', role: 'Arremesso de molotov e pressão incendiária em área' },
+      { id: 'fenix', name: 'Fênix', classId: 'assault', className: 'Assalto (Lança-chamas)', rarity: 'epic', rarityName: 'Épico', spriteIndex: 7, weaponId: 'flamethrower', role: 'Jato contínuo de chamas e dispersão de calor em área' },
       { id: 'sombra', name: 'Sombra', classId: 'infiltrator', className: 'Infiltrador', rarity: 'rare', rarityName: 'Raro', spriteIndex: 8, weaponId: 'precision-rifle', role: 'Ataque de precisão de longo alcance' },
       { id: 'iron', name: 'Iron', classId: 'heavy', className: 'Granadeiro Blindado', rarity: 'epic', rarityName: 'Épico', spriteIndex: 9, weaponId: 'grenade', role: 'Arremesso de granadas e explosão em área' },
       { id: 'colosso', name: 'Colosso', classId: 'juggernaut', className: 'Tanque de elite', rarity: 'legendary', rarityName: 'Lendário', spriteIndex: 10, weaponId: 'rocket-launcher', role: 'Poder de fogo pesado balístico' },
@@ -611,7 +611,7 @@
                 });
               }
             } else if (wid === 'molotov') {
-              // LANÇADOR DE MOLOTOV (Fênix): Arremessa coquetel molotov em chamas
+              // LANÇADOR DE MOLOTOV (Brasa): Arremessa coquetel molotov em chamas
               if (st.shotTimer < now - 650) {
                 st.shotTimer = now;
                 st.particles.push({
@@ -626,7 +626,7 @@
                 });
               }
             } else if (wid === 'flamethrower') {
-              // LANÇA-CHAMAS (Brasa): Cospe jato contínuo de labaredas
+              // LANÇA-CHAMAS (Fênix): Cospe jato contínuo de labaredas
               if (st.shotTimer < now - 50) {
                 st.shotTimer = now;
                 for (let f = 0; f < 3; f++) {

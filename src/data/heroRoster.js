@@ -40,12 +40,12 @@ export const HERO_ROSTER = [
     id: 'brasa',
     name: 'Brasa',
     classId: 'assault',
-    className: 'Assalto',
+    className: 'Assalto (Molotov)',
     rarity: 'common',
     rarityName: 'Comum',
     spriteIndex: 3,
-    weaponId: 'flamethrower',
-    role: 'Pressão ofensiva em curta distância'
+    weaponId: 'molotov',
+    role: 'Arremesso de coquetel molotov e poça incendiária em área'
   },
   {
     id: 'iris',
@@ -84,12 +84,12 @@ export const HERO_ROSTER = [
     id: 'fenix',
     name: 'Fênix',
     classId: 'assault',
-    className: 'Assalto (Molotov)',
+    className: 'Assalto (Lança-chamas)',
     rarity: 'epic',
     rarityName: 'Épico',
     spriteIndex: 7,
-    weaponId: 'molotov',
-    role: 'Arremesso de molotov e pressão incendiária em área'
+    weaponId: 'flamethrower',
+    role: 'Jato contínuo de chamas e dispersão de calor em área'
   },
   {
     id: 'sombra',
