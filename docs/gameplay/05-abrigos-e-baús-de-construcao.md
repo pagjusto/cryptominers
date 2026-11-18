@@ -28,9 +28,9 @@ A velocidade de 200% representa o dobro da velocidade de recuperação de refer�
 
 ## Baús de sobreviventes — chances por raridade
 
-As chances aprovadas para os baús que concedem sobreviventes são iguais para todos os baús desse tipo:
+As chances-base aprovadas para os baús que concedem sobreviventes são:
 
-| Raridade | Chance de obtenção |
+| Raridade | Chance-base |
 |---|---:|
 | Comum | 60% |
 | Raro | 25% |
@@ -39,6 +39,14 @@ As chances aprovadas para os baús que concedem sobreviventes são iguais para t
 | **Total** | **100%** |
 
 As probabilidades são aplicadas a cada abertura individual. As quantidades obtidas em uma sequência de aberturas são aleatórias; as porcentagens representam probabilidades, não uma garantia de distribuição exata em cada grupo de 100 aberturas.
+
+### Bônus para combos de baús
+
+- Combos de baús poderão oferecer chances melhores do que a abertura individual.
+- O bônus deverá beneficiar exclusivamente as raridades **Épica e Lendária**.
+- As chances de Comum e Raro não recebem bônus.
+- O aumento das chances de Épico e Lendário deverá ser compensado pela redução proporcional da chance de Comum, mantendo o total em 100%.
+- Os tamanhos dos combos elegíveis e os percentuais exatos de bônus ainda serão definidos. Nenhum percentual ilustrativo está aprovado como regra.
 
 Essas chances se referem à obtenção de sobreviventes nos baús e não alteram o sorteio separado do Baú de Construção concedido por Boss.
 
