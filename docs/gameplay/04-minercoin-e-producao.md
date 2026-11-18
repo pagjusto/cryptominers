@@ -11,6 +11,7 @@ A referência de planejamento definida é **1 MNC = US$ 0,01**. Essa referência
 - Cada sobrevivente ativo gera MNC individualmente, por segundo válido de combate.
 - A taxa individual depende exclusivamente da raridade do sobrevivente.
 - A classe, função ou tipo de arma do sobrevivente não concede bônus nem penalidade de produção.
+- O nível do abrigo não altera a mineração nem o ROI; sua influência é restrita à capacidade e à velocidade de recuperação dos sobreviventes.
 - A soma da produção dos sobreviventes ativos determina a produção total do jogador.
 - Não há pagamento separado por cada zumbi eliminado.
 - A produção continua durante o evento de Boss.
@@ -21,7 +22,7 @@ A referência de planejamento definida é **1 MNC = US$ 0,01**. Essa referência
 
 ## Referência de produção e ROI
 
-A composição média de referência — **6 sobreviventes comuns, 4 raros, 4 épicos e 1 lendário**, com Abrigo Reforçado — deve totalizar **480,24 MNC por dia**.
+A composição média de referência — **6 sobreviventes comuns, 4 raros, 4 épicos e 1 lendário**, com Abrigo Reforçado como referência de recuperação (sem bônus de mineração) — deve totalizar **480,24 MNC por dia**.
 
 Esse total é a referência de ROI para essa composição. As taxas individuais por raridade deverão ser calibradas para que a soma dos 15 sobreviventes respeite esse total, sem aumentar o rendimento apenas porque o jogo fica disponível por 24 horas.
 
