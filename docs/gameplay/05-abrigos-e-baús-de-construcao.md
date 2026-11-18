@@ -28,29 +28,36 @@ A velocidade de 200% representa o dobro da velocidade de recuperação de refer�
 
 ## Baús de sobreviventes — chances por raridade
 
-As chances-base aprovadas para os baús que concedem sobreviventes são:
+As chances-base aprovadas para a abertura individual de **1 baú** são:
 
 | Raridade | Chance-base |
 |---|---:|
-| Comum | 60% |
+| Comum | 61% |
 | Raro | 25% |
 | Épico | 12% |
-| Lendário | 3% |
+| Lendário | 2% |
 | **Total** | **100%** |
 
 As probabilidades são aplicadas a cada abertura individual. As quantidades obtidas em uma sequência de aberturas são aleatórias; as porcentagens representam probabilidades, não uma garantia de distribuição exata em cada grupo de 100 aberturas.
 
 ### Combos e bônus de raridade
 
-As opções de compra planejadas são combos de **1, 3, 5 e 10 baús**.
+As opções de compra definidas são **1, 5, 10 e 15 baús**.
 
-- A opção de **1 baú** permite ao jogador experimentar uma abertura individual e usa as chances-base, sem bônus de combo.
-- O **combo pequeno (3 baús)** oferece bônus para Raros e um bônus menor para Épicos.
-- O **combo médio (5 baús)** oferece bônus para Épicos e um bônus pequeno adicional para Lendários.
-- O **combo grande (10 baús)** oferece bônus para Épicos e Lendários, com benefício maior que o combo médio.
-- Comuns não recebem bônus direto.
-- O aumento das chances das raridades beneficiadas deverá ser compensado pela redução da chance de Comum, mantendo o total em 100%.
-- Os percentuais exatos de bônus para os combos de 3, 5 e 10 baús ainda serão definidos. Nenhum percentual ilustrativo está aprovado como regra.
+| Opção | Chance de Lendário |
+|---|---:|
+| 1 baú (chance-base) | 2% |
+| Combo de 5 baús | 3% |
+| Combo de 10 baús | 4% |
+| Combo de 15 baús | 7% |
+
+Diretrizes dos bônus:
+- A abertura de **1 baú** usa as chances-base, sem bônus de combo.
+- O **combo de 5 baús** beneficia Épicos e eleva a chance de Lendário para 3%.
+- O **combo de 10 baús** beneficia Épicos e eleva a chance de Lendário para 4%.
+- O **combo de 15 baús** eleva a chance de Lendário para 7%.
+- As chances de Comum, Raro e Épico nos combos ainda precisam ser fechadas em conjunto com os percentuais de bônus, garantindo que a soma de todas as raridades seja sempre 100%.
+- Os valores acima definem a chance de Lendário por abertura dentro de cada modalidade; não representam garantia de obtenção de Lendário em um combo.
 
 Essas chances se referem à obtenção de sobreviventes nos baús e não alteram o sorteio separado do Baú de Construção concedido por Boss.
 
