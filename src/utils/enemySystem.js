@@ -14,6 +14,9 @@ import { ENEMIES } from '../data/enemiesCatalog.js';
 class EnemySpriteManager {
   constructor() {
     this.zombieImg = null;
+    this.zombieUpperImg = null;
+    this.zombieLegLeftImg = null;
+    this.zombieLegRightImg = null;
     this.bossImg = null;
     this.loaded = false;
     this.init();
@@ -26,6 +29,18 @@ class EnemySpriteManager {
     this.zombieImg.crossOrigin = 'anonymous';
     this.zombieImg.src = '/enemies/zombie_clean.png';
 
+    this.zombieUpperImg = new Image();
+    this.zombieUpperImg.crossOrigin = 'anonymous';
+    this.zombieUpperImg.src = '/enemies/zombie_upper.png';
+
+    this.zombieLegLeftImg = new Image();
+    this.zombieLegLeftImg.crossOrigin = 'anonymous';
+    this.zombieLegLeftImg.src = '/enemies/zombie_leg_left.png';
+
+    this.zombieLegRightImg = new Image();
+    this.zombieLegRightImg.crossOrigin = 'anonymous';
+    this.zombieLegRightImg.src = '/enemies/zombie_leg_right.png';
+
     this.bossImg = new Image();
     this.bossImg.crossOrigin = 'anonymous';
     this.bossImg.src = '/enemies/boss_clean.png';
@@ -33,12 +48,15 @@ class EnemySpriteManager {
     let loadedCount = 0;
     const checkReady = () => {
       loadedCount++;
-      if (loadedCount >= 2) {
+      if (loadedCount >= 5) {
         this.loaded = true;
       }
     };
 
     this.zombieImg.onload = checkReady;
+    this.zombieUpperImg.onload = checkReady;
+    this.zombieLegLeftImg.onload = checkReady;
+    this.zombieLegRightImg.onload = checkReady;
     this.bossImg.onload = checkReady;
 
     // Fallbacks para garantir que nunca falhe caso demore o carregamento
@@ -188,7 +206,7 @@ export function updateEnemies(enemies, state, dt, now, isCanyon = true) {
         enemy.gx = enemy.targetGx;
         enemy.gy = enemy.targetGy;
         enemy.isWalking = false;
-        enemy.moveCooldown = Math.random() * (enemy.type === 'boss' ? 5.0 : 3.5) + 3.0;
+        enemy.moveCooldown = Math.random() * (enemy.type === 'boss' ? 4.0 : 2.2) + 1.2;
       } else {
         const step = Math.min(dist, speed * dt);
         enemy.visualX += (dx / dist) * step;
@@ -213,7 +231,7 @@ export function updateEnemies(enemies, state, dt, now, isCanyon = true) {
       }
     } else {
       // Temporizador para decidir a próxima caminhada
-      enemy.moveCooldown = (enemy.moveCooldown || 3.0) - dt;
+      enemy.moveCooldown = (enemy.moveCooldown || 2.0) - dt;
 
       if (enemy.moveCooldown <= 0) {
         // Encontra células vizinhas livres para caminhar (Cima, Baixo, Esquerda, Direita)
@@ -270,14 +288,15 @@ export function drawEnemyCharacter(ctx, enemy, now) {
   const px = enemy.visualX * TILE_SIZE + TILE_SIZE / 2;
   const py = enemy.visualY * TILE_SIZE + TILE_SIZE / 2;
 
-  // 1. Animação de Caminhada (bobbing vertical + gingado dos ombros)
-  const bobbing = enemy.isWalking 
-    ? Math.sin(enemy.walkTimer) * (isBoss ? 3.8 : 2.8) 
-    : Math.sin(now * 0.003 + enemy.index) * 1.2;
+  // 1. Animação de Caminhada
+  // Para o Boss: passadas pesadas e estremecimento do solo
+  // Para os Zumbis: caminham movimentando as pernas de verdade (sem balançar o corpo feito pêndulo)
+  const bobbing = isBoss 
+    ? (enemy.isWalking ? Math.sin(enemy.walkTimer) * 3.8 : Math.sin(now * 0.003 + enemy.index) * 1.2)
+    : (enemy.isWalking ? Math.sin(enemy.walkTimer * 5.0) * 1.2 : Math.sin(now * 0.003 + enemy.index) * 0.8);
 
-  const walkTilt = enemy.isWalking 
-    ? Math.cos(enemy.walkTimer) * (isBoss ? 0.06 : 0.09) 
-    : 0;
+  // O Boss ainda tem uma leve inclinação de peso, mas o Zumbi NÃO balança mais de um lado pro outro!
+  const walkTilt = isBoss && enemy.isWalking ? Math.cos(enemy.walkTimer) * 0.06 : 0;
 
   // 2. Animação de Ataque (investida com garras afiadas)
   let lungeX = 0;
@@ -312,17 +331,70 @@ export function drawEnemyCharacter(ctx, enemy, now) {
   const drawW = isBoss ? Math.floor(TILE_SIZE * 1.75) : Math.floor(TILE_SIZE * 1.32);
   const drawH = isBoss ? Math.floor(TILE_SIZE * 1.75) : Math.floor(TILE_SIZE * 1.15);
 
-  if (img && img.complete && img.naturalWidth > 0) {
+  const dx = -drawW / 2;
+  const dy = -drawH + TILE_SIZE / 2 - 2;
+
+  // Pontos de pivô anatômicos das articulações do quadril (escala 640x640)
+  const hipLeftX = dx + drawW * (294 / 640);
+  const hipLeftY = dy + drawH * (372 / 640);
+
+  const hipRightX = dx + drawW * (352 / 640);
+  const hipRightY = dy + drawH * (372 / 640);
+
+  const hasZombieParts = !isBoss && 
+    enemySpriteManager.zombieUpperImg?.complete && 
+    enemySpriteManager.zombieLegLeftImg?.complete && 
+    enemySpriteManager.zombieLegRightImg?.complete;
+
+  if (hasZombieParts) {
+    if (enemy.hitFlash > 0) {
+      ctx.filter = `brightness(1.5) drop-shadow(0 0 6px #ef4444)`;
+    }
+
+    const isWalking = enemy.isWalking;
+    // Frequência dinâmica dos passos ao caminhar
+    const stepCadence = (enemy.walkTimer || 0) * 8.0;
+    // Movimentação real das pernas alternando para frente e para trás
+    const legAngle = isWalking ? Math.sin(stepCadence) * 0.44 : 0; // ~25 graus de passada
+    const stepBob = isWalking ? Math.abs(Math.sin(stepCadence)) * 2.0 : 0;
+    const torsoSway = isWalking ? Math.sin(stepCadence) * 0.035 : 0;
+
+    // 1. Perna Direita (fundo / trás)
+    ctx.save();
+    ctx.translate(hipRightX, hipRightY);
+    ctx.rotate(-legAngle);
+    ctx.translate(-hipRightX, -hipRightY);
+    ctx.drawImage(enemySpriteManager.zombieLegRightImg, dx, dy, drawW, drawH);
+    ctx.restore();
+
+    // 2. Perna Esquerda (frente)
+    ctx.save();
+    ctx.translate(hipLeftX, hipLeftY);
+    ctx.rotate(legAngle);
+    ctx.translate(-hipLeftX, -hipLeftY);
+    ctx.drawImage(enemySpriteManager.zombieLegLeftImg, dx, dy, drawW, drawH);
+    ctx.restore();
+
+    // 3. Tronco Superior (Cabeça, Jaqueta, Braços e Mãos)
+    ctx.save();
+    ctx.translate(0, -stepBob);
+    ctx.rotate(torsoSway);
+    ctx.drawImage(enemySpriteManager.zombieUpperImg, dx, dy, drawW, drawH);
+    ctx.restore();
+
+    ctx.filter = 'none';
+  } else if (img && img.complete && img.naturalWidth > 0) {
     // Efeito de flash vermelho ao receber golpe do herói
     if (enemy.hitFlash > 0) {
       ctx.filter = `brightness(1.5) drop-shadow(0 0 6px #ef4444)`;
     }
 
-    ctx.drawImage(img, -drawW / 2, -drawH + TILE_SIZE / 2 - 2, drawW, drawH);
+    ctx.drawImage(img, dx, dy, drawW, drawH);
+    ctx.filter = 'none';
   } else {
     // Fallback vetorial retrô caso a imagem esteja carregando
     ctx.fillStyle = isBoss ? '#991b1b' : '#3f6212';
-    ctx.fillRect(-drawW / 2, -drawH + TILE_SIZE / 2, drawW, drawH);
+    ctx.fillRect(dx, dy, drawW, drawH);
   }
 
   // 5. Efeito Visual de Garras / Ataque Lacerante
