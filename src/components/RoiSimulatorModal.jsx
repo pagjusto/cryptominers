@@ -70,11 +70,11 @@ export default function RoiSimulatorModal({
                   SIMULADOR DE ROI — CRIPTO MYNERS
                 </h2>
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
-                  MODELO MATEMÁTICO REAL
+                  PROJEÇÃO ESTIMADA
                 </span>
               </div>
               <p className="text-xs text-slate-400">
-                Simule projeções reais considerando limite de 15 mineradores ativos, estamina e velocidade da casa.
+                Estimativa baseada em produção por raridade, recuperação por abrigo e disponibilidade de sessão.
               </p>
             </div>
           </div>
@@ -185,7 +185,7 @@ export default function RoiSimulatorModal({
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-              {Object.values(config.houses).map(h => {
+              {Object.values(config.houses).filter(h => ['basic', 'reinforced', 'advanced'].includes(h.id)).map(h => {
                 const isSelected = selectedHouse === h.id;
                 return (
                   <button
@@ -201,7 +201,7 @@ export default function RoiSimulatorModal({
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-xl">{h.icon}</span>
                         <span className="font-arcade text-[10px] text-blue-300 font-bold">
-                          {h.costUsdt > 0 ? `$${h.costUsdt}` : 'Grátis'}
+                          {h.id === 'basic' ? 'Grátis' : `${h.constructionFragments} frag. + ${h.costMiner.toLocaleString('pt-BR')} MNC`}
                         </span>
                       </div>
                       <h4 className="font-bold text-[11px] text-white leading-tight">
@@ -379,10 +379,10 @@ export default function RoiSimulatorModal({
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
                 <BarChart3 size={15} className="text-emerald-400" />
-                Retorno Acumulado Projetado (Bruto em USDT)
+                Valor estimado acumulado (referência USDT)
               </span>
               <span className="text-xs font-mono text-emerald-400 font-bold bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/30">
-                1 MNC = US$ ${(config.minerCoinUsdtRate || 0.01).toFixed(2)}
+                Referência: 1 MNC = US$ ${(config.minerCoinUsdtRate || 0.01).toFixed(2)}
               </span>
             </div>
 
@@ -423,7 +423,7 @@ export default function RoiSimulatorModal({
                   ${currentData.projectedReturn180d}
                 </span>
                 <span className="text-[10px] text-amber-400/80 font-mono">
-                  {Math.round((currentData.projectedReturn180d / currentData.totalInvestment) * 100)}% (Lucro Puro)
+                  {Math.round((currentData.projectedReturn180d / currentData.totalInvestment) * 100)}% (bruto estimado)
                 </span>
               </div>
             </div>
@@ -433,7 +433,7 @@ export default function RoiSimulatorModal({
           <div className="p-3 rounded-2xl bg-slate-950/50 border border-slate-800/80 text-[11px] text-slate-400 flex items-start gap-2">
             <Info size={16} className="text-amber-400 shrink-0 mt-0.5" />
             <p className="leading-relaxed">
-              <b>Transparência Cripto Myners:</b> Os cálculos acima são estimativas matemáticas calculadas estritamente com base nos parâmetros configurados de probabilidade, produção média, consumo de estamina e cotação oficial configurada de 1 MINER = ${(config.minerCoinUsdtRate || 1.0).toFixed(2)} USDT (não é 1:1 fixo). O simulador considera o funcionamento real da mina (limite de 15 mineradores ativos simultâneos e descansos periódicos na casa) e não constitui garantia de retorno financeiro.
+              <b>Transparência Cripto Myners:</b> Os cálculos acima são estimativas matemáticas calculadas estritamente com base nos parâmetros configurados de probabilidade, produção média, consumo de estamina e referência econômica de 1 MNC = US$ ${(config.minerCoinUsdtRate || 0.01).toFixed(2)}. A projeção usa disponibilidade estimada de sessão de ${currentData.sessionAvailabilityPct}% em uma janela de 24 horas. A mineração só ocorre com o jogo aberto e conectado, inclusive minimizado; não há produção com navegador fechado, computador desligado ou conexão perdida. Raridades sem probabilidade configurada não entram no valor esperado. O resultado não é garantia de retorno nem cotação de mercado.
             </p>
           </div>
 
