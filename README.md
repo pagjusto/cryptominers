@@ -1,8 +1,8 @@
-# ⛏️ Cripto Myners — Web3 Mining Idle Game
+# 🧟 CryptoZombies — Web3 Survival Strategy Game
 
-![Cripto Myners Banner](public/miners/all_miners_banner.png)
+![CryptoZombies Banner](public/miners/all_miners_banner.png)
 
-> **Cripto Myners** é um jogo Web3 idle de mineração e estratégia com estética pixel art retrô. Desenvolvido em **React 19**, **Vite** e **Canvas**, o jogo implementa mapas individuais por jogador, economia dinâmica sustentável baseada em **Minercoin (MNC)**, sistema de heróis mineradores, casas de repouso, baús de construção e simulador completo de ROI.
+> **CryptoZombies** é um jogo Web3 de sobrevivência e estratégia contra hordas de zumbis, com estética pixel art retrô. Desenvolvido em **React 19**, **Vite** e **Canvas**, o jogo implementa mapas individuais por jogador, economia dinâmica sustentável baseada em **Minercoin (MNC)**, sistema de sobreviventes, abrigos médicos, baús de construção e simulador completo de ROI.
 
 ---
 
@@ -126,4 +126,4 @@ npm test
 
 ## 📄 Licença
 
-Este projeto é desenvolvido para a plataforma **Cripto Myners**. Todos os direitos reservados.
+Este projeto é desenvolvido para a plataforma **CryptoZombies**. Todos os direitos reservados.
