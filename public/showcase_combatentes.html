@@ -264,7 +264,7 @@
       'grenade': { name: 'Granada Tática', sourceIndex: 7, category: 'Explosivo de Área' },
       'rocket-launcher': { name: 'Lança-foguetes RPG', sourceIndex: 10, category: 'Projétil Autopropelido' },
       'tactical-carbine': { name: 'Carbina Tática M4', sourceIndex: 11, category: 'Cadência Rápida' },
-      'heavy-pistol': { name: 'Pistola Pesada .50', sourceIndex: 12, category: 'Pistola de Alto Calibre' }
+      'heavy-pistol': { name: 'Pistola Pesada .50', sourceIndex: 12, category: 'Pistola de Alto Calibre', scale: 0.58 }
     };
 
     // Carregamento dos spritesheets oficiais
@@ -311,7 +311,7 @@
       cardStates[hero.id] = {
         mode: 'shooting', // 'shooting' ou 'walking'
         direction: 1,     // 1 = direita, -1 = esquerda
-        targetDist: 180,
+        targetDist: 70,   // Distância encurtada pela metade para combate corpo a corpo
         particles: [],
         sparks: [],
         shotTimer: 0
@@ -398,11 +398,11 @@
           ctx.stroke();
         }
 
-        const hX = cvs.width / 2 - (st.direction > 0 ? 50 : -50);
+        const hX = cvs.width / 2 - (st.direction > 0 ? 35 : -35);
         const hY = 145;
 
-        // Alvo zumbi simulado à frente
-        const targetX = hX + st.direction * 140;
+        // Alvo zumbi simulado à frente com distância encurtada pela metade (70px)
+        const targetX = hX + st.direction * 70;
         const targetY = hY;
 
         ctx.save();
@@ -447,10 +447,11 @@
         const cadence = 650; // ms por ciclo de tiro
         const cycleProgress = (now % cadence) / cadence;
 
-        const pw = 48; // Escala ampliada no showcase para melhor visualização
+        const pw = 48; // Escala calibrada do herói no showcase
         const ph = 54;
-        const gw = 42;
-        const gh = 22;
+        const wScale = weapon.scale || 1.0;
+        const gw = 40 * wScale;
+        const gh = 22 * wScale;
 
         const sw = 128;
         const sh = 128;
@@ -469,6 +470,14 @@
         const hipLeftY = dy + ph * (72 / 128);
         const hipRightX = dx + pw * (72 / 128);
         const hipRightY = dy + ph * (72 / 128);
+
+        // Ponto anatômico exato da mão direita do herói onde a empunhadura da arma se fixa
+        const handX = dx + pw * (86 / 128);
+        const handY = dy + ph * (69 / 128);
+
+        // Ponto da empunhadura (grip) calibrado dentro da arma
+        const wGripX = gw * (100 / 256);
+        const wGripY = gh * (74 / 144);
 
         if (!isShooting) {
           // MODO CAMINHADA
@@ -499,97 +508,119 @@
           ctx.rotate(torsoSway);
           if (heroUpperImg.complete) ctx.drawImage(heroUpperImg, sx, sy, sw, sh, dx, dy, pw, ph);
 
-          // Arma em descanso
+          // Arma em descanso na mão do herói
           if (weaponImg.complete) {
             ctx.save();
-            ctx.translate(12, -10);
+            ctx.translate(handX - 2, handY + 1);
             ctx.rotate(0.35 + Math.sin(stepPhase) * 0.05);
-            ctx.drawImage(weaponImg, wsx, wsy, wsw, wsh, -8, -12, gw, gh);
+            ctx.drawImage(weaponImg, wsx, wsy, wsw, wsh, -wGripX, -wGripY, gw, gh);
+
+            // Mão segurando a empunhadura
+            ctx.fillStyle = '#fed7aa';
+            ctx.strokeStyle = '#18181b';
+            ctx.lineWidth = 1.2;
+            ctx.beginPath();
+            ctx.arc(0, 0, 2.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
             ctx.restore();
           }
-          ctx.restore();
+          ctx.restore(); // Fecha tronco
         } else {
-          // MODO DISPARO / BALÍSTICA
-          let recoilDist = 0;
-          let bodyAngle = 0;
-          let gunAngle = 0;
+          // MODO DISPARO / BALÍSTICA (COM LEVE BALANÇO PARA TRÁS, SEM CORTAR O PERSONAGEM AO MEIO)
+          let bodyRock = 0;   // Ângulo de balanço suave do corpo (radianos)
+          let bodyShift = 0;  // Recuo linear suave (pixels)
+          let gunPitch = 0;   // Coice do cano para cima
           let isFiringMoment = false;
 
-          if (cycleProgress < 0.25) {
-            // Mira horizontal
-            const p = cycleProgress / 0.25;
-            bodyAngle = 0.05 * p;
-            gunAngle = 0.2 - p * 0.2;
+          if (cycleProgress < 0.20) {
+            // 1. Postura firme de mira horizontal
+            const p = cycleProgress / 0.20;
+            bodyRock = 0.02 * p;
+            gunPitch = 0.06 - p * 0.06;
           } else if (cycleProgress < 0.45) {
-            // Detonação e recuo forte
-            const p = (cycleProgress - 0.25) / 0.20;
-            recoilDist = Math.sin(p * Math.PI) * 7;
-            bodyAngle = 0.05 - Math.sin(p * Math.PI) * 0.16;
-            gunAngle = -Math.sin(p * Math.PI) * 0.38; // Cano dá coice para cima
+            // 2. Detonação e recuo: leve balanço para trás do personagem como um todo
+            const p = (cycleProgress - 0.20) / 0.25;
+            const kick = Math.sin(p * Math.PI);
+            bodyRock = 0.02 - kick * 0.07; // Leve balanço para trás (~4 graus)
+            bodyShift = -kick * 2.5;       // Recuo suave de 2.5px
+            gunPitch = -kick * 0.22;       // Elevação leve do cano
             if (p < 0.4) isFiringMoment = true;
           } else if (cycleProgress < 0.75) {
-            // Recuperação do recuo
+            // 3. Retorno suave e absorção do recuo
             const p = (cycleProgress - 0.45) / 0.30;
-            recoilDist = (1 - p) * 4;
-            gunAngle = -0.15 * (1 - p);
+            bodyRock = -0.05 * (1 - p);
+            bodyShift = -2.5 * (1 - p);
+            gunPitch = -0.10 * (1 - p);
           } else {
-            // Retorno
-            bodyAngle = 0;
-            gunAngle = 0;
+            // 4. Pronto para o próximo disparo
+            bodyRock = 0;
+            bodyShift = 0;
+            gunPitch = 0;
           }
 
-          // Pernas firmes no chão de combate
+          // Renderiza o combatente UNIFICADO (pernas e tronco juntos sem cortar no meio!)
+          ctx.save();
+          ctx.translate(bodyShift, 0);
+          ctx.rotate(bodyRock);
+
           if (heroLegRightImg.complete) ctx.drawImage(heroLegRightImg, sx, sy, sw, sh, dx, dy, pw, ph);
           if (heroLegLeftImg.complete) ctx.drawImage(heroLegLeftImg, sx, sy, sw, sh, dx, dy, pw, ph);
-
-          // Tronco com recuo
-          ctx.save();
-          ctx.translate(-recoilDist, 0);
-          ctx.rotate(bodyAngle);
           if (heroUpperImg.complete) ctx.drawImage(heroUpperImg, sx, sy, sw, sh, dx, dy, pw, ph);
 
-          // Arma apontada e disparando
+          // Arma apontada e empunhada diretamente na mão do herói (sem flutuar)
           ctx.save();
-          ctx.translate(14 - recoilDist * 0.6, -14);
-          ctx.rotate(gunAngle);
+          ctx.translate(handX, handY);
+          ctx.rotate(gunPitch);
           if (weaponImg.complete) {
-            ctx.drawImage(weaponImg, wsx, wsy, wsw, wsh, -8, -12, gw, gh);
+            ctx.drawImage(weaponImg, wsx, wsy, wsw, wsh, -wGripX, -wGripY, gw, gh);
+
+            // Mão segurando a empunhadura firmemente
+            ctx.fillStyle = '#fed7aa';
+            ctx.strokeStyle = '#18181b';
+            ctx.lineWidth = 1.2;
+            ctx.beginPath();
+            ctx.arc(0, 0, 2.8, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
           }
 
           // Muzzle Flash na ponta do cano
           if (isFiringMoment) {
             ctx.save();
-            ctx.translate(gw - 6, -2);
+            const muzzleTipX = gw - wGripX;
+            ctx.translate(muzzleTipX, -1);
             // Chama amarela / alaranjada estourando na boca do cano
             ctx.fillStyle = '#fef08a';
             ctx.beginPath();
-            ctx.arc(0, 0, 7, 0, Math.PI * 2);
+            ctx.arc(0, 0, 6, 0, Math.PI * 2);
             ctx.fill();
 
             ctx.fillStyle = '#f97316';
             ctx.beginPath();
-            ctx.moveTo(0, -6);
-            ctx.lineTo(16, 0);
-            ctx.lineTo(0, 6);
+            ctx.moveTo(0, -5);
+            ctx.lineTo(14, 0);
+            ctx.lineTo(0, 5);
             ctx.closePath();
             ctx.fill();
             ctx.restore();
 
-            // Dispara projétil na direção do alvo
+            // Dispara projétil na direção do alvo (distância encurtada pela metade para 70px)
             if (st.shotTimer < now - 400) {
               st.shotTimer = now;
               st.particles.push({
-                x: hX + st.direction * 35,
-                y: hY - 14,
-                vx: st.direction * 18,
-                vy: (Math.random() - 0.5) * 1.5,
+                x: hX + st.direction * (handX + muzzleTipX),
+                y: hY + handY,
+                vx: st.direction * 14,
+                vy: (Math.random() - 0.5) * 1.0,
                 life: 1.0
               });
             }
           }
 
           ctx.restore(); // Fecha arma
-          ctx.restore(); // Fecha tronco
+          ctx.restore(); // Fecha corpo unificado
         }
 
         ctx.restore(); // Fecha herói

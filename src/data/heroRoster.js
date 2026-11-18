@@ -150,7 +150,7 @@ export const HERO_ROSTER = [
 
 export const WEAPON_CATALOG = [
   { id: 'assault-rifle', name: 'Rifle de Assalto', sourceIndex: 0, facing: 'right', category: 'rifle' },
-  { id: 'pistol', name: 'Pistola', sourceIndex: 1, facing: 'right', category: 'pistola' },
+  { id: 'pistol', name: 'Pistola', sourceIndex: 1, facing: 'right', category: 'pistola', scale: 0.62 },
   { id: 'flamethrower', name: 'Lança-chamas', sourceIndex: 2, facing: 'right', category: 'especial' },
   { id: 'energy-blaster', name: 'Canhão de Energia', sourceIndex: 3, facing: 'right', category: 'energia' },
   { id: 'flare-launcher', name: 'Lançador Incendiário', sourceIndex: 4, facing: 'right', category: 'especial' },
@@ -161,7 +161,7 @@ export const WEAPON_CATALOG = [
   { id: 'shotgun', name: 'Escopeta', sourceIndex: 9, facing: 'right', category: 'escopeta' },
   { id: 'rocket-launcher', name: 'Lança-foguetes', sourceIndex: 10, facing: 'right', category: 'pesada' },
   { id: 'tactical-carbine', name: 'Carbina Tática', sourceIndex: 11, facing: 'right', category: 'rifle' },
-  { id: 'heavy-pistol', name: 'Pistola Pesada', sourceIndex: 12, facing: 'right', category: 'pistola' }
+  { id: 'heavy-pistol', name: 'Pistola Pesada', sourceIndex: 12, facing: 'right', category: 'pistola', scale: 0.58 }
 ];
 
 export function getHeroById(heroId) {

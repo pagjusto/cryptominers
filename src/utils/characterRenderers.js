@@ -4555,8 +4555,9 @@ export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swi
   // Dimensões proporcionais dos Heróis baseadas na entrada do bunker (~36px de altura)
   const pw = 32; // Largura do herói calibrada
   const ph = 36; // Altura do herói calibrada (entra com folga na porta do bunker de 57px)
-  const gw = 28; // Largura proporcional da arma
-  const gh = 15; // Altura proporcional da arma
+  const wScale = weapon?.scale || 1.0;
+  const gw = 28 * wScale; // Largura proporcional da arma (calibrada por arma)
+  const gh = 15 * wScale; // Altura proporcional da arma
 
   const spriteIndex = hero?.spriteIndex ?? 0;
   const sourceIndex = weapon?.sourceIndex ?? spriteIndex ?? 0;
@@ -4576,6 +4577,12 @@ export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swi
 
   const dx = -pw / 2;
   const dy = -ph + 8;
+
+  // Ponto anatômico exato da mão do herói e da empunhadura (grip) da arma
+  const handBaseX = dx + pw * (86 / 128);
+  const handBaseY = dy + ph * (69 / 128);
+  const wGripX = gw * (100 / 256);
+  const wGripY = gh * (74 / 144);
 
   // Pontos de pivô anatômicos do quadril para os heróis (proporcionais à moldura 128x128 centrada em x=64)
   const hipLeftX = dx + pw * (56 / 128);
@@ -4626,12 +4633,12 @@ export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swi
       ctx.rotate(torsoSway);
       ctx.drawImage(heroRosterUpperImg, sx, sy, sw, sh, dx, dy, pw, ph);
 
-      // Arma apoiada na mão direita do herói em marcha
+      // Arma apoiada diretamente na mão direita do herói em marcha
       if (weaponRosterLoaded && weaponRosterImg) {
         ctx.save();
-        ctx.translate(8, -8);
+        ctx.translate(handBaseX - 1, handBaseY + 1);
         ctx.rotate(0.35 + Math.sin(stepPhase) * 0.04);
-        ctx.drawImage(weaponRosterImg, wsx, wsy, wsw, wsh, -5, -8, gw, gh);
+        ctx.drawImage(weaponRosterImg, wsx, wsy, wsw, wsh, -wGripX, -wGripY, gw, gh);
 
         // Mão do herói segurando a coronha / empunhadura
         ctx.fillStyle = '#fed7aa';
@@ -4654,9 +4661,9 @@ export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swi
       ctx.drawImage(heroRosterImg, sx, sy, sw, sh, dx, dy, pw, ph);
       if (weaponRosterLoaded && weaponRosterImg) {
         ctx.save();
-        ctx.translate(8, -8);
+        ctx.translate(handBaseX - 1, handBaseY + 1);
         ctx.rotate(0.35);
-        ctx.drawImage(weaponRosterImg, wsx, wsy, wsw, wsh, -5, -8, gw, gh);
+        ctx.drawImage(weaponRosterImg, wsx, wsy, wsw, wsh, -wGripX, -wGripY, gw, gh);
         ctx.restore();
       }
       ctx.restore();
@@ -4670,100 +4677,66 @@ export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swi
   }
 
   // =========================================================================
-  // 2. MODO ATAQUE: DISPARO DE ARMA COM RECUO, MUZZLE FLASH E BALÍSTICA (PIRATA)
+  // 2. MODO ATAQUE: DISPARO DE ARMA COM LEVE BALANÇO PARA TRÁS E SEM CORTE
   // =========================================================================
   ctx.save();
   ctx.translate(0, 14); // Pivot nos pés
 
-  let lungeX = 0;
-  let bodyAngle = 0;
-  let gunAngle = 0;
-  let handX = 7;
-  let handY = -10;
-  let recoilDist = 0;
-  let scaleY = 1;
-  let scaleX = 1;
+  let bodyRock = 0;   // Ângulo de balanço suave do corpo (radianos)
+  let bodyShift = 0;  // Recuo linear suave (pixels)
+  let gunAngle = 0;   // Coice do cano para cima
 
   // FASE 1: MIRA & ENGATILHAMENTO HORIZONTAL (0.00 a 0.32)
   if (swingProgress < 0.32) {
     const p = swingProgress / 0.32;
-    lungeX = 2 * p;
-    bodyAngle = 0.06 * p; // Postura firme de atirador
-    gunAngle = 0.35 - p * 0.35; // Alinha rigorosamente na horizontal (0.0 rad)
-    handX = 7 + 2 * p;
-    handY = -8 - 2 * p;
+    bodyRock = 0.02 * p;
+    gunAngle = 0.25 - p * 0.25; // Alinha horizontalmente
   }
-  // FASE 2: DETONAÇÃO, DISPARO E RECUO BRUTAL (0.32 a 0.48)
+  // FASE 2: DETONAÇÃO, DISPARO E LEVE BALANÇO PARA TRÁS (0.32 a 0.48)
   else if (swingProgress < 0.48) {
     const p = (swingProgress - 0.32) / 0.16;
-    // Recuo forte jogando o braço e tronco para trás
-    recoilDist = Math.sin(p * Math.PI) * 5;
-    lungeX = 2 - recoilDist * 0.5;
-    bodyAngle = 0.06 - Math.sin(p * Math.PI) * 0.15; // Tronco empurrado para trás
-    gunAngle = -Math.sin(p * Math.PI) * 0.40; // Cano dá coice para cima
-    handX = 9 - recoilDist * 0.8;
-    handY = -10;
-    scaleX = 1 - Math.sin(p * Math.PI) * 0.05;
-    scaleY = 1 + Math.sin(p * Math.PI) * 0.03;
+    const kick = Math.sin(p * Math.PI);
+    bodyRock = 0.02 - kick * 0.07; // Leve balanço para trás (~4 graus)
+    bodyShift = -kick * 2.0;       // Recuo suave de 2px
+    gunAngle = -kick * 0.22;       // Cano dá coice para cima
   }
-  // FASE 3: SUSTENTAÇÃO DE IMPACTO NA ROCHA & FUMAÇA (0.48 a 0.75)
+  // FASE 3: SUSTENTAÇÃO DE IMPACTO E FUMAÇA (0.48 a 0.75)
   else if (swingProgress < 0.75) {
     const p = (swingProgress - 0.48) / 0.27;
-    lungeX = 2 * (1 - p);
-    bodyAngle = -0.04 * (1 - p);
-    gunAngle = -0.15 * (1 - p);
-    handX = 9 - 1 * p;
-    handY = -10;
+    bodyRock = -0.05 * (1 - p);
+    bodyShift = -2.0 * (1 - p);
+    gunAngle = -0.10 * (1 - p);
   }
   // FASE 4: RECUPERAÇÃO E RETORNO (0.75 a 1.00)
   else {
     const p = (swingProgress - 0.75) / 0.25;
-    gunAngle = p * 0.35;
-    handX = 8 - 1 * p;
-    handY = -10 + 2 * p;
+    gunAngle = p * 0.25;
   }
 
-  // Desenha Corpo do Herói: pernas firmes no chão e tronco absorvendo recuo
-  if (hasParts) {
-    ctx.save();
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = 'high';
+  // Desenha Corpo do Herói: pernas e tronco unidos no mesmo balanço suave (SEM CORTAR NO MEIO!)
+  ctx.save();
+  ctx.translate(bodyShift, 0);
+  ctx.rotate(bodyRock);
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
 
-    // Ambas as pernas desenhadas alinhadas e firmes no solo
+  if (hasParts) {
     ctx.drawImage(heroRosterLegRightImg, sx, sy, sw, sh, dx, dy, pw, ph);
     ctx.drawImage(heroRosterLegLeftImg, sx, sy, sw, sh, dx, dy, pw, ph);
-
-    // Tronco Superior com recuo e lungeX
-    ctx.save();
-    ctx.translate(lungeX, 0);
-    ctx.rotate(bodyAngle);
-    ctx.scale(scaleX, scaleY);
     ctx.drawImage(heroRosterUpperImg, sx, sy, sw, sh, dx, dy, pw, ph);
-    ctx.restore();
-
-    ctx.restore();
   } else if (heroRosterLoaded && heroRosterImg) {
-    ctx.save();
-    ctx.translate(lungeX, 0);
-    ctx.rotate(bodyAngle);
-    ctx.scale(scaleX, scaleY);
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(heroRosterImg, sx, sy, sw, sh, dx, dy, pw, ph);
-    ctx.restore();
   } else {
     ctx.fillStyle = '#38bdf8';
     ctx.fillRect(dx, dy, pw, ph);
   }
 
-  // Desenha a Arma do Herói com empunhadura
+  // Desenha a Arma do Herói empunhada diretamente na mão (sem flutuar)
   if (weaponRosterLoaded && weaponRosterImg) {
     ctx.save();
-    ctx.translate(handX, handY);
+    ctx.translate(handBaseX, handBaseY);
     ctx.rotate(gunAngle);
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = 'high';
-    ctx.drawImage(weaponRosterImg, wsx, wsy, wsw, wsh, -5, -8, gw, gh);
+    ctx.drawImage(weaponRosterImg, wsx, wsy, wsw, wsh, -wGripX, -wGripY, gw, gh);
 
     // Mão do herói segurando a empunhadura
     ctx.fillStyle = '#fed7aa';
@@ -4775,13 +4748,13 @@ export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swi
     ctx.stroke();
 
     // Posição da boca do cano (Muzzle)
-    const muzzleLocalX = 25;
-    const muzzleLocalY = -2;
+    const muzzleLocalX = gw - wGripX;
+    const muzzleLocalY = -1;
 
     // 1. FLASH DE DISPARO DA BOCA DO CANO (0.32 a 0.42)
     if (swingProgress >= 0.32 && swingProgress <= 0.42) {
       const flashP = (swingProgress - 0.32) / 0.10;
-      const flashSize = 10 + (1 - flashP) * 6;
+      const flashSize = 8 + (1 - flashP) * 5;
       const category = weapon?.category || 'rifle';
 
       ctx.save();
@@ -4804,11 +4777,11 @@ export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swi
       }
 
       ctx.beginPath();
-      ctx.moveTo(muzzleLocalX, muzzleLocalY - 3);
-      ctx.lineTo(muzzleLocalX + flashSize * 1.5, muzzleLocalY - 7);
+      ctx.moveTo(muzzleLocalX, muzzleLocalY - 2.5);
+      ctx.lineTo(muzzleLocalX + flashSize * 1.5, muzzleLocalY - 5);
       ctx.lineTo(muzzleLocalX + flashSize * 1.7, muzzleLocalY);
-      ctx.lineTo(muzzleLocalX + flashSize * 1.5, muzzleLocalY + 7);
-      ctx.lineTo(muzzleLocalX, muzzleLocalY + 3);
+      ctx.lineTo(muzzleLocalX + flashSize * 1.5, muzzleLocalY + 5);
+      ctx.lineTo(muzzleLocalX, muzzleLocalY + 2.5);
       ctx.closePath();
       ctx.fill();
       ctx.restore();
@@ -4817,10 +4790,12 @@ export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swi
     ctx.restore(); // Fecha arma
   }
 
-  // 2. PROJÉTIL EM VOO ULTRARRÁPIDO (0.33 a 0.46)
-  const muzzleWorldX = handX + 32;
-  const muzzleWorldY = handY - 3;
-  const targetX = 52;
+  ctx.restore(); // Fecha corpo unificado
+
+  // 2. PROJÉTIL EM VOO ULTRARRÁPIDO (0.33 a 0.46) - Distância encurtada pela metade para 26px
+  const muzzleWorldX = handBaseX + (gw - wGripX);
+  const muzzleWorldY = handBaseY - 1;
+  const targetX = 26; // Encurtada pela metade (era 52)
   const targetY = -6;
 
   if (swingProgress >= 0.33 && swingProgress <= 0.46) {
