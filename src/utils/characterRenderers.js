@@ -4576,7 +4576,7 @@ export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swi
   const wsy = 0;
 
   const dx = -pw / 2;
-  const dy = -ph + 8;
+  const dy = -(100 / 128) * ph; // Calibrado para que a sola da bota toque perfeitamente o solo e a sombra
 
   // Ponto anatômico exato da mão do herói e da empunhadura (grip) da arma
   const handBaseX = dx + pw * (86 / 128);
@@ -4800,12 +4800,52 @@ export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swi
 
   if (swingProgress >= 0.33 && swingProgress <= 0.46) {
     const bulletP = (swingProgress - 0.33) / 0.13;
-    const bx = muzzleWorldX + (targetX - muzzleWorldX) * bulletP;
-    const by = muzzleWorldY + (targetY - muzzleWorldY) * bulletP;
     const category = weapon?.category || 'rifle';
 
     ctx.save();
-    if (category === 'energia') {
+    if (category === 'explosivo') {
+      // Granada pesada arremessada em arco parabólico com rotação
+      const arc = Math.sin(bulletP * Math.PI) * 14;
+      const gx = muzzleWorldX + (targetX - muzzleWorldX) * bulletP;
+      const gy = muzzleWorldY + (targetY - muzzleWorldY) * bulletP - arc;
+      ctx.translate(gx, gy);
+      ctx.rotate(bulletP * Math.PI * 3);
+      ctx.fillStyle = '#3f6212';
+      ctx.strokeStyle = '#14532d';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 3.5, 4.8, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+    } else if (category === 'molotov') {
+      // Coquetel Molotov em parábola com pavio ardente
+      const arc = Math.sin(bulletP * Math.PI) * 12;
+      const mx = muzzleWorldX + (targetX - muzzleWorldX) * bulletP;
+      const my = muzzleWorldY + (targetY - muzzleWorldY) * bulletP - arc;
+      ctx.translate(mx, my);
+      ctx.rotate(bulletP * Math.PI * 2);
+      ctx.fillStyle = '#78350f';
+      ctx.fillRect(-2, -3, 4, 7);
+      ctx.fillStyle = '#f97316';
+      ctx.beginPath();
+      ctx.arc(0, -6, 2, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (category === 'especial') {
+      // Lança-chamas: cone contínuo de chamas em expansão
+      for (let f = 0; f < 4; f++) {
+        const fp = Math.min(1, bulletP + f * 0.15);
+        const fx = muzzleWorldX + (targetX - muzzleWorldX) * fp;
+        const fy = muzzleWorldY + (targetY - muzzleWorldY) * fp + (Math.sin(now * 0.05 + f) * 3);
+        const fSize = 3 + fp * 6;
+        ctx.fillStyle = f % 2 === 0 ? '#fef08a' : '#f97316';
+        ctx.beginPath();
+        ctx.arc(fx, fy, fSize, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    } else if (category === 'energia') {
+      // Feixe de plasma azul
+      const bx = muzzleWorldX + (targetX - muzzleWorldX) * bulletP;
+      const by = muzzleWorldY + (targetY - muzzleWorldY) * bulletP;
       ctx.strokeStyle = 'rgba(56, 189, 248, 0.85)';
       ctx.lineWidth = 3;
       ctx.beginPath();
@@ -4820,6 +4860,9 @@ export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swi
       ctx.arc(bx, by, 3.5, 0, Math.PI * 2);
       ctx.fill();
     } else {
+      // Traçante balístico convencional
+      const bx = muzzleWorldX + (targetX - muzzleWorldX) * bulletP;
+      const by = muzzleWorldY + (targetY - muzzleWorldY) * bulletP;
       ctx.strokeStyle = 'rgba(251, 146, 60, 0.7)';
       ctx.lineWidth = 2.5;
       ctx.beginPath();
@@ -4827,16 +4870,9 @@ export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swi
       ctx.lineTo(bx, by);
       ctx.stroke();
 
-      ctx.fillStyle = '#334155';
-      ctx.shadowColor = '#f97316';
-      ctx.shadowBlur = 6;
-      ctx.beginPath();
-      ctx.arc(bx, by, 3.2, 0, Math.PI * 2);
-      ctx.fill();
-
       ctx.fillStyle = '#fef08a';
       ctx.beginPath();
-      ctx.arc(bx + 1, by - 1, 1.2, 0, Math.PI * 2);
+      ctx.arc(bx, by, 2.5, 0, Math.PI * 2);
       ctx.fill();
     }
     ctx.restore();
@@ -4862,18 +4898,60 @@ export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swi
   if (swingProgress >= 0.45 && swingProgress <= 0.75) {
     const impactX = targetX;
     const impactY = targetY;
+    const impactP = (swingProgress - 0.45) / 0.30;
+    const category = weapon?.category || 'rifle';
 
-    // Fissuras e cratera de impacto
-    ctx.strokeStyle = '#020617';
-    ctx.lineWidth = 2.4;
-    ctx.beginPath();
-    ctx.moveTo(impactX, impactY);
-    ctx.lineTo(impactX + 10, impactY - 8);
-    ctx.lineTo(impactX + 18, impactY - 14);
-    ctx.moveTo(impactX, impactY);
-    ctx.lineTo(impactX + 12, impactY + 6);
-    ctx.lineTo(impactX + 20, impactY + 12);
-    ctx.stroke();
+    if (category === 'explosivo') {
+      // Bola de fogo e onda de choque da granada
+      ctx.save();
+      const expRadius = 6 + impactP * 14;
+      ctx.globalAlpha = Math.max(0, 1 - impactP);
+      ctx.strokeStyle = '#fef08a';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(impactX, impactY, expRadius * 1.2, 0, Math.PI * 2);
+      ctx.stroke();
+
+      const grad = ctx.createRadialGradient(impactX, impactY, 0, impactX, impactY, expRadius);
+      grad.addColorStop(0, '#ffffff');
+      grad.addColorStop(0.3, '#fef08a');
+      grad.addColorStop(0.7, '#f97316');
+      grad.addColorStop(1, 'rgba(220, 38, 38, 0)');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(impactX, impactY, expRadius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    } else if (category === 'molotov' || category === 'especial') {
+      // Fogo consumidor da garrafa de molotov e do lança-chamas
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, 1 - impactP * 0.7);
+      for (let k = 0; k < 5; k++) {
+        const fx = impactX + (k - 2) * 4;
+        const fy = impactY + 4;
+        const fh = 8 + Math.sin(now * 0.03 + k) * 6;
+        ctx.fillStyle = k % 2 === 0 ? '#f97316' : '#fef08a';
+        ctx.beginPath();
+        ctx.moveTo(fx - 2, fy);
+        ctx.lineTo(fx, fy - fh);
+        ctx.lineTo(fx + 2, fy);
+        ctx.closePath();
+        ctx.fill();
+      }
+      ctx.restore();
+    } else {
+      // Fissuras e cratera de impacto
+      ctx.strokeStyle = '#020617';
+      ctx.lineWidth = 2.4;
+      ctx.beginPath();
+      ctx.moveTo(impactX, impactY);
+      ctx.lineTo(impactX + 10, impactY - 8);
+      ctx.lineTo(impactX + 18, impactY - 14);
+      ctx.moveTo(impactX, impactY);
+      ctx.lineTo(impactX + 12, impactY + 6);
+      ctx.lineTo(impactX + 20, impactY + 12);
+      ctx.stroke();
+    }
 
     // Faíscas incandescentes
     for (let i = 0; i < 6; i++) {

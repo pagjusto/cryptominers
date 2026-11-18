@@ -40,6 +40,7 @@ import {
   CORNER_SPAWN_POINTS 
 } from '../utils/cityMapGeometry';
 import { findNextHeroAction, COMBAT_RANGE, hasClearLineOfSight } from '../utils/minerPathfinding';
+import { getHeroById, getWeaponById } from '../data/heroRoster';
 
 export default function GameBoard({ 
   mine, 
@@ -730,31 +731,82 @@ export default function GameBoard({
               const shotTargetY = ty * TILE_SIZE + TILE_SIZE / 2;
               const shotDist = Math.hypot(shotTargetX - shotOriginX, shotTargetY - shotOriginY);
 
-              for (let b = 1; b <= 3; b++) {
-                const fraction = b / 4;
-                state.sparks.push({
-                  x: shotOriginX + (shotTargetX - shotOriginX) * fraction,
-                  y: shotOriginY + (shotTargetY - shotOriginY) * fraction,
-                  vx: ((shotTargetX - shotOriginX) / (shotDist || 1)) * 340,
-                  vy: ((shotTargetY - shotOriginY) / (shotDist || 1)) * 340,
-                  color: isCrit ? '#ef4444' : '#facc15',
-                  life: 0.18,
-                  maxLife: 0.18
-                });
-              }
+              const heroInfo = miner.heroId ? getHeroById(miner.heroId) : null;
+              const weaponInfo = (miner.weaponId ? getWeaponById(miner.weaponId) : null) || (heroInfo?.weaponId ? getWeaponById(heroInfo.weaponId) : null);
+              const wid = weaponInfo?.id || heroInfo?.weaponId || '';
 
-              // Faíscas visuais no ponto de impacto
-              const sparkColor = cid === 'mage' ? '#dc2626' : (isCrit ? '#f97316' : '#fef08a');
-              for (let s = 0; s < (isCrit ? 8 : 4); s++) {
-                state.sparks.push({
-                  x: tx * TILE_SIZE + TILE_SIZE / 2,
-                  y: ty * TILE_SIZE + TILE_SIZE / 2,
-                  vx: (Math.random() - 0.5) * 110,
-                  vy: (Math.random() - 0.5) * 110,
-                  color: sparkColor,
-                  life: 0.28,
-                  maxLife: 0.28
-                });
+              if (wid === 'grenade') {
+                // Granada: detonação com explosão em área no zumbi
+                sfx.playDynamiteBlast?.();
+                for (let s = 0; s < 14; s++) {
+                  const ang = Math.random() * Math.PI * 2;
+                  state.sparks.push({
+                    x: shotTargetX,
+                    y: shotTargetY,
+                    vx: Math.cos(ang) * (45 + Math.random() * 80),
+                    vy: Math.sin(ang) * (45 + Math.random() * 80) - 15,
+                    color: Math.random() > 0.4 ? '#facc15' : (Math.random() > 0.5 ? '#f97316' : '#ef4444'),
+                    life: 0.35,
+                    maxLife: 0.35
+                  });
+                }
+              } else if (wid === 'flamethrower') {
+                // Lança-chamas: cone de fogo contínuo
+                for (let b = 1; b <= 5; b++) {
+                  const fraction = b / 5;
+                  state.sparks.push({
+                    x: shotOriginX + (shotTargetX - shotOriginX) * fraction + (Math.random() - 0.5) * 8,
+                    y: shotOriginY + (shotTargetY - shotOriginY) * fraction + (Math.random() - 0.5) * 8,
+                    vx: ((shotTargetX - shotOriginX) / (shotDist || 1)) * (220 + Math.random() * 80),
+                    vy: ((shotTargetY - shotOriginY) / (shotDist || 1)) * (220 + Math.random() * 80),
+                    color: Math.random() > 0.4 ? '#f97316' : (Math.random() > 0.5 ? '#fef08a' : '#dc2626'),
+                    life: 0.28,
+                    maxLife: 0.28
+                  });
+                }
+              } else if (wid === 'molotov') {
+                // Molotov: estilhaço de garrafa e labaredas acesas
+                sfx.playChestDrop?.();
+                for (let s = 0; s < 10; s++) {
+                  const ang = Math.random() * Math.PI * 2;
+                  state.sparks.push({
+                    x: shotTargetX,
+                    y: shotTargetY,
+                    vx: Math.cos(ang) * (30 + Math.random() * 65),
+                    vy: Math.sin(ang) * (30 + Math.random() * 65) - 10,
+                    color: Math.random() > 0.4 ? '#f97316' : '#fef08a',
+                    life: 0.40,
+                    maxLife: 0.40
+                  });
+                }
+              } else {
+                // Projétil balístico convencional
+                for (let b = 1; b <= 3; b++) {
+                  const fraction = b / 4;
+                  state.sparks.push({
+                    x: shotOriginX + (shotTargetX - shotOriginX) * fraction,
+                    y: shotOriginY + (shotTargetY - shotOriginY) * fraction,
+                    vx: ((shotTargetX - shotOriginX) / (shotDist || 1)) * 340,
+                    vy: ((shotTargetY - shotOriginY) / (shotDist || 1)) * 340,
+                    color: isCrit ? '#ef4444' : '#facc15',
+                    life: 0.18,
+                    maxLife: 0.18
+                  });
+                }
+
+                // Faíscas visuais no ponto de impacto
+                const sparkColor = cid === 'mage' ? '#dc2626' : (isCrit ? '#f97316' : '#fef08a');
+                for (let s = 0; s < (isCrit ? 8 : 4); s++) {
+                  state.sparks.push({
+                    x: tx * TILE_SIZE + TILE_SIZE / 2,
+                    y: ty * TILE_SIZE + TILE_SIZE / 2,
+                    vx: (Math.random() - 0.5) * 110,
+                    vy: (Math.random() - 0.5) * 110,
+                    color: sparkColor,
+                    life: 0.28,
+                    maxLife: 0.28
+                  });
+                }
               }
 
               // Passiva do Engenheiro: Dinamite a cada 4 batidas causando splash nos blocos vizinhos

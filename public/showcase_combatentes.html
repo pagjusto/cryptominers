@@ -243,9 +243,9 @@
       { id: 'iris', name: 'Íris', classId: 'medic', className: 'Médica', rarity: 'epic', rarityName: 'Épico', spriteIndex: 4, weaponId: 'medical-kit', role: 'Suporte médico e salvaguarda' },
       { id: 'mumia', name: 'Múmia', classId: 'survivor', className: 'Sobrevivente', rarity: 'common', rarityName: 'Comum', spriteIndex: 5, weaponId: 'shotgun', role: 'Resistência e combate próximo' },
       { id: 'polar', name: 'Polar', classId: 'specialist', className: 'Especialista', rarity: 'rare', rarityName: 'Raro', spriteIndex: 6, weaponId: 'compact-rifle', role: 'Precisão e suporte tático' },
-      { id: 'fenix', name: 'Fênix', classId: 'assault', className: 'Assalto', rarity: 'epic', rarityName: 'Épico', spriteIndex: 7, weaponId: 'flare-launcher', role: 'Dano explosivo e pressão ofensiva' },
+      { id: 'fenix', name: 'Fênix', classId: 'assault', className: 'Assalto (Molotov)', rarity: 'epic', rarityName: 'Épico', spriteIndex: 7, weaponId: 'molotov', role: 'Arremesso de molotov e pressão incendiária em área' },
       { id: 'sombra', name: 'Sombra', classId: 'infiltrator', className: 'Infiltrador', rarity: 'rare', rarityName: 'Raro', spriteIndex: 8, weaponId: 'precision-rifle', role: 'Ataque de precisão de longo alcance' },
-      { id: 'iron', name: 'Iron', classId: 'heavy', className: 'Blindado', rarity: 'epic', rarityName: 'Épico', spriteIndex: 9, weaponId: 'grenade', role: 'Controle de área e resistência extrema' },
+      { id: 'iron', name: 'Iron', classId: 'heavy', className: 'Granadeiro Blindado', rarity: 'epic', rarityName: 'Épico', spriteIndex: 9, weaponId: 'grenade', role: 'Arremesso de granadas e explosão em área' },
       { id: 'colosso', name: 'Colosso', classId: 'juggernaut', className: 'Tanque de elite', rarity: 'legendary', rarityName: 'Lendário', spriteIndex: 10, weaponId: 'rocket-launcher', role: 'Poder de fogo pesado balístico' },
       { id: 'hunter', name: 'Hunter', classId: 'marksman', className: 'Atirador', rarity: 'common', rarityName: 'Comum', spriteIndex: 11, weaponId: 'tactical-carbine', role: 'Tiroteio tático e combate direto' },
       { id: 'scarlet', name: 'Scarlet', classId: 'guerrilla', className: 'Guerrilheira', rarity: 'common', rarityName: 'Comum', spriteIndex: 12, weaponId: 'heavy-pistol', role: 'Ataque rápido e suporte tático' }
@@ -255,13 +255,14 @@
       'assault-rifle': { name: 'Rifle de Assalto', sourceIndex: 0, category: 'Fuzil Automático' },
       'heavy-machine-gun': { name: 'Metralhadora Pesada', sourceIndex: 8, category: 'Arma Pesada de Suporte' },
       'energy-blaster': { name: 'Canhão de Energia', sourceIndex: 3, category: 'Feixe de Plasma' },
-      'flamethrower': { name: 'Lança-chamas', sourceIndex: 2, category: 'Dispersão Incendiária' },
+      'flamethrower': { name: 'Lança-chamas Tático', sourceIndex: 2, category: 'Jato Contínuo de Fogo' },
       'medical-kit': { name: 'Injetor de Suporte', sourceIndex: 6, category: 'Dispositivo Tático' },
       'shotgun': { name: 'Escopeta Calibre 12', sourceIndex: 9, category: 'Dispersão de Chumbo' },
       'compact-rifle': { name: 'Rifle Compacto', sourceIndex: 5, category: 'Carbina Leve' },
       'flare-launcher': { name: 'Lançador Incendiário', sourceIndex: 4, category: 'Projéteis Térmicos' },
+      'molotov': { name: 'Coquetel Molotov', sourceIndex: 4, category: 'Incendiário Arremessável', scale: 0.65 },
       'precision-rifle': { name: 'Rifle de Precisão (Sniper)', sourceIndex: 8, category: 'Balística de Longo Alcance' },
-      'grenade': { name: 'Granada Tática', sourceIndex: 7, category: 'Explosivo de Área' },
+      'grenade': { name: 'Granada de Fragmentação', sourceIndex: 7, category: 'Explosivo Arremessável', scale: 0.68 },
       'rocket-launcher': { name: 'Lança-foguetes RPG', sourceIndex: 10, category: 'Projétil Autopropelido' },
       'tactical-carbine': { name: 'Carbina Tática M4', sourceIndex: 11, category: 'Cadência Rápida' },
       'heavy-pistol': { name: 'Pistola Pesada .50', sourceIndex: 12, category: 'Pistola de Alto Calibre', scale: 0.58 }
@@ -314,6 +315,8 @@
         targetDist: 70,   // Distância encurtada pela metade para combate corpo a corpo
         particles: [],
         sparks: [],
+        explosions: [],
+        groundFlames: [],
         shotTimer: 0
       };
 
@@ -399,34 +402,34 @@
         }
 
         const hX = cvs.width / 2 - (st.direction > 0 ? 35 : -35);
-        const hY = 145;
+        const hY = 150; // Linha de solo sólida para herói e zumbi
 
         // Alvo zumbi simulado à frente com distância encurtada pela metade (70px)
         const targetX = hX + st.direction * 70;
         const targetY = hY;
 
         ctx.save();
-        // Sombra do alvo zumbi
+        // Sombra do alvo zumbi fixada rigorosamente no chão
         ctx.fillStyle = 'rgba(0,0,0,0.4)';
         ctx.beginPath();
-        ctx.ellipse(targetX, targetY + 12, 14, 4, 0, 0, Math.PI * 2);
+        ctx.ellipse(targetX, targetY, 14, 4, 0, 0, Math.PI * 2);
         ctx.fill();
 
-        // Alvo estilizado (Silhueta de zumbi de treino)
+        // Alvo estilizado (Silhueta de zumbi de treino) apoiado no chão
         ctx.fillStyle = '#4d7c0f';
         ctx.beginPath();
-        ctx.arc(targetX, targetY - 22, 7, 0, Math.PI * 2);
+        ctx.arc(targetX, targetY - 33, 7, 0, Math.PI * 2);
         ctx.fill();
-        ctx.fillRect(targetX - 6, targetY - 14, 12, 18);
+        ctx.fillRect(targetX - 6, targetY - 26, 12, 18);
         ctx.fillStyle = '#1e3a1e';
-        ctx.fillRect(targetX - 5, targetY + 4, 4, 8);
-        ctx.fillRect(targetX + 1, targetY + 4, 4, 8);
+        ctx.fillRect(targetX - 5, targetY - 8, 4, 8);
+        ctx.fillRect(targetX + 1, targetY - 8, 4, 8);
 
-        // Placa de alvo
+        // Placa de alvo no peito
         ctx.strokeStyle = '#ef4444';
         ctx.lineWidth = 1.5;
         ctx.beginPath();
-        ctx.arc(targetX, targetY - 6, 12, 0, Math.PI * 2);
+        ctx.arc(targetX, targetY - 17, 12, 0, Math.PI * 2);
         ctx.stroke();
         ctx.restore();
 
@@ -437,10 +440,10 @@
           ctx.scale(-1, 1);
         }
 
-        // Sombra de contato do herói
+        // Sombra de contato do herói exatamente sob a sola das botas (sem flutuar)
         ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
         ctx.beginPath();
-        ctx.ellipse(0, 14, 16, 5, 0, 0, Math.PI * 2);
+        ctx.ellipse(0, 0, 16, 4.5, 0, 0, Math.PI * 2);
         ctx.fill();
 
         const isShooting = st.mode === 'shooting';
@@ -464,7 +467,8 @@
         const wsy = 0;
 
         const dx = -pw / 2;
-        const dy = -ph + 8;
+        // dy calibrado para que a sola da bota (y=100 no sprite 128px) toque exatamente y=0 no solo
+        const dy = -(100 / 128) * ph;
 
         const hipLeftX = dx + pw * (56 / 128);
         const hipLeftY = dy + ph * (72 / 128);
@@ -586,36 +590,113 @@
             ctx.stroke();
           }
 
-          // Muzzle Flash na ponta do cano
+          // Disparo balístico, arremesso de granada, molotov ou jato de chamas
           if (isFiringMoment) {
-            ctx.save();
+            const wid = hero.weaponId;
             const muzzleTipX = gw - wGripX;
-            ctx.translate(muzzleTipX, -1);
-            // Chama amarela / alaranjada estourando na boca do cano
-            ctx.fillStyle = '#fef08a';
-            ctx.beginPath();
-            ctx.arc(0, 0, 6, 0, Math.PI * 2);
-            ctx.fill();
 
-            ctx.fillStyle = '#f97316';
-            ctx.beginPath();
-            ctx.moveTo(0, -5);
-            ctx.lineTo(14, 0);
-            ctx.lineTo(0, 5);
-            ctx.closePath();
-            ctx.fill();
-            ctx.restore();
+            if (wid === 'grenade') {
+              // GRANADEIRO (Iron): Arremessa granada pesada em arco parabólico
+              if (st.shotTimer < now - 620) {
+                st.shotTimer = now;
+                st.particles.push({
+                  type: 'grenade',
+                  startX: hX + st.direction * handX,
+                  startY: hY + handY,
+                  targetX: targetX,
+                  targetY: targetY - 6,
+                  progress: 0,
+                  speed: 0.048,
+                  rotation: 0
+                });
+              }
+            } else if (wid === 'molotov') {
+              // LANÇADOR DE MOLOTOV (Fênix): Arremessa coquetel molotov em chamas
+              if (st.shotTimer < now - 650) {
+                st.shotTimer = now;
+                st.particles.push({
+                  type: 'molotov',
+                  startX: hX + st.direction * handX,
+                  startY: hY + handY,
+                  targetX: targetX,
+                  targetY: targetY + 8,
+                  progress: 0,
+                  speed: 0.042,
+                  rotation: 0
+                });
+              }
+            } else if (wid === 'flamethrower') {
+              // LANÇA-CHAMAS (Brasa): Cospe jato contínuo de labaredas
+              if (st.shotTimer < now - 50) {
+                st.shotTimer = now;
+                for (let f = 0; f < 3; f++) {
+                  st.particles.push({
+                    type: 'flame',
+                    x: hX + st.direction * (handX + muzzleTipX),
+                    y: hY + handY + (Math.random() - 0.5) * 3,
+                    vx: st.direction * (4.2 + Math.random() * 3.8),
+                    vy: (Math.random() - 0.5) * 1.8 - 0.3,
+                    size: 3.5,
+                    maxSize: 15 + Math.random() * 6,
+                    life: 1.0,
+                    decay: 0.045 + Math.random() * 0.02
+                  });
+                }
+              }
+              // Chama piloto na ponta do cano
+              ctx.save();
+              ctx.translate(muzzleTipX, -1);
+              ctx.fillStyle = '#fef08a';
+              ctx.beginPath();
+              ctx.arc(0, 0, 4, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.restore();
+            } else if (wid === 'rocket-launcher') {
+              // LANÇA-FOGUETES (Colosso): Dispara míssil RPG
+              if (st.shotTimer < now - 680) {
+                st.shotTimer = now;
+                st.particles.push({
+                  type: 'rocket',
+                  x: hX + st.direction * (handX + muzzleTipX),
+                  y: hY + handY - 1,
+                  vx: st.direction * 11,
+                  vy: 0,
+                  life: 1.0
+                });
+              }
+            } else {
+              // ARMAS DE FOGO PADRÃO: Muzzle Flash e Projéteis Balísticos
+              ctx.save();
+              ctx.translate(muzzleTipX, -1);
+              ctx.fillStyle = wid === 'energy-blaster' ? '#38bdf8' : '#fef08a';
+              ctx.beginPath();
+              ctx.arc(0, 0, 6, 0, Math.PI * 2);
+              ctx.fill();
 
-            // Dispara projétil na direção do alvo (distância encurtada pela metade para 70px)
-            if (st.shotTimer < now - 400) {
-              st.shotTimer = now;
-              st.particles.push({
-                x: hX + st.direction * (handX + muzzleTipX),
-                y: hY + handY,
-                vx: st.direction * 14,
-                vy: (Math.random() - 0.5) * 1.0,
-                life: 1.0
-              });
+              ctx.fillStyle = wid === 'energy-blaster' ? '#0284c7' : '#f97316';
+              ctx.beginPath();
+              ctx.moveTo(0, -5);
+              ctx.lineTo(14, 0);
+              ctx.lineTo(0, 5);
+              ctx.closePath();
+              ctx.fill();
+              ctx.restore();
+
+              const cadence = wid === 'shotgun' ? 550 : (wid === 'heavy-machine-gun' ? 220 : 380);
+              if (st.shotTimer < now - cadence) {
+                st.shotTimer = now;
+                const count = wid === 'shotgun' ? 3 : 1;
+                for (let k = 0; k < count; k++) {
+                  st.particles.push({
+                    type: wid === 'energy-blaster' ? 'plasma' : 'bullet',
+                    x: hX + st.direction * (handX + muzzleTipX),
+                    y: hY + handY + (k - 1) * 2,
+                    vx: st.direction * (wid === 'shotgun' ? 12 + Math.random() * 3 : 16),
+                    vy: (Math.random() - 0.5) * (wid === 'shotgun' ? 2.5 : 0.8),
+                    life: 1.0
+                  });
+                }
+              }
             }
           }
 
@@ -625,61 +706,366 @@
 
         ctx.restore(); // Fecha herói
 
-        // Atualiza e desenha projéteis balísticos e faíscas
+        // =========================================================================
+        // ATUALIZAÇÃO E RENDERIZAÇÃO DE PROJÉTEIS (GRANADAS, MOLOTOVS, CHAMAS, BALAS)
+        // =========================================================================
         for (let i = st.particles.length - 1; i >= 0; i--) {
           const pt = st.particles[i];
-          pt.x += pt.vx;
-          pt.y += pt.vy;
 
-          // Traçante de bala amarelo-ouro
-          ctx.save();
-          ctx.strokeStyle = '#facc15';
-          ctx.lineWidth = 2.5;
-          ctx.beginPath();
-          ctx.moveTo(pt.x - pt.vx * 1.8, pt.y);
-          ctx.lineTo(pt.x, pt.y);
-          ctx.stroke();
+          if (pt.type === 'grenade') {
+            // Granada voando em parábola realista
+            pt.progress += pt.speed;
+            const arc = Math.sin(pt.progress * Math.PI) * 28;
+            pt.x = pt.startX + (pt.targetX - pt.startX) * pt.progress;
+            pt.y = pt.startY + (pt.targetY - pt.startY) * pt.progress - arc;
+            pt.rotation += 0.35 * st.direction;
 
-          // Luz de ponta do projétil
-          ctx.fillStyle = '#ffffff';
-          ctx.beginPath();
-          ctx.arc(pt.x, pt.y, 2, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.restore();
+            ctx.save();
+            ctx.translate(pt.x, pt.y);
+            ctx.rotate(pt.rotation);
+            // Corpo oval da granada
+            ctx.fillStyle = '#3f6212';
+            ctx.strokeStyle = '#14532d';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.ellipse(0, 0, 4.5, 6, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            // Espoleta prateada
+            ctx.fillStyle = '#cbd5e1';
+            ctx.fillRect(-1.5, -8, 3, 3);
+            ctx.restore();
 
-          // Checa impacto no alvo
-          if ((st.direction > 0 && pt.x >= targetX) || (st.direction < 0 && pt.x <= targetX)) {
-            st.particles.splice(i, 1);
-            // Gera faíscas de impacto no alvo
-            for (let s = 0; s < 8; s++) {
+            // Rastro de fumaça leve
+            if (Math.random() > 0.4) {
               st.sparks.push({
+                x: pt.x,
+                y: pt.y,
+                vx: (Math.random() - 0.5) * 1.0,
+                vy: -Math.random() * 1.5,
+                color: 'rgba(203, 213, 225, 0.4)',
+                size: 2.5,
+                life: 0.4
+              });
+            }
+
+            // DETONAÇÃO E EXPLOSÃO NO ZUMBI
+            if (pt.progress >= 1.0) {
+              st.particles.splice(i, 1);
+              // Onda de choque e bola de fogo esférica
+              st.explosions.push({
                 x: targetX,
-                y: targetY - 8,
-                vx: (Math.random() - 0.5) * 6,
-                vy: (Math.random() - 0.5) * 6 - 2,
-                color: Math.random() > 0.5 ? '#f97316' : '#facc15',
+                y: targetY - 10,
+                radius: 4,
+                maxRadius: 30,
                 life: 1.0
               });
+              // 18 estilhaços e fragmentos incandescentes
+              for (let s = 0; s < 18; s++) {
+                const ang = Math.random() * Math.PI * 2;
+                const spd = 3 + Math.random() * 6.5;
+                st.sparks.push({
+                  x: targetX,
+                  y: targetY - 10,
+                  vx: Math.cos(ang) * spd,
+                  vy: Math.sin(ang) * spd - 2,
+                  color: Math.random() > 0.4 ? '#fbbf24' : (Math.random() > 0.5 ? '#f97316' : '#ef4444'),
+                  size: 2 + Math.random() * 2.5,
+                  life: 1.0
+                });
+              }
+            }
+          } else if (pt.type === 'molotov') {
+            // Molotov com garrafa de vidro e pano em chamas em parábola
+            pt.progress += pt.speed;
+            const arc = Math.sin(pt.progress * Math.PI) * 26;
+            pt.x = pt.startX + (pt.targetX - pt.startX) * pt.progress;
+            pt.y = pt.startY + (pt.targetY - pt.startY) * pt.progress - arc;
+            pt.rotation += 0.30 * st.direction;
+
+            ctx.save();
+            ctx.translate(pt.x, pt.y);
+            ctx.rotate(pt.rotation);
+            // Garrafa de vidro âmbar
+            ctx.fillStyle = '#78350f';
+            ctx.strokeStyle = '#451a03';
+            ctx.lineWidth = 1;
+            ctx.fillRect(-3, -4, 6, 9);
+            ctx.fillRect(-1.5, -8, 3, 4);
+            // Pano aceso na ponta
+            ctx.fillStyle = '#fef08a';
+            ctx.beginPath();
+            ctx.arc(0, -9, 3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#f97316';
+            ctx.beginPath();
+            ctx.arc(0, -11, 2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+
+            // Faíscas no ar
+            if (Math.random() > 0.4) {
+              st.sparks.push({
+                x: pt.x,
+                y: pt.y - 4,
+                vx: (Math.random() - 0.5) * 1.5,
+                vy: (Math.random() - 0.5) * 1.5,
+                color: '#f97316',
+                size: 2,
+                life: 0.5
+              });
+            }
+
+            // ESTILHAÇAMENTO E LABAREDAS NO ALVO
+            if (pt.progress >= 1.0) {
+              st.particles.splice(i, 1);
+              // Cacos de vidro
+              for (let s = 0; s < 12; s++) {
+                const ang = Math.random() * Math.PI * 2;
+                st.sparks.push({
+                  x: targetX,
+                  y: targetY + 6,
+                  vx: Math.cos(ang) * (2 + Math.random() * 4),
+                  vy: Math.sin(ang) * (2 + Math.random() * 4) - 2.5,
+                  color: Math.random() > 0.5 ? '#b45309' : '#fef3c7',
+                  size: 2,
+                  life: 0.7
+                });
+              }
+              // Poça e labaredas de fogo consumidor no zumbi e chão
+              for (let f = 0; f < 8; f++) {
+                st.groundFlames.push({
+                  x: targetX + (Math.random() - 0.5) * 22,
+                  y: targetY + 10 + (Math.random() - 0.5) * 4,
+                  height: 14 + Math.random() * 16,
+                  life: 1.4,
+                  decay: 0.016
+                });
+              }
+            }
+          } else if (pt.type === 'flame') {
+            // Labareda de lança-chamas em expansão contínua
+            pt.x += pt.vx;
+            pt.y += pt.vy;
+            pt.size += (pt.maxSize - pt.size) * 0.12;
+            pt.life -= pt.decay;
+
+            if (pt.life <= 0) {
+              st.particles.splice(i, 1);
+              continue;
+            }
+
+            ctx.save();
+            ctx.globalAlpha = Math.max(0, pt.life);
+            const grad = ctx.createRadialGradient(pt.x, pt.y, 0, pt.x, pt.y, pt.size);
+            grad.addColorStop(0, '#fef08a');
+            grad.addColorStop(0.35, '#f97316');
+            grad.addColorStop(0.75, '#dc2626');
+            grad.addColorStop(1, 'rgba(69, 10, 10, 0)');
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(pt.x, pt.y, pt.size, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+
+            // Ao tocar no zumbi, ateia fogo contínuo
+            if ((st.direction > 0 && pt.x >= targetX) || (st.direction < 0 && pt.x <= targetX)) {
+              if (Math.random() > 0.55) {
+                st.groundFlames.push({
+                  x: targetX + (Math.random() - 0.5) * 14,
+                  y: targetY + 6 + (Math.random() - 0.5) * 6,
+                  height: 9 + Math.random() * 13,
+                  life: 0.85,
+                  decay: 0.038
+                });
+              }
+            }
+          } else if (pt.type === 'rocket') {
+            // Projétil de foguete RPG
+            pt.x += pt.vx;
+            ctx.save();
+            ctx.fillStyle = '#475569';
+            ctx.fillRect(pt.x - 6, pt.y - 2.5, 12, 5);
+            ctx.fillStyle = '#dc2626';
+            ctx.beginPath();
+            ctx.moveTo(pt.x + 6 * st.direction, pt.y - 3);
+            ctx.lineTo(pt.x + 10 * st.direction, pt.y);
+            ctx.lineTo(pt.x + 6 * st.direction, pt.y + 3);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+
+            if ((st.direction > 0 && pt.x >= targetX) || (st.direction < 0 && pt.x <= targetX)) {
+              st.particles.splice(i, 1);
+              st.explosions.push({
+                x: targetX,
+                y: targetY - 8,
+                radius: 5,
+                maxRadius: 32,
+                life: 1.0
+              });
+              for (let s = 0; s < 14; s++) {
+                const ang = Math.random() * Math.PI * 2;
+                st.sparks.push({
+                  x: targetX,
+                  y: targetY - 8,
+                  vx: Math.cos(ang) * (3 + Math.random() * 5),
+                  vy: Math.sin(ang) * (3 + Math.random() * 5) - 2,
+                  color: '#f97316',
+                  size: 2.5,
+                  life: 1.0
+                });
+              }
+            }
+          } else if (pt.type === 'plasma') {
+            // Disparo de plasma azul elétrico
+            pt.x += pt.vx;
+            pt.y += pt.vy;
+            ctx.save();
+            ctx.fillStyle = '#38bdf8';
+            ctx.shadowColor = '#0ea5e9';
+            ctx.shadowBlur = 10;
+            ctx.beginPath();
+            ctx.arc(pt.x, pt.y, 4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(pt.x, pt.y, 2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+
+            if ((st.direction > 0 && pt.x >= targetX) || (st.direction < 0 && pt.x <= targetX)) {
+              st.particles.splice(i, 1);
+              for (let s = 0; s < 8; s++) {
+                st.sparks.push({
+                  x: targetX,
+                  y: targetY - 8,
+                  vx: (Math.random() - 0.5) * 7,
+                  vy: (Math.random() - 0.5) * 7 - 2,
+                  color: '#38bdf8',
+                  size: 2.5,
+                  life: 0.8
+                });
+              }
+            }
+          } else {
+            // Projétil balístico convencional (Rifles, Metralhadora, Escopeta, Pistolas)
+            pt.x += pt.vx;
+            pt.y += pt.vy;
+
+            ctx.save();
+            ctx.strokeStyle = '#facc15';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(pt.x - pt.vx * 1.6, pt.y);
+            ctx.lineTo(pt.x, pt.y);
+            ctx.stroke();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(pt.x, pt.y, 2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+
+            if ((st.direction > 0 && pt.x >= targetX) || (st.direction < 0 && pt.x <= targetX)) {
+              st.particles.splice(i, 1);
+              for (let s = 0; s < 8; s++) {
+                st.sparks.push({
+                  x: targetX,
+                  y: targetY - 8,
+                  vx: (Math.random() - 0.5) * 6,
+                  vy: (Math.random() - 0.5) * 6 - 2,
+                  color: Math.random() > 0.5 ? '#f97316' : '#facc15',
+                  size: 2,
+                  life: 1.0
+                });
+              }
             }
           }
         }
 
-        // Desenha faíscas de impacto
+        // =========================================================================
+        // RENDERIZAÇÃO DE EXPLOSÕES (GRANADAS E FOGUETES)
+        // =========================================================================
+        for (let i = st.explosions.length - 1; i >= 0; i--) {
+          const exp = st.explosions[i];
+          exp.radius += (exp.maxRadius - exp.radius) * 0.20;
+          exp.life -= 0.045;
+          if (exp.life <= 0) {
+            st.explosions.splice(i, 1);
+            continue;
+          }
+          ctx.save();
+          ctx.globalAlpha = Math.max(0, exp.life);
+          // Onda de choque branca
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 2.5 * exp.life;
+          ctx.beginPath();
+          ctx.arc(exp.x, exp.y, exp.radius * 1.25, 0, Math.PI * 2);
+          ctx.stroke();
+
+          // Bola de fogo explosiva
+          const grad = ctx.createRadialGradient(exp.x, exp.y, 0, exp.x, exp.y, exp.radius);
+          grad.addColorStop(0, '#ffffff');
+          grad.addColorStop(0.2, '#fef08a');
+          grad.addColorStop(0.55, '#f97316');
+          grad.addColorStop(0.85, '#dc2626');
+          grad.addColorStop(1, 'rgba(69, 10, 10, 0)');
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.arc(exp.x, exp.y, exp.radius, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+
+        // =========================================================================
+        // RENDERIZAÇÃO DE LABAREDAS NO CHÃO / ZUMBI (MOLOTOV E LANÇA-CHAMAS)
+        // =========================================================================
+        for (let i = st.groundFlames.length - 1; i >= 0; i--) {
+          const fl = st.groundFlames[i];
+          fl.life -= fl.decay;
+          if (fl.life <= 0) {
+            st.groundFlames.splice(i, 1);
+            continue;
+          }
+          const h = fl.height * Math.min(1, fl.life);
+          const wobble = Math.sin(now * 0.025 + fl.x) * 3;
+          ctx.save();
+          ctx.globalAlpha = Math.min(1, fl.life);
+          const grad = ctx.createLinearGradient(fl.x, fl.y, fl.x, fl.y - h);
+          grad.addColorStop(0, '#fef08a');
+          grad.addColorStop(0.35, '#f97316');
+          grad.addColorStop(0.75, '#dc2626');
+          grad.addColorStop(1, 'rgba(185, 28, 28, 0)');
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.moveTo(fl.x - 4, fl.y);
+          ctx.quadraticCurveTo(fl.x + wobble, fl.y - h * 0.6, fl.x, fl.y - h);
+          ctx.quadraticCurveTo(fl.x - wobble, fl.y - h * 0.6, fl.x + 4, fl.y);
+          ctx.closePath();
+          ctx.fill();
+          ctx.restore();
+        }
+
+        // =========================================================================
+        // FAÍSCAS, BRASAS E ESTILHAÇOS DE IMPACTO
+        // =========================================================================
         for (let i = st.sparks.length - 1; i >= 0; i--) {
           const spk = st.sparks[i];
           spk.x += spk.vx;
           spk.y += spk.vy;
-          spk.life -= 0.05;
+          spk.life -= 0.045;
           if (spk.life <= 0) {
             st.sparks.splice(i, 1);
             continue;
           }
+          ctx.save();
           ctx.fillStyle = spk.color;
-          ctx.globalAlpha = spk.life;
+          ctx.globalAlpha = Math.max(0, spk.life);
           ctx.beginPath();
-          ctx.arc(spk.x, spk.y, 2, 0, Math.PI * 2);
+          ctx.arc(spk.x, spk.y, spk.size || 2, 0, Math.PI * 2);
           ctx.fill();
-          ctx.globalAlpha = 1.0;
+          ctx.restore();
         }
 
       });
