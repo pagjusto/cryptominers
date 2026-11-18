@@ -35,6 +35,7 @@ export default function SummonModal({
   const [activeTab, setActiveTab] = useState('mint'); // 'mint' | 'tavern'
   const [paymentCurrency, setPaymentCurrency] = useState('miner'); // 'miner' | 'usdt'
   const [selectedChestType, setSelectedChestType] = useState('miner');
+  const [chestQuantities, setChestQuantities] = useState({});
   const [isProcessing, setIsProcessing] = useState(false);
   const [justPurchasedChest, setJustPurchasedChest] = useState(null);
   const [revealedMiner, setRevealedMiner] = useState(null);
@@ -48,9 +49,15 @@ export default function SummonModal({
   const chestCostMiner = rate > 0 ? parseFloat((chestCostUsdt / rate).toFixed(2)) : chestCostUsdt;
   const chestCost = paymentCurrency === 'miner' ? chestCostMiner : chestCostUsdt;
   
-  const canAffordChest = paymentCurrency === 'miner'
-    ? minerBalance >= chestCostMiner
-    : (walletState.isConnected && walletState.usdtBalance >= chestCostUsdt);
+  const selectedChestOrders = MINT_CHEST_TYPES.map(chest => ({ chest, quantity: Math.max(0, Math.floor(Number(chestQuantities[chest.id]) || 0)) })).filter(item => item.quantity > 0);
+  const totalChestCount = selectedChestOrders.reduce((sum, item) => sum + item.quantity, 0);
+  const totalHeroesCount = selectedChestOrders.reduce((sum, item) => sum + item.quantity * (item.chest.heroesCount || 1), 0);
+  const totalCostUsdt = selectedChestOrders.reduce((sum, item) => sum + item.quantity * (item.chest.costUsdt || item.chest.costBcoin || 10), 0);
+  const totalCostMiner = rate > 0 ? Number((totalCostUsdt / rate).toFixed(2)) : totalCostUsdt;
+  const totalPurchaseCost = paymentCurrency === 'miner' ? totalCostMiner : totalCostUsdt;
+  const canAffordChest = totalChestCount > 0 && (paymentCurrency === 'miner'
+    ? minerBalance >= totalCostMiner
+    : (walletState.isConnected && walletState.usdtBalance >= totalCostUsdt));
 
   const randomName = () => {
     const names = [
@@ -67,25 +74,23 @@ export default function SummonModal({
       if (onOpenWalletModal) onOpenWalletModal();
       return;
     }
-
-    if (!canAffordChest || isProcessing) return;
-
+    if (!canAffordChest || isProcessing || !onBuyAndStoreChest) return;
     setIsProcessing(true);
-
-    if (onBuyAndStoreChest) {
-      const result = onBuyAndStoreChest(currentChest, paymentCurrency);
-      if (result) {
-        setJustPurchasedChest(typeof result === 'object' ? result : {
-          ...currentChest,
-          currency: paymentCurrency.toUpperCase(),
-          cost: chestCost
-        });
+    const purchased = [];
+    for (const item of selectedChestOrders) {
+      for (let i = 0; i < item.quantity; i++) {
+        const result = onBuyAndStoreChest(item.chest, paymentCurrency);
+        if (!result) {
+          alert('Não foi possível concluir toda a compra. Verifique o saldo e tente novamente.');
+          setIsProcessing(false);
+          return;
+        }
+        purchased.push(result);
       }
     }
-
-    setTimeout(() => {
-      setIsProcessing(false);
-    }, 300);
+    setJustPurchasedChest({ name: `${totalChestCount} baú(s) • ${totalHeroesCount} heróis`, icon: '📦', currency: paymentCurrency.toUpperCase(), cost: totalPurchaseCost, purchasedCount: purchased.length });
+    setChestQuantities({});
+    setTimeout(() => setIsProcessing(false), 300);
   };
 
   // 2. CONTRATAÇÃO DIRETA NO MERCADO (PAGO EM USDT OU MINERCOIN)
@@ -451,7 +456,7 @@ export default function SummonModal({
                       Entrega Direta no Inventário
                     </span>
                     <span className="text-[11px] text-slate-300 block">
-                      Todos os baús comprados (qualquer categoria) vão para o seu Inventário para serem abertos <b>um a um</b>, com opção de <b>Abertura Normal</b> ou com <b>Bônus de Anúncio</b>.
+                      Selecione quantidades de várias categorias no mesmo pedido. Todos os baús vão para o Inventário e continuam sendo abertos <b>um a um</b>, com opção de <b>Abertura Normal</b> ou <b>Bônus de Anúncio</b>.
                     </span>
                   </div>
                 </div>
@@ -459,7 +464,7 @@ export default function SummonModal({
                 {/* Grid das 4 Categorias de Baús */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
                   {MINT_CHEST_TYPES.map(chest => {
-                    const isSelected = selectedChestType === chest.id;
+                    const quantity = Number(chestQuantities[chest.id]) || 0;
                     const costUsdt = chest.costUsdt || chest.costBcoin || 10;
                     const costMiner = rate > 0 ? parseFloat((costUsdt / rate).toFixed(2)) : costUsdt;
                     const heroesCount = chest.heroesCount || 1;
@@ -467,12 +472,7 @@ export default function SummonModal({
                     return (
                       <div
                         key={chest.id}
-                        onClick={() => setSelectedChestType(chest.id)}
-                        className={`p-3 rounded-2xl border-2 transition cursor-pointer text-left flex flex-col justify-between ${
-                          isSelected
-                            ? 'border-amber-400 bg-amber-950/20 shadow-lg ring-1 ring-amber-400/50'
-                            : 'border-slate-800 bg-slate-950/70 hover:border-slate-700'
-                        }`}
+                        className={`p-3 rounded-2xl border-2 transition text-left flex flex-col justify-between ${quantity > 0 ? 'border-amber-400 bg-amber-950/20 shadow-lg ring-1 ring-amber-400/50' : 'border-slate-800 bg-slate-950/70'}`}
                       >
                         <div>
                           <div className="flex items-center justify-between mb-1.5">
@@ -501,6 +501,8 @@ export default function SummonModal({
                           )}
                         </div>
 
+                        <label className="mt-3 block text-[10px] text-slate-300">Quantidade deste baú<input type="number" min="0" step="1" value={quantity} onChange={e=>setChestQuantities(prev=>({...prev,[chest.id]:Math.max(0,Math.floor(Number(e.target.value)||0))}))} className="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 px-2 py-2 text-sm text-white" /></label>
+
                         {/* Probabilidades de Raridade */}
                         <div className="space-y-0.5 border-t border-slate-800/80 pt-1 text-[9px] font-mono text-slate-400">
                           {chest.chances.map((c, i) => (
@@ -514,6 +516,149 @@ export default function SummonModal({
                     );
                   })}
                 </div>
+
+                <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-3 flex flex-wrap justify-between gap-2 text-xs"><span>{totalChestCount} baús • {totalHeroesCount} heróis no total</span><b className="text-amber-300">Total: {paymentCurrency === 'miner' ? totalCostMiner.toLocaleString('pt-BR') + ' MNC' : '
+                <div className="pt-1 pb-1">
+                  {paymentCurrency === 'usdt' && !walletState.isConnected ? (
+                    <button
+                      onClick={onOpenWalletModal}
+                      className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 text-slate-950 font-arcade text-xs font-bold transition shadow-xl flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      <Wallet size={16} />
+                      <span>CONECTAR CARTEIRA WEB3 (METAMASK / TRUST)</span>
+                    </button>
+                  ) : (
+                    <div className="space-y-2">
+                      <button
+                        onClick={handleBuyChest}
+                        disabled={!canAffordChest || isProcessing}
+                        className={`w-full py-3.5 rounded-2xl font-arcade text-xs font-bold transition shadow-xl flex items-center justify-center gap-2 ${
+                          canAffordChest && !isProcessing
+                            ? 'bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-slate-950 cursor-pointer shadow-amber-950/40 active:scale-98'
+                            : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
+                        }`}
+                      >
+                        <Package size={16} />
+                        <span>
+                          {canAffordChest
+                            ? `COMPRAR ${totalChestCount} BAÚ(S) (${totalPurchaseCost.toFixed(2)} ${paymentCurrency.toUpperCase()})`
+                            : paymentCurrency === 'miner'
+                              ? `SEM BAÚS OU SALDO INSUFICIENTE: FALTAM ${Math.max(0,totalCostMiner - minerBalance).toFixed(2)} MINER`
+                              : `SEM BAÚS OU SALDO INSUFICIENTE: FALTAM ${Math.max(0,totalCostUsdt - walletState.usdtBalance).toFixed(2)} USDT`}
+                        </span>
+                      </button>
+
+                      <div className="flex items-center justify-between text-[11px] text-slate-400 px-1">
+                        <span>
+                          Pagamento via: <b>{paymentCurrency === 'miner' ? 'Minercoin (Saldo In-Game)' : 'USDT (Carteira Web3)'}</b>
+                        </span>
+                        <span>
+                          Entrega: <b>{totalHeroesCount} heróis no Inventário</b>
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+              </div>
+            )}
+
+            {/* ABA 2: MERCADO DE CONTRATO DIRETO */}
+            {activeTab === 'tavern' && (
+              <div className="flex-1 overflow-y-auto no-scrollbar space-y-2.5 pr-0.5">
+                <p className="text-xs text-slate-400">
+                  Contrate mineradores específicos pagando em <b>{paymentCurrency.toUpperCase()}</b>:
+                </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+                  {MINER_ROSTER.map(minerClass => {
+                    const cost = minerClass.directCostBcoin || 20;
+                    const canAfford = paymentCurrency === 'miner'
+                      ? minerBalance >= cost
+                      : (walletState.isConnected && walletState.usdtBalance >= cost);
+
+                    return (
+                      <div 
+                        key={minerClass.id}
+                        className="p-3 rounded-2xl bg-slate-950/80 border border-slate-800 hover:border-slate-700 transition flex items-center justify-between text-left"
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <div 
+                            className="w-12 h-12 rounded-xl border flex items-center justify-center text-2xl shadow-inner shrink-0"
+                            style={{ 
+                              borderColor: minerClass.color,
+                              backgroundColor: `${minerClass.color}15`
+                            }}
+                          >
+                            {minerClass.avatar}
+                          </div>
+
+                          <div>
+                            <div className="flex items-center gap-1.5">
+                              <h4 className="font-tech font-bold text-xs text-white">
+                                {minerClass.name}
+                              </h4>
+                              <span 
+                                className="text-[9px] font-bold font-tech px-1.5 py-0.2 rounded"
+                                style={{ 
+                                  color: minerClass.color,
+                                  backgroundColor: `${minerClass.color}20` 
+                                }}
+                              >
+                                {minerClass.badge}
+                              </span>
+                            </div>
+
+                            <span className="text-[10px] text-slate-400 block font-tech">
+                              Arma: {minerClass.equipment}
+                            </span>
+
+                            <div className="flex items-center gap-2 text-[10px] font-mono text-slate-400 mt-0.5">
+                              <span className="text-rose-400 font-bold">⚔ {minerClass.basePower}</span>
+                              <span className="text-amber-400 font-bold">⚡ {minerClass.baseSpeed}</span>
+                              <span className="text-sky-400 font-bold">🔋 {minerClass.baseStamina}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Botão de Contrato */}
+                        <div>
+                          {paymentCurrency === 'usdt' && !walletState.isConnected ? (
+                            <button
+                              onClick={onOpenWalletModal}
+                              className="px-3 py-1.5 rounded-xl font-arcade text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30 transition cursor-pointer"
+                            >
+                              Conectar
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleDirectHire(minerClass)}
+                              disabled={!canAfford}
+                              className={`px-3 py-2 rounded-xl font-arcade text-[10px] font-bold transition shadow-md ${
+                                canAfford
+                                  ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 text-slate-950 cursor-pointer active:scale-95'
+                                  : 'bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed'
+                              }`}
+                            >
+                              {cost} {paymentCurrency.toUpperCase()}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+          </div>
+        )}
+
+      </div>
+    </div>
+  );
+}
+ + totalCostUsdt.toFixed(2) + ' USDT'}</b></div>
 
                 {/* BOTÃO DE AÇÃO PRINCIPAL DE COMPRA */}
                 <div className="pt-1 pb-1">
