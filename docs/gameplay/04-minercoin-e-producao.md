@@ -60,6 +60,16 @@ Esse valor serve apenas como referência histórica de cenário. Não é uma met
 
 O Abrigo Reforçado citado na simulação representa apenas uma referência de recuperação e não concede bônus de mineração.
 
+## Meta indicativa de ROI do time mediano
+
+A meta de planejamento é que um time mediano de 15 sobreviventes tenha um **ROI aproximado de 90 dias (três meses)**. Para essa simulação, o custo de referência dos 15 baús foi estimado em **R$ 2.500**, convertido para exibição e cobrança em **USDT**; o real é apenas uma referência interna de precificação e não será moeda utilizada pelo jogo. O plano de médico de 90 dias também foi considerado no custo estimado da simulação.
+
+A produção diária necessária é calculada a partir do custo total estimado em USDT, da referência de planejamento de **1 MNC = US$ 0,01** e de 90 dias. O valor calculado de aproximadamente **499,26 MNC/dia** é uma meta indicativa de cenário, não uma produção garantida ou uma taxa já implementada.
+
+**O ROI real dependerá da sorte de cada jogador ao abrir os baús e receber sobreviventes de diferentes raridades**, conforme as probabilidades de obtenção definidas para o jogo. A composição efetiva do time pode ficar acima ou abaixo da composição mediana usada na simulação, alterando a produção e o prazo de retorno. Também influenciam o resultado o tempo efetivo em combate, pausas, custos aplicáveis, cotação do USDT e eventual preço/mercado do MNC.
+
+Portanto, o prazo de três meses é uma **aproximação estatística de planejamento para um time mediano**, não uma promessa individual de retorno, garantia de lucro ou garantia de recuperação do valor investido.
+
 ## Retorno bruto e líquido
 
 - **Retorno bruto:** total de MNC produzido.
