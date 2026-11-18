@@ -379,8 +379,8 @@ export function drawMinerCharacter(ctx, mx, my, miner, classInfo, now, swingProg
 
   ctx.translate(mx, my + bounceY);
 
-  // Escala proporcional dos bonecos (reduzido conforme solicitado pelo usuário para dar respiro nas trilhas)
-  const CHAR_SCALE = 0.62;
+  // Escala proporcional dos heróis: tamanho idêntico ao dos zumbis (altura ~56px)
+  const CHAR_SCALE = 1.0;
   ctx.scale(CHAR_SCALE, CHAR_SCALE);
 
   const cid = miner.classId || 'miner';
@@ -393,26 +393,13 @@ export function drawMinerCharacter(ctx, mx, my, miner, classInfo, now, swingProg
     || (rosterHero && getWeaponById(rosterHero.weaponId))
     || WEAPON_CATALOG[rosterHero?.spriteIndex % WEAPON_CATALOG.length];
 
-  // 1. Lanterna / Aura no Piso Específica por Classe / Herói
-  const lightGrad = ctx.createRadialGradient(0, 8, 4, 0, 8, 44);
-  const heroColor = classInfo?.color 
-    || (rosterHero?.rarity === 'legendary' ? '#eab308' : rosterHero?.rarity === 'epic' ? '#a855f7' : rosterHero?.rarity === 'rare' ? '#38bdf8' : '#34d399');
-  
-  lightGrad.addColorStop(0, heroColor + '80');
-  lightGrad.addColorStop(0.5, heroColor + '30');
-  lightGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-  ctx.fillStyle = lightGrad;
+  // 1. Sombra Suave e Realista de Contato no Piso (sem círculos que façam parecer voar)
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.32)';
   ctx.beginPath();
-  ctx.arc(0, 8, 44, 0, Math.PI * 2);
+  ctx.ellipse(0, 19, 16, 4.5, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // 2. Sombra Suave no Piso
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
-  ctx.beginPath();
-  ctx.ellipse(0, 18, 17, 6, 0, 0, Math.PI * 2);
-  ctx.fill();
-
-  // 3. Corpo e Equipamento do Personagem (com suporte a espelhamento de direção)
+  // 2. Corpo e Equipamento do Personagem (com suporte a espelhamento de direção)
   ctx.save();
   if (targetDir < 0) {
     ctx.scale(-1, 1);

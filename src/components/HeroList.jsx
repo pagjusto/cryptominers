@@ -154,12 +154,12 @@ export default function HeroList({
               {/* COLUNA 1: IDENTIDADE DO HERÓI (AVATAR, NOME, CLASSE, TRAIT) */}
               <div className="flex items-center gap-2.5 shrink-0 w-[185px] min-w-0">
                 <div className="flex items-center gap-1.5 shrink-0">
-                  <div className="w-11 h-11 rounded-2xl border-2 shadow-inner shrink-0 bg-slate-950"
+                  <div className="w-11 h-11 rounded-2xl border-2 shadow-inner shrink-0 bg-slate-900/60"
                     title={rosterHero.name}
-                    style={{ borderColor: classInfo.color, backgroundImage: 'url(/assets/hero-roster.png)', backgroundRepeat: 'no-repeat', backgroundSize: '440px 40px', backgroundPosition: `-${rosterHero.spriteIndex * 40}px 0`, imageRendering: 'pixelated' }} />
-                  <div className="w-12 h-11 rounded-xl border border-slate-700 bg-slate-900 flex flex-col items-center justify-center px-1">
+                    style={{ borderColor: classInfo.color, backgroundImage: 'url(/assets/hero-roster.png)', backgroundRepeat: 'no-repeat', backgroundSize: '440px 40px', backgroundPosition: `-${rosterHero.spriteIndex * 40}px 0` }} />
+                  <div className="w-12 h-11 rounded-xl border border-slate-700 bg-slate-900/80 flex flex-col items-center justify-center px-1">
                     <div className="w-10 h-6 bg-no-repeat" title={rosterWeapon?.name}
-                      style={{ backgroundImage: 'url(/assets/weapon-roster.png)', backgroundRepeat: 'no-repeat', backgroundSize: '488.9px 25px', backgroundPosition: `-${(rosterWeapon?.sourceIndex || 0) * 44}px center`, imageRendering: 'pixelated' }} />
+                      style={{ backgroundImage: 'url(/assets/weapon-roster.png)', backgroundRepeat: 'no-repeat', backgroundSize: '488.9px 25px', backgroundPosition: `-${(rosterWeapon?.sourceIndex || 0) * 44}px center` }} />
                     <span className="text-[7px] text-slate-400 text-center leading-tight">{rosterWeapon?.name || 'Sem arma'}</span>
                   </div>
                 </div>

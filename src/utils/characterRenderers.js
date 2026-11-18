@@ -4525,22 +4525,29 @@ if (typeof window !== 'undefined') {
 export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swingProgress = 0, isMining = false) {
   initRosterSprites();
 
-  const pw = 42; // Largura proporcional do herói
-  const ph = 46; // Altura proporcional do herói
-  const gw = 38; // Largura da arma
-  const gh = 21; // Altura da arma
+  // Dimensões dos Heróis rigorosamente idênticas às dos Zumbis (largura ~52px, altura ~56px)
+  const pw = 52; // Largura do herói (alinhado aos zumbis de 55-63px)
+  const ph = 56; // Altura do herói (alinhado aos zumbis de 55px)
+  const gw = 46; // Largura proporcional da arma
+  const gh = 25; // Altura proporcional da arma
 
   const spriteIndex = hero?.spriteIndex ?? 0;
   const sourceIndex = weapon?.sourceIndex ?? spriteIndex ?? 0;
-  const sx = spriteIndex * 32;
-  const sy = 0;
-  const sw = 32;
-  const sh = 32;
 
-  const wsx = sourceIndex * 64;
+  // Resolução nativa dinâmica dos spritesheets vetorizados (alta definição)
+  const heroNaturalW = heroRosterImg?.naturalWidth || 1408;
+  const heroNaturalH = heroRosterImg?.naturalHeight || 128;
+  const sw = heroNaturalW / 11;
+  const sh = heroNaturalH;
+  const sx = spriteIndex * sw;
+  const sy = 0;
+
+  const weaponNaturalW = weaponRosterImg?.naturalWidth || 2816;
+  const weaponNaturalH = weaponRosterImg?.naturalHeight || 144;
+  const wsw = weaponNaturalW / 11;
+  const wsh = weaponNaturalH;
+  const wsx = sourceIndex * wsw;
   const wsy = 0;
-  const wsw = 64;
-  const wsh = 36;
 
   // =========================================================================
   // 1. MODO REPOUSO & CAMINHADA (IDLE / WALKING)
@@ -4556,19 +4563,23 @@ export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swi
     const breathX = 1 - Math.sin(now * 0.01) * 0.01;
 
     // Sombra suave sob os pés
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.28)';
     ctx.beginPath();
-    ctx.ellipse(0, -1, 16, 5, 0, 0, Math.PI * 2);
+    ctx.ellipse(0, 4, 16, 4.5, 0, 0, Math.PI * 2);
     ctx.fill();
 
     ctx.translate(0, -walkBob);
     ctx.rotate(bodySway);
     ctx.scale(breathX, breathY);
 
-    // Desenha corpo do Herói com pixel art nítido
+    // Desenha corpo do Herói com renderização vetorial suave e cel-shading
     if (heroRosterLoaded && heroRosterImg) {
-      ctx.imageSmoothingEnabled = false;
+      ctx.save();
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.filter = 'drop-shadow(0px 1px 1.5px rgba(0,0,0,0.55))';
       ctx.drawImage(heroRosterImg, sx, sy, sw, sh, -pw / 2, -ph + 6, pw, ph);
+      ctx.restore();
     } else {
       ctx.fillStyle = '#38bdf8';
       ctx.fillRect(-pw / 2, -ph + 6, pw, ph);
@@ -4577,10 +4588,12 @@ export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swi
     // Arma em repouso na mão direita, apontada diagonalmente para baixo
     if (weaponRosterLoaded && weaponRosterImg) {
       ctx.save();
-      ctx.translate(11, -12);
+      ctx.translate(14, -14);
       ctx.rotate(0.35 + Math.sin(now * 0.012) * 0.04);
-      ctx.imageSmoothingEnabled = false;
-      ctx.drawImage(weaponRosterImg, wsx, wsy, wsw, wsh, -6, -11, gw, gh);
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.filter = 'drop-shadow(0px 1px 1.5px rgba(0,0,0,0.55))';
+      ctx.drawImage(weaponRosterImg, wsx, wsy, wsw, wsh, -8, -13, gw, gh);
 
       // Mão do herói segurando a coronha / empunhadura
       ctx.fillStyle = '#fed7aa';
@@ -4653,18 +4666,20 @@ export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swi
   }
 
   // Sombra no chão
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.28)';
   ctx.beginPath();
-  ctx.ellipse(lungeX, -1, 18, 6, 0, 0, Math.PI * 2);
+  ctx.ellipse(lungeX, 4, 18, 5, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // Desenha Corpo do Herói
+  // Desenha Corpo do Herói com contorno vetorial e suavização
   ctx.save();
   ctx.translate(lungeX, 0);
   ctx.rotate(bodyAngle);
   ctx.scale(scaleX, scaleY);
   if (heroRosterLoaded && heroRosterImg) {
-    ctx.imageSmoothingEnabled = false;
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.filter = 'drop-shadow(0px 1px 1.5px rgba(0,0,0,0.55))';
     ctx.drawImage(heroRosterImg, sx, sy, sw, sh, -pw / 2, -ph + 6, pw, ph);
   } else {
     ctx.fillStyle = '#38bdf8';
@@ -4677,8 +4692,10 @@ export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swi
     ctx.save();
     ctx.translate(handX, handY);
     ctx.rotate(gunAngle);
-    ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(weaponRosterImg, wsx, wsy, wsw, wsh, -6, -11, gw, gh);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.filter = 'drop-shadow(0px 1px 1.5px rgba(0,0,0,0.55))';
+    ctx.drawImage(weaponRosterImg, wsx, wsy, wsw, wsh, -8, -13, gw, gh);
 
     // Mão do herói segurando a empunhadura
     ctx.fillStyle = '#fed7aa';
@@ -4690,8 +4707,8 @@ export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swi
     ctx.stroke();
 
     // Posição da boca do cano (Muzzle)
-    const muzzleLocalX = 32;
-    const muzzleLocalY = -3;
+    const muzzleLocalX = 38;
+    const muzzleLocalY = -4;
 
     // 1. FLASH DE DISPARO DA BOCA DO CANO (0.32 a 0.42)
     if (swingProgress >= 0.32 && swingProgress <= 0.42) {
@@ -4733,9 +4750,9 @@ export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swi
   }
 
   // 2. PROJÉTIL EM VOO ULTRARRÁPIDO (0.33 a 0.46)
-  const muzzleWorldX = handX + 32;
-  const muzzleWorldY = handY - 3;
-  const targetX = 54;
+  const muzzleWorldX = handX + 38;
+  const muzzleWorldY = handY - 4;
+  const targetX = 58;
   const targetY = -8;
 
   if (swingProgress >= 0.33 && swingProgress <= 0.46) {
