@@ -53,11 +53,23 @@ Este documento registra as regras de gameplay aprovadas para o sistema de sobrev
 
 ## Contratação do médico e ROI
 
-- O serviço é pago exclusivamente em MNC.
-- Existem três opções de duração: mensal (30 dias), trimestral (90 dias) e semestral (180 dias).
-- O plano mensal terá o maior custo proporcional; os planos trimestral e semestral terão descontos progressivos.
+- O jogador pode pagar em **USDT ou MNC**, escolhendo a moeda no momento da contratação.
+- Referência econômica: **1 MNC = 0,01 USDT**.
+- Preços aprovados:
+
+  | Plano | Duração | USDT | MNC |
+  |---|---:|---:|---:|
+  | Mensal | 30 dias | 5,20 | 520 |
+  | Trimestral | 90 dias | 13,80 | 1.380 |
+  | Semestral | 180 dias | 25,00 | 2.500 |
+
+- A renovação pode ser **manual ou automática**.
+- Na renovação manual, o jogador confirma a operação e pode pagar em USDT ou MNC.
+- A renovação automática é opcional e exclusiva em **MNC**. No vencimento, o sistema verifica o saldo disponível; havendo MNC suficiente, renova pelo mesmo período contratado.
+- Se não houver MNC suficiente, a renovação automática falha e o médico para de atuar imediatamente.
+- Não há débito automático em USDT.
+- Quando o plano expira, o médico para instantaneamente. O jogador pode renovar imediatamente, inclusive após o vencimento.
 - O custo do médico deve ser considerado no ROI líquido, sem alterar a taxa bruta de produção de MNC dos sobreviventes.
-- Preços exatos, percentuais de desconto e política de renovação ainda precisam ser definidos.
 
 ## Parâmetros do Boss já definidos
 
