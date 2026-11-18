@@ -21,6 +21,8 @@
 ## Participação
 
 - O jogador precisa estar participando quando o Boss aparece. Quem não estiver participando perde aquele evento; não existe recuperação posterior da participação.
+- Se o jogador perder a conexão durante o Boss, precisa voltar antes de o Boss morrer. Se não reconectar enquanto o Boss ainda estiver vivo, perde o direito ao sorteio daquele evento.
+- Se reconectar antes do encerramento do Boss, mantém sua participação.
 - A lista de sobreviventes elegíveis ao sorteio é congelada no início do Boss.
 - Cada sobrevivente dessa lista conta no máximo uma vez, desde que esteja vivo ao final dos cinco minutos.
 - Um sobrevivente ferido que seja enviado à enfermaria continua contando se estiver vivo ao final do evento.
@@ -42,4 +44,4 @@
 
 ## Pontos ainda a definir
 
-Tratamento de desconexões ou falhas do servidor, comportamento quando não houver sobrevivente elegível e confirmação de eventuais limites diários precisam ser fechados antes de serem publicados como regras definitivas.
+Comportamento em caso de falha global do servidor, comportamento quando não houver sobrevivente elegível e confirmação de eventuais limites diários precisam ser fechados antes de serem publicados como regras definitivas.
