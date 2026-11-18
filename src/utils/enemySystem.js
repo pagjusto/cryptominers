@@ -321,7 +321,19 @@ export function drawEnemyCharacter(ctx, enemy, now) {
     }
   }
 
-  // 3. Desenho do Sprite do Inimigo com Transformações
+  // 3. Sombra de Contato Realista no Solo (fixa no chão, rente à sola dos pés para não parecer flutuando)
+  ctx.save();
+  ctx.translate(px + lungeX * 0.35, py);
+  ctx.fillStyle = isBoss ? 'rgba(0, 0, 0, 0.42)' : 'rgba(0, 0, 0, 0.35)';
+  ctx.beginPath();
+  const shadowY = isBoss ? 16 : 13.5;
+  const shadowRx = isBoss ? 26 : 14;
+  const shadowRy = isBoss ? 7.5 : 4.0;
+  ctx.ellipse(0, shadowY, shadowRx, shadowRy, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+
+  // 4. Desenho do Sprite do Inimigo com Transformações
   ctx.save();
   ctx.translate(px + lungeX, py + bobbing);
   ctx.scale(enemy.facingDir * attackScale, attackScale);
