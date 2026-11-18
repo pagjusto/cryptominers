@@ -149,7 +149,7 @@ export default function HeroList({
               }`}
             >
               {/* COLUNA 1: IDENTIDADE DO HERÓI (AVATAR, NOME, CLASSE, TRAIT) */}
-              <div className="flex items-center gap-3 shrink-0 min-w-[245px] max-w-[270px]">
+              <div className="flex items-center gap-3 shrink-0 min-w-[260px] max-w-[290px]">
                 <div className="flex items-center gap-2 shrink-0">
                   <div className="w-14 h-14 rounded-2xl border-2 shadow-lg shrink-0 bg-slate-900/90 flex items-center justify-center overflow-hidden"
                     title={rosterHero.name}
@@ -161,15 +161,17 @@ export default function HeroList({
                       backgroundPosition: `-${rosterHero.spriteIndex * 56}px center`,
                       imageRendering: 'auto'
                     }} />
-                  <div className="w-13 h-14 rounded-xl border border-slate-700 bg-slate-900/80 flex flex-col items-center justify-center px-1 shrink-0">
-                    <div className="w-11 h-7 bg-no-repeat" title={rosterWeapon?.name}
+                  <div className="w-[70px] h-14 rounded-xl border border-slate-700/90 bg-slate-900/90 flex flex-col items-center justify-center px-1 shrink-0 shadow-inner group hover:border-amber-400/50 transition">
+                    <div className="w-[60px] h-[33px] bg-no-repeat transition-transform group-hover:scale-105" title={rosterWeapon?.name}
                       style={{
                         backgroundImage: 'url(/assets/weapon-roster.png?v=4)',
                         backgroundRepeat: 'no-repeat',
-                        backgroundSize: '635.7px 27.5px',
-                        backgroundPosition: `-${(rosterWeapon?.sourceIndex || 0) * 48.9}px center`
+                        backgroundSize: '762.6px 33px',
+                        backgroundPosition: `-${(rosterWeapon?.sourceIndex || 0) * 58.66}px center`,
+                        transform: 'scaleX(-1)',
+                        imageRendering: 'pixelated'
                       }} />
-                    <span className="text-[7.5px] text-slate-300 font-bold text-center leading-tight truncate max-w-[48px]">{rosterWeapon?.name || 'Sem arma'}</span>
+                    <span className="text-[8px] text-slate-300 font-bold text-center leading-tight truncate max-w-[64px] mt-0.5">{rosterWeapon?.name || 'Sem arma'}</span>
                   </div>
                 </div>
 
