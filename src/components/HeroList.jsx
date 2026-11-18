@@ -152,21 +152,33 @@ export default function HeroList({
               }`}
             >
               {/* COLUNA 1: IDENTIDADE DO HERÓI (AVATAR, NOME, CLASSE, TRAIT) */}
-              <div className="flex items-center gap-2.5 shrink-0 w-[185px] min-w-0">
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <div className="w-11 h-11 rounded-2xl border-2 shadow-inner shrink-0 bg-slate-900/60"
+              <div className="flex items-center gap-3 shrink-0 min-w-[245px] max-w-[270px]">
+                <div className="flex items-center gap-2 shrink-0">
+                  <div className="w-14 h-14 rounded-2xl border-2 shadow-lg shrink-0 bg-slate-900/90 flex items-center justify-center overflow-hidden"
                     title={rosterHero.name}
-                    style={{ borderColor: classInfo.color, backgroundImage: 'url(/assets/hero-roster.png)', backgroundRepeat: 'no-repeat', backgroundSize: '440px 40px', backgroundPosition: `-${rosterHero.spriteIndex * 40}px 0` }} />
-                  <div className="w-12 h-11 rounded-xl border border-slate-700 bg-slate-900/80 flex flex-col items-center justify-center px-1">
-                    <div className="w-10 h-6 bg-no-repeat" title={rosterWeapon?.name}
-                      style={{ backgroundImage: 'url(/assets/weapon-roster.png)', backgroundRepeat: 'no-repeat', backgroundSize: '488.9px 25px', backgroundPosition: `-${(rosterWeapon?.sourceIndex || 0) * 44}px center` }} />
-                    <span className="text-[7px] text-slate-400 text-center leading-tight">{rosterWeapon?.name || 'Sem arma'}</span>
+                    style={{
+                      borderColor: classInfo.color,
+                      backgroundImage: 'url(/assets/hero-avatars.png)',
+                      backgroundRepeat: 'no-repeat',
+                      backgroundSize: '616px 56px',
+                      backgroundPosition: `-${rosterHero.spriteIndex * 56}px center`,
+                      imageRendering: 'auto'
+                    }} />
+                  <div className="w-13 h-14 rounded-xl border border-slate-700 bg-slate-900/80 flex flex-col items-center justify-center px-1 shrink-0">
+                    <div className="w-11 h-7 bg-no-repeat" title={rosterWeapon?.name}
+                      style={{
+                        backgroundImage: 'url(/assets/weapon-roster.png)',
+                        backgroundRepeat: 'no-repeat',
+                        backgroundSize: '537.8px 27.5px',
+                        backgroundPosition: `-${(rosterWeapon?.sourceIndex || 0) * 48.9}px center`
+                      }} />
+                    <span className="text-[7.5px] text-slate-300 font-bold text-center leading-tight truncate max-w-[48px]">{rosterWeapon?.name || 'Sem arma'}</span>
                   </div>
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <span className="font-tech font-bold text-xs sm:text-sm text-white truncate max-w-[105px]" title={rosterHero.name}>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="font-tech font-bold text-xs sm:text-sm text-white truncate max-w-[120px]" title={rosterHero.name}>
                       {rosterHero.name}
                     </span>
                     <span className="text-[10px] px-1.5 py-0.2 rounded-md bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30 shrink-0">
