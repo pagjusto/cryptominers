@@ -40,13 +40,16 @@ As chances-base aprovadas para os baús que concedem sobreviventes são:
 
 As probabilidades são aplicadas a cada abertura individual. As quantidades obtidas em uma sequência de aberturas são aleatórias; as porcentagens representam probabilidades, não uma garantia de distribuição exata em cada grupo de 100 aberturas.
 
-### Bônus para combos de baús
+### Combos e bônus de raridade
 
-- Combos de baús poderão oferecer chances melhores do que a abertura individual.
+As opções de compra planejadas são combos de **1, 3, 5 e 10 baús**.
+
+- A opção de **1 baú** permite ao jogador experimentar uma abertura individual e usa as chances-base, sem bônus de combo.
+- Os combos de **3, 5 e 10 baús** poderão oferecer chances melhores do que a abertura individual.
 - O bônus deverá beneficiar exclusivamente as raridades **Épica e Lendária**.
 - As chances de Comum e Raro não recebem bônus.
 - O aumento das chances de Épico e Lendário deverá ser compensado pela redução proporcional da chance de Comum, mantendo o total em 100%.
-- Os tamanhos dos combos elegíveis e os percentuais exatos de bônus ainda serão definidos. Nenhum percentual ilustrativo está aprovado como regra.
+- Os percentuais exatos de bônus para os combos de 3, 5 e 10 baús ainda serão definidos. Nenhum percentual ilustrativo está aprovado como regra.
 
 Essas chances se referem à obtenção de sobreviventes nos baús e não alteram o sorteio separado do Baú de Construção concedido por Boss.
 
