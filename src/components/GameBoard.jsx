@@ -178,6 +178,8 @@ export default function GameBoard({
     canvas.height = logicalHeight * dpr;
     canvas.style.width = `${logicalWidth}px`;
     canvas.style.height = `${logicalHeight}px`;
+    canvas.style.maxWidth = '100%';
+    canvas.style.aspectRatio = `${logicalWidth} / ${logicalHeight}`;
 
     let animationId;
 

@@ -1397,7 +1397,7 @@ export default function App() {
             />
           ) : (
             <div className="flex flex-col items-center justify-center relative w-full">
-              <div className="w-full max-w-[720px] flex items-center justify-between mb-2 px-2 text-xs text-slate-400 font-tech">
+              <div className="w-full max-w-[900px] flex items-center justify-between mb-2 px-2 text-xs text-slate-400 font-tech">
                 <div className="flex items-center gap-3">
                   <span className="flex items-center gap-2 text-xs">
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -1418,7 +1418,7 @@ export default function App() {
               </div>
 
               {/* BARRA HUD DO MAPA INDIVIDUAL & INIMIGOS */}
-              <div className="w-full max-w-[720px] mb-2 px-3 py-2 rounded-2xl bg-slate-900/90 border border-slate-700/80 flex flex-wrap items-center justify-between gap-2 text-xs shadow-md">
+              <div className="w-full max-w-[900px] mb-2 px-3 py-2 rounded-2xl bg-slate-900/90 border border-slate-700/80 flex flex-wrap items-center justify-between gap-2 text-xs shadow-md">
                 <div className="flex items-center gap-2">
                   <span className="flex items-center gap-1 font-bold text-amber-400 bg-amber-500/15 px-2 py-0.5 rounded-lg border border-amber-500/30 text-[11px]">
                     🗺️ Mapa Individual

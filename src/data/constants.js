@@ -1,6 +1,6 @@
 export const GRID_COLS = 15;
 export const GRID_ROWS = 11;
-export const TILE_SIZE = 48; // tamanho do bloco em pixels no Canvas
+export const TILE_SIZE = 60; // tamanho do bloco em pixels no Canvas
 
 // Tipos de células do mapa
 export const CELL_EMPTY = 0;

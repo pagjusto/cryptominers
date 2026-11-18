@@ -377,8 +377,8 @@ export function drawMinerCharacter(ctx, mx, my, miner, classInfo, now, swingProg
   const legAngle = isWorking && !isMining ? Math.sin(now * 0.02) * 5 : 0;
   const swingAngle = isMining && swingProgress > 0 ? -Math.sin(swingProgress * Math.PI) * 1.35 : 0;
 
-  // Escala dos heróis proporcional e calibrada (heróis um pouco menores conforme solicitado)
-  const CHAR_SCALE = 0.85;
+  // Escala dos heróis calibrada na entrada do bunker (~27px de altura no canvas)
+  const CHAR_SCALE = 0.95;
 
   // 1. Sombra Suave e Realista de Contato no Piso (fixa no solo em mx, my, sem saltar com bounceY)
   // Posicionada rigorosamente sob os pés do herói (sem parecer que está voando)
@@ -387,7 +387,7 @@ export function drawMinerCharacter(ctx, mx, my, miner, classInfo, now, swingProg
   ctx.scale(CHAR_SCALE, CHAR_SCALE);
   ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
   ctx.beginPath();
-  ctx.ellipse(0, 14, 13, 3.8, 0, 0, Math.PI * 2);
+  ctx.ellipse(0, 11, 8.5, 2.8, 0, 0, Math.PI * 2);
   ctx.fill();
   ctx.restore();
 

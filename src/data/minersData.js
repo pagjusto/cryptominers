@@ -2,7 +2,7 @@
 
 export const GRID_COLS = 15;
 export const GRID_ROWS = 11;
-export const TILE_SIZE = 48;
+export const TILE_SIZE = 60;
 
 // Tipos de Blocos Subterrâneos
 export const BLOCK_EMPTY = 0;

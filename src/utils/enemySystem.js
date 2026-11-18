@@ -328,9 +328,9 @@ export function drawEnemyCharacter(ctx, enemy, now) {
   ctx.translate(px + lungeX * 0.35, py);
   ctx.fillStyle = isBoss ? 'rgba(0, 0, 0, 0.42)' : 'rgba(0, 0, 0, 0.35)';
   ctx.beginPath();
-  const shadowY = isBoss ? 16 : 13.5;
-  const shadowRx = isBoss ? 26 : 14;
-  const shadowRy = isBoss ? 7.5 : 4.0;
+  const shadowY = isBoss ? 16 : 10;
+  const shadowRx = isBoss ? 16 : 8.5;
+  const shadowRy = isBoss ? 5.0 : 2.8;
   ctx.ellipse(0, shadowY, shadowRx, shadowRy, 0, 0, Math.PI * 2);
   ctx.fill();
   ctx.restore();
@@ -341,12 +341,12 @@ export function drawEnemyCharacter(ctx, enemy, now) {
   ctx.scale(enemy.facingDir * attackScale, attackScale);
   ctx.rotate(walkTilt + attackTilt);
 
-  // Zumbis mais largos e imponentes conforme solicitado (largura expandida de 0.95 para 1.32)
-  const drawW = isBoss ? Math.floor(TILE_SIZE * 1.75) : Math.floor(TILE_SIZE * 1.32);
-  const drawH = isBoss ? Math.floor(TILE_SIZE * 1.75) : Math.floor(TILE_SIZE * 1.15);
+  // Zumbis adequados ao tamanho dos heróis e proporcionais à entrada do bunker (~27px de altura)
+  const drawW = isBoss ? Math.floor(TILE_SIZE * 0.65) : Math.floor(TILE_SIZE * 0.40);
+  const drawH = isBoss ? Math.floor(TILE_SIZE * 0.65) : Math.floor(TILE_SIZE * 0.45);
 
   const dx = -drawW / 2;
-  const dy = -drawH + TILE_SIZE / 2 - 2;
+  const dy = isBoss ? -drawH + 16 : -drawH + 10;
 
   // Pontos de pivô anatômicos das articulações do quadril (escala 640x640)
   const hipLeftX = dx + drawW * (294 / 640);
@@ -414,17 +414,17 @@ export function drawEnemyCharacter(ctx, enemy, now) {
   // 5. Efeito Visual de Garras / Ataque Lacerante
   if (enemy.isAttacking && enemy.attackProgress > 0.25 && enemy.attackProgress < 0.65) {
     ctx.strokeStyle = isBoss ? '#ef4444' : '#bef264';
-    ctx.lineWidth = isBoss ? 3.5 : 2.5;
+    ctx.lineWidth = isBoss ? 2.5 : 1.5;
     ctx.lineCap = 'round';
 
     const slashForward = drawW * 0.45;
-    const slashTop = -drawH * 0.65;
+    const slashTop = -drawH * 0.55;
 
     // Três riscos diagonais de garras afiadas cortando o ar
     for (let s = -1; s <= 1; s++) {
       ctx.beginPath();
-      ctx.moveTo(slashForward - 10, slashTop + s * 9 - 10);
-      ctx.lineTo(slashForward + 12, slashTop + s * 9 + 12);
+      ctx.moveTo(slashForward - 6, slashTop + s * 5 - 6);
+      ctx.lineTo(slashForward + 7, slashTop + s * 5 + 7);
       ctx.stroke();
     }
   }
@@ -435,9 +435,9 @@ export function drawEnemyCharacter(ctx, enemy, now) {
   if (isBoss && enemy.isAttacking && enemy.attackProgress > 0.35 && enemy.attackProgress < 0.60) {
     ctx.save();
     ctx.strokeStyle = 'rgba(239, 68, 68, 0.65)';
-    ctx.lineWidth = 2.5;
+    ctx.lineWidth = 2.0;
     ctx.beginPath();
-    ctx.ellipse(px + lungeX, py + TILE_SIZE / 2 - 2, 32, 10, 0, 0, Math.PI * 2);
+    ctx.ellipse(px + lungeX, py + 16, 22, 7, 0, 0, Math.PI * 2);
     ctx.stroke();
     ctx.restore();
   }
@@ -447,10 +447,10 @@ export function drawEnemyCharacter(ctx, enemy, now) {
 
   if (isBoss) {
     // BARRA DE VIDA DO BOSS (Imponente no topo com ícone de caveira)
-    const barW = 54;
-    const barH = 5;
+    const barW = 38;
+    const barH = 4;
     const barX = px - barW / 2;
-    const barY = py - drawH * 0.72;
+    const barY = py - drawH * 0.85;
 
     ctx.save();
     // Fundo escuro com borda
@@ -465,19 +465,19 @@ export function drawEnemyCharacter(ctx, enemy, now) {
     ctx.fillRect(barX, barY, barW * hpRatio, barH);
 
     // Tag '💀 BOSS'
-    ctx.font = 'bold 9px var(--font-arcade, sans-serif)';
+    ctx.font = 'bold 8.5px var(--font-arcade, sans-serif)';
     ctx.fillStyle = '#fca5a5';
     ctx.textAlign = 'center';
     ctx.shadowColor = '#000000';
     ctx.shadowBlur = 4;
-    ctx.fillText('💀 BOSS', px, barY - 3);
+    ctx.fillText(`💀 BOSS (${Math.ceil(enemy.hp)}/30)`, px, barY - 3);
     ctx.restore();
   } else if (hpRatio < 1.0) {
     // Mini Barra de Vida para Zumbis danificados
-    const barW = 28;
-    const barH = 3.5;
+    const barW = 18;
+    const barH = 2.5;
     const barX = px - barW / 2;
-    const barY = py - drawH * 0.68;
+    const barY = py - drawH * 0.80;
 
     ctx.save();
     ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';

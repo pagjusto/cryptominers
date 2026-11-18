@@ -10,7 +10,7 @@
 
 export const GRID_COLS = 15;
 export const GRID_ROWS = 11;
-export const TILE_SIZE = 48;
+export const TILE_SIZE = 60;
 
 /**
  * Retorna se a célula (c, r) contém um obstáculo sólido:
