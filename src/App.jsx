@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   BarChart3,
   Pickaxe, 
@@ -54,6 +54,7 @@ import {
   openConstructionChestById
 } from './utils/constructionChestEngine';
 import { calculateMinerEfficiency } from './utils/minerRotationEngine';
+import { calculateCombatProduction } from './utils/cryptozombiesEconomy';
 import { Calculator, Settings } from 'lucide-react';
 import { getSavedWalletState, saveWalletState, requestWalletConnection, disconnectWalletFromStorage } from './utils/web3Wallet';
 import MinerCatalogModal from './components/MinerCatalogModal';
@@ -193,6 +194,33 @@ export default function App() {
     }
     return INITIAL_MINERS;
   });
+
+  const minersRef = useRef(miners);
+  minersRef.current = miners;
+
+  // Produção de MNC por segundo válido de combate no modo tático CryptoZombies.
+  // Não contabiliza reservas, feridos, abrigo, abas ocultas ou tempo offline.
+  useEffect(() => {
+    if (boardMode !== 'tactical') return undefined;
+    let lastTickAt = Date.now();
+    const timer = setInterval(() => {
+      const now = Date.now();
+      const elapsedSeconds = Math.min(2, Math.max(0, (now - lastTickAt) / 1000));
+      lastTickAt = now;
+      if (document.visibilityState !== 'visible' || elapsedSeconds <= 0) return;
+
+      const earned = calculateCombatProduction(minersRef.current, elapsedSeconds);
+      if (earned <= 0) return;
+
+      setBcoin(prev => {
+        const next = Number((prev + earned).toFixed(8));
+        localStorage.setItem('crypto_miners_bcoin', String(next));
+        return next;
+      });
+      setTotalMinedSession(prev => Number((prev + earned).toFixed(8)));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [boardMode]);
 
   // Casa dos mineradores (House System - Estilo Bomb Crypto)
   const [currentHouseId, setCurrentHouseId] = useState(() => {
