@@ -26,6 +26,22 @@ A velocidade de 200% representa o dobro da velocidade de recuperação de refer�
 - A evolução é permanente e consome materiais e MNC.
 - Abrigos de níveis superiores não são comprados diretamente com USDT.
 
+## Baús de sobreviventes — chances por raridade
+
+As chances aprovadas para os baús que concedem sobreviventes são iguais para todos os baús desse tipo:
+
+| Raridade | Chance de obtenção |
+|---|---:|
+| Comum | 60% |
+| Raro | 25% |
+| Épico | 12% |
+| Lendário | 3% |
+| **Total** | **100%** |
+
+As probabilidades são aplicadas a cada abertura individual. As quantidades obtidas em uma sequência de aberturas são aleatórias; as porcentagens representam probabilidades, não uma garantia de distribuição exata em cada grupo de 100 aberturas.
+
+Essas chances se referem à obtenção de sobreviventes nos baús e não alteram o sorteio separado do Baú de Construção concedido por Boss.
+
 ## Fragmentos de Construção
 
 - Fragmentos são obtidos por meio dos Baús de Construção.
