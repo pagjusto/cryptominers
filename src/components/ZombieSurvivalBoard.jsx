@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { HERO_ROSTER, getWeaponById } from '../data/heroRoster';
+import { rescueInjured, assignBedsFIFO, recoverInShelter, isInjured } from '../utils/medicalSystem';
 
 const COLS = 15;
 const ROWS = 11;
@@ -54,15 +55,7 @@ function normalizeSurvivor(survivor, index) {
 }
 
 function recoverOffline(survivors, house, elapsedMs) {
-  const rate = (house?.recoverySpeedPct || 100) / 100;
-  const healedPct = (elapsedMs / 60000) * (100 / ZOMBIE_DEMO_CONFIG.baseFullRecoveryMinutes) * rate;
-  return survivors.map(s => {
-    if (s.status !== 'house') return s;
-    const currentHealth = Math.min(s.maxHealth, s.currentHealth + (s.maxHealth * healedPct / 100));
-    return currentHealth >= s.maxHealth
-      ? { ...s, currentHealth: s.maxHealth, status: 'reserve' }
-      : { ...s, currentHealth };
-  });
+  return recoverInShelter(survivors, elapsedMs, house?.recoverySpeedPct || 100, ZOMBIE_DEMO_CONFIG.baseFullRecoveryMinutes);
 }
 
 function promoteReserves(survivors, capacity) {
@@ -79,18 +72,10 @@ function promoteReserves(survivors, capacity) {
     if (target) target.status = 'work';
   });
 
-  const occupied = next.filter(s => s.status === 'house').length;
-  let beds = Math.max(0, capacity - occupied);
-  next.forEach(s => {
-    if (s.status === 'waiting_house' && beds > 0) {
-      s.status = 'house';
-      beds -= 1;
-    }
-  });
-  return next;
+  return assignBedsFIFO(next, capacity);
 }
 
-export default function ZombieSurvivalBoard({ survivors = [], onSurvivorsChange, house, onOpenShelter }) {
+export default function ZombieSurvivalBoard({ survivors = [], onSurvivorsChange, house, onOpenShelter, doctorActive = false }) {
   const [zombies, setZombies] = useState(() => createWave(1));
   const [wave, setWave] = useState(1);
   const [combatEnabled, setCombatEnabled] = useState(true);
@@ -178,7 +163,7 @@ export default function ZombieSurvivalBoard({ survivors = [], onSurvivorsChange,
               if (s.id !== target.id) return s;
               const currentHealth = Math.max(0, s.currentHealth - ZOMBIE_DEMO_CONFIG.zombieDamage);
               if ((currentHealth / s.maxHealth) * 100 <= INJURY_THRESHOLD_PCT) {
-                return { ...s, currentHealth: s.maxHealth * (INJURY_THRESHOLD_PCT / 100), status: 'waiting_house', attackCooldown: 0 };
+                return { ...s, currentHealth: s.maxHealth * (INJURY_THRESHOLD_PCT / 100), status: 'injured', attackCooldown: 0 };
               }
               return { ...s, currentHealth };
             });
@@ -197,6 +182,12 @@ export default function ZombieSurvivalBoard({ survivors = [], onSurvivorsChange,
         return step ? { ...z, ...step, attackCooldown: cooldown } : { ...z, attackCooldown: cooldown };
       });
 
+      if (doctorActive) {
+        nextSurvivors = rescueInjured(nextSurvivors, { doctorActive: true, capacity: house?.slots || 0 });
+      } else {
+        nextSurvivors = nextSurvivors.map(s => s.status === 'work' && isInjured(s) ? { ...s, status: 'injured' } : s);
+      }
+      nextSurvivors = assignBedsFIFO(nextSurvivors, house?.slots || 0);
       nextSurvivors = promoteReserves(nextSurvivors, house?.slots || 0);
       survivorsRef.current = nextSurvivors;
       zombiesRef.current = nextZombies;
@@ -215,8 +206,15 @@ export default function ZombieSurvivalBoard({ survivors = [], onSurvivorsChange,
     return () => clearInterval(timer);
   }, [combatEnabled, house, onSurvivorsChange, wave]);
 
+  const handleManualRescue = survivorId => {
+    const rescued = rescueInjured(survivorsRef.current, { doctorActive: false, survivorId, capacity: house?.slots || 0 });
+    survivorsRef.current = rescued;
+    onSurvivorsChange(rescued);
+  };
+
   const active = survivors.filter(s => s.status === 'work').length;
   const injured = survivors.filter(s => s.status === 'house' || s.status === 'waiting_house').length;
+  const unrescued = survivors.filter(s => s.status === 'injured' || (s.status === 'work' && isInjured(s)));
   const aliveZombies = zombies.filter(z => z.hp > 0);
   const cells = useMemo(() => Array.from({ length: COLS * ROWS }, (_, index) => ({
     x: index % COLS,
@@ -274,8 +272,19 @@ export default function ZombieSurvivalBoard({ survivors = [], onSurvivorsChange,
           ))}
         </div>
       </div>
+      {unrescued.length > 0 && (
+        <div className="mt-3 rounded-xl border border-amber-500/30 bg-amber-950/20 p-3">
+          <p className="mb-2 text-xs font-bold text-amber-300">{doctorActive ? "Médico ativo: resgate automático" : "Feridos aguardando sua decisão"}</p>
+          {!doctorActive && unrescued.map(s => (
+            <div key={s.id} className="flex items-center justify-between gap-2 py-1 text-xs">
+              <span className="text-slate-300">{s.name || "Sobrevivente"} • {Math.ceil((s.currentHealth / s.maxHealth) * 100)}% de vida</span>
+              <button onClick={() => handleManualRescue(s.id)} className="rounded-lg border border-amber-400/40 bg-amber-500/10 px-2 py-1 font-bold text-amber-200">Enviar ao abrigo</button>
+            </div>
+          ))}
+        </div>
+      )}
       <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs">
-        <span className="text-slate-400">Sobreviventes feridos são enviados ao abrigo automaticamente ao atingir 5% de vida.</span>
+        <span className="text-slate-400">Sem médico, escolha individualmente quais feridos enviar ao abrigo.</span>
         <button onClick={onOpenShelter} className="px-3 py-2 rounded-xl bg-blue-950/60 border border-blue-500/40 text-blue-300 font-bold">Abrir abrigo</button>
       </div>
       <p className="mt-2 text-[10px] leading-relaxed text-amber-300/70">Simulação local: atributos de dano, vida e velocidade são provisórios. Recuperação offline usa horário do dispositivo; produção real exige validação no backend.</p>

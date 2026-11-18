@@ -9,7 +9,7 @@
     "build": "vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "test": "node test_cotacao_dinamica.mjs && node test_individual_maps_suite.mjs && node test_spiderman_and_robot_pocket.mjs"
+    "test": "node test_cotacao_dinamica.mjs && node test_individual_maps_suite.mjs && node test_spiderman_and_robot_pocket.mjs && node test_medical_system.mjs && node test_cryptozombies_economy.mjs"
   },
   "dependencies": {
     "canvas-confetti": "^1.9.4",

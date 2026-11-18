@@ -1,0 +1,77 @@
+# Sobreviventes, médico e enfermaria
+
+## Elenco e especializações
+
+O elenco possui **12 heróis**, sem contar o médico: dois personagens para cada uma das seis raridades.
+
+- A raridade determina a produção-base e os parâmetros de combate e recuperação.
+- Os heróis não são mais divididos nas classes **Ágil** e **Resistente**.
+- Todos os heróis de uma mesma raridade seguem os mesmos parâmetros de HP, dano recebido, combate e recuperação.
+- As antigas diferenças de HP e tempo de recuperação entre Ágil e Resistente deixam de fazer parte do modelo.
+- Como identidade temática, poderão existir especializações como **Minerador**, **Engenheiro** e **Explorador**.
+- Na versão inicial, essas especializações não concedem bônus nem alteram HP, dano, recuperação ou produção de MNC. Eventuais habilidades e bônus ficam reservados para uma atualização futura.
+- Os dois heróis de uma mesma raridade produzem a mesma quantidade de MNC por segundo.
+- O sistema de estrelas foi adiado para uma atualização futura. Na versão atual, todos os heróis ficam sem estrelas e não recebem bônus associados a estrelas.
+
+Os valores exatos de HP, dano e tempo-base de recuperação para cada uma das seis raridades ainda precisam ser fechados na tabela final de balanceamento. As metas médias de recuperações completas por dia já discutidas permanecem como referência de balanceamento, mas deverão ser recalculadas sem distinção entre Ágil e Resistente.
+
+## Quando um sobrevivente fica ferido
+
+Ao atingir **5% de vida**, o sobrevivente sai do combate e passa a ser considerado ferido. Não ocorre morte permanente por esse motivo.
+
+## Resgate manual sem médico
+
+- Quando o jogador está online e não possui médico, o sobrevivente ferido fica aguardando a decisão do jogador.
+- O jogador escolhe individualmente quando enviá-lo à enfermaria.
+- Não há limite de quantidade de resgates manuais; o envio é feito um sobrevivente por vez.
+- Durante um evento de Boss, o envio manual de sobreviventes feridos continua permitido.
+
+## Resgate com médico
+
+O médico é um serviço adicional previsto para uma etapa futura:
+
+- Enquanto o jogador está online, resgata automaticamente todos os sobreviventes feridos, sem limite de quantidade de resgates.
+- Não ocupa vaga entre os 15 sobreviventes de combate.
+- Não luta e não gera MNC.
+- Não aumenta a quantidade de leitos.
+- Não acelera a recuperação.
+- Durante o Boss, não altera a lista de participantes congelada no início do evento.
+
+A ativação, contratação e renovação do médico dependem da futura etapa conjunta de pagamentos. Não existe cobrança implementada nesta fase.
+
+## Leitos e fila de espera
+
+- A quantidade de leitos depende exclusivamente do nível do abrigo.
+- Os sobreviventes são admitidos conforme a disponibilidade.
+- Quando não há leito livre, o ferido aguarda em uma fila FIFO: quem chegou primeiro recebe o próximo leito disponível.
+- O médico pode encaminhar todos os feridos, mas não cria leitos adicionais.
+- Quando um sobrevivente termina a recuperação e deixa o leito, o próximo da fila entra automaticamente.
+
+## Desconexão e reconexão
+
+- Ao perder a conexão ou ficar offline, o jogador deixa de contar para o combate e sua produção de MNC é interrompida.
+- Todos os sobreviventes que estavam ativos são enviados automaticamente ao ambulatório/enfermaria, mesmo que o jogador não tenha contratado o médico.
+- Ao reconectar, os sobreviventes retornam automaticamente ao combate, respeitando o limite de **15 vagas**.
+- Se não houver vagas livres, ficam na reserva e retornam automaticamente quando uma vaga surgir.
+- A desconexão não gera produção retroativa de MNC e não concede recuperação instantânea.
+- O estado dos sobreviventes e a ordem da fila de recuperação devem ser preservados durante a desconexão.
+
+## Recuperação
+
+- A recuperação acontece simultaneamente para os sobreviventes que ocupam leitos.
+- A velocidade depende da raridade do herói e do nível do abrigo.
+- Não existe diferença de recuperação entre classes ou especializações na versão inicial.
+- O médico não modifica a velocidade de recuperação.
+- A recuperação restaura a vida do sobrevivente.
+- Ao alcançar 100% de vida, ele retorna automaticamente à reserva e libera o leito.
+- Havendo vaga no limite de 15 combatentes, um sobrevivente da reserva poderá voltar ao combate automaticamente.
+
+## Planos previstos para o médico — não disponíveis nesta fase
+
+| Duração | Valor previsto em USDT | Valor previsto em MNC |
+|---|---:|---:|
+| 30 dias | 5,20 | 520 |
+| 90 dias | 13,80 | 1.380 |
+| 180 dias | 25,00 | 2.500 |
+
+Os valores são referência de planejamento e não representam uma oferta ativa ou uma cobrança disponível.

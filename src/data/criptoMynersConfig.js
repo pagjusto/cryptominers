@@ -9,6 +9,8 @@ export const DEFAULT_CRIPTO_MYNERS_CONFIG = {
 
   // Limite da Mina
   maxActiveMiners: 15,
+  // Hipótese editável de disponibilidade de sessão para a projeção; não representa mineração offline.
+  roiSessionAvailabilityPct: 60,
 
   // 1. SISTEMA DE BAÚS (Probabilidades Normais vs. Com Anúncio Recompensado)
   chests: {
@@ -24,13 +26,17 @@ export const DEFAULT_CRIPTO_MYNERS_CONFIG = {
       normalProbabilities: {
         common: 80,
         rare: 15,
+        superRare: 0,
         epic: 4,
+        superLegendary: 0,
         legendary: 1
       },
       adBonusProbabilities: {
         common: 74,
         rare: 17,
+        superRare: 0,
         epic: 7,
+        superLegendary: 0,
         legendary: 2
       },
       probabilities: {
@@ -45,7 +51,9 @@ export const DEFAULT_CRIPTO_MYNERS_CONFIG = {
       name: 'Baú Explorer',
       tagline: 'Esquadrão de Exploração',
       heroesCount: 5,
-      costUsdt: 50,
+      costUsdt: 15,
+      costMiner: 1500,
+      constructionFragments: 20,
       icon: '🗺️',
       color: '#22c55e',
       popular: true,
@@ -53,13 +61,17 @@ export const DEFAULT_CRIPTO_MYNERS_CONFIG = {
       normalProbabilities: {
         common: 76,
         rare: 16,
+        superRare: 0,
         epic: 6,
+        superLegendary: 0,
         legendary: 2
       },
       adBonusProbabilities: {
         common: 69,
         rare: 18,
+        superRare: 0,
         epic: 9,
+        superLegendary: 0,
         legendary: 4
       },
       probabilities: {
@@ -81,13 +93,17 @@ export const DEFAULT_CRIPTO_MYNERS_CONFIG = {
       normalProbabilities: {
         common: 72,
         rare: 17,
+        superRare: 0,
         epic: 8,
+        superLegendary: 0,
         legendary: 3
       },
       adBonusProbabilities: {
         common: 64,
         rare: 19,
+        superRare: 0,
         epic: 11,
+        superLegendary: 0,
         legendary: 6
       },
       probabilities: {
@@ -98,6 +114,7 @@ export const DEFAULT_CRIPTO_MYNERS_CONFIG = {
       }
     },
     legendary: {
+      mncPerDay: 62.64,
       id: 'legendary',
       name: 'Baú Legendary',
       tagline: 'Full Team (Mina Completa 15/15)',
@@ -116,7 +133,9 @@ export const DEFAULT_CRIPTO_MYNERS_CONFIG = {
       adBonusProbabilities: {
         common: 59,
         rare: 20,
+        superRare: 0,
         epic: 13,
+        superLegendary: 0,
         legendary: 8
       },
       probabilities: {
@@ -145,7 +164,9 @@ export const DEFAULT_CRIPTO_MYNERS_CONFIG = {
       name: 'Abrigo Básico',
       slots: 5,
       recoverySpeedMultiplier: 1.0, // 100% de velocidade base
-      costUsdt: 25,
+      costUsdt: 0,
+      costMiner: 0,
+      constructionFragments: 0,
       icon: '🛖',
       color: '#38bdf8',
       description: 'Acomoda até 5 sobreviventes em tratamento simultaneamente com 100% da velocidade padrão.'
@@ -165,7 +186,9 @@ export const DEFAULT_CRIPTO_MYNERS_CONFIG = {
       name: 'Abrigo Avançado',
       slots: 15,
       recoverySpeedMultiplier: 1.50, // 150%
-      costUsdt: 85,
+      costUsdt: 40,
+      costMiner: 4000,
+      constructionFragments: 40,
       icon: '🏠',
       color: '#f59e0b',
       popular: true,
@@ -187,6 +210,7 @@ export const DEFAULT_CRIPTO_MYNERS_CONFIG = {
   // 3. ATRIBUTOS DAS RARIDADES (Conforme Regras Oficiais de Energia e Produção de Referência)
   rarityAttributes: {
     common: {
+      mncPerDay: 20.88,
       rarityName: 'Comum',
       color: '#94a3b8',
       basePowerMin: 1.5,
@@ -201,6 +225,7 @@ export const DEFAULT_CRIPTO_MYNERS_CONFIG = {
       badge: 'COMUM'
     },
     rare: {
+      mncPerDay: 31.32,
       rarityName: 'Raro',
       color: '#38bdf8',
       basePowerMin: 3.5,
@@ -214,7 +239,11 @@ export const DEFAULT_CRIPTO_MYNERS_CONFIG = {
       baseRecoveryMinutes: 400,
       badge: 'RARO'
     },
+
+    superRare: { rarityName: 'Super Raro', color: '#06b6d4', mncPerDay: 36.54, maxEnergy: 100, energyDrainPerMinute: 0.2, baseRecoveryMinutes: 180, badge: 'SUPER RARO' },
+    superLegendary: { rarityName: 'Super Lendário', color: '#f97316', mncPerDay: 83.52, maxEnergy: 100, energyDrainPerMinute: 0.2, baseRecoveryMinutes: 288, badge: 'SUPER LENDÁRIO' },
     epic: {
+      mncPerDay: 41.76,
       rarityName: 'Épico',
       color: '#a855f7',
       basePowerMin: 7.0,
@@ -291,8 +320,10 @@ export const DEFAULT_CRIPTO_MYNERS_CONFIG = {
     rarityMultipliers: {
       common: 1.0,              // 2,00% por sobrevivente
       rare: 1.1,                // 2,20% por sobrevivente
-      epic: 1.1666666666666667, // 2,333333...% por sobrevivente
-      legendary: 1.3333333333333333 // 2,666666...% por sobrevivente
+      superRare: 1.1333333333333333, // 2,2667% por sobrevivente
+      epic: 1.1666666666666667, // 2,3333% por sobrevivente
+      legendary: 1.3333333333333333, // 2,6667% por sobrevivente
+      superLegendary: 1.5 // 3,00% por sobrevivente
     },
     maxAccountChanceCapPct: 40.0, // Teto absoluto de 40% por Boss e por jogador
     cycleDurationSeconds: 0,      // Sem ciclo horário; sorteio a cada Boss derrotado
@@ -318,9 +349,9 @@ export function getCriptoMynersConfig() {
       ...DEFAULT_CRIPTO_MYNERS_CONFIG,
       ...parsed,
       minerCoinUsdtRate: effectiveRate,
-      chests: { ...DEFAULT_CRIPTO_MYNERS_CONFIG.chests, ...(parsed.chests || {}) },
+      chests: Object.fromEntries(Object.entries(DEFAULT_CRIPTO_MYNERS_CONFIG.chests).map(([id, defaults]) => { const saved = parsed.chests?.[id] || {}; return [id, { ...defaults, ...saved, probabilities: { ...defaults.probabilities, ...(saved.probabilities || {}) }, normalProbabilities: { ...defaults.normalProbabilities, ...(saved.normalProbabilities || {}) }, adBonusProbabilities: { ...defaults.adBonusProbabilities, ...(saved.adBonusProbabilities || {}) } }]; })),
       houses: { ...DEFAULT_CRIPTO_MYNERS_CONFIG.houses, ...(parsed.houses || {}) },
-      rarityAttributes: { ...DEFAULT_CRIPTO_MYNERS_CONFIG.rarityAttributes, ...(parsed.rarityAttributes || {}) },
+      rarityAttributes: Object.fromEntries(Object.entries(DEFAULT_CRIPTO_MYNERS_CONFIG.rarityAttributes).map(([tier, defaults]) => [tier, { ...defaults, ...(parsed.rarityAttributes?.[tier] || {}) }])),
       upgradesConfig: { ...DEFAULT_CRIPTO_MYNERS_CONFIG.upgradesConfig, ...(parsed.upgradesConfig || {}) },
       adsConfig: { ...DEFAULT_CRIPTO_MYNERS_CONFIG.adsConfig, ...(parsed.adsConfig || {}) },
       constructionChestConfig: {

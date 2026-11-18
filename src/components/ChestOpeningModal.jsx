@@ -16,7 +16,8 @@ import confetti from 'canvas-confetti';
 import { sfx } from '../utils/sfx';
 import { getCriptoMynersConfig } from '../data/criptoMynersConfig';
 import { MINER_ROSTER } from '../data/minersCatalog';
-import { rollHeroRarity, recordAdTransaction } from '../utils/adRewardService';
+import { recordAdTransaction } from '../utils/adRewardService';
+import { drawSurvivorRarity } from '../utils/cryptozombiesEconomy';
 import RewardedAdModal from './RewardedAdModal';
 
 export default function ChestOpeningModal({
@@ -38,8 +39,7 @@ export default function ChestOpeningModal({
   const chestConfig = config.chests[chest.id] || config.chests.miner;
   const heroesToMint = chestConfig.heroesCount || chest.heroesCount || 1;
 
-  const normalProbs = chestConfig.normalProbabilities || chestConfig.probabilities || { common: 80, rare: 15, epic: 4, legendary: 1 };
-  const adProbs = chestConfig.adBonusProbabilities || { common: 74, rare: 17, epic: 7, legendary: 2 };
+  // Probabilidades gerais aprovadas para as seis raridades. O bônus publicitário não altera a raridade-base nesta etapa.
 
   const randomName = () => {
     const names = [
@@ -59,7 +59,7 @@ export default function ChestOpeningModal({
 
       for (let i = 0; i < heroesToMint; i++) {
         // Sorteio individual e independente de raridade por herói
-        const selectedRarity = rollHeroRarity(chest.id, isBonus, config);
+        const selectedRarity = drawSurvivorRarity();
 
         let matchingClasses = MINER_ROSTER.filter(m => m.rarity === selectedRarity);
         if (matchingClasses.length === 0) matchingClasses = MINER_ROSTER;
