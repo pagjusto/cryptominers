@@ -1236,48 +1236,6 @@ export default function App() {
           </div>
         </button>
 
-        {/* SELETOR DE MODO DE JOGO & STATUS DO MAPA */}
-        <div className="flex items-center gap-1.5 bg-slate-950 p-0.5 rounded-lg border border-slate-800 shadow-inner shrink-0">
-          <div className="flex items-center bg-slate-900 p-0.5 rounded border border-slate-700/60">
-            <button
-              onClick={() => setBoardMode('canyon')}
-              className={`px-2 py-0.5 rounded font-tech text-xs transition cursor-pointer flex items-center gap-1 ${
-                boardMode === 'canyon'
-                  ? 'bg-amber-500 text-slate-950 font-bold shadow-sm'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              <span>🎮</span>
-              <span>Canvas HD</span>
-            </button>
-            <button
-              onClick={() => setBoardMode('tactical')}
-              className={`px-2 py-0.5 rounded font-tech text-xs transition cursor-pointer flex items-center gap-1 ${
-                boardMode === 'tactical'
-                  ? 'bg-emerald-500 text-slate-950 font-bold shadow-sm'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              <span>📋</span>
-              <span>Grid</span>
-            </button>
-          </div>
-
-          <span className="font-mono text-slate-300 bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800 text-[10px]">
-            Ciclo #{mapData?.cycleNumber || 1}
-          </span>
-
-          <span className="flex items-center gap-1 text-[10px] bg-lime-950/70 text-lime-300 px-1.5 py-0.5 rounded border border-lime-500/40 font-bold" title="Zumbis restantes">
-            🧟 <b className="text-white">{mapData?.deposits?.filter(d => d.type === 'zombie' && !d.isCompleted).length ?? 19}</b>/19
-          </span>
-
-          <span className="flex items-center gap-1 text-[10px] bg-red-950/70 text-red-300 px-1.5 py-0.5 rounded border border-red-500/40 font-bold" title="Boss Mutante">
-            💀 Boss: <b className={mapData?.deposits?.some(d => d.type === 'boss' && !d.isCompleted) ? 'text-amber-300' : 'text-emerald-400'}>
-              {mapData?.deposits?.some(d => d.type === 'boss' && !d.isCompleted) ? 'Ativo' : 'Morto'}
-            </b>
-          </span>
-        </div>
-
         {/* Ações da Expedição */}
         <div className="flex items-center gap-1.5 shrink-0">
           
@@ -1432,6 +1390,26 @@ export default function App() {
             </div>
           ) : (
             <div className="flex flex-col items-center justify-start relative w-full h-full max-w-[1200px] pt-0.5">
+              {/* STATUS DO MAPA NO CANTO SUPERIOR ESQUERDO DO MAPA */}
+              <div 
+                title="Status do Ciclo Atual e Criaturas"
+                className="absolute top-2.5 left-3 z-30 flex items-center gap-1.5 bg-slate-950/85 backdrop-blur-md px-2.5 py-1.5 rounded-xl border border-slate-700/80 shadow-2xl pointer-events-none select-none"
+              >
+                <span className="font-mono text-amber-300 bg-slate-900/90 px-2 py-0.5 rounded-md border border-slate-700/60 text-xs font-bold shadow-sm">
+                  Ciclo #{mapData?.cycleNumber || 1}
+                </span>
+
+                <span className="flex items-center gap-1 text-xs bg-lime-950/80 text-lime-300 px-2 py-0.5 rounded-md border border-lime-500/50 font-bold shadow-sm" title="Zumbis restantes">
+                  🧟 <b className="text-white">{mapData?.deposits?.filter(d => d.type === 'zombie' && !d.isCompleted).length ?? 19}</b>/19
+                </span>
+
+                <span className="flex items-center gap-1 text-xs bg-red-950/80 text-red-300 px-2 py-0.5 rounded-md border border-red-500/50 font-bold shadow-sm" title="Status do Boss Mutante">
+                  💀 Boss: <b className={mapData?.deposits?.some(d => d.type === 'boss' && !d.isCompleted) ? 'text-amber-300' : 'text-emerald-400'}>
+                    {mapData?.deposits?.some(d => d.type === 'boss' && !d.isCompleted) ? 'Ativo' : 'Morto'}
+                  </b>
+                </span>
+              </div>
+
               <GameBoard
                 mine={currentMine}
                 mapData={mapData}
