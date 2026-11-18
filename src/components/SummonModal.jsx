@@ -496,7 +496,7 @@ export default function SummonModal({
                           </p>
                           {heroesCount >= 5 && (
                             <p className="text-[9px] leading-relaxed text-sky-300/90 font-tech mb-2">
-                              Projeção de produção e ROI baseada em cenário mediano de uso intermitente ao longo de 24 horas. A mineração ocorre somente com o jogo aberto e conectado, mesmo minimizado.
+                              Projeção de produção e ROI baseada em cenário mediano de uso intermitente ao longo de 24 horas. A mineração ocorre somente com o jogo aberto e conectado, mesmo minimizado. Os resultados e as médias podem variar conforme as raridades dos soldados obtidos em cada baú.
                             </p>
                           )}
                         </div>
