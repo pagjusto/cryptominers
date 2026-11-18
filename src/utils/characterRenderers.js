@@ -4525,11 +4525,11 @@ if (typeof window !== 'undefined') {
 export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swingProgress = 0, isMining = false) {
   initRosterSprites();
 
-  // Dimensões dos Heróis rigorosamente idênticas às dos Zumbis (largura ~52px, altura ~56px)
-  const pw = 52; // Largura do herói (alinhado aos zumbis de 55-63px)
-  const ph = 56; // Altura do herói (alinhado aos zumbis de 55px)
-  const gw = 46; // Largura proporcional da arma
-  const gh = 25; // Altura proporcional da arma
+  // Dimensões proporcionais dos Heróis (calibrados um pouco menores para equilíbrio visual e contato com o solo)
+  const pw = 42; // Largura do herói calibrada
+  const ph = 46; // Altura do herói calibrada
+  const gw = 38; // Largura proporcional da arma
+  const gh = 21; // Altura proporcional da arma
 
   const spriteIndex = hero?.spriteIndex ?? 0;
   const sourceIndex = weapon?.sourceIndex ?? spriteIndex ?? 0;
@@ -4554,53 +4554,47 @@ export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swi
   // =========================================================================
   if (!isMining) {
     ctx.save();
-    ctx.translate(0, 16); // Pivot na base dos pés
+    ctx.translate(0, 14); // Pivot exatamente na base dos pés
 
     // Swagger / ginga de caminhada e respiração
-    const walkBob = Math.abs(Math.sin(now * 0.012)) * 1.8;
-    const bodySway = Math.sin(now * 0.012) * 0.04;
+    const walkBob = Math.abs(Math.sin(now * 0.012)) * 1.5;
+    const bodySway = Math.sin(now * 0.012) * 0.035;
     const breathY = 1 + Math.sin(now * 0.01) * 0.02;
     const breathX = 1 - Math.sin(now * 0.01) * 0.01;
-
-    // Sombra suave sob os pés
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.28)';
-    ctx.beginPath();
-    ctx.ellipse(0, 4, 16, 4.5, 0, 0, Math.PI * 2);
-    ctx.fill();
 
     ctx.translate(0, -walkBob);
     ctx.rotate(bodySway);
     ctx.scale(breathX, breathY);
 
-    // Desenha corpo do Herói com renderização vetorial suave e cel-shading
+    // Desenha corpo do Herói com renderização vetorial suave e pés tocando o solo
     if (heroRosterLoaded && heroRosterImg) {
       ctx.save();
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = 'high';
       ctx.filter = 'drop-shadow(0px 1px 1.5px rgba(0,0,0,0.55))';
-      ctx.drawImage(heroRosterImg, sx, sy, sw, sh, -pw / 2, -ph + 6, pw, ph);
+      ctx.drawImage(heroRosterImg, sx, sy, sw, sh, -pw / 2, -ph + 9, pw, ph);
       ctx.restore();
     } else {
       ctx.fillStyle = '#38bdf8';
-      ctx.fillRect(-pw / 2, -ph + 6, pw, ph);
+      ctx.fillRect(-pw / 2, -ph + 9, pw, ph);
     }
 
     // Arma em repouso na mão direita, apontada diagonalmente para baixo
     if (weaponRosterLoaded && weaponRosterImg) {
       ctx.save();
-      ctx.translate(14, -14);
+      ctx.translate(11, -11);
       ctx.rotate(0.35 + Math.sin(now * 0.012) * 0.04);
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = 'high';
       ctx.filter = 'drop-shadow(0px 1px 1.5px rgba(0,0,0,0.55))';
-      ctx.drawImage(weaponRosterImg, wsx, wsy, wsw, wsh, -8, -13, gw, gh);
+      ctx.drawImage(weaponRosterImg, wsx, wsy, wsw, wsh, -6, -10, gw, gh);
 
       // Mão do herói segurando a coronha / empunhadura
       ctx.fillStyle = '#fed7aa';
       ctx.strokeStyle = '#1c1917';
-      ctx.lineWidth = 1.4;
+      ctx.lineWidth = 1.3;
       ctx.beginPath();
-      ctx.arc(0, 0, 3.2, 0, Math.PI * 2);
+      ctx.arc(0, 0, 2.8, 0, Math.PI * 2);
       ctx.fill();
       ctx.stroke();
 
@@ -4615,13 +4609,13 @@ export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swi
   // 2. MODO ATAQUE: DISPARO DE ARMA COM RECUO, MUZZLE FLASH E BALÍSTICA (PIRATA)
   // =========================================================================
   ctx.save();
-  ctx.translate(0, 16); // Pivot nos pés
+  ctx.translate(0, 14); // Pivot nos pés
 
   let lungeX = 0;
   let bodyAngle = 0;
   let gunAngle = 0;
-  let handX = 10;
-  let handY = -14;
+  let handX = 9;
+  let handY = -12;
   let recoilDist = 0;
   let scaleY = 1;
   let scaleX = 1;
@@ -4632,19 +4626,19 @@ export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swi
     lungeX = 2 * p;
     bodyAngle = 0.06 * p; // Postura firme de atirador
     gunAngle = 0.35 - p * 0.35; // Alinha rigorosamente na horizontal (0.0 rad)
-    handX = 11 + 2 * p;
-    handY = -12 - 2 * p;
+    handX = 9 + 2 * p;
+    handY = -10 - 2 * p;
   }
   // FASE 2: DETONAÇÃO, DISPARO E RECUO BRUTAL (0.32 a 0.48)
   else if (swingProgress < 0.48) {
     const p = (swingProgress - 0.32) / 0.16;
     // Recuo forte jogando o braço e tronco para trás
-    recoilDist = Math.sin(p * Math.PI) * 7;
+    recoilDist = Math.sin(p * Math.PI) * 6;
     lungeX = 2 - recoilDist * 0.6;
     bodyAngle = 0.06 - Math.sin(p * Math.PI) * 0.15; // Tronco empurrado para trás
     gunAngle = -Math.sin(p * Math.PI) * 0.42; // Cano dá coice para cima
-    handX = 13 - recoilDist;
-    handY = -14;
+    handX = 11 - recoilDist;
+    handY = -12;
     scaleX = 1 - Math.sin(p * Math.PI) * 0.05;
     scaleY = 1 + Math.sin(p * Math.PI) * 0.03;
   }
@@ -4654,22 +4648,16 @@ export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swi
     lungeX = 2 * (1 - p);
     bodyAngle = -0.04 * (1 - p);
     gunAngle = -0.15 * (1 - p);
-    handX = 13 - 1 * p;
-    handY = -14;
+    handX = 11 - 1 * p;
+    handY = -12;
   }
   // FASE 4: RECUPERAÇÃO E RETORNO (0.75 a 1.00)
   else {
     const p = (swingProgress - 0.75) / 0.25;
     gunAngle = p * 0.35;
-    handX = 12 - 1 * p;
-    handY = -14 + 2 * p;
+    handX = 10 - 1 * p;
+    handY = -12 + 2 * p;
   }
-
-  // Sombra no chão
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.28)';
-  ctx.beginPath();
-  ctx.ellipse(lungeX, 4, 18, 5, 0, 0, Math.PI * 2);
-  ctx.fill();
 
   // Desenha Corpo do Herói com contorno vetorial e suavização
   ctx.save();
@@ -4680,10 +4668,10 @@ export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swi
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
     ctx.filter = 'drop-shadow(0px 1px 1.5px rgba(0,0,0,0.55))';
-    ctx.drawImage(heroRosterImg, sx, sy, sw, sh, -pw / 2, -ph + 6, pw, ph);
+    ctx.drawImage(heroRosterImg, sx, sy, sw, sh, -pw / 2, -ph + 9, pw, ph);
   } else {
     ctx.fillStyle = '#38bdf8';
-    ctx.fillRect(-pw / 2, -ph + 6, pw, ph);
+    ctx.fillRect(-pw / 2, -ph + 9, pw, ph);
   }
   ctx.restore();
 
@@ -4695,52 +4683,52 @@ export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swi
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
     ctx.filter = 'drop-shadow(0px 1px 1.5px rgba(0,0,0,0.55))';
-    ctx.drawImage(weaponRosterImg, wsx, wsy, wsw, wsh, -8, -13, gw, gh);
+    ctx.drawImage(weaponRosterImg, wsx, wsy, wsw, wsh, -6, -10, gw, gh);
 
     // Mão do herói segurando a empunhadura
     ctx.fillStyle = '#fed7aa';
     ctx.strokeStyle = '#1c1917';
-    ctx.lineWidth = 1.4;
+    ctx.lineWidth = 1.3;
     ctx.beginPath();
-    ctx.arc(0, 0, 3.2, 0, Math.PI * 2);
+    ctx.arc(0, 0, 2.8, 0, Math.PI * 2);
     ctx.fill();
     ctx.stroke();
 
     // Posição da boca do cano (Muzzle)
-    const muzzleLocalX = 38;
-    const muzzleLocalY = -4;
+    const muzzleLocalX = 32;
+    const muzzleLocalY = -3;
 
     // 1. FLASH DE DISPARO DA BOCA DO CANO (0.32 a 0.42)
     if (swingProgress >= 0.32 && swingProgress <= 0.42) {
       const flashP = (swingProgress - 0.32) / 0.10;
-      const flashSize = 14 + (1 - flashP) * 10;
+      const flashSize = 12 + (1 - flashP) * 8;
       const category = weapon?.category || 'rifle';
 
       ctx.save();
       if (category === 'energia') {
         ctx.shadowColor = '#38bdf8';
-        ctx.shadowBlur = 16;
+        ctx.shadowBlur = 14;
         ctx.fillStyle = '#38bdf8';
       } else if (category === 'especial') {
         ctx.shadowColor = '#f97316';
-        ctx.shadowBlur = 16;
+        ctx.shadowBlur = 14;
         ctx.fillStyle = '#ea580c';
       } else if (category === 'suporte') {
         ctx.shadowColor = '#34d399';
-        ctx.shadowBlur = 14;
+        ctx.shadowBlur = 12;
         ctx.fillStyle = '#10b981';
       } else {
         ctx.shadowColor = '#f59e0b';
-        ctx.shadowBlur = 15;
+        ctx.shadowBlur = 14;
         ctx.fillStyle = '#fef08a';
       }
 
       ctx.beginPath();
-      ctx.moveTo(muzzleLocalX, muzzleLocalY - 4);
-      ctx.lineTo(muzzleLocalX + flashSize * 1.6, muzzleLocalY - 9);
-      ctx.lineTo(muzzleLocalX + flashSize * 1.8, muzzleLocalY);
-      ctx.lineTo(muzzleLocalX + flashSize * 1.6, muzzleLocalY + 9);
-      ctx.lineTo(muzzleLocalX, muzzleLocalY + 4);
+      ctx.moveTo(muzzleLocalX, muzzleLocalY - 3);
+      ctx.lineTo(muzzleLocalX + flashSize * 1.5, muzzleLocalY - 7);
+      ctx.lineTo(muzzleLocalX + flashSize * 1.7, muzzleLocalY);
+      ctx.lineTo(muzzleLocalX + flashSize * 1.5, muzzleLocalY + 7);
+      ctx.lineTo(muzzleLocalX, muzzleLocalY + 3);
       ctx.closePath();
       ctx.fill();
       ctx.restore();
@@ -4750,10 +4738,10 @@ export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swi
   }
 
   // 2. PROJÉTIL EM VOO ULTRARRÁPIDO (0.33 a 0.46)
-  const muzzleWorldX = handX + 38;
-  const muzzleWorldY = handY - 4;
-  const targetX = 58;
-  const targetY = -8;
+  const muzzleWorldX = handX + 32;
+  const muzzleWorldY = handY - 3;
+  const targetX = 52;
+  const targetY = -6;
 
   if (swingProgress >= 0.33 && swingProgress <= 0.46) {
     const bulletP = (swingProgress - 0.33) / 0.13;

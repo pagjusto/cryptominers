@@ -373,14 +373,25 @@ export function drawMinerCharacter(ctx, mx, my, miner, classInfo, now, swingProg
 
   const isWorking = miner.status === 'work';
   const isMining = miner.isMining;
-  const bounceY = isWorking && !isMining ? Math.sin(now * 0.015) * 3 : 0;
-  const legAngle = isWorking && !isMining ? Math.sin(now * 0.02) * 6 : 0;
+  const bounceY = isWorking && !isMining ? Math.sin(now * 0.015) * 2.5 : 0;
+  const legAngle = isWorking && !isMining ? Math.sin(now * 0.02) * 5 : 0;
   const swingAngle = isMining && swingProgress > 0 ? -Math.sin(swingProgress * Math.PI) * 1.35 : 0;
 
-  ctx.translate(mx, my + bounceY);
+  // Escala dos heróis proporcional e calibrada (heróis um pouco menores conforme solicitado)
+  const CHAR_SCALE = 0.85;
 
-  // Escala proporcional dos heróis: tamanho idêntico ao dos zumbis (altura ~56px)
-  const CHAR_SCALE = 1.0;
+  // 1. Sombra Suave e Realista de Contato no Piso (fixa no solo em mx, my, sem saltar com bounceY)
+  // Posicionada rigorosamente sob os pés do herói (sem parecer que está voando)
+  ctx.save();
+  ctx.translate(mx, my);
+  ctx.scale(CHAR_SCALE, CHAR_SCALE);
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+  ctx.beginPath();
+  ctx.ellipse(0, 14, 13, 3.8, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+
+  ctx.translate(mx, my + bounceY);
   ctx.scale(CHAR_SCALE, CHAR_SCALE);
 
   const cid = miner.classId || 'miner';
@@ -392,12 +403,6 @@ export function drawMinerCharacter(ctx, mx, my, miner, classInfo, now, swingProg
   const rosterWeapon = (miner.weaponId && getWeaponById(miner.weaponId))
     || (rosterHero && getWeaponById(rosterHero.weaponId))
     || WEAPON_CATALOG[rosterHero?.spriteIndex % WEAPON_CATALOG.length];
-
-  // 1. Sombra Suave e Realista de Contato no Piso (sem círculos que façam parecer voar)
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.32)';
-  ctx.beginPath();
-  ctx.ellipse(0, 19, 16, 4.5, 0, 0, Math.PI * 2);
-  ctx.fill();
 
   // 2. Corpo e Equipamento do Personagem (com suporte a espelhamento de direção)
   ctx.save();
@@ -466,18 +471,18 @@ export function drawMinerCharacter(ctx, mx, my, miner, classInfo, now, swingProg
   }
 
   // 5. Barra de Estamina Nítida com Contorno Escuro
-  const barW = 32;
-  const barH = 5;
+  const barW = 30;
+  const barH = 4.5;
   const pct = Math.max(0, miner.currentStamina / miner.maxStamina);
 
   ctx.fillStyle = 'rgba(0, 0, 0, 0.9)';
   ctx.beginPath();
-  ctx.roundRect(-barW / 2 - 1, -34, barW + 2, barH + 2, 2.5);
+  ctx.roundRect(-barW / 2 - 1, -29, barW + 2, barH + 2, 2.5);
   ctx.fill();
 
   ctx.fillStyle = pct > 0.4 ? '#22c55e' : (pct > 0.15 ? '#f59e0b' : '#ef4444');
   ctx.beginPath();
-  ctx.roundRect(-barW / 2, -33, barW * pct, barH, 2);
+  ctx.roundRect(-barW / 2, -28, barW * pct, barH, 2);
   ctx.fill();
 
   // 6. Estrelas de Fusão do Herói (★) exibidas acima da barra
@@ -489,7 +494,7 @@ export function drawMinerCharacter(ctx, mx, my, miner, classInfo, now, swingProg
     ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
     ctx.shadowBlur = 3;
     const starStr = '★'.repeat(stars);
-    ctx.fillText(starStr, 0, -38);
+    ctx.fillText(starStr, 0, -33);
     ctx.shadowColor = 'transparent';
   }
 
