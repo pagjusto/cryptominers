@@ -4,9 +4,9 @@
 
 Ao atingir **5% de vida**, o sobrevivente sai do combate e passa a ser considerado ferido. Não ocorre morte permanente por esse motivo.
 
-## Resgate sem médico
+## Resgate manual sem médico
 
-- O sobrevivente ferido fica aguardando a decisão do jogador.
+- Quando o jogador está online e não possui médico, o sobrevivente ferido fica aguardando a decisão do jogador.
 - O jogador escolhe individualmente quando enviá-lo à enfermaria.
 - Não há limite de quantidade de resgates manuais; o envio é feito um sobrevivente por vez.
 - Durante um evento de Boss, o envio manual de sobreviventes feridos continua permitido.
@@ -15,7 +15,7 @@ Ao atingir **5% de vida**, o sobrevivente sai do combate e passa a ser considera
 
 O médico é um serviço adicional previsto para uma etapa futura:
 
-- Resgata automaticamente todos os sobreviventes feridos, sem limite de quantidade de resgates.
+- Enquanto o jogador está online, resgata automaticamente todos os sobreviventes feridos, sem limite de quantidade de resgates.
 - Não ocupa vaga entre os 15 sobreviventes de combate.
 - Não luta e não gera MNC.
 - Não aumenta a quantidade de leitos.
@@ -34,8 +34,8 @@ A ativação, contratação e renovação do médico dependem da futura etapa co
 
 ## Desconexão e reconexão
 
-- Ao perder a conexão, o jogador deixa de contar para o combate e sua produção de MNC é interrompida.
-- Todos os sobreviventes que estavam ativos são encaminhados ao fluxo do ambulatório/enfermaria.
+- Ao perder a conexão ou ficar offline, o jogador deixa de contar para o combate e sua produção de MNC é interrompida.
+- Todos os sobreviventes que estavam ativos são enviados automaticamente ao ambulatório/enfermaria, mesmo que o jogador não tenha contratado o médico.
 - Ao reconectar, os sobreviventes retornam automaticamente ao combate, respeitando o limite de **15 vagas**.
 - Se não houver vagas livres, ficam na reserva e retornam automaticamente quando uma vaga surgir.
 - A desconexão não gera produção retroativa de MNC e não concede recuperação instantânea.
