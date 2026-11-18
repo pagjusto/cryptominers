@@ -11,9 +11,8 @@ O abrigo determina a capacidade da enfermaria e a velocidade de recuperação do
 | Básico | 5 leitos | 100% |
 | Reforçado | 10 leitos | 125% |
 | Avançado | 15 leitos | 150% |
-| Lendário | 20 leitos | 200% |
 
-A velocidade de 200% representa o dobro da velocidade de recuperação de referência. Os parâmetros devem ser confirmados na configuração final do jogo.
+A velocidade representa a taxa de recuperação em relação ao Abrigo Básico. Os parâmetros devem ser confirmados na configuração final do jogo.
 
 ## Obtenção e evolução
 
@@ -21,10 +20,21 @@ A velocidade de 200% representa o dobro da velocidade de recuperação de refer�
 - Compras posteriores não concedem outro Abrigo Básico.
 - O abrigo pertence à conta.
 - O jogador mantém apenas um abrigo ativo.
-- A evolução segue a ordem: Básico → Reforçado → Avançado → Lendário.
+- No lançamento, existem somente três níveis: Básico, Reforçado e Avançado.
+- A evolução segue a ordem: Básico → Reforçado → Avançado.
 - Não é permitido pular níveis.
-- A evolução é permanente e consome materiais e MNC.
+- A evolução é permanente e consome Fragmentos de Construção e MNC.
 - Abrigos de níveis superiores não são comprados diretamente com USDT.
+- O nível Lendário (20 leitos) fica reservado para uma possível expansão futura e não faz parte da progressão de lançamento.
+
+### Custos de evolução aprovados
+
+| Evolução | Capacidade após evolução | Fragmentos de Construção | Custo em MNC |
+|---|---:|---:|---:|
+| Básico → Reforçado | 10 leitos | 20 | 1.500 MNC |
+| Reforçado → Avançado | 15 leitos | 40 | 4.000 MNC |
+
+O Abrigo Básico não exige custo de evolução. Os custos acima são cumulativos por etapa: para chegar ao Avançado, o jogador precisa primeiro desbloquear o Reforçado e depois pagar o custo da evolução para Avançado.
 
 ## Baús de sobreviventes — chances por raridade
 
@@ -92,4 +102,4 @@ O limite diário de baús e os detalhes operacionais do sorteio devem ser confir
 
 ## Materiais e custos de evolução
 
-As quantidades de materiais e os custos exatos em MNC para cada evolução ainda precisam ser definidos.
+Os custos em Fragmentos de Construção e MNC aprovados para as duas evoluções disponíveis no lançamento estão definidos na tabela de custos acima. Outros materiais de construção, se necessários, ainda precisam ser especificados.
