@@ -9,7 +9,8 @@ A referência de planejamento definida é **1 MNC = US$ 0,01**. Essa referência
 ## Como a produção funciona
 
 - Cada sobrevivente ativo gera MNC individualmente, por segundo válido de combate.
-- A taxa individual depende da raridade do sobrevivente.
+- A taxa individual depende exclusivamente da raridade do sobrevivente.
+- A classe, função ou tipo de arma do sobrevivente não concede bônus nem penalidade de produção.
 - A soma da produção dos sobreviventes ativos determina a produção total do jogador.
 - Não há pagamento separado por cada zumbi eliminado.
 - A produção continua durante o evento de Boss.
