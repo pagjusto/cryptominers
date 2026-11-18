@@ -46,8 +46,8 @@ As opções de compra planejadas são combos de **1, 3, 5 e 10 baús**.
 
 - A opção de **1 baú** permite ao jogador experimentar uma abertura individual e usa as chances-base, sem bônus de combo.
 - O **combo pequeno (3 baús)** oferece bônus para Raros e um bônus menor para Épicos.
-- O **combo médio (5 baús)** oferece bônus para Épicos.
-- O **combo grande (10 baús)** oferece bônus para Épicos e Lendários.
+- O **combo médio (5 baús)** oferece bônus para Épicos e um bônus pequeno adicional para Lendários.
+- O **combo grande (10 baús)** oferece bônus para Épicos e Lendários, com benefício maior que o combo médio.
 - Comuns não recebem bônus direto.
 - O aumento das chances das raridades beneficiadas deverá ser compensado pela redução da chance de Comum, mantendo o total em 100%.
 - Os percentuais exatos de bônus para os combos de 3, 5 e 10 baús ainda serão definidos. Nenhum percentual ilustrativo está aprovado como regra.
