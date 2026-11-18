@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CRIPTO MYNERS — Showcase de Combatentes & Armas</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: #111827;
+      --border: #1f2937;
+      --accent: #f59e0b;
+      --accent-glow: rgba(245, 158, 11, 0.25);
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      padding-bottom: 60px;
+    }
+    header {
+      background: #0f172a;
+      border-bottom: 1px solid #1e293b;
+      padding: 16px 24px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+    .header-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .title-area h1 {
+      font-size: 20px;
+      font-weight: 800;
+      color: #fbbf24;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .title-area p {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .global-btn {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #000;
+      font-weight: 700;
+      padding: 8px 16px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .global-btn:hover {
+      filter: brightness(1.1);
+      transform: translateY(-1px);
+    }
+    .nav-bar {
+      max-width: 1400px;
+      margin: 16px auto;
+      padding: 0 24px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .nav-btn {
+      background: #1e293b;
+      color: #cbd5e1;
+      padding: 6px 12px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid #334155;
+      transition: all 0.15s;
+    }
+    .nav-btn:hover, .nav-btn.active {
+      background: #f59e0b;
+      color: #000;
+      border-color: #f59e0b;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+      gap: 24px;
+    }
+    .hero-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      transition: all 0.25s;
+      scroll-margin-top: 100px;
+    }
+    .hero-card:target {
+      border-color: #f59e0b;
+      box-shadow: 0 0 25px var(--accent-glow);
+    }
+    .card-header {
+      padding: 14px 18px;
+      background: #1e293b;
+      border-bottom: 1px solid #334155;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .rarity-pill {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .rarity-common { background: #334155; color: #94a3b8; }
+    .rarity-rare { background: #0369a1; color: #7dd3fc; }
+    .rarity-epic { background: #6b21a8; color: #d8b4fe; }
+    .rarity-legendary { background: #92400e; color: #fde68a; }
+
+    .canvas-container {
+      position: relative;
+      background: radial-gradient(circle at center, #1e293b 0%, #090d16 100%);
+      height: 220px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-bottom: 1px solid #1f2937;
+    }
+    canvas {
+      width: 100%;
+      height: 100%;
+      image-rendering: pixelated;
+    }
+    .card-body {
+      padding: 16px 18px;
+      font-size: 13px;
+    }
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      color: var(--text-muted);
+    }
+    .stat-val {
+      color: var(--text);
+      font-weight: 600;
+    }
+    .controls {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+    }
+    .ctrl-btn {
+      flex: 1;
+      background: #1f2937;
+      color: #e5e7eb;
+      border: 1px solid #374151;
+      padding: 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .ctrl-btn:hover {
+      background: #374151;
+      color: #fff;
+    }
+    .ctrl-btn.active {
+      background: #f59e0b;
+      color: #000;
+      border-color: #f59e0b;
+    }
+    .copy-link-btn {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      cursor: pointer;
+      font-size: 12px;
+      text-decoration: underline;
+    }
+    .copy-link-btn:hover {
+      color: #f59e0b;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-content">
+      <div class="title-area">
+        <h1>🎖️ CRIPTO MYNERS — SHOWCASE DOS COMBATENTES</h1>
+        <p>Verificação individual de movimentação, mira, recuo e efeitos balísticos de cada combatente</p>
+      </div>
+      <div>
+        <a href="/" class="global-btn">🎮 Voltar ao Jogo (Localhost)</a>
+      </div>
+    </div>
+  </header>
+
+  <nav class="nav-bar" id="navbar">
+    <!-- Links dinâmicos injetados via JS -->
+  </nav>
+
+  <main class="container" id="cards-container">
+    <!-- Cards dinâmicos injetados via JS -->
+  </main>
+
+  <script type="module">
+    // Dados oficiais do HERO_ROSTER e WEAPON_CATALOG
+    const HERO_ROSTER = [
+      { id: 'verdant', name: 'Verdant', classId: 'explorer', className: 'Explorador', rarity: 'common', rarityName: 'Comum', spriteIndex: 0, weaponId: 'assault-rifle', role: 'Reconhecimento e mobilidade' },
+      { id: 'granito', name: 'Granito', classId: 'tank', className: 'Tanque', rarity: 'legendary', rarityName: 'Lendário', spriteIndex: 1, weaponId: 'heavy-machine-gun', role: 'Absorção de dano e proteção' },
+      { id: 'nox', name: 'Nox', classId: 'fighter', className: 'Combatente', rarity: 'rare', rarityName: 'Raro', spriteIndex: 2, weaponId: 'energy-blaster', role: 'Combate equilibrado' },
+      { id: 'brasa', name: 'Brasa', classId: 'assault', className: 'Assalto', rarity: 'common', rarityName: 'Comum', spriteIndex: 3, weaponId: 'flamethrower', role: 'Pressão ofensiva em curta distância' },
+      { id: 'iris', name: 'Íris', classId: 'medic', className: 'Médica', rarity: 'epic', rarityName: 'Épico', spriteIndex: 4, weaponId: 'medical-kit', role: 'Suporte médico e salvaguarda' },
+      { id: 'mumia', name: 'Múmia', classId: 'survivor', className: 'Sobrevivente', rarity: 'common', rarityName: 'Comum', spriteIndex: 5, weaponId: 'shotgun', role: 'Resistência e combate próximo' },
+      { id: 'polar', name: 'Polar', classId: 'specialist', className: 'Especialista', rarity: 'rare', rarityName: 'Raro', spriteIndex: 6, weaponId: 'compact-rifle', role: 'Precisão e suporte tático' },
+      { id: 'fenix', name: 'Fênix', classId: 'assault', className: 'Assalto', rarity: 'epic', rarityName: 'Épico', spriteIndex: 7, weaponId: 'flare-launcher', role: 'Dano explosivo e pressão ofensiva' },
+      { id: 'sombra', name: 'Sombra', classId: 'infiltrator', className: 'Infiltrador', rarity: 'rare', rarityName: 'Raro', spriteIndex: 8, weaponId: 'precision-rifle', role: 'Ataque de precisão de longo alcance' },
+      { id: 'iron', name: 'Iron', classId: 'heavy', className: 'Blindado', rarity: 'epic', rarityName: 'Épico', spriteIndex: 9, weaponId: 'grenade', role: 'Controle de área e resistência extrema' },
+      { id: 'colosso', name: 'Colosso', classId: 'juggernaut', className: 'Tanque de elite', rarity: 'legendary', rarityName: 'Lendário', spriteIndex: 10, weaponId: 'rocket-launcher', role: 'Poder de fogo pesado balístico' },
+      { id: 'hunter', name: 'Hunter', classId: 'marksman', className: 'Atirador', rarity: 'common', rarityName: 'Comum', spriteIndex: 11, weaponId: 'tactical-carbine', role: 'Tiroteio tático e combate direto' },
+      { id: 'scarlet', name: 'Scarlet', classId: 'guerrilla', className: 'Guerrilheira', rarity: 'common', rarityName: 'Comum', spriteIndex: 12, weaponId: 'heavy-pistol', role: 'Ataque rápido e suporte tático' }
+    ];
+
+    const WEAPON_CATALOG = {
+      'assault-rifle': { name: 'Rifle de Assalto', sourceIndex: 0, category: 'Fuzil Automático' },
+      'heavy-machine-gun': { name: 'Metralhadora Pesada', sourceIndex: 8, category: 'Arma Pesada de Suporte' },
+      'energy-blaster': { name: 'Canhão de Energia', sourceIndex: 3, category: 'Feixe de Plasma' },
+      'flamethrower': { name: 'Lança-chamas', sourceIndex: 2, category: 'Dispersão Incendiária' },
+      'medical-kit': { name: 'Injetor de Suporte', sourceIndex: 6, category: 'Dispositivo Tático' },
+      'shotgun': { name: 'Escopeta Calibre 12', sourceIndex: 9, category: 'Dispersão de Chumbo' },
+      'compact-rifle': { name: 'Rifle Compacto', sourceIndex: 5, category: 'Carbina Leve' },
+      'flare-launcher': { name: 'Lançador Incendiário', sourceIndex: 4, category: 'Projéteis Térmicos' },
+      'precision-rifle': { name: 'Rifle de Precisão (Sniper)', sourceIndex: 8, category: 'Balística de Longo Alcance' },
+      'grenade': { name: 'Granada Tática', sourceIndex: 7, category: 'Explosivo de Área' },
+      'rocket-launcher': { name: 'Lança-foguetes RPG', sourceIndex: 10, category: 'Projétil Autopropelido' },
+      'tactical-carbine': { name: 'Carbina Tática M4', sourceIndex: 11, category: 'Cadência Rápida' },
+      'heavy-pistol': { name: 'Pistola Pesada .50', sourceIndex: 12, category: 'Pistola de Alto Calibre' }
+    };
+
+    // Carregamento dos spritesheets oficiais
+    const heroImg = new Image();
+    heroImg.crossOrigin = 'anonymous';
+    heroImg.src = '/assets/hero-roster.png?v=4';
+
+    const heroUpperImg = new Image();
+    heroUpperImg.crossOrigin = 'anonymous';
+    heroUpperImg.src = '/assets/hero-roster-upper.png?v=4';
+
+    const heroLegLeftImg = new Image();
+    heroLegLeftImg.crossOrigin = 'anonymous';
+    heroLegLeftImg.src = '/assets/hero-roster-leg-left.png?v=4';
+
+    const heroLegRightImg = new Image();
+    heroLegRightImg.crossOrigin = 'anonymous';
+    heroLegRightImg.src = '/assets/hero-roster-leg-right.png?v=4';
+
+    const weaponImg = new Image();
+    weaponImg.crossOrigin = 'anonymous';
+    weaponImg.src = '/assets/weapon-roster.png?v=4';
+
+    const navbar = document.getElementById('navbar');
+    const container = document.getElementById('cards-container');
+
+    const cardStates = {};
+
+    HERO_ROSTER.forEach(hero => {
+      const weapon = WEAPON_CATALOG[hero.weaponId] || { name: 'Arma Padrão', sourceIndex: hero.spriteIndex, category: 'Arma de Fogo' };
+      
+      // Link na barra de navegação
+      const navItem = document.createElement('a');
+      navItem.href = `#${hero.id}`;
+      navItem.className = 'nav-btn';
+      navItem.textContent = hero.name;
+      navbar.appendChild(navItem);
+
+      // Card do herói
+      const card = document.createElement('div');
+      card.className = 'hero-card';
+      card.id = hero.id;
+
+      cardStates[hero.id] = {
+        mode: 'shooting', // 'shooting' ou 'walking'
+        direction: 1,     // 1 = direita, -1 = esquerda
+        targetDist: 180,
+        particles: [],
+        sparks: [],
+        shotTimer: 0
+      };
+
+      card.innerHTML = `
+        <div class="card-header">
+          <div class="card-title">
+            <span>${hero.name}</span>
+            <span class="rarity-pill rarity-${hero.rarity}">${hero.rarityName}</span>
+          </div>
+          <button class="copy-link-btn" onclick="navigator.clipboard.writeText(window.location.origin + window.location.pathname + '#${hero.id}'); alert('Link copiado: #' + '${hero.id}')">📋 Copiar Link</button>
+        </div>
+        <div class="canvas-container">
+          <canvas id="canvas-${hero.id}" width="420" height="220"></canvas>
+        </div>
+        <div class="card-body">
+          <div class="stat-row">
+            <span>Classe / Função:</span>
+            <span class="stat-val">${hero.className} (${hero.role})</span>
+          </div>
+          <div class="stat-row">
+            <span>Arma Equipada:</span>
+            <span class="stat-val" style="color: #fbbf24">${weapon.name}</span>
+          </div>
+          <div class="stat-row">
+            <span>Tipo Balístico:</span>
+            <span class="stat-val">${weapon.category}</span>
+          </div>
+          <div class="controls">
+            <button class="ctrl-btn active" id="btn-mode-${hero.id}" onclick="toggleMode('${hero.id}')">💥 Modo: Disparando</button>
+            <button class="ctrl-btn" onclick="toggleDir('${hero.id}')">🔄 Virar Sentido</button>
+          </div>
+        </div>
+      `;
+
+      container.appendChild(card);
+    });
+
+    window.toggleMode = function(heroId) {
+      const st = cardStates[heroId];
+      st.mode = st.mode === 'shooting' ? 'walking' : 'shooting';
+      const btn = document.getElementById(`btn-mode-${heroId}`);
+      if (st.mode === 'shooting') {
+        btn.textContent = '💥 Modo: Disparando';
+        btn.classList.add('active');
+      } else {
+        btn.textContent = '🚶 Modo: Caminhando';
+        btn.classList.remove('active');
+      }
+    };
+
+    window.toggleDir = function(heroId) {
+      const st = cardStates[heroId];
+      st.direction *= -1;
+    };
+
+    // Loop de animação global a 60 FPS
+    function animate() {
+      const now = performance.now();
+
+      HERO_ROSTER.forEach(hero => {
+        const cvs = document.getElementById(`canvas-${hero.id}`);
+        if (!cvs) return;
+        const ctx = cvs.getContext('2d');
+        const st = cardStates[hero.id];
+        const weapon = WEAPON_CATALOG[hero.weaponId] || { sourceIndex: hero.spriteIndex };
+
+        ctx.clearRect(0, 0, cvs.width, cvs.height);
+
+        // Grade de piso tático suave
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+        ctx.lineWidth = 1;
+        for (let x = 0; x < cvs.width; x += 40) {
+          ctx.beginPath();
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, cvs.height);
+          ctx.stroke();
+        }
+        for (let y = 0; y < cvs.height; y += 40) {
+          ctx.beginPath();
+          ctx.moveTo(0, y);
+          ctx.lineTo(cvs.width, y);
+          ctx.stroke();
+        }
+
+        const hX = cvs.width / 2 - (st.direction > 0 ? 50 : -50);
+        const hY = 145;
+
+        // Alvo zumbi simulado à frente
+        const targetX = hX + st.direction * 140;
+        const targetY = hY;
+
+        ctx.save();
+        // Sombra do alvo zumbi
+        ctx.fillStyle = 'rgba(0,0,0,0.4)';
+        ctx.beginPath();
+        ctx.ellipse(targetX, targetY + 12, 14, 4, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Alvo estilizado (Silhueta de zumbi de treino)
+        ctx.fillStyle = '#4d7c0f';
+        ctx.beginPath();
+        ctx.arc(targetX, targetY - 22, 7, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillRect(targetX - 6, targetY - 14, 12, 18);
+        ctx.fillStyle = '#1e3a1e';
+        ctx.fillRect(targetX - 5, targetY + 4, 4, 8);
+        ctx.fillRect(targetX + 1, targetY + 4, 4, 8);
+
+        // Placa de alvo
+        ctx.strokeStyle = '#ef4444';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(targetX, targetY - 6, 12, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+
+        // Renderização do Herói
+        ctx.save();
+        ctx.translate(hX, hY);
+        if (st.direction < 0) {
+          ctx.scale(-1, 1);
+        }
+
+        // Sombra de contato do herói
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+        ctx.beginPath();
+        ctx.ellipse(0, 14, 16, 5, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        const isShooting = st.mode === 'shooting';
+        const cadence = 650; // ms por ciclo de tiro
+        const cycleProgress = (now % cadence) / cadence;
+
+        const pw = 48; // Escala ampliada no showcase para melhor visualização
+        const ph = 54;
+        const gw = 42;
+        const gh = 22;
+
+        const sw = 128;
+        const sh = 128;
+        const sx = hero.spriteIndex * sw;
+        const sy = 0;
+
+        const wsw = 256;
+        const wsh = 144;
+        const wsx = weapon.sourceIndex * wsw;
+        const wsy = 0;
+
+        const dx = -pw / 2;
+        const dy = -ph + 8;
+
+        const hipLeftX = dx + pw * (56 / 128);
+        const hipLeftY = dy + ph * (72 / 128);
+        const hipRightX = dx + pw * (72 / 128);
+        const hipRightY = dy + ph * (72 / 128);
+
+        if (!isShooting) {
+          // MODO CAMINHADA
+          const stepPhase = now * 0.015;
+          const legSwing = Math.sin(stepPhase) * 0.42;
+          const stepBob = Math.abs(Math.sin(stepPhase)) * 2.2;
+          const torsoSway = Math.sin(stepPhase) * 0.035;
+
+          // Perna direita
+          ctx.save();
+          ctx.translate(hipRightX, hipRightY);
+          ctx.rotate(-legSwing);
+          ctx.translate(-hipRightX, -hipRightY);
+          if (heroLegRightImg.complete) ctx.drawImage(heroLegRightImg, sx, sy, sw, sh, dx, dy, pw, ph);
+          ctx.restore();
+
+          // Perna esquerda
+          ctx.save();
+          ctx.translate(hipLeftX, hipLeftY);
+          ctx.rotate(legSwing);
+          ctx.translate(-hipLeftX, -hipLeftY);
+          if (heroLegLeftImg.complete) ctx.drawImage(heroLegLeftImg, sx, sy, sw, sh, dx, dy, pw, ph);
+          ctx.restore();
+
+          // Tronco
+          ctx.save();
+          ctx.translate(0, -stepBob);
+          ctx.rotate(torsoSway);
+          if (heroUpperImg.complete) ctx.drawImage(heroUpperImg, sx, sy, sw, sh, dx, dy, pw, ph);
+
+          // Arma em descanso
+          if (weaponImg.complete) {
+            ctx.save();
+            ctx.translate(12, -10);
+            ctx.rotate(0.35 + Math.sin(stepPhase) * 0.05);
+            ctx.drawImage(weaponImg, wsx, wsy, wsw, wsh, -8, -12, gw, gh);
+            ctx.restore();
+          }
+          ctx.restore();
+        } else {
+          // MODO DISPARO / BALÍSTICA
+          let recoilDist = 0;
+          let bodyAngle = 0;
+          let gunAngle = 0;
+          let isFiringMoment = false;
+
+          if (cycleProgress < 0.25) {
+            // Mira horizontal
+            const p = cycleProgress / 0.25;
+            bodyAngle = 0.05 * p;
+            gunAngle = 0.2 - p * 0.2;
+          } else if (cycleProgress < 0.45) {
+            // Detonação e recuo forte
+            const p = (cycleProgress - 0.25) / 0.20;
+            recoilDist = Math.sin(p * Math.PI) * 7;
+            bodyAngle = 0.05 - Math.sin(p * Math.PI) * 0.16;
+            gunAngle = -Math.sin(p * Math.PI) * 0.38; // Cano dá coice para cima
+            if (p < 0.4) isFiringMoment = true;
+          } else if (cycleProgress < 0.75) {
+            // Recuperação do recuo
+            const p = (cycleProgress - 0.45) / 0.30;
+            recoilDist = (1 - p) * 4;
+            gunAngle = -0.15 * (1 - p);
+          } else {
+            // Retorno
+            bodyAngle = 0;
+            gunAngle = 0;
+          }
+
+          // Pernas firmes no chão de combate
+          if (heroLegRightImg.complete) ctx.drawImage(heroLegRightImg, sx, sy, sw, sh, dx, dy, pw, ph);
+          if (heroLegLeftImg.complete) ctx.drawImage(heroLegLeftImg, sx, sy, sw, sh, dx, dy, pw, ph);
+
+          // Tronco com recuo
+          ctx.save();
+          ctx.translate(-recoilDist, 0);
+          ctx.rotate(bodyAngle);
+          if (heroUpperImg.complete) ctx.drawImage(heroUpperImg, sx, sy, sw, sh, dx, dy, pw, ph);
+
+          // Arma apontada e disparando
+          ctx.save();
+          ctx.translate(14 - recoilDist * 0.6, -14);
+          ctx.rotate(gunAngle);
+          if (weaponImg.complete) {
+            ctx.drawImage(weaponImg, wsx, wsy, wsw, wsh, -8, -12, gw, gh);
+          }
+
+          // Muzzle Flash na ponta do cano
+          if (isFiringMoment) {
+            ctx.save();
+            ctx.translate(gw - 6, -2);
+            // Chama amarela / alaranjada estourando na boca do cano
+            ctx.fillStyle = '#fef08a';
+            ctx.beginPath();
+            ctx.arc(0, 0, 7, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#f97316';
+            ctx.beginPath();
+            ctx.moveTo(0, -6);
+            ctx.lineTo(16, 0);
+            ctx.lineTo(0, 6);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+
+            // Dispara projétil na direção do alvo
+            if (st.shotTimer < now - 400) {
+              st.shotTimer = now;
+              st.particles.push({
+                x: hX + st.direction * 35,
+                y: hY - 14,
+                vx: st.direction * 18,
+                vy: (Math.random() - 0.5) * 1.5,
+                life: 1.0
+              });
+            }
+          }
+
+          ctx.restore(); // Fecha arma
+          ctx.restore(); // Fecha tronco
+        }
+
+        ctx.restore(); // Fecha herói
+
+        // Atualiza e desenha projéteis balísticos e faíscas
+        for (let i = st.particles.length - 1; i >= 0; i--) {
+          const pt = st.particles[i];
+          pt.x += pt.vx;
+          pt.y += pt.vy;
+
+          // Traçante de bala amarelo-ouro
+          ctx.save();
+          ctx.strokeStyle = '#facc15';
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.moveTo(pt.x - pt.vx * 1.8, pt.y);
+          ctx.lineTo(pt.x, pt.y);
+          ctx.stroke();
+
+          // Luz de ponta do projétil
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.arc(pt.x, pt.y, 2, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+
+          // Checa impacto no alvo
+          if ((st.direction > 0 && pt.x >= targetX) || (st.direction < 0 && pt.x <= targetX)) {
+            st.particles.splice(i, 1);
+            // Gera faíscas de impacto no alvo
+            for (let s = 0; s < 8; s++) {
+              st.sparks.push({
+                x: targetX,
+                y: targetY - 8,
+                vx: (Math.random() - 0.5) * 6,
+                vy: (Math.random() - 0.5) * 6 - 2,
+                color: Math.random() > 0.5 ? '#f97316' : '#facc15',
+                life: 1.0
+              });
+            }
+          }
+        }
+
+        // Desenha faíscas de impacto
+        for (let i = st.sparks.length - 1; i >= 0; i--) {
+          const spk = st.sparks[i];
+          spk.x += spk.vx;
+          spk.y += spk.vy;
+          spk.life -= 0.05;
+          if (spk.life <= 0) {
+            st.sparks.splice(i, 1);
+            continue;
+          }
+          ctx.fillStyle = spk.color;
+          ctx.globalAlpha = spk.life;
+          ctx.beginPath();
+          ctx.arc(spk.x, spk.y, 2, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.globalAlpha = 1.0;
+        }
+
+      });
+
+      requestAnimationFrame(animate);
+    }
+
+    // Inicia a animação quando os sprites carregarem
+    heroImg.onload = () => {
+      animate();
+    };
+    if (heroImg.complete) {
+      animate();
+    }
+  </script>
+</body>
+</html>
