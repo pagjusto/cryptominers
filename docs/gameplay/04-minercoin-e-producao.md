@@ -8,16 +8,23 @@ A referência de planejamento definida é **1 MNC = US$ 0,01**. Essa referência
 
 ## Como a produção funciona
 
-- A MNC é gerada continuamente por segundo válido de combate.
+- Cada sobrevivente ativo gera MNC individualmente, por segundo válido de combate.
+- A taxa individual depende da raridade do sobrevivente.
+- A soma da produção dos sobreviventes ativos determina a produção total do jogador.
 - Não há pagamento separado por cada zumbi eliminado.
-- A composição e a raridade dos sobreviventes influenciam a produção.
 - A produção continua durante o evento de Boss.
 - Se não houver sobreviventes em combate, a produção pausa.
-- O tempo pausado não gera acúmulo retroativo.
+- Ao ficar offline ou perder a conexão, a produção é interrompida.
+- O tempo pausado ou offline não gera acúmulo retroativo.
+- A disponibilidade do jogo por 24 horas não dobra o ROI diário já definido.
 
-## Referência de produção
+## Referência de produção e ROI
 
-Uma composição média de referência — 6 sobreviventes comuns, 4 raros, 4 épicos e 1 lendário, com Abrigo Reforçado — foi estimada em **480,24 MNC por dia**.
+A composição média de referência — **6 sobreviventes comuns, 4 raros, 4 épicos e 1 lendário**, com Abrigo Reforçado — deve totalizar **480,24 MNC por dia**.
+
+Esse total é a referência de ROI para essa composição. As taxas individuais por raridade deverão ser calibradas para que a soma dos 15 sobreviventes respeite esse total, sem aumentar o rendimento apenas porque o jogo fica disponível por 24 horas.
+
+Os valores exatos de MNC por segundo para cada raridade ainda precisam ser calculados e formalizados. Não devem ser definidos por estimativa sem validar a soma contra a referência de ROI.
 
 Esse número é uma referência para aquela composição específica, não um limite universal nem uma promessa de rendimento.
 
@@ -26,4 +33,4 @@ Esse número é uma referência para aquela composição específica, não um li
 - **Retorno bruto:** total de MNC produzido.
 - **Retorno líquido:** produção após descontar custos e despesas aplicáveis, como o custo do médico quando esse serviço estiver ativo.
 
-A fórmula final de produção por segundo, os efeitos econômicos definitivos de cada nível e o cálculo completo do retorno líquido ainda precisam ser formalizados antes da publicação como números garantidos.
+A fórmula final por raridade, os efeitos econômicos definitivos de cada nível e o cálculo completo do retorno líquido ainda precisam ser formalizados antes da publicação como números garantidos.
