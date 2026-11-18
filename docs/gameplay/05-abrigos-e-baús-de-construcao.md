@@ -49,13 +49,13 @@ As opções de compra definidas são **1, 5, 10 e 15 baús**.
 | 1 baú (chance-base) | 2% |
 | Combo de 5 baús | 3% |
 | Combo de 10 baús | 4% |
-| Combo de 15 baús | 7% |
+| Combo de 15 baús | 6% |
 
 Diretrizes dos bônus:
 - A abertura de **1 baú** usa as chances-base, sem bônus de combo.
 - O **combo de 5 baús** beneficia Épicos e eleva a chance de Lendário para 3%.
 - O **combo de 10 baús** beneficia Épicos e eleva a chance de Lendário para 4%.
-- O **combo de 15 baús** eleva a chance de Lendário para 7%.
+- O **combo de 15 baús** eleva a chance de Lendário para 6%.
 - As chances de Comum, Raro e Épico nos combos ainda precisam ser fechadas em conjunto com os percentuais de bônus, garantindo que a soma de todas as raridades seja sempre 100%.
 - Os valores acima definem a chance de Lendário por abertura dentro de cada modalidade; não representam garantia de obtenção de Lendário em um combo.
 
