@@ -494,6 +494,11 @@ export default function SummonModal({
                           <p className="text-[10px] text-slate-400 font-tech mb-2 line-clamp-2">
                             {chest.description}
                           </p>
+                          {heroesCount >= 5 && (
+                            <p className="text-[9px] leading-relaxed text-sky-300/90 font-tech mb-2">
+                              Projeção de produção e ROI baseada em cenário mediano de uso intermitente ao longo de 24 horas. A mineração ocorre somente com o jogo aberto e conectado, mesmo minimizado.
+                            </p>
+                          )}
                         </div>
 
                         {/* Probabilidades de Raridade */}
