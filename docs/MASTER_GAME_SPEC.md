@@ -9,22 +9,21 @@
 
 ## 2. Equipe e combate
 - O jogador monta uma equipe de sobreviventes.
-- **O limite máximo é de 15 vagas de equipe por jogador. É um limite fixo: não aumenta com compras, raridade, melhorias de abrigo ou qualquer outro upgrade.**
-- Até 15 sobreviventes podem atuar simultaneamente. Sobreviventes adicionais no inventário/reserva não criam vagas extras.
+- A quantidade máxima de sobreviventes na equipe de combate ainda precisa ser confirmada; não confundir esse limite com as vagas do ambulatório.
 - Ao chegar a **5% de vida**, o sobrevivente deixa o combate e entra no fluxo de feridos; não há morte permanente por esse evento.
 - Sobreviventes feridos não produzem MNC. Se não houver sobreviventes ativos em combate, a produção pausa.
 - A produção não é retroativa durante pausas ou períodos offline. Sobreviventes saudáveis produzem enquanto estiverem em combate e conectados.
 - O médico é um serviço: não ocupa vaga, não luta, não produz MNC, não cria leitos e não acelera a recuperação.
 
 ## 3. Enfermaria, abrigo e recuperação
-- **As 15 vagas de equipe são separadas da capacidade física do abrigo/enfermaria. Melhorar o abrigo não aumenta as vagas da equipe.**
-- O abrigo define capacidade de leitos e velocidade de recuperação. Sem leito, o sobrevivente aguarda em fila FIFO; ocupantes recuperam simultaneamente.
-- Ao recuperar 100% da vida, o sobrevivente sai do leito e vai para a reserva. Havendo vaga no limite fixo de 15, a reposição pode ocorrer automaticamente.
+- **O ambulatório tem no máximo 15 vagas de recuperação simultâneas por jogador. Esse limite é fixo e não pode ser aumentado por compras ou melhorias.**
+- A capacidade do ambulatório é separada da quantidade de sobreviventes permitida na equipe de combate. Sobreviventes sem vaga aguardam em fila FIFO; os que ocupam vagas recuperam simultaneamente.
+- Ao recuperar 100% da vida, o sobrevivente sai da vaga de recuperação e vai para a reserva. A entrada na equipe depende das vagas de combate disponíveis.
 - Sem médico, o jogador online decide individualmente quando enviar cada ferido à enfermaria.
-- Com médico ativo, o resgate de feridos é automático enquanto o jogador está online, sem limite de quantidade; a capacidade física dos leitos continua valendo.
-- Ao perder conexão/ficar offline, a produção para e os sobreviventes que estavam ativos são enviados automaticamente ao fluxo de enfermaria, mesmo sem médico. Ao reconectar, retornam respeitando o limite de 15; sem vaga, ficam na reserva.
+- Com médico ativo, o resgate de feridos é automático enquanto o jogador está online; o limite de 15 vagas simultâneas do ambulatório continua valendo e os demais aguardam na fila.
+- Ao perder conexão/ficar offline, a produção para e os sobreviventes que estavam ativos são enviados automaticamente ao fluxo do ambulatório, mesmo sem médico. Se as 15 vagas estiverem ocupadas, aguardam na fila.
 - O médico não altera a lista de participantes de um Boss congelada no início do evento.
-- Referência de níveis de abrigo: Básico 5 leitos/100%; Reforçado 10/125%; Avançado 15/150%; Lendário 20/200%. Custos e materiais permanecem pendentes de validação.
+- Referência de níveis do ambulatório: Básico 5 vagas/100%; Reforçado 10/125%; Avançado 15/150%. O limite absoluto permanece em 15 vagas; não existe nível de 20 vagas. Custos e materiais permanecem pendentes de validação.
 - O abrigo básico inicial é gratuito. Custos das próximas melhorias ainda precisam ser confirmados.
 
 ## 4. Heróis e raridades
