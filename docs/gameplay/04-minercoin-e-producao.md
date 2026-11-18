@@ -21,18 +21,18 @@ A referência de planejamento definida é **1 MNC = US$ 0,01**. Essa referência
 - O tempo pausado ou offline não gera acúmulo retroativo.
 - A disponibilidade do jogo por 24 horas não dobra o ROI diário já definido.
 
-## Simulação de cenário mediano
+## Produção por raridade
 
-O valor de **480,24 MNC por dia** foi definido como resultado de uma **simulação de cenário mediano**, usando a composição de referência de **6 sobreviventes comuns, 4 raros, 4 épicos e 1 lendário**.
-
-A distribuição de produção aprovada usa os multiplicadores **1× para comum, 1,5× para raro, 2× para épico e 3× para lendário**. As taxas resultantes são:
+A base de cálculo aprovada permanece **20,88 MNC por dia para cada sobrevivente comum**. Os multiplicadores aprovados para as seis raridades são:
 
 | Raridade | Multiplicador | Produção por sobrevivente/dia | Taxa exata por segundo (MNC) |
 |---|---:|---:|---:|
 | Comum | 1× | 20,88 MNC | 20,88 ÷ 86.400 = 0,000241666666… |
 | Raro | 1,5× | 31,32 MNC | 31,32 ÷ 86.400 = 0,0003625 |
+| Super Raro | 1,75× | 36,54 MNC | 36,54 ÷ 86.400 = 0,000422916666… |
 | Épico | 2× | 41,76 MNC | 41,76 ÷ 86.400 = 0,000483333333… |
 | Lendário | 3× | 62,64 MNC | 62,64 ÷ 86.400 = 0,000725 |
+| Super Lendário | 4× | 83,52 MNC | 83,52 ÷ 86.400 = 0,000966666666… |
 
 ### Regra de precisão para a mineração contínua
 
@@ -43,7 +43,11 @@ A distribuição de produção aprovada usa os multiplicadores **1× para comum,
 - Em 86.400 segundos válidos de mineração contínua, cada sobrevivente deve produzir exatamente seu valor diário de referência.
 - Pausas por desconexão, ausência de sobreviventes em combate ou outras condições já definidas não contam como segundos válidos e não geram produção retroativa.
 
-### Conferência da composição mediana
+## Simulação de cenário mediano — referência anterior
+
+O valor de **480,24 MNC por dia** permanece como resultado da simulação de referência anterior, usando a composição de **6 sobreviventes comuns, 4 raros, 4 épicos e 1 lendário**. Essa composição não inclui as novas categorias Super Raro e Super Lendário; portanto, o valor de 480,24 MNC/dia não deve ser interpretado como média recalculada para a nova distribuição de seis raridades.
+
+Conferência da composição anterior:
 
 - 6 comuns: **125,28 MNC/dia**
 - 4 raros: **125,28 MNC/dia**
@@ -52,7 +56,7 @@ A distribuição de produção aprovada usa os multiplicadores **1× para comum,
 
 **Total: 480,24 MNC por dia.**
 
-Esse valor serve como referência para analisar um cenário mediano de produção. Não é uma meta obrigatória que toda composição deva atingir, um limite universal, uma taxa fixa de retorno ou uma promessa de rendimento. A produção real varia conforme a quantidade e a raridade dos sobreviventes ativos, além do tempo válido em combate.
+Esse valor serve apenas como referência histórica de cenário. Não é uma meta obrigatória que toda composição deva atingir, um limite universal, uma taxa fixa de retorno ou uma promessa de rendimento. A produção real varia conforme a quantidade e a raridade dos sobreviventes ativos, além do tempo válido em combate.
 
 O Abrigo Reforçado citado na simulação representa apenas uma referência de recuperação e não concede bônus de mineração.
 
