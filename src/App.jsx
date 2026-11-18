@@ -1365,13 +1365,13 @@ export default function App() {
         </div>
       </header>
 
-      {/* ÁREA DO JOGO (FULLSCREEN SEM BARRA DE ROLAGEM) */}
-      <main className="flex-1 w-full h-screen flex flex-col items-center justify-start pt-0 px-1 pb-1 overflow-hidden relative select-none">
+      {/* ÁREA DO JOGO (MAPA À ESQUERDA + EQUIPE AO LADO À DIREITA) */}
+      <main className="flex-1 w-full h-screen flex flex-row items-start justify-start pt-0 px-2 pb-1 gap-3 overflow-hidden relative select-none">
         
-        {/* ÁREA DO TABULEIRO */}
-        <div className="w-full h-full flex flex-col items-center justify-start">
+        {/* ÁREA DO TABULEIRO: JOGADO TODO PARA A ESQUERDA */}
+        <div className="shrink-0 flex flex-col items-start justify-start h-full">
           {boardMode === 'tactical' ? (
-            <div className="w-full flex flex-col items-center pt-2">
+            <div className="w-full flex flex-col items-start pt-2">
               {/* Seletor quando no modo tático */}
               <div className="flex items-center gap-2 mb-2 bg-slate-900/90 p-1.5 rounded-2xl border border-slate-800 shadow-lg">
                 <button
@@ -1389,7 +1389,7 @@ export default function App() {
               />
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-start relative w-full h-full max-w-[1200px] pt-0.5">
+            <div className="flex flex-col items-start justify-start relative h-full pt-0.5">
               {/* STATUS DO MAPA NO CANTO SUPERIOR ESQUERDO DO MAPA */}
               <div 
                 title="Status do Ciclo Atual e Criaturas"
@@ -1458,22 +1458,22 @@ export default function App() {
           )}
         </div>
 
-      </main>
+        {/* PAINEL DA EQUIPE DE SOBREVIVENTES DE VOLTA AO LADO DO MAPA */}
+        <aside className="flex-1 h-[calc(100vh-16px)] flex flex-col shrink min-w-[340px] max-w-[620px] overflow-hidden pt-0.5">
+          <HeroList
+            miners={miners}
+            gold={bcoin}
+            onUpgradeMiner={handleUpgradeMiner}
+            onToggleStatus={handleToggleStatus}
+            onAllWork={handleAllWork}
+            onOpenEnergyBoostAd={() => handleOpenEnergyRecovery(null)}
+            onOpenEnergyRecoveryModal={handleOpenEnergyRecovery}
+            onRepairMiner={handleRepairMiner}
+            onDiversifyTeam={handleDiversifyTeam}
+          />
+        </aside>
 
-      {/* BOTÃO FLUTUANTE LATERAL RÁPIDO PARA ABRIR A EQUIPE */}
-      {!isTeamDrawerOpen && (
-        <button
-          onClick={() => setIsTeamDrawerOpen(true)}
-          className="fixed right-3 top-1/2 -translate-y-1/2 z-40 flex flex-col items-center gap-1.5 px-3 py-3 rounded-2xl bg-gradient-to-b from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold shadow-[0_4px_25px_rgba(245,158,11,0.45)] border-2 border-amber-300 transition-all hover:scale-105 active:scale-95 cursor-pointer"
-          title="Abrir Painel da Equipe de Heróis"
-        >
-          <Users size={22} className="stroke-[2.5]" />
-          <span className="text-[11px] font-arcade tracking-wider font-extrabold">EQUIPE</span>
-          <span className="text-[10px] bg-slate-950 text-amber-300 px-1.5 py-0.5 rounded-full font-mono font-bold border border-amber-400/30">
-            {miners.filter(m => m.status === 'work').length}/15
-          </span>
-        </button>
-      )}
+      </main>
 
       {/* MODAL DO MARKETPLACE P2P (COMÉRCIO COM TAXA DE 5%) */}
       <MarketplaceModal
