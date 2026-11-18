@@ -31,7 +31,7 @@ if (map1.mapId !== map2.mapId && map1.playerId === player1 && map2.playerId === 
   console.error('❌ TESTE 1 FALHOU');
 }
 
-// TESTE 2: Um jogador eliminando jazida - Não desaparece no outro jogador
+// TESTE 2: Um jogador eliminando jazida - Não afeta o outro jogador (Regra: mantém sempre 20 zumbis com respawn imediato)
 console.log('\nTESTE 2: Isolamento na eliminação de jazidas...');
 const initialRemainingP2 = map2.remainingDeposits;
 const targetDepP1 = map1.deposits[0];
@@ -40,8 +40,8 @@ recordDepositDamage(player1, targetDepP1.c, targetDepP1.r, targetDepP1.maxHp + 1
 const map1Updated = getPlayerMap(player1);
 const map2Unchanged = getPlayerMap(player2);
 
-if (map1Updated.remainingDeposits === map1.totalDeposits - 1 && map2Unchanged.remainingDeposits === initialRemainingP2) {
-  console.log(`✅ TESTE 2 APROVADO: Jogador 1 foi para ${map1Updated.remainingDeposits}/20 enquanto Jogador 2 permaneceu em ${map2Unchanged.remainingDeposits}/20.`);
+if (map1Updated.remainingDeposits === 20 && map2Unchanged.remainingDeposits === initialRemainingP2) {
+  console.log(`✅ TESTE 2 APROVADO: Jogador 1 eliminou o zumbi e recebeu respawn imediato (mantendo ${map1Updated.remainingDeposits}/20) enquanto Jogador 2 permaneceu isolado em ${map2Unchanged.remainingDeposits}/20.`);
   passedTests++;
 } else {
   console.error('❌ TESTE 2 FALHOU');
@@ -118,11 +118,11 @@ if (!hasOverlap && coordSet.size === sampleMap.deposits.length) {
   console.error('❌ TESTE 6 FALHOU: Sobreposição detectada');
 }
 
-// TESTE 7: Reconexão do jogador mantendo o estado correto do mapa
+// TESTE 7: Reconexão do jogador mantendo o estado correto do mapa (Regra: mantém sempre 20 zumbis ativos)
 console.log('\nTESTE 7: Reconexão e persistência do mapa...');
 const reconnectPlayer = '0x3333333333333333333333333333333333333333';
 const initialMapState = generatePlayerMap(reconnectPlayer, 1);
-// Simula 3 jazidas mineradas
+// Simula 3 zumbis eliminados com reposição imediata da horda
 recordDepositDamage(reconnectPlayer, initialMapState.deposits[0].c, initialMapState.deposits[0].r, 99999);
 recordDepositDamage(reconnectPlayer, initialMapState.deposits[1].c, initialMapState.deposits[1].r, 99999);
 recordDepositDamage(reconnectPlayer, initialMapState.deposits[2].c, initialMapState.deposits[2].r, 99999);
@@ -131,10 +131,10 @@ recordDepositDamage(reconnectPlayer, initialMapState.deposits[2].c, initialMapSt
 const restoredMap = getPlayerMap(reconnectPlayer);
 if (
   restoredMap.mapId === initialMapState.mapId &&
-  restoredMap.remainingDeposits === 17 &&
+  restoredMap.remainingDeposits === 20 &&
   restoredMap.cycleNumber === 1
 ) {
-  console.log('✅ TESTE 7 APROVADO: Reconexão recuperou fielmente o mapa ativo com 17/20 jazidas e mesmo MapId.');
+  console.log('✅ TESTE 7 APROVADO: Reconexão recuperou fielmente o mapa ativo mantendo a horda de 20 zumbis e mesmo MapId.');
   passedTests++;
 } else {
   console.error('❌ TESTE 7 FALHOU');

@@ -285,8 +285,7 @@ export function getPlayerMap(playerId = DEFAULT_PLAYER_ID) {
       return generatePlayerMap(playerId, 1);
     }
 
-    // MIGRAÇÃO AUTOMÁTICA: Se o mapa armazenado tiver entidades antigas, entidades em prédios,
-    // ou se ainda contiver os pilares antigos de xadrez do cânion:
+    // MIGRAÇÃO AUTOMÁTICA & HORDA INFINITA: Garante SEMPRE exatamente 20 criaturas ativas no mapa
     const hasOldDeposits = parsed.deposits.some(d => 
       d.type === 'stone' || d.type === 'gold' || d.type === 'diamond' || d.type === 'emerald'
     );
@@ -297,6 +296,42 @@ export function getPlayerMap(playerId = DEFAULT_PLAYER_ID) {
     if (hasOldDeposits || !hasZombies || hasAnyInBuilding || hasOldPillars) {
       console.log('🔄 Migrando mapa individual para nova geometria da cidade de sobrevivência...');
       return generatePlayerMap(playerId, parsed.cycleNumber || 1);
+    }
+
+    // REGRA OFICIAL DO USUÁRIO: Garante SEMPRE 20 zumbis ativos no mapa
+    const activeDeposits = parsed.deposits.filter(d => !d.isCompleted);
+    if (activeDeposits.length < 20) {
+      const validCells = getValidDepositCells(GRID_COLS, GRID_ROWS);
+      const activeKeys = new Set(activeDeposits.map(d => `${d.c},${d.r}`));
+      const openCells = validCells.filter(pos => !activeKeys.has(`${pos.c},${pos.r}`));
+
+      const needed = 20 - activeDeposits.length;
+      for (let i = 0; i < needed && openCells.length > 0; i++) {
+        const randIdx = Math.floor(Math.random() * openCells.length);
+        const newPos = openCells.splice(randIdx, 1)[0];
+        const newDep = {
+          id: `dep_horde_${Date.now()}_${i}_${Math.random().toString(36).substring(2, 6)}`,
+          c: newPos.c,
+          r: newPos.r,
+          type: 'zombie',
+          name: 'Zumbi Andarilho',
+          blockId: BLOCK_ZOMBIE,
+          rarity: 'common',
+          maxHp: 2,
+          currentHp: 2,
+          isCompleted: false,
+          yieldRate: 0.05
+        };
+        parsed.deposits.push(newDep);
+        if (parsed.grid && parsed.grid[newPos.r]) {
+          parsed.grid[newPos.r][newPos.c] = BLOCK_ZOMBIE;
+        }
+        if (parsed.hpMap) {
+          parsed.hpMap[`${newPos.c},${newPos.r}`] = 2;
+        }
+      }
+      parsed.remainingDeposits = 20;
+      savePlayerMap(playerId, parsed);
     }
 
     return parsed;
@@ -339,25 +374,62 @@ export function recordDepositDamage(playerId = DEFAULT_PLAYER_ID, c, r, damage =
     deposit.currentHp = 0;
     delete mapState.hpMap[cellKey];
     mapState.grid[r][c] = BLOCK_EMPTY;
-    mapState.remainingDeposits = Math.max(0, mapState.remainingDeposits - 1);
     isNowBroken = true;
 
-    // Registra estatísticas individuais do jogador
+    // Registra estatísticas individuais do jogador e contagem da rodada
     incrementPlayerMiningStats(playerId, deposit.type);
+    mapState.zombiesKilledInCycle = (mapState.zombiesKilledInCycle || 0) + 1;
 
-    // Se todos os zumbis e o boss foram eliminados, finaliza o ciclo!
-    const activeDeposits = mapState.deposits.filter(d => !d.isCompleted);
-    if (activeDeposits.length === 0) {
+    // REGRA OFICIAL DO USUÁRIO: "cada vez que um zumbi morre entra outro mantendo sempre 20 zumbis"
+    // Gera imediatamente um substituto ativo para manter a horda sempre com 20 criaturas no mapa
+    const validCells = getValidDepositCells(GRID_COLS, GRID_ROWS);
+    const activeKeys = new Set(
+      mapState.deposits.filter(d => !d.isCompleted).map(d => `${d.c},${d.r}`)
+    );
+    const openCells = validCells.filter(pos => 
+      !activeKeys.has(`${pos.c},${pos.r}`) && (pos.c !== c || pos.r !== r)
+    );
+
+    let respawnedDeposit = null;
+    if (openCells.length > 0) {
+      const newPos = openCells[Math.floor(Math.random() * openCells.length)];
+      const isBossType = deposit.type === 'boss';
+      respawnedDeposit = {
+        id: `dep_horde_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+        c: newPos.c,
+        r: newPos.r,
+        type: isBossType ? 'boss' : 'zombie',
+        name: isBossType ? 'Boss Abominação' : 'Zumbi Andarilho',
+        blockId: isBossType ? BLOCK_BOSS : BLOCK_ZOMBIE,
+        rarity: isBossType ? 'boss' : 'common',
+        maxHp: isBossType ? 30 : 2,
+        currentHp: isBossType ? 30 : 2,
+        isCompleted: false,
+        yieldRate: isBossType ? 0.25 : 0.05
+      };
+      mapState.deposits.push(respawnedDeposit);
+      mapState.grid[newPos.r][newPos.c] = respawnedDeposit.blockId;
+      mapState.hpMap[`${newPos.c},${newPos.r}`] = respawnedDeposit.currentHp;
+    }
+
+    // Mantém sempre 20 criaturas ativas no mapa
+    const activeCount = mapState.deposits.filter(d => !d.isCompleted).length;
+    mapState.remainingDeposits = Math.max(20, activeCount);
+
+    // Conclusão de ciclo a cada 20 zumbis eliminados pela equipe
+    if (mapState.zombiesKilledInCycle >= 20) {
       cycleCompleted = true;
+      mapState.zombiesKilledInCycle = 0;
       mapState.completedAt = new Date().toISOString();
       const nextCycle = (mapState.cycleNumber || 1) + 1;
+      mapState.cycleNumber = nextCycle;
 
-      // Dispara evento global de ciclo concluído
+      // Dispara evento global de ciclo concluído (concede bônus de MNC de rodada)
       if (typeof window !== 'undefined') {
         const event = new CustomEvent('cripto_myners_map_cycle_completed', {
           detail: {
             playerId,
-            oldCycle: mapState.cycleNumber,
+            oldCycle: nextCycle - 1,
             nextCycle,
             timestamp: new Date().toISOString()
           }
@@ -365,15 +437,16 @@ export function recordDepositDamage(playerId = DEFAULT_PLAYER_ID, c, r, damage =
         window.dispatchEvent(event);
       }
 
-      // Gera novo mapa imediatamente para o ciclo seguinte
-      newMapState = generatePlayerMap(playerId, nextCycle);
+      savePlayerMap(playerId, mapState);
       return {
         deposit,
+        respawnedDeposit,
         isNowBroken: true,
         cycleCompleted: true,
-        oldCycle: mapState.cycleNumber,
+        oldCycle: nextCycle - 1,
         nextCycle,
-        newMap: newMapState
+        remainingDeposits: 20,
+        currentMap: mapState
       };
     }
   }

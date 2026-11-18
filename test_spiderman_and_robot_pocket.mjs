@@ -42,8 +42,8 @@ console.log('\n--- PASSO 1: DECISÃO INICIAL DO ROBÔ EM (3, 3) ---');
 const actRobot1 = findNextHeroAction(robot, map.grid, allMiners, true);
 console.log('Robô:', actRobot1);
 
-if (actSpider1.action !== 'move' || actRobot1.action !== 'move') {
-  console.error('❌ ERRO: Heróis não decidiram se mover para a próxima jazida!');
+if ((actSpider1.action !== 'move' && actSpider1.action !== 'mine') || (actRobot1.action !== 'move' && actRobot1.action !== 'mine')) {
+  console.error('❌ ERRO: Heróis não decidiram combater nem se mover para a próxima jazida!');
   process.exit(1);
 }
 

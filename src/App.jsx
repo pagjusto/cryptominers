@@ -205,6 +205,25 @@ export default function App() {
             return updated;
           }
 
+          // Garante que a equipe ativa tenha 15 heróis prontos para combate com estamina
+          const workHeroes = parsed.filter(m => m.status === 'work' && (m.currentStamina || 0) > 5);
+          if (workHeroes.length < 15) {
+            let activeCount = 0;
+            const restored = parsed.map(m => {
+              if (activeCount < 15) {
+                activeCount++;
+                return {
+                  ...m,
+                  status: 'work',
+                  currentStamina: Math.max(m.currentStamina || 0, 95)
+                };
+              }
+              return m;
+            });
+            localStorage.setItem('crypto_miners_team', JSON.stringify(restored));
+            return restored;
+          }
+
           return parsed;
         }
       } catch (e) {}
@@ -1076,12 +1095,17 @@ export default function App() {
 
   const handleAllWork = () => {
     setMiners(prev => {
-      const eligible = prev.filter(m => m.status !== 'house' && m.status !== 'waiting_house' && (m.currentHealth === undefined || m.currentHealth > 5));
-      const sorted = [...eligible].sort((a, b) => calculateMinerEfficiency(b) - calculateMinerEfficiency(a));
+      // Ordena por eficiência para colocar os 15 melhores em campo
+      const sorted = [...prev].sort((a, b) => calculateMinerEfficiency(b) - calculateMinerEfficiency(a));
       const top15Ids = new Set(sorted.slice(0, 15).map(m => m.id));
       const updated = prev.map(m => {
-        if (m.status === 'house' || m.status === 'waiting_house') return m;
-        if (top15Ids.has(m.id)) return { ...m, status: 'work' };
+        if (top15Ids.has(m.id)) {
+          return {
+            ...m,
+            status: 'work',
+            currentStamina: Math.max(m.currentStamina || 0, 80) // Garante estamina para combate contínuo
+          };
+        }
         return { ...m, status: 'reserve' };
       });
       localStorage.setItem('crypto_miners_team', JSON.stringify(updated));
@@ -1399,8 +1423,8 @@ export default function App() {
                   Ciclo #{mapData?.cycleNumber || 1}
                 </span>
 
-                <span className="flex items-center gap-1 text-xs bg-lime-950/80 text-lime-300 px-2 py-0.5 rounded-md border border-lime-500/50 font-bold shadow-sm" title="Zumbis restantes">
-                  🧟 <b className="text-white">{mapData?.deposits?.filter(d => d.type === 'zombie' && !d.isCompleted).length ?? 19}</b>/19
+                <span className="flex items-center gap-1 text-xs bg-lime-950/80 text-lime-300 px-2 py-0.5 rounded-md border border-lime-500/50 font-bold shadow-sm" title="Horda Contínua: 20 zumbis sempre ativos">
+                  🧟 <b className="text-white">{mapData?.deposits?.filter(d => d.type === 'zombie' && !d.isCompleted).length ?? 20}</b>/20 Horda
                 </span>
 
                 <span className="flex items-center gap-1 text-xs bg-red-950/80 text-red-300 px-2 py-0.5 rounded-md border border-red-500/50 font-bold shadow-sm" title="Status do Boss Mutante">

@@ -32,7 +32,7 @@ import { characterSpriteManager } from '../utils/characterSprites';
 import { rollMiningGearDrop } from '../data/gearData';
 import { sfx } from '../utils/sfx';
 import { isCityBuilding, getSafeHeroSpawn, isCanyonTrackOrTunnel } from '../utils/cityMapGeometry';
-import { findNextHeroAction } from '../utils/minerPathfinding';
+import { findNextHeroAction, COMBAT_RANGE, hasClearLineOfSight } from '../utils/minerPathfinding';
 
 export default function GameBoard({ 
   mine, 
@@ -106,17 +106,32 @@ export default function GameBoard({
   useEffect(() => {
     if (!mapData || !mapData.grid) return;
     const currentKey = mapData.mapId || mapData.id;
-    // Evita recarregar a malha e desincronizar o estado dos heróis se o id do mapa for o mesmo
-    if (currentKey && currentKey === lastMapIdRef.current && gameStateRef.current.grid) {
-      return;
+    const isNewMap = !currentKey || currentKey !== lastMapIdRef.current || !gameStateRef.current.grid;
+
+    if (isNewMap) {
+      lastMapIdRef.current = currentKey;
+      gameStateRef.current.grid = mapData.grid.map(row => [...row]);
+      gameStateRef.current.hpMap = { ...(mapData.hpMap || {}) };
+      gameStateRef.current.totalMapHp = Object.values(mapData.hpMap || {}).reduce((a, b) => a + b, 0);
+      gameStateRef.current.isMapClearing = false;
+      gameStateRef.current.enemies = syncEnemiesWithMap([], mapData, gameStateRef.current.grid, gameStateRef.current.hpMap);
+    } else {
+      // Sincroniza ativamente a horda de 20 zumbis: injeta no grid e no hpMap qualquer criatura nova da horda
+      const deposits = mapData.deposits || [];
+      deposits.forEach(dep => {
+        if (!dep.isCompleted && dep.r >= 0 && dep.r < GRID_ROWS && dep.c >= 0 && dep.c < GRID_COLS) {
+          const cellKey = `${dep.c},${dep.r}`;
+          if (gameStateRef.current.grid && gameStateRef.current.grid[dep.r][dep.c] === BLOCK_EMPTY) {
+            gameStateRef.current.grid[dep.r][dep.c] = dep.blockId || BLOCK_ZOMBIE;
+          }
+          if (gameStateRef.current.hpMap && gameStateRef.current.hpMap[cellKey] === undefined) {
+            gameStateRef.current.hpMap[cellKey] = dep.currentHp || 2;
+          }
+        }
+      });
+      gameStateRef.current.enemies = syncEnemiesWithMap(gameStateRef.current.enemies || [], mapData, gameStateRef.current.grid, gameStateRef.current.hpMap);
     }
-    lastMapIdRef.current = currentKey;
-    gameStateRef.current.grid = mapData.grid.map(row => [...row]);
-    gameStateRef.current.hpMap = { ...(mapData.hpMap || {}) };
-    gameStateRef.current.totalMapHp = Object.values(mapData.hpMap || {}).reduce((a, b) => a + b, 0);
-    gameStateRef.current.isMapClearing = false;
-    gameStateRef.current.enemies = syncEnemiesWithMap([], mapData, gameStateRef.current.grid, gameStateRef.current.hpMap);
-  }, [mapData?.mapId, mapData?.id]);
+  }, [mapData]);
 
   useEffect(() => {
     if (statsResetTrigger > 0) {
@@ -328,13 +343,16 @@ export default function GameBoard({
                 }
 
                 state.floatTexts.push({
-                  text: '🧟 +HORDA',
+                  text: '🧟 +HORDA (+0.05 MNC)',
                   x: spawnPos.c * TILE_SIZE + TILE_SIZE / 2,
                   y: spawnPos.r * TILE_SIZE - 8,
                   color: '#a3e635',
                   opacity: 0.95,
                   vy: -22
                 });
+
+                // Concede recompensa econômica direta de MNC pelo abate do zumbi
+                callbacksRef.current.onCollectBcoin?.(0.05);
               }
             }
           }
@@ -387,7 +405,7 @@ export default function GameBoard({
         }
       };
 
-      state.miners.forEach(miner => {
+      state.miners.forEach((miner, minerIndex) => {
         // 1. Descanso na Casa (Recuperação rápida e transição para reserva quando 100%)
         if (miner.status === 'house') {
           miner.isMining = false;
@@ -462,29 +480,30 @@ export default function GameBoard({
           miner.isMining = false;
         }
 
-        // Se o herói já tem um bloco alvo, valida se ele ainda existe, se tem HP e se o herói ainda está adjacente
+        // Se o herói já tem um bloco alvo, valida se ele ainda existe, se tem HP e se está no alcance de combate com armas de fogo
         if (miner.targetBlock) {
           const { x: tx, y: ty } = miner.targetBlock;
           const currentType = state.grid[ty] ? state.grid[ty][tx] : BLOCK_EMPTY;
-          // Adjacência cardinal e diagonal (raio de tiro de 1 bloco em 8 direções)
-          const isAdjacent = Math.max(Math.abs(tx - mx), Math.abs(ty - my)) === 1;
+          const dist = Math.max(Math.abs(tx - mx), Math.abs(ty - my));
           const cellKey = `${tx},${ty}`;
           const hasHp = state.hpMap[cellKey] !== undefined && state.hpMap[cellKey] > 0;
-          if (currentType === BLOCK_EMPTY || currentType === BLOCK_BEDROCK || !isAdjacent || !hasHp) {
+          const inRange = dist <= COMBAT_RANGE && hasClearLineOfSight(mx, my, tx, ty);
+
+          if (currentType === BLOCK_EMPTY || currentType === BLOCK_BEDROCK || !hasHp || !inRange) {
             miner.targetBlock = null;
             miner.isMining = false;
             miner.moveCooldown = 0;
           }
         }
 
-        // Se o herói está sem alvo ou não está minerando, busca a próxima jazida imediatamente
+        // Se o herói está sem alvo ou não está minerando, busca a próxima criatura taticamente
         if (!miner.targetBlock || !miner.isMining) {
           const decision = findNextHeroAction(miner, state.grid, state.miners, isCanyon);
           if (decision.action === 'mine' && decision.targetBlock) {
             miner.targetBlock = decision.targetBlock;
             miner.targetDir = decision.targetDir;
             miner.isMining = true;
-            miner.swingTimer = 0.5;
+            miner.swingTimer = 0.4;
           }
         }
 
@@ -645,6 +664,26 @@ export default function GameBoard({
                 const ms = state.minerStats[miner.id] || { blocksBroken: 0, bcoinEarned: 0, damageDealt: 0 };
                 ms.damageDealt = (ms.damageDealt || 0) + ((isZombie || isBoss) ? hitDamageApplied : hitDamage);
                 state.minerStats[miner.id] = ms;
+              }
+
+              // Traçantes luminosos e dinâmicos de projétil saindo da arma do herói até o zumbi
+              const shotOriginX = mx * TILE_SIZE + TILE_SIZE / 2;
+              const shotOriginY = my * TILE_SIZE + TILE_SIZE / 2 - 4;
+              const shotTargetX = tx * TILE_SIZE + TILE_SIZE / 2;
+              const shotTargetY = ty * TILE_SIZE + TILE_SIZE / 2;
+              const shotDist = Math.hypot(shotTargetX - shotOriginX, shotTargetY - shotOriginY);
+
+              for (let b = 1; b <= 3; b++) {
+                const fraction = b / 4;
+                state.sparks.push({
+                  x: shotOriginX + (shotTargetX - shotOriginX) * fraction,
+                  y: shotOriginY + (shotTargetY - shotOriginY) * fraction,
+                  vx: ((shotTargetX - shotOriginX) / (shotDist || 1)) * 340,
+                  vy: ((shotTargetY - shotOriginY) / (shotDist || 1)) * 340,
+                  color: isCrit ? '#ef4444' : '#facc15',
+                  life: 0.18,
+                  maxLife: 0.18
+                });
               }
 
               // Faíscas visuais no ponto de impacto

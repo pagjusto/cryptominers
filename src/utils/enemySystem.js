@@ -136,6 +136,13 @@ export function syncEnemiesWithMap(existingEnemies = [], mapData, grid, hpMap) {
     result.push(entity);
   });
 
+  // Inclui também quaisquer zumbis respawnados ativos que ainda não foram sincronizados no mapData
+  existingEnemies.forEach(e => {
+    if (e.hp > 0 && !result.some(r => r.id === e.id)) {
+      result.push(e);
+    }
+  });
+
   return result;
 }
 
