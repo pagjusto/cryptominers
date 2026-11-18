@@ -18,14 +18,16 @@
 - O encerramento do evento é global quando o tempo termina.
 - Cada Boss derrotado gera uma única tentativa de sorteio de Baú de Construção por jogador elegível.
 
-## Participação
+## Participação e desconexão
 
 - O jogador precisa estar participando quando o Boss aparece. Quem não estiver participando perde aquele evento; não existe recuperação posterior da participação.
-- Se o jogador perder a conexão durante o Boss, precisa voltar antes de o Boss morrer. Se não reconectar enquanto o Boss ainda estiver vivo, perde o direito ao sorteio daquele evento.
-- Se reconectar antes do encerramento do Boss, mantém sua participação.
+- Se o jogador perder a conexão, deixa imediatamente de contar como participante ativo: sua produção de MNC é interrompida e seus sobreviventes ativos são enviados ao fluxo do ambulatório/enfermaria.
+- Para manter o direito ao sorteio daquele Boss, o jogador precisa reconectar antes do encerramento do evento.
+- Ao reconectar, os sobreviventes retornam automaticamente ao combate, respeitando o limite de **15 vagas**. Se não houver vagas livres, aguardam na reserva até surgir uma vaga.
+- A desconexão não cria produção retroativa de MNC nem recupera vida automaticamente.
 - A lista de sobreviventes elegíveis ao sorteio é congelada no início do Boss.
 - Cada sobrevivente dessa lista conta no máximo uma vez, desde que esteja vivo ao final dos cinco minutos.
-- Um sobrevivente ferido que seja enviado à enfermaria continua contando se estiver vivo ao final do evento.
+- Um sobrevivente original enviado à enfermaria por ferimento ou desconexão continua contando se estiver vivo ao final do evento.
 - Se um sobrevivente original retornar durante o evento, continua contando apenas uma vez.
 - Sobreviventes que entram como substitutos depois do início podem lutar, mas não entram no sorteio daquele Boss.
 
