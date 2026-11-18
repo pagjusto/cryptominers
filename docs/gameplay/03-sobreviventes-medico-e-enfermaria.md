@@ -32,6 +32,15 @@ A ativação, contratação e renovação do médico dependem da futura etapa co
 - O médico pode encaminhar todos os feridos, mas não cria leitos adicionais.
 - Quando um sobrevivente termina a recuperação e deixa o leito, o próximo da fila entra automaticamente.
 
+## Desconexão e reconexão
+
+- Ao perder a conexão, o jogador deixa de contar para o combate e sua produção de MNC é interrompida.
+- Todos os sobreviventes que estavam ativos são encaminhados ao fluxo do ambulatório/enfermaria.
+- Ao reconectar, os sobreviventes retornam automaticamente ao combate, respeitando o limite de **15 vagas**.
+- Se não houver vagas livres, ficam na reserva e retornam automaticamente quando uma vaga surgir.
+- A desconexão não gera produção retroativa de MNC e não concede recuperação instantânea.
+- O estado dos sobreviventes e a ordem da fila de recuperação devem ser preservados durante a desconexão.
+
 ## Recuperação
 
 - A recuperação acontece simultaneamente para os sobreviventes que ocupam leitos.
@@ -39,7 +48,7 @@ A ativação, contratação e renovação do médico dependem da futura etapa co
 - O médico não modifica a velocidade de recuperação.
 - A recuperação restaura a vida do sobrevivente.
 - Ao alcançar 100% de vida, ele retorna automaticamente à reserva e libera o leito.
-- Havendo vaga no limite de 15 combatentes, um sobrevivente da reserva poderá voltar ao combate.
+- Havendo vaga no limite de 15 combatentes, um sobrevivente da reserva poderá voltar ao combate automaticamente.
 
 ## Planos previstos para o médico — não disponíveis nesta fase
 
