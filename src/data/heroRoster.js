@@ -84,12 +84,12 @@ export const HERO_ROSTER = [
     id: 'fenix',
     name: 'Fênix',
     classId: 'assault',
-    className: 'Assalto',
+    className: 'Assalto (Molotov)',
     rarity: 'epic',
     rarityName: 'Épico',
     spriteIndex: 7,
-    weaponId: 'flare-launcher',
-    role: 'Dano explosivo e pressão ofensiva'
+    weaponId: 'molotov',
+    role: 'Arremesso de molotov e pressão incendiária em área'
   },
   {
     id: 'sombra',
@@ -100,18 +100,18 @@ export const HERO_ROSTER = [
     rarityName: 'Raro',
     spriteIndex: 8,
     weaponId: 'precision-rifle',
-    role: 'Ataque de precisão'
+    role: 'Ataque de precisão de longo alcance'
   },
   {
     id: 'iron',
     name: 'Iron',
     classId: 'heavy',
-    className: 'Blindado',
+    className: 'Granadeiro Blindado',
     rarity: 'epic',
     rarityName: 'Épico',
     spriteIndex: 9,
     weaponId: 'grenade',
-    role: 'Controle de área e resistência'
+    role: 'Arremesso de granadas pesadas e explosão em área'
   },
   {
     id: 'colosso',
@@ -154,9 +154,11 @@ export const WEAPON_CATALOG = [
   { id: 'flamethrower', name: 'Lança-chamas', sourceIndex: 2, facing: 'right', category: 'especial' },
   { id: 'energy-blaster', name: 'Canhão de Energia', sourceIndex: 3, facing: 'right', category: 'energia' },
   { id: 'flare-launcher', name: 'Lançador Incendiário', sourceIndex: 4, facing: 'right', category: 'especial' },
+  { id: 'molotov', name: 'Coquetel Molotov', sourceIndex: 4, facing: 'right', category: 'molotov', scale: 0.65 },
   { id: 'compact-rifle', name: 'Rifle Compacto', sourceIndex: 5, facing: 'right', category: 'rifle' },
   { id: 'medical-kit', name: 'Kit Médico', sourceIndex: 6, facing: 'right', category: 'suporte' },
-  { id: 'grenade', name: 'Granada', sourceIndex: 7, facing: 'right', category: 'explosivo' },
+  { id: 'grenade', name: 'Granada', sourceIndex: 7, facing: 'right', category: 'explosivo', scale: 0.68 },
+  { id: 'precision-rifle', name: 'Rifle de Precisão', sourceIndex: 8, facing: 'right', category: 'rifle' },
   { id: 'heavy-machine-gun', name: 'Metralhadora Pesada', sourceIndex: 8, facing: 'right', category: 'pesada' },
   { id: 'shotgun', name: 'Escopeta', sourceIndex: 9, facing: 'right', category: 'escopeta' },
   { id: 'rocket-launcher', name: 'Lança-foguetes', sourceIndex: 10, facing: 'right', category: 'pesada' },
