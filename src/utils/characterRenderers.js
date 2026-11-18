@@ -4605,7 +4605,6 @@ export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swi
       ctx.save();
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = 'high';
-      ctx.filter = 'drop-shadow(0px 1px 1.5px rgba(0,0,0,0.55))';
 
       // 1. Perna Direita (trás / fundo)
       ctx.save();
@@ -4654,7 +4653,6 @@ export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swi
       ctx.save();
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = 'high';
-      ctx.filter = 'drop-shadow(0px 1px 1.5px rgba(0,0,0,0.55))';
       ctx.drawImage(heroRosterImg, sx, sy, sw, sh, dx, dy, pw, ph);
       if (weaponRosterLoaded && weaponRosterImg) {
         ctx.save();
@@ -4732,7 +4730,6 @@ export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swi
     ctx.save();
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
-    ctx.filter = 'drop-shadow(0px 1px 1.5px rgba(0,0,0,0.55))';
 
     // Ambas as pernas desenhadas alinhadas e firmes no solo
     ctx.drawImage(heroRosterLegRightImg, sx, sy, sw, sh, dx, dy, pw, ph);
@@ -4754,7 +4751,6 @@ export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swi
     ctx.scale(scaleX, scaleY);
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
-    ctx.filter = 'drop-shadow(0px 1px 1.5px rgba(0,0,0,0.55))';
     ctx.drawImage(heroRosterImg, sx, sy, sw, sh, dx, dy, pw, ph);
     ctx.restore();
   } else {
@@ -4769,7 +4765,6 @@ export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swi
     ctx.rotate(gunAngle);
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
-    ctx.filter = 'drop-shadow(0px 1px 1.5px rgba(0,0,0,0.55))';
     ctx.drawImage(weaponRosterImg, wsx, wsy, wsw, wsh, -6, -10, gw, gh);
 
     // Mão do herói segurando a empunhadura

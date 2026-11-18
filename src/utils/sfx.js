@@ -203,6 +203,37 @@ class MineSoundEffects {
     osc.stop(now + 0.22);
   }
 
+  // Impacto de tiro / picareta na jazida ou zumbi
+  playRockHit() {
+    if (!this.enabled) return;
+    this.init();
+    if (!this.ctx) return;
+    try {
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(320, now);
+      osc.frequency.exponentialRampToValueAtTime(75, now + 0.08);
+      gain.gain.setValueAtTime(0.22, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.08);
+    } catch (e) {}
+  }
+
+  // Baú místico ou Boss mutante derrotado
+  playChestOpen() {
+    if (!this.enabled) return;
+    this.init();
+    if (!this.ctx) return;
+    try {
+      this.playLevelUp();
+    } catch (e) {}
+  }
+
   // Feixe mágico do Mago
   playMagicCast() {
     if (!this.enabled) return;

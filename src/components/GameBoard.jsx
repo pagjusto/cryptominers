@@ -358,7 +358,7 @@ export default function GameBoard({
           });
         }
 
-        sfx.playRockHit();
+        sfx.playRockHit?.();
 
         // Registra a destruição da jazida no motor de mapas individuais (Lógica Estritamente Visual)
         const pId = callbacksRef.current.playerId || 'player_default';
@@ -579,7 +579,7 @@ export default function GameBoard({
                 const showFloat = isCrit || Math.random() < 0.25;
                 if (showFloat && state.floatTexts.length < 24) {
                   if (isCrit) {
-                    sfx.playCritHit();
+                    sfx.playCritHit?.();
                     state.floatTexts.push({
                       text: `💥 CRÍTICO! -${hitDamage}`,
                       x: tx * TILE_SIZE + TILE_SIZE / 2,
@@ -636,7 +636,7 @@ export default function GameBoard({
                 miner.dynamiteCount = (miner.dynamiteCount || 0) + 1;
                 if (miner.dynamiteCount >= 4) {
                   miner.dynamiteCount = 0;
-                  sfx.playDynamiteBlast();
+                  sfx.playDynamiteBlast?.();
                   state.floatTexts.push({
                     text: `🧨 DINAMITE EM ÁREA!`,
                     x: tx * TILE_SIZE + TILE_SIZE / 2,
@@ -731,6 +731,7 @@ export default function GameBoard({
         s.life -= dt;
         if (s.life <= 0) state.sparks.splice(i, 1);
       }
+      if (state.sparks.length > 60) state.sparks.splice(0, state.sparks.length - 60);
 
       for (let i = state.particles.length - 1; i >= 0; i--) {
         const p = state.particles[i];
@@ -739,6 +740,7 @@ export default function GameBoard({
         p.life -= dt;
         if (p.life <= 0) state.particles.splice(i, 1);
       }
+      if (state.particles.length > 80) state.particles.splice(0, state.particles.length - 80);
 
       for (let i = state.floatTexts.length - 1; i >= 0; i--) {
         const ft = state.floatTexts[i];
@@ -746,6 +748,7 @@ export default function GameBoard({
         ft.opacity -= dt * 1.1;
         if (ft.opacity <= 0) state.floatTexts.splice(i, 1);
       }
+      if (state.floatTexts.length > 32) state.floatTexts.splice(0, state.floatTexts.length - 32);
 
       // ==========================================
       // RENDERIZAÇÃO EM ALTA DEFINIÇÃO (RETINA)
