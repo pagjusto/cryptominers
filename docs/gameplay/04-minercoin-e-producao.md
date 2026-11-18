@@ -23,17 +23,33 @@ A referência de planejamento definida é **1 MNC = US$ 0,01**. Essa referência
 
 ## Simulação de cenário mediano
 
-O valor de **480,24 MNC por dia** foi definido como resultado de uma **simulação de cenário mediano**, usando como composição ilustrativa **6 sobreviventes comuns, 4 raros, 4 épicos e 1 lendário**.
+O valor de **480,24 MNC por dia** foi definido como resultado de uma **simulação de cenário mediano**, usando a composição de referência de **6 sobreviventes comuns, 4 raros, 4 épicos e 1 lendário**.
 
-Esse valor serve como referência para analisar um cenário mediano de produção. Não é uma meta obrigatória que toda composição deva atingir, um limite universal, uma taxa fixa de retorno ou uma promessa de rendimento.
+A distribuição de produção aprovada usa os multiplicadores **1× para comum, 1,5× para raro, 2× para épico e 3× para lendário**. As taxas resultantes são:
 
-O Abrigo Reforçado citado nessa simulação representa apenas uma referência de recuperação e não concede bônus de mineração.
+| Raridade | Multiplicador | Produção por sobrevivente/dia | Produção por sobrevivente/segundo |
+|---|---:|---:|---:|
+| Comum | 1× | 20,88 MNC | 0,0002416667 MNC |
+| Raro | 1,5× | 31,32 MNC | 0,0003625 MNC |
+| Épico | 2× | 41,76 MNC | 0,0004833333 MNC |
+| Lendário | 3× | 62,64 MNC | 0,000725 MNC |
 
-Os valores exatos de MNC por segundo de cada raridade ainda precisam ser calculados e formalizados. A produção real varia conforme a quantidade e a raridade dos sobreviventes ativos, além do tempo válido em combate.
+### Conferência da composição mediana
+
+- 6 comuns: **125,28 MNC/dia**
+- 4 raros: **125,28 MNC/dia**
+- 4 épicos: **167,04 MNC/dia**
+- 1 lendário: **62,64 MNC/dia**
+
+**Total: 480,24 MNC por dia.**
+
+Esse valor serve como referência para analisar um cenário mediano de produção. Não é uma meta obrigatória que toda composição deva atingir, um limite universal, uma taxa fixa de retorno ou uma promessa de rendimento. A produção real varia conforme a quantidade e a raridade dos sobreviventes ativos, além do tempo válido em combate.
+
+O Abrigo Reforçado citado na simulação representa apenas uma referência de recuperação e não concede bônus de mineração.
 
 ## Retorno bruto e líquido
 
 - **Retorno bruto:** total de MNC produzido.
 - **Retorno líquido:** produção após descontar custos e despesas aplicáveis, como o custo do médico quando esse serviço estiver ativo.
 
-A fórmula final por raridade e o cálculo completo do retorno líquido ainda precisam ser formalizados antes da publicação como números garantidos.
+O cálculo completo do retorno líquido ainda precisa ser formalizado antes da publicação como números garantidos.
