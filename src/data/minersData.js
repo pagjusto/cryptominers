@@ -306,6 +306,32 @@ export const MINER_CLASSES = {
     specialty: 'Lança-Foguetes & Explosão de Alto Impacto',
     description: 'A vanguarda destrutiva armada com lançador de foguetes teleguiados pesados.',
     chance: 0.05
+  },
+  marksman: {
+    id: 'marksman',
+    name: 'Hunter',
+    subtitle: 'Atirador de Vanguarda',
+    avatar: '🎯',
+    color: '#84cc16',
+    basePower: 3,
+    baseSpeed: 1.4,
+    baseStamina: 100,
+    specialty: 'Carbina Tática & Tiroteio em Rajadas',
+    description: 'Soldado veterano barbudo com capacete balístico, óculos táticos e carbina com miras holográficas.',
+    chance: 0.35
+  },
+  guerrilla: {
+    id: 'guerrilla',
+    name: 'Scarlet',
+    subtitle: 'Guerrilheira Ágil',
+    avatar: '🦊',
+    color: '#f97316',
+    basePower: 3,
+    baseSpeed: 1.6,
+    baseStamina: 95,
+    specialty: 'Pistola Pesada & Manobras de Resgate',
+    description: 'Combatente tática de rabo de cavalo ruivo e boné militar armada com pistola pesada de alta cadência.',
+    chance: 0.35
   }
 };
 
@@ -443,7 +469,6 @@ export const INITIAL_MINERS = [
     className: 'Explorador',
     rarity: 'common',
     rarityName: 'Comum',
-    level: 1,
     power: 2,
     speed: 1.3,
     maxStamina: 100,
@@ -464,7 +489,6 @@ export const INITIAL_MINERS = [
     className: 'Tanque',
     rarity: 'legendary',
     rarityName: 'Lendário',
-    level: 1,
     power: 6,
     speed: 0.95,
     maxStamina: 140,
@@ -485,7 +509,6 @@ export const INITIAL_MINERS = [
     className: 'Combatente',
     rarity: 'rare',
     rarityName: 'Raro',
-    level: 1,
     power: 3,
     speed: 2.1,
     maxStamina: 90,

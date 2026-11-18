@@ -4500,7 +4500,7 @@ export function initRosterSprites() {
   if (!heroRosterImg) {
     const img = new Image();
     img.crossOrigin = 'anonymous';
-    img.src = '/assets/hero-roster.png';
+    img.src = '/assets/hero-roster.png?v=4';
     img.onload = () => {
       heroRosterImg = img;
       heroRosterLoaded = true;
@@ -4509,7 +4509,7 @@ export function initRosterSprites() {
   if (!heroRosterUpperImg) {
     const uImg = new Image();
     uImg.crossOrigin = 'anonymous';
-    uImg.src = '/assets/hero-roster-upper.png';
+    uImg.src = '/assets/hero-roster-upper.png?v=4';
     uImg.onload = () => {
       heroRosterUpperImg = uImg;
     };
@@ -4517,7 +4517,7 @@ export function initRosterSprites() {
   if (!heroRosterLegLeftImg) {
     const llImg = new Image();
     llImg.crossOrigin = 'anonymous';
-    llImg.src = '/assets/hero-roster-leg-left.png';
+    llImg.src = '/assets/hero-roster-leg-left.png?v=4';
     llImg.onload = () => {
       heroRosterLegLeftImg = llImg;
     };
@@ -4525,7 +4525,7 @@ export function initRosterSprites() {
   if (!heroRosterLegRightImg) {
     const lrImg = new Image();
     lrImg.crossOrigin = 'anonymous';
-    lrImg.src = '/assets/hero-roster-leg-right.png';
+    lrImg.src = '/assets/hero-roster-leg-right.png?v=4';
     lrImg.onload = () => {
       heroRosterLegRightImg = lrImg;
     };
@@ -4533,7 +4533,7 @@ export function initRosterSprites() {
   if (!weaponRosterImg) {
     const wImg = new Image();
     wImg.crossOrigin = 'anonymous';
-    wImg.src = '/assets/weapon-roster.png';
+    wImg.src = '/assets/weapon-roster.png?v=4';
     wImg.onload = () => {
       weaponRosterImg = wImg;
       weaponRosterLoaded = true;
@@ -4561,17 +4561,15 @@ export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swi
   const spriteIndex = hero?.spriteIndex ?? 0;
   const sourceIndex = weapon?.sourceIndex ?? spriteIndex ?? 0;
 
-  // Resolução nativa dinâmica dos spritesheets vetorizados (alta definição)
-  const heroNaturalW = heroRosterImg?.naturalWidth || 1408;
+  // Resolução nativa dinâmica dos spritesheets vetorizados (alta definição: cada herói tem 128px, cada arma 256px)
   const heroNaturalH = heroRosterImg?.naturalHeight || 128;
-  const sw = heroNaturalW / 11;
+  const sw = 128;
   const sh = heroNaturalH;
   const sx = spriteIndex * sw;
   const sy = 0;
 
-  const weaponNaturalW = weaponRosterImg?.naturalWidth || 2816;
   const weaponNaturalH = weaponRosterImg?.naturalHeight || 144;
-  const wsw = weaponNaturalW / 11;
+  const wsw = 256;
   const wsh = weaponNaturalH;
   const wsx = sourceIndex * wsw;
   const wsy = 0;

@@ -5,7 +5,6 @@ import {
   HeartPulse, 
   Play,
   Pause, 
-  ArrowUpCircle, 
   Wrench, 
   Sparkles, 
   Lock, 
@@ -137,8 +136,6 @@ export default function HeroList({
           const rosterHero = HERO_ROSTER.find(hero => hero.id === miner.heroId) || HERO_ROSTER[index % HERO_ROSTER.length];
           const rosterWeapon = getWeaponById(rosterHero.weaponId);
           const classInfo = MINER_CLASSES[miner.classId] || MINER_CLASSES.miner;
-          const upgradeCost = parseFloat((2.5 * Math.pow(1.6, miner.level - 1)).toFixed(2));
-          const canUpgrade = gold >= upgradeCost;
           const isWorking = miner.status === 'work';
           const staminaPct = Math.round(((miner.currentHealth ?? miner.maxHealth ?? 100) / (miner.maxHealth || 100)) * 100);
           const durability = miner.durability !== undefined ? Math.round(miner.durability) : 100;
@@ -158,18 +155,18 @@ export default function HeroList({
                     title={rosterHero.name}
                     style={{
                       borderColor: classInfo.color,
-                      backgroundImage: 'url(/assets/hero-avatars.png?v=3)',
+                      backgroundImage: 'url(/assets/hero-avatars.png?v=4)',
                       backgroundRepeat: 'no-repeat',
-                      backgroundSize: '616px 56px',
+                      backgroundSize: '728px 56px',
                       backgroundPosition: `-${rosterHero.spriteIndex * 56}px center`,
                       imageRendering: 'auto'
                     }} />
                   <div className="w-13 h-14 rounded-xl border border-slate-700 bg-slate-900/80 flex flex-col items-center justify-center px-1 shrink-0">
                     <div className="w-11 h-7 bg-no-repeat" title={rosterWeapon?.name}
                       style={{
-                        backgroundImage: 'url(/assets/weapon-roster.png)',
+                        backgroundImage: 'url(/assets/weapon-roster.png?v=4)',
                         backgroundRepeat: 'no-repeat',
-                        backgroundSize: '537.8px 27.5px',
+                        backgroundSize: '635.7px 27.5px',
                         backgroundPosition: `-${(rosterWeapon?.sourceIndex || 0) * 48.9}px center`
                       }} />
                     <span className="text-[7.5px] text-slate-300 font-bold text-center leading-tight truncate max-w-[48px]">{rosterWeapon?.name || 'Sem arma'}</span>
@@ -178,11 +175,8 @@ export default function HeroList({
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="font-tech font-bold text-xs sm:text-sm text-white truncate max-w-[120px]" title={rosterHero.name}>
+                    <span className="font-tech font-bold text-xs sm:text-sm text-white truncate max-w-[130px]" title={rosterHero.name}>
                       {rosterHero.name}
-                    </span>
-                    <span className="text-[10px] px-1.5 py-0.2 rounded-md bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30 shrink-0">
-                      Nv.{miner.level}
                     </span>
                     <span className={`text-[8px] px-1 py-0.2 rounded border font-bold uppercase shrink-0 ${rosterHero.rarity === 'legendary' ? 'bg-amber-500/20 text-amber-300 border-amber-500/40' : rosterHero.rarity === 'epic' ? 'bg-purple-500/20 text-purple-300 border-purple-500/40' : rosterHero.rarity === 'rare' ? 'bg-sky-500/20 text-sky-300 border-sky-500/40' : 'bg-slate-700/60 text-slate-300 border-slate-600'}`}>
                       {rosterHero.rarityName}
@@ -320,7 +314,7 @@ export default function HeroList({
                   <button
                     onClick={() => onToggleStatus(miner.id)}
                     disabled={miner.status === 'house' || miner.status === 'waiting_house'}
-                    className={`px-2 py-1.5 rounded-xl text-[9px] font-tech font-bold flex items-center justify-center gap-0.5 transition cursor-pointer active:scale-95 shadow-sm shrink-0 ${
+                    className={`px-3 py-1.5 rounded-xl text-[10px] font-tech font-bold flex items-center justify-center gap-1 transition cursor-pointer active:scale-95 shadow-sm shrink-0 ${
                       isWorking
                         ? 'bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700'
                         : (miner.status === 'house'
@@ -330,7 +324,7 @@ export default function HeroList({
                                 : 'bg-emerald-500 text-slate-950 hover:bg-emerald-400'))
                     }`}
                   >
-                    {isWorking ? <Pause size={9} /> : <Play size={9} className="fill-current" />}
+                    {isWorking ? <Pause size={10} /> : <Play size={10} className="fill-current" />}
                     <span>
                       {isWorking 
                         ? 'PAUSAR' 
@@ -338,20 +332,6 @@ export default function HeroList({
                             ? 'TRATANDO' 
                             : (miner.status === 'waiting_house' ? 'AGUARDANDO' : 'ATIVAR'))}
                     </span>
-                  </button>
-
-                  <button
-                    onClick={() => onUpgradeMiner(miner.id, upgradeCost)}
-                    disabled={!canUpgrade}
-                    className={`px-2 py-1.5 rounded-xl font-tech font-bold text-[9px] flex items-center justify-center gap-0.5 transition shrink-0 ${
-                      canUpgrade
-                        ? 'bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-md active:scale-95 cursor-pointer'
-                        : 'bg-slate-800 text-slate-600 cursor-not-allowed border border-slate-800'
-                    }`}
-                    title={canUpgrade ? `Evoluir nível por ${upgradeCost} BCOIN` : `Necessário ${upgradeCost} BCOIN`}
-                  >
-                    <ArrowUpCircle size={10} />
-                    <span>+{upgradeCost}B</span>
                   </button>
                 </div>
               </div>

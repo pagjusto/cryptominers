@@ -74,7 +74,6 @@ export default function ChestOpeningModal({
           name: `${randomName()} #${Math.floor(Math.random() * 900 + 100)}`,
           classId: pickedRoster.id.replace('class_', ''),
           rarity: selectedRarity,
-          level: 1,
           power: rolledPower,
           speed: pickedRoster.baseSpeed || 1.2,
           coinsPerHour: rolledCoins,

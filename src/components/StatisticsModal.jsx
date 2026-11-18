@@ -596,7 +596,7 @@ export default function StatisticsModal({
                               className="text-[9px] font-bold font-mono px-1.5 py-0.2 rounded uppercase inline-block mt-0.5"
                               style={{ backgroundColor: `${hero.classInfo.color}25`, color: hero.classInfo.color }}
                             >
-                              {hero.rarityName} • Nv. {hero.level || 1}
+                              {hero.rarityName} • {hero.className || 'Sobrevivente'}
                             </span>
                           </div>
                         </div>

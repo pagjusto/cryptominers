@@ -259,9 +259,9 @@ export default function ZombieSurvivalBoard({ survivors = [], onSurvivorsChange,
             return (
               <div key={s.id} title={`${hero.name} • ${weapon?.name || 'Sem arma'}`} className="absolute z-10 flex flex-col items-center justify-center" style={{ left: s.x * 40, top: s.y * 40, width: 40, height: 40 }}>
                 <span className="w-9 h-9 rounded-xl border border-emerald-300 bg-slate-900/80 shadow-lg block"
-                  style={{ backgroundImage: 'url(/assets/hero-avatars.png?v=3)', backgroundRepeat: 'no-repeat', backgroundSize: '396px 36px', backgroundPosition: `-${hero.spriteIndex * 36}px center` }} />
+                  style={{ backgroundImage: 'url(/assets/hero-avatars.png?v=4)', backgroundRepeat: 'no-repeat', backgroundSize: '468px 36px', backgroundPosition: `-${hero.spriteIndex * 36}px center` }} />
                 <span className="absolute -right-3 top-0 w-5 h-3 bg-no-repeat"
-                  style={{ backgroundImage: 'url(/assets/weapon-roster.png)', backgroundSize: '234.7px 12px', backgroundPosition: `-${(weapon?.sourceIndex || 0) * 18}px center` }} />
+                  style={{ backgroundImage: 'url(/assets/weapon-roster.png?v=4)', backgroundSize: '277.3px 12px', backgroundPosition: `-${(weapon?.sourceIndex || 0) * 21.33}px center` }} />
                 <span className="absolute bottom-0 w-8 h-1 rounded bg-slate-900 overflow-hidden"><span className="block h-full bg-emerald-400" style={{ width: `${Math.max(0, s.currentHealth / s.maxHealth * 100)}%` }} /></span>
               </div>
             );

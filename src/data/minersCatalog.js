@@ -265,6 +265,54 @@ export const MINER_ROSTER = [
       description: 'Arremessa maços maciços de dólares em velocidade supersônica com explosão de cédulas, moedas de ouro e tremores.'
     },
     lore: 'O bilionário magnata dos negócios que comprou a mina. Munido de pilhas infinitas de dinheiro e terno impecável, destrói blocos lançando rajadas de notas com poder financeiro avassalador.'
+  },
+  {
+    id: 'class_marksman',
+    name: 'Hunter',
+    title: 'O Atirador de Vanguarda',
+    role: 'Tiroteio Tático',
+    rarity: 'common',
+    avatar: '🎯',
+    image: '/miners/hunter.png',
+    bannerImage: '/miners/banners/banner_hunter.png',
+    color: '#84cc16',
+    borderColor: '#65a30d',
+    badge: 'COMUM',
+    basePower: 3.0,
+    baseSpeed: 1.4,
+    baseStamina: 100,
+    equipment: 'Carbina Tática com Miras Holográficas',
+    weaponType: 'tactical_carbine',
+    directCostBcoin: 10,
+    passiveTrait: {
+      name: 'Rajada Tática',
+      description: 'Dispara rajadas contínuas de fogo tático de alta precisão.'
+    },
+    lore: 'Soldado veterano barbudo com capacete balístico e óculos táticos, especialista em supressão à distância com carabina equipada com miras holográficas.'
+  },
+  {
+    id: 'class_guerrilla',
+    name: 'Scarlet',
+    title: 'A Guerrilheira Ágil',
+    role: 'Ataque Rápido & Suporte',
+    rarity: 'common',
+    avatar: '🦊',
+    image: '/miners/scarlet.png',
+    bannerImage: '/miners/banners/banner_scarlet.png',
+    color: '#f97316',
+    borderColor: '#ea580c',
+    badge: 'COMUM',
+    basePower: 3.2,
+    baseSpeed: 1.6,
+    baseStamina: 95,
+    equipment: 'Pistola Pesada Tática',
+    weaponType: 'heavy_pistol',
+    directCostBcoin: 10,
+    passiveTrait: {
+      name: 'Reflexos de Guerrilha',
+      description: 'Velocidade aumentada em manobras ágeis e combate rápido.'
+    },
+    lore: 'Combatente tática de rabo de cavalo ruivo e boné militar, mestre em infiltração urbana e suporte rápido armada com pistola pesada de alta cadência.'
   }
 ];
 

@@ -123,6 +123,28 @@ export const HERO_ROSTER = [
     spriteIndex: 10,
     weaponId: 'rocket-launcher',
     role: 'Poder de fogo pesado'
+  },
+  {
+    id: 'hunter',
+    name: 'Hunter',
+    classId: 'marksman',
+    className: 'Atirador',
+    rarity: 'common',
+    rarityName: 'Comum',
+    spriteIndex: 11,
+    weaponId: 'tactical-carbine',
+    role: 'Tiroteio tático e combate direto'
+  },
+  {
+    id: 'scarlet',
+    name: 'Scarlet',
+    classId: 'guerrilla',
+    className: 'Guerrilheira',
+    rarity: 'common',
+    rarityName: 'Comum',
+    spriteIndex: 12,
+    weaponId: 'heavy-pistol',
+    role: 'Ataque rápido e suporte tático'
   }
 ];
 
@@ -137,7 +159,9 @@ export const WEAPON_CATALOG = [
   { id: 'grenade', name: 'Granada', sourceIndex: 7, facing: 'right', category: 'explosivo' },
   { id: 'heavy-machine-gun', name: 'Metralhadora Pesada', sourceIndex: 8, facing: 'right', category: 'pesada' },
   { id: 'shotgun', name: 'Escopeta', sourceIndex: 9, facing: 'right', category: 'escopeta' },
-  { id: 'rocket-launcher', name: 'Lança-foguetes', sourceIndex: 10, facing: 'right', category: 'pesada' }
+  { id: 'rocket-launcher', name: 'Lança-foguetes', sourceIndex: 10, facing: 'right', category: 'pesada' },
+  { id: 'tactical-carbine', name: 'Carbina Tática', sourceIndex: 11, facing: 'right', category: 'rifle' },
+  { id: 'heavy-pistol', name: 'Pistola Pesada', sourceIndex: 12, facing: 'right', category: 'pistola' }
 ];
 
 export function getHeroById(heroId) {

@@ -211,9 +211,6 @@ export default function MarketplaceModal({
                               <h4 className="font-tech font-bold text-sm text-white">
                                 {m.name}
                               </h4>
-                              <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                                Nv. {m.level}
-                              </span>
                             </div>
                             <span className="text-[10px] text-slate-400 font-tech">
                               {listing.listedAt}
@@ -319,7 +316,7 @@ export default function MarketplaceModal({
                               <span className="text-2xl">{miner.avatar}</span>
                               <div className="text-left">
                                 <span className="font-tech font-bold text-xs text-white block">
-                                  {miner.name} (Nv. {miner.level})
+                                  {miner.name}
                                 </span>
                                 <span className="text-[10px] text-slate-400 font-mono">
                                   ⚔ {miner.power} | ⚡ {miner.speed} | 🔋 {miner.maxStamina}
