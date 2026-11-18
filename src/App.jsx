@@ -1209,7 +1209,7 @@ export default function App() {
       <header 
         onMouseEnter={() => setIsNavHovered(true)}
         onMouseLeave={() => { if (!isNavPinned) setIsNavHovered(false); }}
-        className={`fixed top-0 left-0 right-0 h-16 border-b border-slate-800 bg-slate-900/95 backdrop-blur-md px-4 sm:px-6 flex items-center justify-between z-50 shadow-2xl transition-all duration-300 ease-out transform ${
+        className={`fixed top-0 left-0 right-0 h-14 border-b border-slate-800 bg-slate-900/95 backdrop-blur-md px-2 sm:px-3 flex items-center justify-between gap-1.5 z-50 shadow-2xl transition-all duration-300 ease-out transform overflow-x-auto no-scrollbar ${
           showNavbar ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0 pointer-events-none'
         }`}
       >
@@ -1218,30 +1218,30 @@ export default function App() {
         <button 
           onClick={() => handleOpenUserProfile('profile')}
           title={`Saldo: ${bcoin.toFixed(2)} MNC ≈ US$ ${(bcoin * currentMinerRate).toFixed(2)} • Clique para abrir Perfil, Carteira e Saques (Claim)`}
-          className="flex items-center gap-2 bg-slate-950 px-3 py-1.5 rounded-2xl border border-amber-500/40 hover:border-amber-400 transition shadow-inner cursor-pointer group active:scale-95 shrink-0"
+          className="flex items-center gap-1.5 bg-slate-950 px-2.5 py-1 rounded-xl border border-amber-500/40 hover:border-amber-400 transition shadow-inner cursor-pointer group active:scale-95 shrink-0"
         >
-          <div className="w-6 h-6 rounded-full bg-amber-500/20 border border-amber-400 flex items-center justify-center text-amber-300 font-bold font-arcade text-xs group-hover:scale-105 transition">
+          <div className="w-5 h-5 rounded-full bg-amber-500/20 border border-amber-400 flex items-center justify-center text-amber-300 font-bold font-arcade text-[10px] group-hover:scale-105 transition">
             🪙
           </div>
           <div className="flex flex-col leading-none text-left">
-            <span className="text-[10px] uppercase text-slate-400 font-bold flex items-center gap-1">
-              <span>Saldo MNC</span>
-              <span className="text-[9px] text-emerald-400 font-mono">
-                ({currentMinerRate === 0.01 ? 'US$ 0,01' : `$${currentMinerRate} USDT`})
+            <span className="text-[9px] uppercase text-slate-400 font-bold flex items-center gap-1">
+              <span>MNC</span>
+              <span className="text-[8.5px] text-emerald-400 font-mono">
+                ({currentMinerRate === 0.01 ? '0,01' : `$${currentMinerRate}`})
               </span>
             </span>
-            <span className="font-arcade text-sm text-amber-300 font-bold tracking-wider">
+            <span className="font-arcade text-xs text-amber-300 font-bold tracking-wider">
               {bcoin.toFixed(2)}
             </span>
           </div>
         </button>
 
         {/* SELETOR DE MODO DE JOGO & STATUS DO MAPA */}
-        <div className="flex items-center gap-2 bg-slate-950 p-1 rounded-xl border border-slate-800 shadow-inner">
-          <div className="flex items-center bg-slate-900 p-0.5 rounded-lg border border-slate-700/60">
+        <div className="flex items-center gap-1.5 bg-slate-950 p-0.5 rounded-lg border border-slate-800 shadow-inner shrink-0">
+          <div className="flex items-center bg-slate-900 p-0.5 rounded border border-slate-700/60">
             <button
               onClick={() => setBoardMode('canyon')}
-              className={`px-2.5 py-1 rounded-md font-tech text-xs transition cursor-pointer flex items-center gap-1.5 ${
+              className={`px-2 py-0.5 rounded font-tech text-xs transition cursor-pointer flex items-center gap-1 ${
                 boardMode === 'canyon'
                   ? 'bg-amber-500 text-slate-950 font-bold shadow-sm'
                   : 'text-slate-400 hover:text-white'
@@ -1252,26 +1252,26 @@ export default function App() {
             </button>
             <button
               onClick={() => setBoardMode('tactical')}
-              className={`px-2.5 py-1 rounded-md font-tech text-xs transition cursor-pointer flex items-center gap-1.5 ${
+              className={`px-2 py-0.5 rounded font-tech text-xs transition cursor-pointer flex items-center gap-1 ${
                 boardMode === 'tactical'
                   ? 'bg-emerald-500 text-slate-950 font-bold shadow-sm'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
               <span>📋</span>
-              <span>Grid Tático</span>
+              <span>Grid</span>
             </button>
           </div>
 
-          <span className="font-mono text-slate-300 bg-slate-900 px-2 py-0.5 rounded border border-slate-800 text-[11px]">
+          <span className="font-mono text-slate-300 bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800 text-[10px]">
             Ciclo #{mapData?.cycleNumber || 1}
           </span>
 
-          <span className="flex items-center gap-1 text-[11px] bg-lime-950/70 text-lime-300 px-2 py-0.5 rounded border border-lime-500/40 font-bold" title="Zumbis restantes">
+          <span className="flex items-center gap-1 text-[10px] bg-lime-950/70 text-lime-300 px-1.5 py-0.5 rounded border border-lime-500/40 font-bold" title="Zumbis restantes">
             🧟 <b className="text-white">{mapData?.deposits?.filter(d => d.type === 'zombie' && !d.isCompleted).length ?? 19}</b>/19
           </span>
 
-          <span className="flex items-center gap-1 text-[11px] bg-red-950/70 text-red-300 px-2 py-0.5 rounded border border-red-500/40 font-bold" title="Boss Mutante">
+          <span className="flex items-center gap-1 text-[10px] bg-red-950/70 text-red-300 px-1.5 py-0.5 rounded border border-red-500/40 font-bold" title="Boss Mutante">
             💀 Boss: <b className={mapData?.deposits?.some(d => d.type === 'boss' && !d.isCompleted) ? 'text-amber-300' : 'text-emerald-400'}>
               {mapData?.deposits?.some(d => d.type === 'boss' && !d.isCompleted) ? 'Ativo' : 'Morto'}
             </b>
@@ -1279,16 +1279,16 @@ export default function App() {
         </div>
 
         {/* Ações da Expedição */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 shrink-0">
           
           {/* BOTÃO DO MARKETPLACE P2P */}
           <button
             onClick={() => setIsMarketplaceOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-950/60 hover:bg-emerald-900/70 text-emerald-300 border border-emerald-500/40 font-tech text-xs font-bold transition cursor-pointer shadow-sm"
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-emerald-950/60 hover:bg-emerald-900/70 text-emerald-300 border border-emerald-500/40 font-tech text-xs font-bold transition cursor-pointer shadow-sm"
           >
-            <ShoppingBag size={14} className="text-emerald-400" />
+            <ShoppingBag size={13} className="text-emerald-400" />
             <span>MERCADO</span>
-            <span className="px-1.5 py-0.2 rounded-full bg-emerald-500 text-slate-950 text-[10px] font-bold font-mono">
+            <span className="px-1 py-0.1 rounded-full bg-emerald-500 text-slate-950 text-[9px] font-bold font-mono">
               {marketplaceListings.length}
             </span>
           </button>
@@ -1296,11 +1296,11 @@ export default function App() {
           {/* BOTÃO DO ABRIGO MÉDICO */}
           <button
             onClick={() => setIsHouseOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-blue-950/60 hover:bg-blue-900/70 text-blue-300 border border-blue-500/40 font-tech text-xs font-bold transition cursor-pointer shadow-sm"
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-blue-950/60 hover:bg-blue-900/70 text-blue-300 border border-blue-500/40 font-tech text-xs font-bold transition cursor-pointer shadow-sm"
           >
-            <Home size={14} className="text-blue-400" />
+            <Home size={13} className="text-blue-400" />
             <span>ABRIGO</span>
-            <span className="px-1.5 py-0.2 rounded-full bg-blue-500 text-slate-950 text-[10px] font-bold font-mono">
+            <span className="px-1 py-0.1 rounded-full bg-blue-500 text-slate-950 text-[9px] font-bold font-mono">
               {minersInHouse.length}/{currentHouse.slots}
             </span>
           </button>
@@ -1308,15 +1308,15 @@ export default function App() {
           {/* BOTÃO INVENTÁRIO DE BAÚS (PLAYABLE ADS) */}
           <button
             onClick={() => setIsInventoryOpen(true)}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border font-tech text-xs font-bold transition cursor-pointer ${
+            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg border font-tech text-xs font-bold transition cursor-pointer ${
               inventoryChests.length > 0
                 ? 'bg-amber-500/20 border-amber-400 text-amber-300 shadow-sm animate-pulse'
                 : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700'
             }`}
           >
-            <Package size={14} className={inventoryChests.length > 0 ? 'text-amber-400' : 'text-slate-400'} />
+            <Package size={13} className={inventoryChests.length > 0 ? 'text-amber-400' : 'text-slate-400'} />
             <span>INVENTÁRIO</span>
-            <span className="px-1.5 py-0.2 rounded-full bg-amber-500 text-slate-950 text-[10px] font-bold font-mono">
+            <span className="px-1 py-0.1 rounded-full bg-amber-500 text-slate-950 text-[9px] font-bold font-mono">
               {inventoryChests.length}
             </span>
           </button>
@@ -1324,33 +1324,33 @@ export default function App() {
           {/* BOTÃO CATÁLOGO DE MINERADORES */}
           <button
             onClick={() => setIsCatalogOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-300 font-tech text-xs font-bold border border-slate-700 transition cursor-pointer"
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-sky-300 font-tech text-xs font-bold border border-slate-700 transition cursor-pointer"
           >
-            <BookOpen size={14} />
+            <BookOpen size={13} />
             <span>CATÁLOGO</span>
           </button>
 
           {/* NOVO MENU: ESTATÍSTICAS & RETORNO DE ROI */}
           <button
             onClick={() => setIsStatisticsOpen(true)}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-purple-950/70 hover:bg-purple-900/80 text-purple-300 border border-purple-500/50 font-tech text-xs font-bold transition cursor-pointer shadow-md shadow-purple-950/40 active:scale-95"
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-purple-950/70 hover:bg-purple-900/80 text-purple-300 border border-purple-500/50 font-tech text-xs font-bold transition cursor-pointer shadow-md shadow-purple-950/40 active:scale-95"
           >
-            <BarChart3 size={15} className="text-purple-400" />
-            <span>ESTATÍSTICAS & ROI</span>
-            <span className="px-1.5 py-0.2 rounded-full bg-purple-500 text-slate-950 text-[10px] font-bold font-mono">
-              ROI & STATS
+            <BarChart3 size={14} className="text-purple-400" />
+            <span>ESTATÍSTICAS</span>
+            <span className="px-1 py-0.1 rounded-full bg-purple-500 text-slate-950 text-[9px] font-bold font-mono">
+              ROI
             </span>
           </button>
 
           {/* BOTÃO EQUIPE (JANELA FLUTUANTE) */}
           <button
             onClick={() => setIsTeamDrawerOpen(prev => !prev)}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-tech text-xs font-bold border border-amber-500/40 transition cursor-pointer shadow-md shadow-amber-950/30 active:scale-95"
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-tech text-xs font-bold border border-amber-500/40 transition cursor-pointer shadow-md shadow-amber-950/30 active:scale-95"
             title="Abrir Painel da Equipe de Heróis"
           >
-            <Users size={15} className="text-amber-400" />
+            <Users size={14} className="text-amber-400" />
             <span>EQUIPE</span>
-            <span className="px-1.5 py-0.2 rounded-full bg-amber-500 text-slate-950 text-[10px] font-bold font-mono">
+            <span className="px-1 py-0.1 rounded-full bg-amber-500 text-slate-950 text-[9px] font-bold font-mono">
               {miners.filter(m => m.status === 'work').length}/15
             </span>
           </button>
@@ -1358,9 +1358,9 @@ export default function App() {
           {/* BOTÃO MINT */}
           <button
             onClick={() => setIsSummonOpen(true)}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-arcade text-xs font-bold transition shadow-lg shadow-amber-950/40 active:scale-95 cursor-pointer"
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-arcade text-xs font-bold transition shadow-lg shadow-amber-950/40 active:scale-95 cursor-pointer"
           >
-            <Sparkles size={14} />
+            <Sparkles size={13} />
             <span>MINT</span>
           </button>
 
@@ -1368,41 +1368,41 @@ export default function App() {
           <button
             onClick={() => setIsAdminConfigOpen(true)}
             title="Painel Administrativo da Economia"
-            className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-amber-400 transition border border-slate-700 cursor-pointer"
+            className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-amber-400 transition border border-slate-700 cursor-pointer"
           >
-            <Settings size={16} />
+            <Settings size={15} />
           </button>
 
           {/* Reset do Mapa */}
           <button
             onClick={handleResetCurrentMine}
             title="Escanear Novo Veio da Mina"
-            className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition border border-slate-700 cursor-pointer"
+            className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition border border-slate-700 cursor-pointer"
           >
-            <RefreshCw size={16} />
+            <RefreshCw size={15} />
           </button>
 
           {/* Som */}
           <button
             onClick={toggleSound}
             title={soundEnabled ? "Mutar Som" : "Ativar Som"}
-            className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition border border-slate-700 cursor-pointer"
+            className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition border border-slate-700 cursor-pointer"
           >
-            {soundEnabled ? <Volume2 size={16} /> : <VolumeX size={16} className="text-rose-400" />}
+            {soundEnabled ? <Volume2 size={15} /> : <VolumeX size={15} className="text-rose-400" />}
           </button>
 
           {/* Fixar / Desafixar Menu Superior */}
           <button
             onClick={() => setIsNavPinned(prev => !prev)}
             title={isNavPinned ? "Menu fixado permanentemente. Clique para ativar auto-ocultação" : "Clique para fixar o menu no topo"}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl transition border cursor-pointer text-xs font-bold ${
+            className={`flex items-center gap-1 px-2 py-1.5 rounded-lg transition border cursor-pointer text-xs font-bold ${
               isNavPinned 
                 ? 'bg-amber-500/20 text-amber-300 border-amber-400 shadow-sm' 
                 : 'bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white border-slate-700'
             }`}
           >
-            <Pin size={14} className={isNavPinned ? 'rotate-45 text-amber-400' : ''} />
-            <span className="hidden xl:inline text-[10px]">{isNavPinned ? 'FIXADO' : 'AUTO'}</span>
+            <Pin size={13} className={isNavPinned ? 'rotate-45 text-amber-400' : ''} />
+            <span className="hidden xl:inline text-[9px]">{isNavPinned ? 'FIXO' : 'AUTO'}</span>
           </button>
         </div>
       </header>
