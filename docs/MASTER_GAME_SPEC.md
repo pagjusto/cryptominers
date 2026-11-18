@@ -9,15 +9,15 @@
 
 ## 2. Equipe e combate
 - O jogador monta uma equipe de sobreviventes.
-- A quantidade máxima de sobreviventes na equipe de combate ainda precisa ser confirmada; não confundir esse limite com as vagas do ambulatório.
+- **A equipe de combate tem no máximo 15 vagas por jogador. Esse limite é fixo e não aumenta com compras, raridade, melhorias ou qualquer outro upgrade.** Sobreviventes extras permanecem no inventário/reserva.
 - Ao chegar a **5% de vida**, o sobrevivente deixa o combate e entra no fluxo de feridos; não há morte permanente por esse evento.
 - Sobreviventes feridos não produzem MNC. Se não houver sobreviventes ativos em combate, a produção pausa.
 - A produção não é retroativa durante pausas ou períodos offline. Sobreviventes saudáveis produzem enquanto estiverem em combate e conectados.
 - O médico é um serviço: não ocupa vaga, não luta, não produz MNC, não cria leitos e não acelera a recuperação.
 
 ## 3. Enfermaria, abrigo e recuperação
-- **O ambulatório tem no máximo 15 vagas de recuperação simultâneas por jogador. Esse limite é fixo e não pode ser aumentado por compras ou melhorias.**
-- A capacidade do ambulatório é separada da quantidade de sobreviventes permitida na equipe de combate. Sobreviventes sem vaga aguardam em fila FIFO; os que ocupam vagas recuperam simultaneamente.
+- **O ambulatório também tem no máximo 15 vagas de recuperação simultâneas por jogador. Esse limite é independente das 15 vagas da equipe e não pode ser aumentado por compras ou melhorias.**
+- Portanto, cada jogador possui dois limites separados: até 15 sobreviventes na equipe e até 15 sobreviventes em recuperação simultânea no ambulatório. Sobreviventes sem vaga aguardam em fila FIFO; os que ocupam vagas recuperam simultaneamente.
 - Ao recuperar 100% da vida, o sobrevivente sai da vaga de recuperação e vai para a reserva. A entrada na equipe depende das vagas de combate disponíveis.
 - Sem médico, o jogador online decide individualmente quando enviar cada ferido à enfermaria.
 - Com médico ativo, o resgate de feridos é automático enquanto o jogador está online; o limite de 15 vagas simultâneas do ambulatório continua valendo e os demais aguardam na fila.
