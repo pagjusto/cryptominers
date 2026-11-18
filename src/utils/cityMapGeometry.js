@@ -13,12 +13,26 @@ export const GRID_ROWS = 11;
 export const TILE_SIZE = 76;
 
 /**
+ * Retorna se a célula (c, r) está no perímetro interno, pátio ou cercas da Base Militar e Hospital.
+ * Regra Oficial do Usuário: "veja que zumbis estao invadindo a area da base"
+ * Zumbis e Boss NUNCA podem nascer nem caminhar dentro do santuário da base.
+ */
+export function isBaseCompound(c, r) {
+  // Complexo militar fortificado: Hangar, Hospital Cruz Vermelha, Pátio cercado e Doca da Ambulância
+  if (c >= 4 && c <= 9 && (r >= 3 && r <= 7)) return true;
+  if (c === 10 && (r >= 4 && r <= 7)) return true; // Cercas laterais a leste do hospital
+  return false;
+}
+
+/**
  * Retorna se a célula (c, r) contém um obstáculo sólido:
  * - Prédios e Ruínas de concreto
+ * - Base Militar Fortificada (Santuário dos Sobreviventes)
  * - Muros perimetrais e Portões
  * - Cercas de arame e Barricadas de sacos de areia
  * - Carros abandonados e Ambulância
  * - Torres de vigia e Silos
+ * - Outdoor / Billboard "CryptoZombies"
  * 
  * Onde for true: nem heróis nem zumbis/boss podem pisar, atravessar ou nascer.
  * Onde for false: ruas pavimentadas (livres de carros), caminhos de terra batida e gramados livres.
@@ -32,7 +46,7 @@ export function isCityObstacle(c, r) {
   if (c === 1 && r === 5) return true;
   // Carro no asfalto leste: na faixa c=13, r=5 (a faixa c=12 fica livre para desvio dos pedestres)
   if (c === 13 && r === 5) return true;
-  // Ambulância estacionada na doca: c=7, r=6 (a pista c=8 fica livre para passagem pelo pátio)
+  // Ambulância estacionada na doca: c=7, r=6
   if (c === 7 && r === 6) return true;
 
   // 2. PRÉDIOS E RUÍNAS DE CONCRETO
@@ -42,22 +56,17 @@ export function isCityObstacle(c, r) {
   // Ruína Sudeste (prédio em c=10..11, r=7..8; avenida leste c=12..13 livre)
   if ((c === 10 || c === 11) && (r === 7 || r === 8)) return true;
 
-  // Base Central (Hangar Militar de Suprimentos & Posto Médico / Hospital Cruz Vermelha)
-  if (c >= 5 && c <= 8 && r === 3) return true; // Hangar norte
-  if (c >= 5 && c <= 9 && r === 4) return true; // Corpo central do hangar
-  if (c >= 5 && c <= 9 && r === 5) return true; // Suprimentos e hospital
-  if (c >= 5 && c <= 6 && r === 6) return true; // Doca de caixotes
+  // 3. BASE MILITAR FORTIFICADA & SANTUÁRIO DOS SOBREVIVENTES
+  // Hangar Militar de Suprimentos, Hospital Cruz Vermelha, Pátio cercado da Ambulância, Portão e Muros:
+  // Zumbis e Boss são estritamente proibidos de invadir ou nascer nesta área.
+  if (isBaseCompound(c, r)) return true;
 
   // Torres de Vigia e Silo Metálico de Abastecimento
   if ((c === 10 || c === 11) && (r === 0 || r === 1)) return true; // Torre norte
   if (c === 11 && (r === 3 || r === 4)) return true; // Torre leste
   if (c === 13 && (r === 3 || r === 4)) return true; // Silo metálico
 
-  // 3. MUROS, CERCAS DE ARAME E BARRICADAS (Walls, Fences & Sandbags)
-  // Muro oeste da base: c=4, r=4..6 (deixa r=7 aberto como corredor livre)
-  if (c === 4 && (r >= 4 && r <= 6)) return true;
-  // Muro sul da base: c=5, 6, 7 em r=7 (deixa c=8 e c=9 abertos como portões da base)
-  if ((c === 5 || c === 6 || c === 7) && r === 7) return true;
+  // 4. MUROS, CERCAS DE ARAME E BARRICADAS (Walls, Fences & Sandbags)
   // Barricada norte da base: c=6..8, r=2 (deixa c=5 e c=9 abertos como acessos norte)
   if (c >= 6 && c <= 8 && r === 2) return true;
 
@@ -69,10 +78,10 @@ export function isCityObstacle(c, r) {
 
   if (c === 10 && r === 6) return true; // Cerca da ruína sudeste
 
-  // 4. OUTDOOR / BILLBOARD VETORIZADO "CRYPTOZOMBIES" (Cols c=7..8, Row r=1 no gramado)
-  // Estrutura metálica com sapatas de sustentação e painel oficial:
+  // 5. OUTDOOR / BILLBOARD VETORIZADO "CRYPTOZOMBIES" (Cols c=7..9, Row r=1 no gramado)
+  // Estrutura metálica com sapatas de sustentação e painel oficial aumentado 2x:
   // Nem heróis nem zumbis podem pisar, atravessar ou nascer sobre o outdoor.
-  if ((c === 7 || c === 8) && r === 1) return true;
+  if (c >= 7 && c <= 9 && r === 1) return true;
 
   return false;
 }

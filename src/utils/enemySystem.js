@@ -8,7 +8,7 @@
 // ============================================================================
 
 import { TILE_SIZE, BLOCK_EMPTY, BLOCK_BEDROCK, BLOCK_ZOMBIE, BLOCK_BOSS } from '../data/minersData.js';
-import { isCityBuilding, isCanyonTrackOrTunnel } from './cityMapGeometry.js';
+import { isCityBuilding, isCanyonTrackOrTunnel, isBaseCompound } from './cityMapGeometry.js';
 import { ENEMIES } from '../data/enemiesCatalog.js';
 
 class EnemySpriteManager {
@@ -88,6 +88,8 @@ export function syncEnemiesWithMap(existingEnemies = [], mapData, grid, hpMap) {
 
   deposits.forEach((dep, idx) => {
     if (dep.isCompleted) return;
+    // Zumbis e Boss NUNCA podem nascer nem existir na área da base militar/hospital
+    if (isCityBuilding(dep.c, dep.r) || isBaseCompound(dep.c, dep.r)) return;
 
     const isBoss = dep.type === 'boss' || dep.blockId === BLOCK_BOSS;
     const blockId = isBoss ? BLOCK_BOSS : BLOCK_ZOMBIE;
@@ -251,7 +253,7 @@ export function updateEnemies(enemies, state, dt, now, isCanyon = true) {
           { x: enemy.gx, y: enemy.gy - 1 }
         ].filter(pos => {
           if (pos.x <= 0 || pos.x >= GRID_COLS - 1 || pos.y <= 0 || pos.y >= GRID_ROWS - 1) return false;
-          if (isCityBuilding(pos.x, pos.y)) return false; // Prédios e estruturas da cidade (apenas ruas e grama)
+          if (isCityBuilding(pos.x, pos.y) || isBaseCompound(pos.x, pos.y)) return false; // Bloqueia prédios e toda a área da base militar
           if (state.grid[pos.y] && state.grid[pos.y][pos.x] !== BLOCK_EMPTY) return false; // Bloqueado por rocha/outro
 
           // Não anda em cima de outro minerador

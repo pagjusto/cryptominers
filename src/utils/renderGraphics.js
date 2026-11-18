@@ -99,47 +99,47 @@ export function drawContinuousCaveFloor(ctx, width, height, mine, now) {
   if (cityBgLoaded && cityBgImg) {
     ctx.drawImage(cityBgImg, 0, 0, width, height);
 
-    // 1.1 OUTDOOR / BILLBOARD VETORIZADO "CRYPTOZOMBIES" (Mais pra frente, mais pro lado e tamanho calibrado)
+    // 1.1 OUTDOOR / BILLBOARD VETORIZADO "CRYPTOZOMBIES" (Aumentado 2x, proporção 16:9 de alto impacto)
     if (!billboardImg && typeof window !== 'undefined') {
       initBillboard();
     }
     if (billboardLoaded && billboardImg) {
-      // Dimensões aumentadas e calibradas com proporção 16:9
-      const bW = 180;
-      const bH = 101;
-      // Posicionado mais pra frente (Y=50) e mais pro lado no gramado livre (X=530)
-      const bX = 530;
-      const bY = 50;
+      // Dimensões aumentadas em 2x (260x146, proporção exata 16:9 da arte oficial)
+      const bW = 260;
+      const bH = 146;
+      // Posicionado no gramado livre ao lado e mais à frente (X=490, Y=22)
+      const bX = 490;
+      const bY = 22;
 
       // Sombras realistas de contato e projeção solar no gramado (Sol vindo do noroeste)
       ctx.save();
       
       // 1. Sombra suave e difusa projetada pelo painel no gramado (diagonal para sudeste)
-      ctx.fillStyle = 'rgba(5, 20, 5, 0.40)';
+      ctx.fillStyle = 'rgba(5, 20, 5, 0.42)';
       ctx.beginPath();
-      ctx.ellipse(bX + bW * 0.58, bY + bH * 0.93, bW * 0.46, 15, 0.10, 0, Math.PI * 2);
+      ctx.ellipse(bX + bW * 0.58, bY + bH * 0.93, bW * 0.46, 20, 0.10, 0, Math.PI * 2);
       ctx.fill();
 
       // 2. Sombra de oclusão de ambiente sob a base da estrutura
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.28)';
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.30)';
       ctx.beginPath();
-      ctx.ellipse(bX + bW * 0.50, bY + bH * 0.88, bW * 0.42, 18, 0.05, 0, Math.PI * 2);
+      ctx.ellipse(bX + bW * 0.50, bY + bH * 0.88, bW * 0.42, 24, 0.05, 0, Math.PI * 2);
       ctx.fill();
 
       // 3. Sombra profunda de contato no pé esquerdo (apoio traseiro no gramado)
       const leftFootX = bX + bW * 0.28;
       const leftFootY = bY + bH * 0.89;
-      ctx.fillStyle = 'rgba(0, 10, 0, 0.85)';
+      ctx.fillStyle = 'rgba(0, 10, 0, 0.88)';
       ctx.beginPath();
-      ctx.ellipse(leftFootX, leftFootY, 11, 4.5, 0.12, 0, Math.PI * 2);
+      ctx.ellipse(leftFootX, leftFootY, 15, 6, 0.12, 0, Math.PI * 2);
       ctx.fill();
 
       // 4. Sombra profunda de contato no pé direito (apoio frontal no gramado)
       const rightFootX = bX + bW * 0.72;
       const rightFootY = bY + bH * 0.98;
-      ctx.fillStyle = 'rgba(0, 10, 0, 0.88)';
+      ctx.fillStyle = 'rgba(0, 10, 0, 0.90)';
       ctx.beginPath();
-      ctx.ellipse(rightFootX, rightFootY, 13, 5.5, 0.12, 0, Math.PI * 2);
+      ctx.ellipse(rightFootX, rightFootY, 18, 7.5, 0.12, 0, Math.PI * 2);
       ctx.fill();
 
       ctx.restore();

@@ -31,7 +31,7 @@ import { rockSpriteManager } from '../utils/rockSprites';
 import { characterSpriteManager } from '../utils/characterSprites';
 import { rollMiningGearDrop } from '../data/gearData';
 import { sfx } from '../utils/sfx';
-import { isCityBuilding, getSafeHeroSpawn, isCanyonTrackOrTunnel } from '../utils/cityMapGeometry';
+import { isCityBuilding, getSafeHeroSpawn, isCanyonTrackOrTunnel, isBaseCompound } from '../utils/cityMapGeometry';
 import { findNextHeroAction, COMBAT_RANGE, hasClearLineOfSight } from '../utils/minerPathfinding';
 
 export default function GameBoard({ 
@@ -210,6 +210,18 @@ export default function GameBoard({
       // Atualiza movimentação de caminhada e combate dos Zumbis e Boss
       if (mapData) {
         state.enemies = syncEnemiesWithMap(state.enemies || [], mapData, state.grid, state.hpMap);
+        // Regra Oficial do Usuário: Zumbis NUNCA podem invadir ou permanecer na área da base militar
+        state.enemies = state.enemies.filter(e => {
+          if (isBaseCompound(Math.round(e.gx), Math.round(e.gy))) {
+            const k = `${Math.round(e.gx)},${Math.round(e.gy)}`;
+            delete state.hpMap[k];
+            if (state.grid[Math.round(e.gy)]) {
+              state.grid[Math.round(e.gy)][Math.round(e.gx)] = BLOCK_EMPTY;
+            }
+            return false;
+          }
+          return true;
+        });
         updateEnemies(state.enemies, state, dt, now, isCanyon);
       }
 

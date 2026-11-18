@@ -24,7 +24,7 @@ import {
   BLOCK_ZOMBIE,
   BLOCK_BOSS
 } from '../data/minersData.js';
-import { isCityBuilding, isCanyonTrackOrTunnel } from './cityMapGeometry.js';
+import { isCityBuilding, isCanyonTrackOrTunnel, isBaseCompound } from './cityMapGeometry.js';
 import { ENEMIES } from '../data/enemiesCatalog.js';
 
 export const DEPOSIT_TYPES = {
@@ -114,10 +114,10 @@ export function getValidDepositCells(cols = GRID_COLS, rows = GRID_ROWS) {
 
   for (let r = 1; r < rows - 1; r++) {
     for (let c = 1; c < cols - 1; c++) {
-      // Bloqueia edifícios, ruínas, muros e estruturas fortificadas da cidade
-      if (isCityBuilding(c, r)) continue;
+      // Bloqueia edifícios, ruínas, muros, outdoor e toda a área da base militar/hospital
+      if (isCityBuilding(c, r) || isBaseCompound(c, r)) continue;
 
-      // Área livre e permitida: ruas asfaltadas, caminhos de terra e gramados
+      // Área livre e permitida: ruas asfaltadas, caminhos de terra e gramados externos
       validCells.push({ c, r });
     }
   }
