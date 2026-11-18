@@ -42,6 +42,16 @@ export const MEDIAN_TEAM_COMPOSITION = Object.freeze({
   superLegendary: 0
 });
 
+export function calculateCombatProduction(survivors = [], elapsedSeconds = 1) {
+  if (!Number.isFinite(elapsedSeconds) || elapsedSeconds <= 0) return 0;
+  return survivors.reduce((total, survivor) => {
+    if (survivor?.status !== 'work') return total;
+    if (Number.isFinite(survivor.currentHealth) && survivor.currentHealth <= 5) return total;
+    const rarity = survivor?.rarity || 'common';
+    return total + (SURVIVOR_MNC_PER_SECOND[rarity] || 0) * elapsedSeconds;
+  }, 0);
+}
+
 export function calculateSurvivorDailyProduction(survivors = []) {
   return survivors.reduce((total, survivor) => {
     const rarity = survivor?.rarity || 'common';
