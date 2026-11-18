@@ -326,30 +326,47 @@ export function drawEnemyCharacter(ctx, enemy, now) {
     }
   }
 
-  // 3. Sombra de Contato Realista no Solo (fixa no chão, rente à sola dos pés para não parecer flutuando)
-  ctx.save();
-  ctx.translate(px + lungeX * 0.35, py);
-  ctx.fillStyle = isBoss ? 'rgba(0, 0, 0, 0.42)' : 'rgba(0, 0, 0, 0.35)';
-  ctx.beginPath();
-  const shadowY = isBoss ? 20 : 14;
-  const shadowRx = isBoss ? 23 : 15;
-  const shadowRy = isBoss ? 6.5 : 4.2;
-  ctx.ellipse(0, shadowY, shadowRx, shadowRy, 0, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.restore();
-
-  // 4. Desenho do Sprite do Inimigo com Transformações
-  ctx.save();
-  ctx.translate(px + lungeX, py + bobbing);
-  ctx.scale(enemy.facingDir * attackScale, attackScale);
-  ctx.rotate(walkTilt + attackTilt);
-
   // Zumbis mais encorpados e largos conforme solicitado (~40px de largura e ~36px de altura)
   const drawW = isBoss ? Math.floor(TILE_SIZE * 0.74) : Math.floor(TILE_SIZE * 0.52);
   const drawH = isBoss ? Math.floor(TILE_SIZE * 0.68) : Math.floor(TILE_SIZE * 0.47);
 
+  // Calibragem física exata para pés plantados no solo (elimina qualquer efeito de flutuação):
+  // No sprite 640x640 do zumbi, a sola da bota está em Y=536 (536/640 = 0.8375)
+  // No sprite 1024x1024 do boss, a sola dos pés está em Y=948 (948/1024 = 0.9258)
+  const groundY = isBoss ? 18 : 12;
+  const dy = isBoss
+    ? groundY - Math.round(drawH * (948 / 1024))
+    : groundY - Math.round(drawH * (536 / 640));
   const dx = -drawW / 2;
-  const dy = isBoss ? -drawH + 20 : -drawH + 14;
+
+  // 3. Sombra de Contato Realista no Solo (ancorada exatamente na sola das botas)
+  ctx.save();
+  ctx.translate(px + lungeX * 0.35, py);
+  const shadowY = groundY;
+  const shadowRx = isBoss ? 24 : 16;
+  const shadowRy = isBoss ? 6.8 : 4.4;
+
+  // Camada 1: Penumbra difusa suave
+  ctx.beginPath();
+  ctx.fillStyle = isBoss ? 'rgba(0, 0, 0, 0.22)' : 'rgba(0, 0, 0, 0.20)';
+  ctx.ellipse(0, shadowY, shadowRx, shadowRy, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Camada 2: Núcleo de oclusão de contato direto (bem escuro e rente ao solo)
+  ctx.beginPath();
+  ctx.fillStyle = isBoss ? 'rgba(0, 0, 0, 0.50)' : 'rgba(0, 0, 0, 0.44)';
+  ctx.ellipse(0, shadowY, shadowRx * 0.82, shadowRy * 0.72, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+
+  // 4. Desenho do Sprite do Inimigo com Transformações
+  // Para os zumbis com pernas separadas, os pés ficam firmemente apoiados no chão
+  // enquanto o tronco e cabeça realizam o bobbing e a respiração.
+  ctx.save();
+  const rootBob = isBoss ? bobbing * 0.5 : 0;
+  ctx.translate(px + lungeX, py + rootBob);
+  ctx.scale(enemy.facingDir * attackScale, attackScale);
+  ctx.rotate(walkTilt + attackTilt);
 
   // Pontos de pivô anatômicos das articulações do quadril (escala 640x640)
   const hipLeftX = dx + drawW * (294 / 640);
@@ -392,9 +409,9 @@ export function drawEnemyCharacter(ctx, enemy, now) {
     ctx.drawImage(enemySpriteManager.zombieLegLeftImg, dx, dy, drawW, drawH);
     ctx.restore();
 
-    // 3. Tronco Superior (Cabeça, Jaqueta, Braços e Mãos)
+    // 3. Tronco Superior (Cabeça, Jaqueta, Braços e Mãos com bobbing e respiração)
     ctx.save();
-    ctx.translate(0, -stepBob);
+    ctx.translate(0, -stepBob + bobbing);
     ctx.rotate(torsoSway);
     ctx.drawImage(enemySpriteManager.zombieUpperImg, dx, dy, drawW, drawH);
     ctx.restore();
