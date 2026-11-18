@@ -24,7 +24,13 @@ import {
   BLOCK_ZOMBIE,
   BLOCK_BOSS
 } from '../data/minersData.js';
-import { isCityBuilding, isCanyonTrackOrTunnel, isBaseCompound } from './cityMapGeometry.js';
+import { 
+  isCityBuilding, 
+  isCanyonTrackOrTunnel, 
+  isBaseCompound,
+  TACTICAL_ZONES,
+  CORNER_SPAWN_POINTS 
+} from './cityMapGeometry.js';
 import { ENEMIES } from '../data/enemiesCatalog.js';
 
 export const DEPOSIT_TYPES = {
@@ -143,11 +149,44 @@ function shuffleArray(arr) {
  */
 export function generatePlayerMap(playerId = DEFAULT_PLAYER_ID, cycleNumber = 1) {
   const validCells = getValidDepositCells(GRID_COLS, GRID_ROWS);
-  const shuffledCells = shuffleArray(validCells);
 
-  // Seleciona até 19 posições para os Zumbis e 1 para o Boss (Total = 20 entidades no mapa)
+  // REGRA OFICIAL DO USUÁRIO:
+  // "os herois devem ser distribuidos entre todo o mapa nos locais que defini inclusive os zumbis tambem , 
+  // os zumbis nascem nos cantos do mapa e caminham para as areas definidas proporcionalmente distribuidos"
   const maxZombies = MAX_DEPOSITS_PER_MAP - 1;
-  const chosenPositions = shuffledCells.slice(0, Math.min(maxZombies, shuffledCells.length));
+  const chosenPositions = [];
+  const usedKeys = new Set();
+
+  for (let i = 0; i < maxZombies; i++) {
+    const tz = TACTICAL_ZONES[i % TACTICAL_ZONES.length].center;
+    const candidates = [
+      { c: tz.x, r: tz.y },
+      { c: tz.x + 1, r: tz.y },
+      { c: tz.x - 1, r: tz.y },
+      { c: tz.x, r: tz.y + 1 },
+      { c: tz.x, r: tz.y - 1 },
+      { c: tz.x + 1, r: tz.y + 1 },
+      { c: tz.x - 1, r: tz.y - 1 }
+    ].filter(p => {
+      if (p.c <= 0 || p.c >= GRID_COLS - 1 || p.r <= 0 || p.r >= GRID_ROWS - 1) return false;
+      if (isCityBuilding(p.c, p.r) || isBaseCompound(p.c, p.r)) return false;
+      if (usedKeys.has(`${p.c},${p.r}`)) return false;
+      return true;
+    });
+
+    let chosenPos = null;
+    if (candidates.length > 0) {
+      chosenPos = candidates[0];
+    } else {
+      const fallback = validCells.find(p => !usedKeys.has(`${p.c},${p.r}`));
+      if (fallback) chosenPos = fallback;
+    }
+
+    if (chosenPos) {
+      usedKeys.add(`${chosenPos.c},${chosenPos.r}`);
+      chosenPositions.push({ ...chosenPos, targetZone: tz });
+    }
+  }
 
   const mapId = `map_${playerId}_c${cycleNumber}_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
   const deposits = [];
@@ -187,6 +226,7 @@ export function generatePlayerMap(playerId = DEFAULT_PLAYER_ID, cycleNumber = 1)
       sprite: enemyConfig.cleanSprite || enemyConfig.sprite,
       c: pos.c,
       r: pos.r,
+      targetZone: pos.targetZone || { x: pos.c, y: pos.r },
       maxHp: hp,
       currentHp: hp,
       isCompleted: false,
@@ -380,8 +420,8 @@ export function recordDepositDamage(playerId = DEFAULT_PLAYER_ID, c, r, damage =
     incrementPlayerMiningStats(playerId, deposit.type);
     mapState.zombiesKilledInCycle = (mapState.zombiesKilledInCycle || 0) + 1;
 
-    // REGRA OFICIAL DO USUÁRIO: "cada vez que um zumbi morre entra outro mantendo sempre 20 zumbis"
-    // Gera imediatamente um substituto ativo para manter a horda sempre com 20 criaturas no mapa
+    // REGRA OFICIAL DO USUÁRIO: "os zumbis nascem nos cantos do mapa e caminham para as areas definidas proporcionalmente distribuidos"
+    // Gera imediatamente um substituto ativo nascendo nos cantos do mapa e mirando a zona com menos criaturas
     const validCells = getValidDepositCells(GRID_COLS, GRID_ROWS);
     const activeKeys = new Set(
       mapState.deposits.filter(d => !d.isCompleted).map(d => `${d.c},${d.r}`)
@@ -390,14 +430,37 @@ export function recordDepositDamage(playerId = DEFAULT_PLAYER_ID, c, r, damage =
       !activeKeys.has(`${pos.c},${pos.r}`) && (pos.c !== c || pos.r !== r)
     );
 
+    const cornerPoints = CORNER_SPAWN_POINTS;
+    const openCorners = cornerPoints.filter(pos => 
+      !activeKeys.has(`${pos.c},${pos.r}`) && 
+      !isCityBuilding(pos.c, pos.r) && 
+      !isBaseCompound(pos.c, pos.r)
+    );
+
+    const newPos = openCorners.length > 0 
+      ? openCorners[Math.floor(Math.random() * openCorners.length)]
+      : (openCells.length > 0 ? openCells[Math.floor(Math.random() * openCells.length)] : { c: 1, r: 1 });
+
+    // Determina a zona tática com menor quantidade de zumbis para manter proporção rigorosa
+    const zoneCounts = TACTICAL_ZONES.map(z => ({
+      center: z.center,
+      count: mapState.deposits.filter(d => 
+        !d.isCompleted && d.targetZone && d.targetZone.x === z.center.x && d.targetZone.y === z.center.y
+      ).length
+    }));
+    zoneCounts.sort((a, b) => a.count - b.count);
+    const assignedZone = zoneCounts[0]?.center || TACTICAL_ZONES[0].center;
+
     let respawnedDeposit = null;
-    if (openCells.length > 0) {
-      const newPos = openCells[Math.floor(Math.random() * openCells.length)];
+    if (newPos) {
+      const spawnC = newPos.c !== undefined ? newPos.c : newPos.x;
+      const spawnR = newPos.r !== undefined ? newPos.r : newPos.y;
       const isBossType = deposit.type === 'boss';
       respawnedDeposit = {
         id: `dep_horde_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
-        c: newPos.c,
-        r: newPos.r,
+        c: spawnC,
+        r: spawnR,
+        targetZone: assignedZone,
         type: isBossType ? 'boss' : 'zombie',
         name: isBossType ? 'Boss Abominação' : 'Zumbi Andarilho',
         blockId: isBossType ? BLOCK_BOSS : BLOCK_ZOMBIE,
@@ -408,8 +471,8 @@ export function recordDepositDamage(playerId = DEFAULT_PLAYER_ID, c, r, damage =
         yieldRate: isBossType ? 0.25 : 0.05
       };
       mapState.deposits.push(respawnedDeposit);
-      mapState.grid[newPos.r][newPos.c] = respawnedDeposit.blockId;
-      mapState.hpMap[`${newPos.c},${newPos.r}`] = respawnedDeposit.currentHp;
+      mapState.grid[spawnR][spawnC] = respawnedDeposit.blockId;
+      mapState.hpMap[`${spawnC},${spawnR}`] = respawnedDeposit.currentHp;
     }
 
     // Mantém sempre 20 criaturas ativas no mapa

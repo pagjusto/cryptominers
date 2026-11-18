@@ -31,7 +31,14 @@ import { rockSpriteManager } from '../utils/rockSprites';
 import { characterSpriteManager } from '../utils/characterSprites';
 import { rollMiningGearDrop } from '../data/gearData';
 import { sfx } from '../utils/sfx';
-import { isCityBuilding, getSafeHeroSpawn, isCanyonTrackOrTunnel, isBaseCompound } from '../utils/cityMapGeometry';
+import { 
+  isCityBuilding, 
+  getSafeHeroSpawn, 
+  isCanyonTrackOrTunnel, 
+  isBaseCompound,
+  TACTICAL_ZONES,
+  CORNER_SPAWN_POINTS 
+} from '../utils/cityMapGeometry';
 import { findNextHeroAction, COMBAT_RANGE, hasClearLineOfSight } from '../utils/minerPathfinding';
 
 export default function GameBoard({ 
@@ -300,7 +307,7 @@ export default function GameBoard({
                 title: 'Abominação Mutante Derrotada'
               });
             } else {
-              // Zumbi comum derrotado: "ao morrer um vem outro" - respawn contínuo da horda
+              // Zumbi derrotado: "os zumbis nascem nos cantos do mapa e caminham para as areas definidas proporcionalmente distribuidos"
               const validCells = getValidDepositCells(GRID_COLS, GRID_ROWS);
               const openCells = validCells.filter(pos => {
                 if (pos.c === bx && pos.r === by) return false;
@@ -312,8 +319,34 @@ export default function GameBoard({
                 return true;
               });
 
-              if (openCells.length > 0) {
-                const spawnPos = openCells[Math.floor(Math.random() * openCells.length)];
+              // Filtra cantos e bordas abertos
+              const openCorners = CORNER_SPAWN_POINTS.filter(pos => {
+                if (state.grid[pos.r] && state.grid[pos.r][pos.c] !== BLOCK_EMPTY) return false;
+                if (isCityBuilding(pos.c, pos.r) || isBaseCompound(pos.c, pos.r)) return false;
+                const hasMiner = state.miners?.some(m => Math.round(m.x) === pos.c && Math.round(m.y) === pos.r);
+                if (hasMiner) return false;
+                const hasEnemy = state.enemies?.some(e => e.gx === pos.c && e.gy === pos.r);
+                if (hasEnemy) return false;
+                return true;
+              });
+
+              const spawnPos = openCorners.length > 0 
+                ? openCorners[Math.floor(Math.random() * openCorners.length)]
+                : (openCells.length > 0 ? openCells[Math.floor(Math.random() * openCells.length)] : null);
+
+              // Atribui à zona tática com menor quantidade de zumbis para manter distribuição proporcional
+              const zoneCounts = TACTICAL_ZONES.map(z => ({
+                center: z.center,
+                count: (state.enemies || []).filter(e => {
+                  const tx = e.targetZone?.x ?? e.targetZone?.c;
+                  const ty = e.targetZone?.y ?? e.targetZone?.r;
+                  return tx === z.center.x && ty === z.center.y;
+                }).length
+              }));
+              zoneCounts.sort((a, b) => a.count - b.count);
+              const assignedZone = zoneCounts[0]?.center || TACTICAL_ZONES[0].center;
+
+              if (spawnPos) {
                 const spawnKey = `${spawnPos.c},${spawnPos.r}`;
                 state.grid[spawnPos.r][spawnPos.c] = BLOCK_ZOMBIE;
                 state.hpMap[spawnKey] = 2; // Morre com exatamente 2 tiros
@@ -324,10 +357,13 @@ export default function GameBoard({
                   name: 'Zumbi Andarilho',
                   gx: spawnPos.c,
                   gy: spawnPos.r,
+                  targetZone: assignedZone,
                   visualX: spawnPos.c,
                   visualY: spawnPos.r,
                   facingDir: Math.random() > 0.5 ? 1 : -1,
                   isWalking: false,
+                  attackedTimer: 0,
+                  isUnderAttack: false,
                   walkTimer: 0,
                   targetGx: spawnPos.c,
                   targetGy: spawnPos.r,
@@ -541,6 +577,15 @@ export default function GameBoard({
               miner.isMining = false;
               miner.moveCooldown = 0;
               return;
+            }
+
+            // REGRA OFICIAL DO USUÁRIO: "enquanto o zumbi é atacado ele nao deve caminhar"
+            const targetEnemy = state.enemies?.find(e => e.gx === tx && e.gy === ty);
+            if (targetEnemy) {
+              targetEnemy.isUnderAttack = true;
+              targetEnemy.attackedTimer = 1.2;
+              targetEnemy.isWalking = false;
+              targetEnemy.moveCooldown = 1.2;
             }
 
             if (blockType !== BLOCK_EMPTY && blockType !== BLOCK_BEDROCK) {

@@ -8,7 +8,7 @@
 // ============================================================================
 
 import { TILE_SIZE, BLOCK_EMPTY, BLOCK_BEDROCK, BLOCK_ZOMBIE, BLOCK_BOSS } from '../data/minersData.js';
-import { isCityBuilding, isCanyonTrackOrTunnel, isBaseCompound } from './cityMapGeometry.js';
+import { isCityBuilding, isCanyonTrackOrTunnel, isBaseCompound, TACTICAL_ZONES } from './cityMapGeometry.js';
 import { ENEMIES } from '../data/enemiesCatalog.js';
 
 class EnemySpriteManager {
@@ -106,11 +106,14 @@ export function syncEnemiesWithMap(existingEnemies = [], mapData, grid, hpMap) {
         name: isBoss ? 'Boss Abominação' : 'Zumbi Mineiro',
         gx: dep.c,
         gy: dep.r,
+        targetZone: dep.targetZone || TACTICAL_ZONES[idx % TACTICAL_ZONES.length]?.center,
         visualX: dep.c,
         visualY: dep.r,
         targetGx: dep.c,
         targetGy: dep.r,
         isWalking: false,
+        attackedTimer: 0,
+        isUnderAttack: false,
         walkTimer: Math.random() * 20,
         moveCooldown: Math.random() * (isBoss ? 4.5 : 3.0) + 2.0,
         facingDir: Math.random() > 0.5 ? 1 : -1,
@@ -241,6 +244,19 @@ export function updateEnemies(enemies, state, dt, now, isCanyon = true) {
         }
       }
     } else {
+      // Temporizador de ataque sofrido (reseta gradualmente)
+      if (enemy.attackedTimer > 0) {
+        enemy.attackedTimer -= dt;
+      }
+
+      // REGRA OFICIAL DO USUÁRIO: "enquanto o zumbi é atacado ele nao deve caminhar"
+      const isUnderAttack = (enemy.hitFlash > 0) || (enemy.attackedTimer > 0) || (enemy.isUnderAttack);
+      if (isUnderAttack) {
+        enemy.isWalking = false;
+        enemy.moveCooldown = 1.2; // Permanece estático e em posição de combate enquanto sob ataque
+        return;
+      }
+
       // Temporizador para decidir a próxima caminhada
       enemy.moveCooldown = (enemy.moveCooldown || 2.0) - dt;
 
@@ -264,7 +280,28 @@ export function updateEnemies(enemies, state, dt, now, isCanyon = true) {
         });
 
         if (candidates.length > 0) {
-          const chosen = candidates[Math.floor(Math.random() * candidates.length)];
+          // REGRA OFICIAL DO USUÁRIO: "caminham para as areas definidas proporcionalmente distribuidos"
+          let chosen = null;
+          const targetX = enemy.targetZone?.x ?? enemy.targetZone?.c;
+          const targetY = enemy.targetZone?.y ?? enemy.targetZone?.r;
+
+          if (targetX !== undefined && targetY !== undefined) {
+            const currentDist = Math.abs(enemy.gx - targetX) + Math.abs(enemy.gy - targetY);
+            if (currentDist > 1) {
+              // Se ainda não chegou na zona definida, caminha em direção a ela
+              candidates.sort((a, b) => {
+                const distA = Math.abs(a.x - targetX) + Math.abs(a.y - targetY);
+                const distB = Math.abs(b.x - targetX) + Math.abs(b.y - targetY);
+                return distA - distB;
+              });
+              chosen = candidates[0];
+            }
+          }
+
+          if (!chosen) {
+            chosen = candidates[Math.floor(Math.random() * candidates.length)];
+          }
+
           const oldKey = `${enemy.gx},${enemy.gy}`;
           const newKey = `${chosen.x},${chosen.y}`;
 
@@ -283,6 +320,7 @@ export function updateEnemies(enemies, state, dt, now, isCanyon = true) {
           enemy.gy = chosen.y;
           enemy.isWalking = true;
           enemy.facingDir = dir;
+          enemy.moveCooldown = Math.random() * 1.5 + 1.2;
         } else {
           // Tenta novamente em 2 segundos se cercado
           enemy.moveCooldown = 2.0;

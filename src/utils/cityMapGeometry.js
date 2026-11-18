@@ -93,20 +93,76 @@ export const isCityBuilding = isCityObstacle;
 export const isCanyonTrackOrTunnel = isCityObstacle;
 
 /**
- * Lista de pontos seguros e 100% abertos para spawn inicial de heróis (apenas Ruas livres e Grama)
- * Nenhum ponto colide com carros, prédios, muros ou cercas, e todos estão rigorosamente nos limites jogáveis.
+ * 14 ZONAS TÁTICAS DEFINIDAS OFICIALMENTE PELO USUÁRIO (Círculos vermelhos no mapa)
+ * Distribuídas proporcionalmente por todo o perímetro ao redor da base militar:
+ * Noroeste, Oeste, Sudoeste, Sul, Sudeste, Leste e Nordeste.
+ */
+export const TACTICAL_ZONES = [
+  // 1. Noroeste - Gramado Atrás da Ruína (Canto superior esquerdo)
+  { id: 'nw_grass_high', name: 'Noroeste Gramado Alto', center: { x: 4, y: 1 } },
+  // 2. Noroeste - Gramado Aberto Oeste (Ao lado da ruína)
+  { id: 'nw_grass_open', name: 'Noroeste Gramado Aberto', center: { x: 1, y: 2 } },
+  // 3. Noroeste - Encruzilhada da Base Norte (Estrada de terra)
+  { id: 'nw_crossroad', name: 'Norte Encruzilhada', center: { x: 4, y: 2 } },
+  // 4. Oeste - Estrada Lateral da Base (Entre avenida e muro oeste)
+  { id: 'w_road_side', name: 'Oeste Estrada Lateral', center: { x: 3, y: 5 } },
+  // 5. Sudoeste - Gramado Sul da Avenida
+  { id: 'sw_grass_open', name: 'Sudoeste Gramado', center: { x: 1, y: 7 } },
+  // 6. Sudoeste - Trilha do Canto Inferior Esquerdo
+  { id: 'sw_trail_corner', name: 'Sudoeste Canto', center: { x: 1, y: 9 } },
+  // 7. Sul-Oeste - Gramado Frontal da Base
+  { id: 's_grass_front', name: 'Sul Gramado Frontal', center: { x: 3, y: 9 } },
+  // 8. Sul - Gramado Central do Portão
+  { id: 's_grass_center', name: 'Sul Gramado Central', center: { x: 6, y: 9 } },
+  // 9. Sul-Leste - Gramado Dianteiro da Ruína Sudeste
+  { id: 'se_grass_ruin', name: 'Sudeste Gramado Ruína', center: { x: 8, y: 9 } },
+  // 10. Sul-Leste - Encruzilhada da Ruína Sudeste
+  { id: 'se_crossroad', name: 'Sudeste Encruzilhada', center: { x: 9, y: 8 } },
+  // 11. Sudeste - Gramado Extremo Leste
+  { id: 'se_grass_corner', name: 'Sudeste Canto Leste', center: { x: 13, y: 8 } },
+  // 12. Leste - Avenida de Asfalto Leste (Em frente ao hospital)
+  { id: 'e_avenue', name: 'Leste Avenida', center: { x: 12, y: 5 } },
+  // 13. Nordeste - Trilha de Terra da Torre
+  { id: 'ne_trail_tower', name: 'Nordeste Trilha Torre', center: { x: 10, y: 2 } },
+  // 14. Nordeste - Gramado Superior da Torre
+  { id: 'ne_grass_high', name: 'Nordeste Gramado Alto', center: { x: 13, y: 1 } }
+];
+
+/**
+ * PONTOS DE SPAWN NOS CANTOS E BORDAS DO MAPA ("os zumbis nascem nos cantos do mapa")
+ * Zumbis surgem nas bordas e cantos extremos e caminham para as zonas táticas definidas.
+ */
+export const CORNER_SPAWN_POINTS = [
+  // Canto Noroeste (Extremo superior esquerdo)
+  { x: 1, y: 1, c: 1, r: 1 },
+  { x: 2, y: 1, c: 2, r: 1 },
+  // Canto Nordeste (Extremo superior direito)
+  { x: 13, y: 1, c: 13, r: 1 },
+  { x: 12, y: 1, c: 12, r: 1 },
+  // Canto Sudoeste (Extremo inferior esquerdo)
+  { x: 1, y: 9, c: 1, r: 9 },
+  { x: 2, y: 9, c: 2, r: 9 },
+  // Canto Sudeste (Extremo inferior direito)
+  { x: 13, y: 9, c: 13, r: 9 },
+  { x: 12, y: 9, c: 12, r: 9 },
+  // Vias de Entrada Externas
+  { x: 1, y: 4, c: 1, r: 4 },  // Avenida Oeste
+  { x: 13, y: 4, c: 13, r: 4 }, // Avenida Leste
+  { x: 5, y: 1, c: 5, r: 1 },  // Acesso Norte
+  { x: 7, y: 9, c: 7, r: 9 }   // Acesso Sul
+];
+
+export function getCornerSpawnPoint(index = 0) {
+  return CORNER_SPAWN_POINTS[index % CORNER_SPAWN_POINTS.length];
+}
+
+/**
+ * Lista oficial de spawn inicial dos heróis distribuídos por todo o mapa nos locais definidos pelo usuário.
+ * Cada um dos 15 heróis ocupa uma zona tática própria ao redor da base.
  */
 export const SAFE_HERO_SPAWN_POINTS = [
-  // Estrada Oeste (Pista livre e desvio do carro)
-  { x: 1, y: 4 }, { x: 2, y: 5 }, { x: 1, y: 6 }, { x: 2, y: 6 },
-  // Gramado Sudoeste (Totalmente aberto)
-  { x: 1, y: 8 }, { x: 2, y: 8 }, { x: 1, y: 9 }, { x: 2, y: 9 },
-  // Acesso Norte / Gramado Noroeste (Aberto)
-  { x: 1, y: 1 }, { x: 1, y: 2 }, { x: 4, y: 1 }, { x: 5, y: 1 },
-  // Estrada Leste (Pista livre e desvio do carro)
-  { x: 12, y: 4 }, { x: 12, y: 5 }, { x: 12, y: 6 }, { x: 13, y: 6 },
-  // Pátio Sul e Gramado Sul (Aberto)
-  { x: 7, y: 8 }, { x: 8, y: 8 }, { x: 6, y: 9 }, { x: 7, y: 9 }
+  ...TACTICAL_ZONES.map(z => ({ x: z.center.x, y: z.center.y })),
+  { x: 1, y: 4 } // 15º herói na avenida oeste
 ];
 
 export function getSafeHeroSpawn(index = 0) {
