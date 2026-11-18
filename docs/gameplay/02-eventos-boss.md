@@ -47,6 +47,32 @@
 - O dano causado ao Boss não aumenta nem reduz a chance do Baú de Construção.
 - A chance é calculada pela composição e raridade dos sobreviventes elegíveis, conforme a regra dos Baús de Construção.
 
+## Chances de Baú de Construção por raridade
+
+A chance individual de cada sobrevivente elegível contribuir para o sorteio de Baú de Construção é:
+
+| Raridade | Chance |
+|---|---:|
+| Comum | 2,00% |
+| Raro | 2,20% |
+| Super Raro | 2,2667% |
+| Épico | 2,3333% |
+| Lendário | 2,6667% |
+| Super Lendário | 3,00% |
+
+- As chances individuais são somadas por jogador, respeitando o limite máximo de **40% por jogador em cada Boss**.
+- Cada jogador pode receber no máximo **1 Baú de Construção por Boss**.
+- O limite diário é de **3 Baús de Construção por jogador**.
+
+## Recompensa adicional: Baú de Herói
+
+- Cada Baú de Construção concede sempre **1 Fragmento de Construção**.
+- Além do fragmento garantido, cada Baú de Construção tem **2% de chance independente** de conceder **1 Baú de Herói adicional**.
+- O Baú de Herói não substitui nem remove o Fragmento de Construção.
+- Cada Baú de Construção pode conceder no máximo **1 Baú de Herói**.
+- A chance de 2% é aplicada na abertura de cada Baú de Construção, não no sorteio do Boss.
+- O Baú de Herói utiliza as probabilidades de raridade já definidas para os Baús de Herói.
+
 ## Pontos ainda a definir
 
 Comportamento em caso de falha global do servidor, comportamento quando não houver sobrevivente elegível e confirmação de eventuais limites diários precisam ser fechados antes de serem publicados como regras definitivas.
