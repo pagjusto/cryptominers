@@ -1,473 +1,79 @@
-import React, { useState } from 'react';
-import { X, TrendingUp, Calculator, ShieldCheck, Sparkles, Home, Layers, DollarSign, Calendar, Clock, ArrowRight, Settings, Info, Award, BarChart3 } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+import { X, Home, Layers, Info, BarChart3, Sparkles, Settings } from 'lucide-react';
 import { calculateRoiScenario } from '../utils/roiSimulatorEngine';
 import { getCriptoMynersConfig } from '../data/criptoMynersConfig';
 
-export default function RoiSimulatorModal({
-  isOpen,
-  onClose,
-  onOpenSummonModal,
-  onOpenAdminConfig
-}) {
-  const [selectedChest, setSelectedChest] = useState('explorer');
-  const [chestQuantity, setChestQuantity] = useState(1);
-  const [selectedHouse, setSelectedHouse] = useState('basic');
-  const [activeScenario, setActiveScenario] = useState('expected'); // 'conservative' | 'expected' | 'optimistic'
+const TIERS = [
+  ['common','Comum','text-slate-200'],['rare','Raro','text-sky-300'],
+  ['superRare','Super Raro','text-cyan-300'],['epic','Épico','text-purple-300'],
+  ['legendary','Lendário','text-amber-300'],['superLegendary','Super Lendário','text-orange-300']
+];
+const money = n => Number(n||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 
-  if (!isOpen) return null;
-
-  const config = getCriptoMynersConfig();
-
-  // Calcula os 3 cenários simultaneamente para permitir comparação lado a lado
-  const conservativeData = calculateRoiScenario({
-    chestCategory: selectedChest,
-    chestQuantity,
-    houseId: selectedHouse,
-    scenario: 'conservative',
-    config
-  });
-
-  const expectedData = calculateRoiScenario({
-    chestCategory: selectedChest,
-    chestQuantity,
-    houseId: selectedHouse,
-    scenario: 'expected',
-    config
-  });
-
-  const optimisticData = calculateRoiScenario({
-    chestCategory: selectedChest,
-    chestQuantity,
-    houseId: selectedHouse,
-    scenario: 'optimistic',
-    config
-  });
-
-  const currentData = activeScenario === 'conservative'
-    ? conservativeData
-    : activeScenario === 'optimistic'
-      ? optimisticData
-      : expectedData;
-
-  const currentChestInfo = config.chests[selectedChest] || config.chests.miner;
-  const currentHouseInfo = config.houses[selectedHouse] || config.houses.basic;
-
+export default function RoiSimulatorModal({isOpen,onClose,onOpenSummonModal,onOpenAdminConfig}) {
+  const [chestMix,setChestMix]=useState({miner:0,explorer:0,elite:0,legendary:0});
+  const [heroCounts,setHeroCounts]=useState({common:0,rare:0,superRare:0,epic:0,legendary:0,superLegendary:0});
+  const [selectedHouse,setSelectedHouse]=useState('basic');
+  const [sessionHours,setSessionHours]=useState(24);
+  if(!isOpen)return null;
+  const config=getCriptoMynersConfig();
+  const chests=Object.values(config.chests);
+  const mix=chests.map(c=>({id:c.id,quantity:Number(chestMix[c.id])||0}));
+  const data=calculateRoiScenario({chestMix:mix,heroCounts,houseId:selectedHouse,sessionHours,config});
+  const setChest=(id,value)=>setChestMix(old=>({...old,[id]:Math.max(0,Math.floor(Number(value)||0))}));
+  const setHero=(id,value)=>setHeroCounts(old=>({...old,[id]:Math.max(0,Math.floor(Number(value)||0))}));
+  const reset=()=>{setChestMix({miner:0,explorer:0,elite:0,legendary:0});setHeroCounts({common:0,rare:0,superRare:0,epic:0,legendary:0,superLegendary:0});setSelectedHouse('basic');setSessionHours(24);};
+  const fmtDays=data.paybackDays===null?'—':data.paybackDays.toLocaleString('pt-BR');
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md animate-fadeIn select-none">
-      <div 
-        className="relative w-full max-w-4xl max-h-[92vh] rounded-3xl p-5 sm:p-6 bg-slate-900 border-2 border-amber-500/40 text-slate-100 shadow-2xl flex flex-col overflow-hidden font-tech"
-        onClick={e => e.stopPropagation()}
-      >
-        {/* CABEÇALHO OFICIAL */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md select-none">
+      <div className="relative w-full max-w-4xl max-h-[92vh] rounded-3xl p-5 sm:p-6 bg-slate-900 border-2 border-amber-500/40 text-slate-100 shadow-2xl flex flex-col overflow-hidden font-tech" onClick={e=>e.stopPropagation()}>
         <div className="flex items-center justify-between pb-3 border-b border-slate-800 shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-600 to-amber-400 text-slate-950 flex items-center justify-center text-2xl shadow-lg border border-amber-300/40 font-arcade">
-              📊
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="font-arcade text-sm sm:text-base text-amber-400 tracking-wider">
-                  SIMULADOR DE ROI — CRIPTO MYNERS
-                </h2>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
-                  PROJEÇÃO ESTIMADA
-                </span>
-              </div>
-              <p className="text-xs text-slate-400">
-                Estimativa baseada em produção por raridade, recuperação por abrigo e disponibilidade de sessão.
-              </p>
-            </div>
-          </div>
-
+          <div><h2 className="font-arcade text-sm sm:text-base text-amber-400 tracking-wider">SIMULADOR DE ROI — CRIPTO MYNERS</h2><p className="text-xs text-slate-400">Monte sua compra de baús e escolha a equipe que deseja simular.</p></div>
           <div className="flex items-center gap-2">
-            {onOpenAdminConfig && (
-              <button
-                onClick={onOpenAdminConfig}
-                title="Abrir Painel Administrativo de Probabilidades e Economia"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-amber-300 border border-slate-700 text-xs font-bold transition cursor-pointer"
-              >
-                <Settings size={14} />
-                <span className="hidden sm:inline">Admin</span>
-              </button>
-            )}
-            <button
-              onClick={onClose}
-              className="p-2 rounded-full text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
-            >
-              <X size={20} />
-            </button>
+            {onOpenAdminConfig&&<button onClick={onOpenAdminConfig} className="px-3 py-2 rounded-xl bg-slate-800 text-xs text-slate-300 border border-slate-700"><Settings size={14}/></button>}
+            <button onClick={onClose} className="p-2 rounded-full text-slate-400 hover:text-white"><X size={20}/></button>
           </div>
         </div>
-
-        {/* CORPO DO SIMULADOR (SCROLLÁVEL) */}
         <div className="flex-1 overflow-y-auto no-scrollbar py-4 space-y-4">
-
-          {/* 1. SELETOR DE BAÚ E QUANTIDADE */}
-          <div className="bg-slate-950/70 p-4 rounded-2xl border border-slate-800 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-300 flex items-center gap-1.5 uppercase tracking-wider">
-                <Layers size={14} className="text-amber-400" />
-                1. Escolha a Categoria do Baú
-              </span>
-              <span className="text-xs text-amber-400 font-mono">
-                {currentChestInfo.heroesCount * chestQuantity} heróis projetados
-              </span>
+          <section className="bg-slate-950/70 p-4 rounded-2xl border border-slate-800 space-y-3">
+            <div className="flex items-center justify-between"><span className="text-xs font-bold text-slate-300 uppercase tracking-wider flex gap-2 items-center"><Layers size={14} className="text-amber-400"/>1. Monte sua compra de baús</span><b className="text-xs text-amber-300">{data.chestQuantity} baús • {data.chestHeroes} heróis nos pacotes</b></div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {chests.map(c=><div key={c.id} className="p-3 rounded-xl bg-slate-900 border border-slate-800 flex items-center gap-3">
+                <span className="text-2xl">{c.icon}</span><div className="flex-1 min-w-0"><b className="block text-xs text-white">{c.name}</b><span className="text-[10px] text-slate-400">{c.heroesCount} heróis • US$ {money(c.costUsdt)} cada</span></div>
+                <label className="text-[10px] text-slate-400">Qtd.<input type="number" min="0" step="1" value={chestMix[c.id]||0} onChange={e=>setChest(c.id,e.target.value)} className="block w-20 mt-1 rounded-lg bg-slate-950 border border-slate-700 px-2 py-1.5 text-white text-sm"/></label>
+              </div>)}
             </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-              {Object.values(config.chests).map(c => {
-                const isSelected = selectedChest === c.id;
-                return (
-                  <button
-                    key={c.id}
-                    onClick={() => setSelectedChest(c.id)}
-                    className={`p-3 rounded-2xl border text-left transition cursor-pointer flex flex-col justify-between ${
-                      isSelected
-                        ? 'border-amber-400 bg-amber-950/30 ring-1 ring-amber-400/50 shadow-md'
-                        : 'border-slate-800 bg-slate-900/60 hover:border-slate-700 text-slate-400'
-                    }`}
-                  >
-                    <div>
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-2xl">{c.icon}</span>
-                        <span className="font-arcade text-[10px] text-amber-300 font-bold bg-amber-500/20 px-1.5 py-0.5 rounded">
-                          ${c.costUsdt} USDT
-                        </span>
-                      </div>
-                      <h4 className="font-bold text-xs text-white">
-                        {c.name}
-                      </h4>
-                      <p className="text-[10px] text-slate-400">
-                        {c.heroesCount} {c.heroesCount === 1 ? 'herói' : 'heróis'} por baú
-                      </p>
-                    </div>
-
-                    <div className="mt-2 pt-1.5 border-t border-slate-800/80 text-[9px] font-mono flex justify-between text-slate-400">
-                      <span>Épico: {c.probabilities.epic}%</span>
-                      <span className="text-amber-400 font-bold">Lendário: {c.probabilities.legendary}%</span>
-                    </div>
-                  </button>
-                );
-              })}
+            <div className="flex flex-wrap justify-between gap-2 pt-2 border-t border-slate-800 text-xs"><span className="text-slate-400">Custo dos baús: <b className="text-white">US$ {money(data.chestCost)}</b></span><span className="text-amber-300 font-bold">Investimento em baús: US$ {money(data.chestCost)}</span></div>
+          </section>
+          <section className="bg-slate-950/70 p-4 rounded-2xl border border-slate-800 space-y-3">
+            <div className="flex items-center justify-between gap-2"><span className="text-xs font-bold text-slate-300 uppercase tracking-wider">2. Escolha a composição dos heróis</span><span className="text-xs text-emerald-300">{data.totalHeroes} heróis selecionados</span></div>
+            <p className="text-[11px] text-slate-400">Informe quantos heróis de cada raridade deseja usar na projeção. Essa composição é manual e não é sorteada pelas probabilidades dos baús.</p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {TIERS.map(([id,label,color])=><label key={id} className="p-3 rounded-xl bg-slate-900 border border-slate-800"><span className={`block text-xs font-bold ${color}`}>{label}</span><input type="number" min="0" step="1" value={heroCounts[id]} onChange={e=>setHero(id,e.target.value)} className="mt-2 w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-white text-sm"/></label>)}
             </div>
-
-            {/* Quantidade de Baús */}
-            <div className="flex items-center justify-between pt-2 border-t border-slate-800/80">
-              <span className="text-xs text-slate-400">Quantidade de Baús:</span>
-              <div className="flex items-center gap-1.5">
-                {[1, 2, 3, 5, 10].map(qty => (
-                  <button
-                    key={qty}
-                    onClick={() => setChestQuantity(qty)}
-                    className={`px-3 py-1 rounded-xl font-arcade text-xs font-bold transition cursor-pointer ${
-                      chestQuantity === qty
-                        ? 'bg-amber-500 text-slate-950 shadow-sm'
-                        : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
-                    }`}
-                  >
-                    {qty}x
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* 2. SELETOR DA CASA DE MINERAÇÃO */}
-          <div className="bg-slate-950/70 p-4 rounded-2xl border border-slate-800 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-300 flex items-center gap-1.5 uppercase tracking-wider">
-                <Home size={14} className="text-blue-400" />
-                2. Selecione a Casa para Descanso e Revezamento
-              </span>
-              <span className="text-xs text-blue-300 font-mono">
-                {currentHouseInfo.slots} vagas • {Math.round(currentHouseInfo.recoverySpeedMultiplier * 100)}% velocidade
-              </span>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-              {Object.values(config.houses).filter(h => ['basic', 'reinforced', 'advanced'].includes(h.id)).map(h => {
-                const isSelected = selectedHouse === h.id;
-                return (
-                  <button
-                    key={h.id}
-                    onClick={() => setSelectedHouse(h.id)}
-                    className={`p-2.5 rounded-2xl border text-left transition cursor-pointer flex flex-col justify-between ${
-                      isSelected
-                        ? 'border-blue-400 bg-blue-950/30 ring-1 ring-blue-400/50 shadow-md'
-                        : 'border-slate-800 bg-slate-900/60 hover:border-slate-700 text-slate-400'
-                    }`}
-                  >
-                    <div>
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-xl">{h.icon}</span>
-                        <span className="font-arcade text-[10px] text-blue-300 font-bold">
-                          {h.id === 'basic' ? 'Grátis' : `${h.constructionFragments} frag. + ${h.costMiner.toLocaleString('pt-BR')} MNC`}
-                        </span>
-                      </div>
-                      <h4 className="font-bold text-[11px] text-white leading-tight">
-                        {h.name.split(' ')[0]} {h.name.split(' ')[1] || ''}
-                      </h4>
-                      <p className="text-[10px] text-slate-400">
-                        {h.slots} vagas
-                      </p>
-                    </div>
-
-                    <span className="mt-2 text-[10px] font-mono font-bold text-emerald-400">
-                      {Math.round(h.recoverySpeedMultiplier * 100)}% Vel.
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* 3. SELETOR DOS 3 CENÁRIOS COMPARATIVOS */}
-          <div className="flex items-center justify-between bg-slate-950 p-1.5 rounded-2xl border border-slate-800">
-            <span className="text-xs text-slate-400 px-3 font-bold uppercase tracking-wider">
-              Cenário de Análise:
-            </span>
-            <div className="flex gap-1">
-              <button
-                onClick={() => setActiveScenario('conservative')}
-                className={`px-3.5 py-1.5 rounded-xl font-tech text-xs font-bold transition cursor-pointer ${
-                  activeScenario === 'conservative'
-                    ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40 shadow-sm'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                🔴 Conservador
-              </button>
-              <button
-                onClick={() => setActiveScenario('expected')}
-                className={`px-4 py-1.5 rounded-xl font-tech text-xs font-bold transition cursor-pointer ${
-                  activeScenario === 'expected'
-                    ? 'bg-amber-500 text-slate-950 shadow-md font-extrabold'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                🟡 Esperado (Médio)
-              </button>
-              <button
-                onClick={() => setActiveScenario('optimistic')}
-                className={`px-3.5 py-1.5 rounded-xl font-tech text-xs font-bold transition cursor-pointer ${
-                  activeScenario === 'optimistic'
-                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                🟢 Otimista
-              </button>
-            </div>
-          </div>
-
-          {/* 4. CARDS DE MÉTRICAS PRINCIPAIS (INVESTIMENTO, ROI E PAYBACK) */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="bg-slate-950/80 p-3.5 rounded-2xl border border-slate-800 text-center">
-              <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider block mb-1">
-                Investimento Total
-              </span>
-              <span className="font-arcade text-lg text-white font-bold block">
-                ${currentData.totalInvestment} USDT
-              </span>
-              <span className="text-[10px] text-slate-500">
-                Baús: ${currentData.chestCost} • Casa: ${currentData.houseCost}
-              </span>
-            </div>
-
-            <div className="bg-slate-950/80 p-3.5 rounded-2xl border border-emerald-500/30 text-center">
-              <span className="text-[10px] text-emerald-400 uppercase font-bold tracking-wider block mb-1">
-                Produção Diária
-              </span>
-              <span className="font-arcade text-lg text-emerald-400 font-bold block">
-                +{currentData.effectiveCoinsPerDay} MINER
-              </span>
-              <span className="text-[10px] text-slate-400 font-mono">
-                ≈ ${currentData.dailyUsd} USD / dia
-              </span>
-            </div>
-
-            <div className="bg-slate-950/80 p-3.5 rounded-2xl border border-amber-500/30 text-center">
-              <span className="text-[10px] text-amber-400 uppercase font-bold tracking-wider block mb-1">
-                ROI Diário Estimado
-              </span>
-              <span className="font-arcade text-lg text-amber-300 font-bold block">
-                {currentData.roiDailyPct}% / dia
-              </span>
-              <span className="text-[10px] text-slate-400">
-                {currentData.effectiveCoinsPerMonth} MINER / mês
-              </span>
-            </div>
-
-            <div className="bg-slate-950/80 p-3.5 rounded-2xl border border-purple-500/30 text-center">
-              <span className="text-[10px] text-purple-400 uppercase font-bold tracking-wider block mb-1">
-                Prazo de Payback
-              </span>
-              <span className="font-arcade text-lg text-purple-300 font-bold block">
-                ~{currentData.paybackDays} Dias
-              </span>
-              <span className="text-[10px] text-slate-400">
-                {currentData.paybackDays <= 90 ? '🚀 Retorno Sustentável' : 'Mineração Passiva'}
-              </span>
-            </div>
-          </div>
-
-          {/* 5. DETALHES DE EQUIPE, DISTRIBUIÇÃO E CAPACIDADE DA MINA */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            
-            {/* Distribuição das Raridades */}
-            <div className="bg-slate-950/70 p-3.5 rounded-2xl border border-slate-800 space-y-2">
-              <div className="flex items-center justify-between text-xs font-bold text-slate-300">
-                <span>Distribuição de Raridades ({currentData.totalHeroes} Heróis)</span>
-                <span className="text-amber-400 font-mono">{activeScenario.toUpperCase()}</span>
-              </div>
-
-              <div className="grid grid-cols-4 gap-1.5 text-center text-xs">
-                <div className="bg-slate-900 p-2 rounded-xl border border-slate-800">
-                  <span className="text-[10px] text-slate-400 block">Comum</span>
-                  <span className="font-bold text-slate-200">{currentData.rarities.common}</span>
-                </div>
-                <div className="bg-slate-900 p-2 rounded-xl border border-blue-500/30">
-                  <span className="text-[10px] text-blue-400 block">Raro</span>
-                  <span className="font-bold text-blue-300">{currentData.rarities.rare}</span>
-                </div>
-                <div className="bg-slate-900 p-2 rounded-xl border border-purple-500/30">
-                  <span className="text-[10px] text-purple-400 block">Épico</span>
-                  <span className="font-bold text-purple-300">{currentData.rarities.epic}</span>
-                </div>
-                <div className="bg-slate-900 p-2 rounded-xl border border-amber-500/30">
-                  <span className="text-[10px] text-amber-400 block">Lendário</span>
-                  <span className="font-bold text-amber-300">{currentData.rarities.legendary}</span>
-                </div>
-              </div>
-
-              <p className="text-[11px] text-slate-400 leading-relaxed">
-                As probabilidades são aplicadas individualmente a cada herói sorteado dos baús adquiridos.
-              </p>
-            </div>
-
-            {/* Lógica da Mina & Revezamento */}
-            <div className="bg-slate-950/70 p-3.5 rounded-2xl border border-slate-800 space-y-2">
-              <div className="flex items-center justify-between text-xs font-bold text-slate-300">
-                <span>Dinâmica da Mina & Revezamento</span>
-                <span className="text-emerald-400 font-mono">Uptime: {currentData.effectiveUptimePct}%</span>
-              </div>
-
-              <div className="space-y-1 text-xs">
-                <div className="flex justify-between py-0.5 border-b border-slate-900 text-slate-400">
-                  <span>Capacidade Ativa da Mina:</span>
-                  <b className="text-white">{currentData.maxActive} / 15 minerando</b>
-                </div>
-                <div className="flex justify-between py-0.5 border-b border-slate-900 text-slate-400">
-                  <span>Equipe Reserva para Revezamento:</span>
-                  <b className="text-purple-300">{currentData.reserves} heróis</b>
-                </div>
-                <div className="flex justify-between py-0.5 border-b border-slate-900 text-slate-400">
-                  <span>Tempo Médio de Trabalho Contínuo:</span>
-                  <b className="text-amber-300">{currentData.avgWorkHours} horas</b>
-                </div>
-                <div className="flex justify-between py-0.5 text-slate-400">
-                  <span>Tempo de Descanso na Casa:</span>
-                  <b className="text-blue-300">{currentData.avgRestHours} horas ({Math.round(currentData.recoveryMultiplier * 100)}% vel.)</b>
-                </div>
-              </div>
-            </div>
-
-          </div>
-
-          {/* 6. PROJEÇÃO DE RETORNO ACUMULADO */}
-          <div className="bg-slate-950/80 p-4 rounded-2xl border border-slate-800 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-                <BarChart3 size={15} className="text-emerald-400" />
-                Valor estimado acumulado (referência USDT)
-              </span>
-              <span className="text-xs font-mono text-emerald-400 font-bold bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/30">
-                Referência: 1 MNC = US$ ${(config.minerCoinUsdtRate || 0.01).toFixed(2)}
-              </span>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-center">
-              <div className="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800">
-                <span className="text-[10px] text-slate-400 block mb-0.5">Em 30 Dias</span>
-                <span className="font-arcade text-sm text-white font-bold block">
-                  ${currentData.projectedReturn30d}
-                </span>
-                <span className="text-[10px] text-slate-500 font-mono">
-                  {Math.round((currentData.projectedReturn30d / currentData.totalInvestment) * 100)}% recuperado
-                </span>
-              </div>
-
-              <div className="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800">
-                <span className="text-[10px] text-slate-400 block mb-0.5">Em 60 Dias</span>
-                <span className="font-arcade text-sm text-white font-bold block">
-                  ${currentData.projectedReturn60d}
-                </span>
-                <span className="text-[10px] text-slate-500 font-mono">
-                  {Math.round((currentData.projectedReturn60d / currentData.totalInvestment) * 100)}% recuperado
-                </span>
-              </div>
-
-              <div className="bg-slate-900/90 p-2.5 rounded-xl border border-emerald-500/30">
-                <span className="text-[10px] text-emerald-400 block mb-0.5">Em 90 Dias (~3 meses)</span>
-                <span className="font-arcade text-sm text-emerald-400 font-bold block">
-                  ${currentData.projectedReturn90d}
-                </span>
-                <span className="text-[10px] text-emerald-400/80 font-mono">
-                  {Math.round((currentData.projectedReturn90d / currentData.totalInvestment) * 100)}% recuperado
-                </span>
-              </div>
-
-              <div className="bg-slate-900/90 p-2.5 rounded-xl border border-amber-500/30">
-                <span className="text-[10px] text-amber-400 block mb-0.5">Em 180 Dias (~6 meses)</span>
-                <span className="font-arcade text-sm text-amber-400 font-bold block">
-                  ${currentData.projectedReturn180d}
-                </span>
-                <span className="text-[10px] text-amber-400/80 font-mono">
-                  {Math.round((currentData.projectedReturn180d / currentData.totalInvestment) * 100)}% (bruto estimado)
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* 7. NOTA DE TRANSPARÊNCIA E RESPONSABILIDADE */}
-          <div className="p-3 rounded-2xl bg-slate-950/50 border border-slate-800/80 text-[11px] text-slate-400 flex items-start gap-2">
-            <Info size={16} className="text-amber-400 shrink-0 mt-0.5" />
-            <p className="leading-relaxed">
-              <b>Transparência Cripto Myners:</b> Os cálculos acima são estimativas matemáticas calculadas estritamente com base nos parâmetros configurados de probabilidade, produção média, consumo de estamina e referência econômica de 1 MNC = US$ ${(config.minerCoinUsdtRate || 0.01).toFixed(2)}. A projeção usa disponibilidade estimada de sessão de ${currentData.sessionAvailabilityPct}% em uma janela de 24 horas. A mineração só ocorre com o jogo aberto e conectado, inclusive minimizado; não há produção com navegador fechado, computador desligado ou conexão perdida. Raridades sem probabilidade configurada não entram no valor esperado. O resultado não é garantia de retorno nem cotação de mercado.
-            </p>
-          </div>
-
+            <div className="text-[11px] text-slate-400">Capacidade simultânea da mina: até 15 heróis. Heróis adicionais entram como reserva para revezamento.</div>
+          </section>
+          <section className="bg-slate-950/70 p-4 rounded-2xl border border-slate-800 space-y-3">
+            <span className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2"><Home size={14} className="text-blue-400"/>3. Abrigo e tempo conectado</span>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">{Object.values(config.houses).filter(h=>['basic','reinforced','advanced'].includes(h.id)).map(h=><button key={h.id} onClick={()=>setSelectedHouse(h.id)} className={`p-3 rounded-xl border text-left ${selectedHouse===h.id?'border-blue-400 bg-blue-950/30':'border-slate-800 bg-slate-900'}`}><b className="block text-xs text-white">{h.icon} {h.name}</b><span className="text-[10px] text-slate-400">{h.slots} camas • {Math.round(h.recoverySpeedMultiplier*100)}% recuperação</span><span className="block text-[10px] text-blue-300 mt-1">{h.id==='basic'?'Grátis':`${h.constructionFragments||0} fragmentos + ${Number(h.costMiner||0).toLocaleString('pt-BR')} MNC`}</span></button>)}</div>
+            <label className="block text-xs text-slate-300">Horas por dia com o jogo aberto e conectado: <b className="text-amber-300">{sessionHours}h</b><input type="range" min="1" max="24" value={sessionHours} onChange={e=>setSessionHours(Number(e.target.value))} className="block w-full mt-2 accent-amber-400"/><span className="flex justify-between text-[10px] text-slate-500"><span>1 hora</span><span>24 horas</span></span></label>
+          </section>
+          <section className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div className="bg-slate-950 p-3 rounded-xl border border-slate-800"><span className="text-[10px] text-slate-400">Investimento total*</span><b className="block text-lg text-white">US$ {money(data.totalInvestment)}</b><span className="text-[10px] text-slate-500">Baús + abrigo em MNC</span></div>
+            <div className="bg-slate-950 p-3 rounded-xl border border-emerald-500/30"><span className="text-[10px] text-emerald-400">Produção diária</span><b className="block text-lg text-emerald-300">+{money(data.effectiveCoinsPerDay)} MNC</b><span className="text-[10px] text-slate-400">≈ US$ {money(data.dailyUsd)}/dia</span></div>
+            <div className="bg-slate-950 p-3 rounded-xl border border-amber-500/30"><span className="text-[10px] text-amber-400">ROI diário estimado</span><b className="block text-lg text-amber-300">{data.roiDailyPct}%</b><span className="text-[10px] text-slate-400">{money(data.effectiveCoinsPerMonth)} MNC/mês</span></div>
+            <div className="bg-slate-950 p-3 rounded-xl border border-purple-500/30"><span className="text-[10px] text-purple-300">Payback estimado</span><b className="block text-lg text-purple-300">{fmtDays} dias</b><span className="text-[10px] text-slate-400">Projeção matemática</span></div>
+          </section>
+          <section className="bg-slate-950/70 p-4 rounded-2xl border border-slate-800 space-y-2">
+            <span className="text-xs font-bold text-slate-300 uppercase flex items-center gap-2"><BarChart3 size={14}/>Projeção acumulada (referência USDT)</span>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">{[[30,data.projectedReturn30d],[60,data.projectedReturn60d],[90,data.projectedReturn90d],[180,data.projectedReturn180d]].map(([days,value])=><div key={days} className="bg-slate-900 p-3 rounded-xl"><span className="text-[10px] text-slate-400">{days} dias</span><b className="block text-white">US$ {money(value)}</b></div>)}</div>
+          </section>
+          <div className="p-3 rounded-xl bg-slate-950/50 border border-slate-800 text-[11px] text-slate-400 flex gap-2"><Info size={15} className="text-amber-400 shrink-0"/><p>*O custo dos baús é calculado pela combinação escolhida. A equipe simulada é independente dos baús e pode não corresponder aos heróis efetivamente obtidos. A referência de conversão é 1 MNC = US$ {Number(config.minerCoinUsdtRate||.01).toFixed(2)}; não representa cotação garantida. A mineração só ocorre com o jogo aberto e conectado. Estimativa não é garantia de retorno.</p></div>
         </div>
-
-        {/* RODAPÉ DE AÇÃO */}
-        <div className="pt-3 border-t border-slate-800 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-400">Total a investir:</span>
-            <span className="font-arcade text-base text-amber-300 font-bold">
-              ${currentData.totalInvestment} USDT
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={onClose}
-              className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition cursor-pointer"
-            >
-              Fechar
-            </button>
-            <button
-              onClick={() => {
-                onClose();
-                if (onOpenSummonModal) onOpenSummonModal();
-              }}
-              className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-arcade text-xs font-bold transition shadow-lg shadow-amber-950/40 cursor-pointer"
-            >
-              <Sparkles size={16} />
-              <span>IR PARA A LOJA DE BAÚS</span>
-            </button>
-          </div>
+        <div className="pt-3 border-t border-slate-800 flex flex-wrap items-center justify-between gap-2 shrink-0">
+          <button onClick={reset} className="px-3 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs">Restaurar padrão</button>
+          <div className="flex gap-2"><button onClick={onClose} className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs">Fechar</button><button onClick={()=>{onClose();onOpenSummonModal?.();}} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500 text-slate-950 font-bold text-xs"><Sparkles size={15}/>IR PARA A LOJA DE BAÚS</button></div>
         </div>
-
       </div>
     </div>
   );
