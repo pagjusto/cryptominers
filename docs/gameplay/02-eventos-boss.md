@@ -21,13 +21,13 @@
 ## Participação e desconexão
 
 - O jogador precisa estar participando quando o Boss aparece. Quem não estiver participando perde aquele evento; não existe recuperação posterior da participação.
-- Se o jogador perder a conexão, deixa imediatamente de contar como participante ativo: sua produção de MNC é interrompida e seus sobreviventes ativos são enviados ao fluxo do ambulatório/enfermaria.
+- Se o jogador perder a conexão ou ficar offline, deixa imediatamente de contar como participante ativo: sua produção de MNC é interrompida e todos os sobreviventes ativos são enviados automaticamente ao ambulatório/enfermaria, mesmo que o jogador não tenha contratado o médico.
 - Para manter o direito ao sorteio daquele Boss, o jogador precisa reconectar antes do encerramento do evento.
 - Ao reconectar, os sobreviventes retornam automaticamente ao combate, respeitando o limite de **15 vagas**. Se não houver vagas livres, aguardam na reserva até surgir uma vaga.
 - A desconexão não cria produção retroativa de MNC nem recupera vida automaticamente.
 - A lista de sobreviventes elegíveis ao sorteio é congelada no início do Boss.
 - Cada sobrevivente dessa lista conta no máximo uma vez, desde que esteja vivo ao final dos cinco minutos.
-- Um sobrevivente original enviado à enfermaria por ferimento ou desconexão continua contando se estiver vivo ao final do evento.
+- Um sobrevivente original enviado ao ambulatório/enfermaria por ferimento ou desconexão continua contando se estiver vivo ao final do evento.
 - Se um sobrevivente original retornar durante o evento, continua contando apenas uma vez.
 - Sobreviventes que entram como substitutos depois do início podem lutar, mas não entram no sorteio daquele Boss.
 
@@ -37,7 +37,7 @@
 - Não é permitido retirar manualmente sobreviventes saudáveis para substituí-los.
 - A substituição só é permitida quando um sobrevivente fica ferido e é enviado à enfermaria.
 - O envio manual de feridos à enfermaria continua permitido.
-- O médico poderá automatizar o resgate em uma etapa futura, sem alterar a lista original de participantes.
+- O médico poderá automatizar o resgate de sobreviventes feridos durante a atividade normal do jogador, sem alterar a lista original de participantes.
 
 ## O que influencia o sorteio
 
