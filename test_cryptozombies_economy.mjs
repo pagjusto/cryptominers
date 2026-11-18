@@ -6,6 +6,7 @@ import {
   MEDIAN_TEAM_COMPOSITION,
   calculateCompositionDailyProduction,
   calculateSurvivorDailyProduction,
+  calculateCombatProduction,
   drawSurvivorRarity,
   drawTeamRarities,
   estimateRoi,
@@ -17,6 +18,12 @@ assert.deepEqual(Object.values(SURVIVOR_MNC_PER_DAY), [20.88, 31.32, 36.54, 41.7
 assert.equal(SURVIVOR_MNC_PER_SECOND.common * 86400, 20.88);
 assert.equal(SURVIVOR_MNC_PER_SECOND.superRare * 86400, 36.54);
 assert.equal(calculateCompositionDailyProduction(MEDIAN_TEAM_COMPOSITION), 480.24);
+assert.equal(calculateCombatProduction([
+  { rarity: 'common', status: 'work', currentHealth: 100 },
+  { rarity: 'superLegendary', status: 'work', currentHealth: 100 },
+  { rarity: 'legendary', status: 'reserve', currentHealth: 100 },
+  { rarity: 'epic', status: 'work', currentHealth: 5 }
+], 10), (20.88 / 86400 + 83.52 / 86400) * 10);
 assert.equal(calculateSurvivorDailyProduction([
   { rarity: 'common' }, { rarity: 'superRare' }, { rarity: 'superLegendary' }
 ]), 140.94);
