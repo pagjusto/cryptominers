@@ -69,6 +69,11 @@ export function isCityObstacle(c, r) {
 
   if (c === 10 && r === 6) return true; // Cerca da ruína sudeste
 
+  // 4. OUTDOOR / BILLBOARD VETORIZADO "CRYPTOZOMBIES" (Cols c=6..9, Rows r=0..2)
+  // Grande estrutura metálica com sapatas de sustentação e painel oficial:
+  // Nem heróis nem zumbis podem pisar, atravessar ou nascer sobre o outdoor.
+  if (c >= 6 && c <= 9 && (r === 0 || r === 1 || r === 2)) return true;
+
   return false;
 }
 

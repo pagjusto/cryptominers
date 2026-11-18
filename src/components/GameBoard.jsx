@@ -453,10 +453,11 @@ export default function GameBoard({
         const mx = Math.max(1, Math.min(GRID_COLS - 2, Math.round(miner.x)));
         const my = Math.max(1, Math.min(GRID_ROWS - 2, Math.round(miner.y)));
 
-        // Garante que nenhum herói fique preso dentro da estrutura física de madeira da entrada da mina
-        if (isCanyon && (mx >= 6 && mx <= 10 && my >= 3 && my <= 6)) {
-          miner.x = 2;
-          miner.y = 8;
+        // Garante que nenhum herói fique preso sobre o outdoor ou obstáculos físicos da cidade
+        if (isCityBuilding(mx, my)) {
+          const safePoint = getSafeHeroSpawn(minerIndex);
+          miner.x = safePoint.x;
+          miner.y = safePoint.y;
           miner.targetBlock = null;
           miner.isMining = false;
         }

@@ -28,10 +28,31 @@ import { HERO_ROSTER, WEAPON_CATALOG, getHeroById, getWeaponById } from '../data
 // ============================================================================
 let cityBgImg = null;
 let cityBgLoaded = false;
+let billboardImg = null;
+let billboardLoaded = false;
 let canyonBgImg = null;
 let canyonBgLoaded = false;
 
+export function initBillboard(onLoaded) {
+  if (billboardLoaded && billboardImg) {
+    if (onLoaded) onLoaded();
+    return;
+  }
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.src = `/assets/billboard.png?v=1`;
+  img.onload = () => {
+    billboardImg = img;
+    billboardLoaded = true;
+    if (onLoaded) onLoaded();
+  };
+  img.onerror = () => {
+    console.error('Falha ao carregar /assets/billboard.png');
+  };
+}
+
 export function initCityMap(onLoaded) {
+  initBillboard();
   if (cityBgLoaded && cityBgImg) {
     if (onLoaded) onLoaded();
     return;
@@ -77,6 +98,40 @@ export function drawContinuousCaveFloor(ctx, width, height, mine, now) {
   // 1. Prioridade Oficial: Mapa da Cidade de Sobrevivência Zumbi
   if (cityBgLoaded && cityBgImg) {
     ctx.drawImage(cityBgImg, 0, 0, width, height);
+
+    // 1.1 OUTDOOR / BILLBOARD VETORIZADO "CRYPTOZOMBIES" (Exatamente no gramado norte c=6..9, r=0..2)
+    if (!billboardImg && typeof window !== 'undefined') {
+      initBillboard();
+    }
+    if (billboardLoaded && billboardImg) {
+      const bW = 292;
+      const bH = 242;
+      const bX = 460;
+      const bY = 12;
+
+      // Sombras projetadas e de contato no gramado
+      ctx.save();
+      // Sombra geral difusa do painel inclinado no gramado
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.20)';
+      ctx.beginPath();
+      ctx.ellipse(bX + bW * 0.52, bY + bH * 0.93, bW * 0.44, 15, -0.10, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Sombra sob a perna esquerda
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+      ctx.beginPath();
+      ctx.ellipse(bX + bW * 0.14, bY + bH * 0.95, 18, 5.5, -0.08, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Sombra sob a perna direita
+      ctx.beginPath();
+      ctx.ellipse(bX + bW * 0.77, bY + bH * 0.98, 20, 6, -0.08, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      // Renderiza o outdoor vetorizado em alta definição
+      ctx.drawImage(billboardImg, bX, bY, bW, bH);
+    }
 
     // Efeito suave de luz solar e calor na cidade
     const sunPulse = Math.sin((now || 0) * 0.002) * 0.03 + 0.97;
