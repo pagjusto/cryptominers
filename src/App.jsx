@@ -1214,91 +1214,27 @@ export default function App() {
         }`}
       >
         
-        {/* Marca: Crypto Miners */}
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-600 via-amber-500 to-yellow-300 flex items-center justify-center text-2xl shadow-lg border border-amber-300/40 animate-pulse">
-            🧟
+        {/* Saldo In-Game MNC (Clique abre Perfil, Carteira & Saques) */}
+        <button 
+          onClick={() => handleOpenUserProfile('profile')}
+          title={`Saldo: ${bcoin.toFixed(2)} MNC ≈ US$ ${(bcoin * currentMinerRate).toFixed(2)} • Clique para abrir Perfil, Carteira e Saques (Claim)`}
+          className="flex items-center gap-2 bg-slate-950 px-3 py-1.5 rounded-2xl border border-amber-500/40 hover:border-amber-400 transition shadow-inner cursor-pointer group active:scale-95 shrink-0"
+        >
+          <div className="w-6 h-6 rounded-full bg-amber-500/20 border border-amber-400 flex items-center justify-center text-amber-300 font-bold font-arcade text-xs group-hover:scale-105 transition">
+            🪙
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="font-arcade text-sm sm:text-base tracking-wider text-amber-400">
-                CRIPTO MYNERS
-              </h1>
-              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
-                ONDA ZUMBI
+          <div className="flex flex-col leading-none text-left">
+            <span className="text-[10px] uppercase text-slate-400 font-bold flex items-center gap-1">
+              <span>Saldo MNC</span>
+              <span className="text-[9px] text-emerald-400 font-mono">
+                ({currentMinerRate === 0.01 ? 'US$ 0,01' : `$${currentMinerRate} USDT`})
               </span>
-            </div>
-            <p className="text-[11px] text-slate-400">
-              Sobrevivência • Abrigo: {currentHouse.name.replace('Casa ', '')}
-            </p>
+            </span>
+            <span className="font-arcade text-sm text-amber-300 font-bold tracking-wider">
+              {bcoin.toFixed(2)}
+            </span>
           </div>
-        </div>
-
-        {/* Saldo In-Game MNC e Menu de Perfil / Carteira / Saques */}
-        <div className="flex items-center gap-3">
-          {/* Saldo de Mineração MNC (Cotação Oficial: 1 MNC = US$ 0,01) */}
-          <div 
-            title={`Saldo de Minercoin: ${bcoin.toFixed(2)} MNC ≈ US$ ${(bcoin * currentMinerRate).toFixed(2)} (Cotação de referência)`}
-            className="flex items-center gap-2 bg-slate-950 px-3.5 py-1.5 rounded-2xl border border-amber-500/40 shadow-inner"
-          >
-            <div className="w-6 h-6 rounded-full bg-amber-500/20 border border-amber-400 flex items-center justify-center text-amber-300 font-bold font-arcade text-xs">
-              🪙
-            </div>
-            <div className="flex flex-col leading-none">
-              <span className="text-[10px] uppercase text-slate-400 font-bold flex items-center gap-1">
-                <span>Saldo MNC</span>
-                <span className="text-[9px] text-emerald-400 font-mono">
-                  ({currentMinerRate === 0.01 ? 'US$ 0,01' : `$${currentMinerRate} USDT`})
-                </span>
-              </span>
-              <span className="font-arcade text-base text-amber-300 font-bold tracking-wider">
-                {bcoin.toFixed(2)}
-              </span>
-            </div>
-          </div>
-
-          {/* BOTÃO UNIFICADO: PERFIL DO USUÁRIO, CARTEIRA WEB3 & SAQUES */}
-          <button
-            onClick={() => handleOpenUserProfile('profile')}
-            className="flex items-center gap-2.5 px-3.5 py-1.5 rounded-2xl bg-slate-950 border border-slate-700/90 hover:border-amber-400/70 transition shadow-inner cursor-pointer group active:scale-95"
-            title="Abrir Perfil, Carteira Web3 e Saques (Claim)"
-          >
-            <div className="relative">
-              <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center text-slate-950 font-bold text-xs shadow-sm">
-                👤
-              </div>
-              {walletState.isConnected && (
-                <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 border border-slate-950 animate-pulse" />
-              )}
-            </div>
-
-            <div className="flex flex-col text-left leading-tight">
-              <div className="flex items-center gap-1.5">
-                <span className="font-tech text-xs font-bold text-slate-200 group-hover:text-amber-300 transition">
-                  PERFIL & CARTEIRA
-                </span>
-                {walletState.isConnected ? (
-                  <span className="text-[10px] font-mono text-emerald-400 font-bold">
-                    ${walletState.usdtBalance.toFixed(2)} USDT
-                  </span>
-                ) : (
-                  <span className="text-[10px] font-tech text-amber-400 font-bold">
-                    CONECTAR
-                  </span>
-                )}
-              </div>
-              <span className="font-tech text-[10px] text-slate-400">
-                {walletState.isConnected 
-                  ? `${walletState.address.slice(0, 6)}...${walletState.address.slice(-4)} • Saques`
-                  : 'Carteira & Saques'}
-              </span>
-            </div>
-
-            <div className="ml-1 px-2 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-arcade font-bold">
-              CLAIM
-            </div>
-          </button>
-        </div>
+        </button>
 
         {/* SELETOR DE MODO DE JOGO & STATUS DO MAPA */}
         <div className="flex items-center gap-2 bg-slate-950 p-1 rounded-xl border border-slate-800 shadow-inner">
