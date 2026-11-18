@@ -10,6 +10,7 @@ A referência de planejamento definida é **1 MNC = US$ 0,01**. Essa referência
 
 - Cada sobrevivente ativo gera MNC individualmente, por segundo válido de combate.
 - A taxa individual depende exclusivamente da raridade do sobrevivente.
+- Cada raridade possui uma taxa de mineração própria.
 - A classe, função ou tipo de arma do sobrevivente não concede bônus nem penalidade de produção.
 - O nível do abrigo não altera a mineração nem o ROI; sua influência é restrita à capacidade e à velocidade de recuperação dos sobreviventes.
 - A soma da produção dos sobreviventes ativos determina a produção total do jogador.
@@ -20,19 +21,19 @@ A referência de planejamento definida é **1 MNC = US$ 0,01**. Essa referência
 - O tempo pausado ou offline não gera acúmulo retroativo.
 - A disponibilidade do jogo por 24 horas não dobra o ROI diário já definido.
 
-## Referência de produção e ROI
+## Simulação de cenário mediano
 
-A composição média de referência — **6 sobreviventes comuns, 4 raros, 4 épicos e 1 lendário**, com Abrigo Reforçado como referência de recuperação (sem bônus de mineração) — deve totalizar **480,24 MNC por dia**.
+O valor de **480,24 MNC por dia** foi definido como resultado de uma **simulação de cenário mediano**, usando como composição ilustrativa **6 sobreviventes comuns, 4 raros, 4 épicos e 1 lendário**.
 
-Esse total é a referência de ROI para essa composição. As taxas individuais por raridade deverão ser calibradas para que a soma dos 15 sobreviventes respeite esse total, sem aumentar o rendimento apenas porque o jogo fica disponível por 24 horas.
+Esse valor serve como referência para analisar um cenário mediano de produção. Não é uma meta obrigatória que toda composição deva atingir, um limite universal, uma taxa fixa de retorno ou uma promessa de rendimento.
 
-Os valores exatos de MNC por segundo para cada raridade ainda precisam ser calculados e formalizados. Não devem ser definidos por estimativa sem validar a soma contra a referência de ROI.
+O Abrigo Reforçado citado nessa simulação representa apenas uma referência de recuperação e não concede bônus de mineração.
 
-Esse número é uma referência para aquela composição específica, não um limite universal nem uma promessa de rendimento.
+Os valores exatos de MNC por segundo de cada raridade ainda precisam ser calculados e formalizados. A produção real varia conforme a quantidade e a raridade dos sobreviventes ativos, além do tempo válido em combate.
 
 ## Retorno bruto e líquido
 
 - **Retorno bruto:** total de MNC produzido.
 - **Retorno líquido:** produção após descontar custos e despesas aplicáveis, como o custo do médico quando esse serviço estiver ativo.
 
-A fórmula final por raridade, os efeitos econômicos definitivos de cada nível e o cálculo completo do retorno líquido ainda precisam ser formalizados antes da publicação como números garantidos.
+A fórmula final por raridade e o cálculo completo do retorno líquido ainda precisam ser formalizados antes da publicação como números garantidos.
