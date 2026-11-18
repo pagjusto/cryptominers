@@ -16,7 +16,7 @@ import {
   BLOCK_BOSS,
   MINER_CLASSES 
 } from '../data/minersData';
-import { recordDepositDamage } from '../utils/individualMapEngine';
+import { recordDepositDamage, getValidDepositCells } from '../utils/individualMapEngine';
 import { syncEnemiesWithMap, updateEnemies, drawEnemyCharacter } from '../utils/enemySystem';
 import { BOMB_CRYPTO_REWARDS } from '../data/bombCryptoEconomy';
 import { 
@@ -269,6 +269,70 @@ export default function GameBoard({
                 rewardMnc: 25,
                 title: 'Abominação Mutante Derrotada'
               });
+            } else {
+              // Zumbi comum derrotado: "ao morrer um vem outro" - respawn contínuo da horda
+              const validCells = getValidDepositCells(GRID_COLS, GRID_ROWS);
+              const openCells = validCells.filter(pos => {
+                if (pos.c === bx && pos.r === by) return false;
+                if (state.grid[pos.r][pos.c] !== BLOCK_EMPTY) return false;
+                const hasMiner = state.miners?.some(m => Math.round(m.x) === pos.c && Math.round(m.y) === pos.r);
+                if (hasMiner) return false;
+                const hasEnemy = state.enemies?.some(e => e.gx === pos.c && e.gy === pos.r);
+                if (hasEnemy) return false;
+                return true;
+              });
+
+              if (openCells.length > 0) {
+                const spawnPos = openCells[Math.floor(Math.random() * openCells.length)];
+                const spawnKey = `${spawnPos.c},${spawnPos.r}`;
+                state.grid[spawnPos.r][spawnPos.c] = BLOCK_ZOMBIE;
+                state.hpMap[spawnKey] = 2; // Morre com exatamente 2 tiros
+
+                const respawnedZombie = {
+                  id: `zombie_horde_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+                  type: 'zombie',
+                  name: 'Zumbi Andarilho',
+                  gx: spawnPos.c,
+                  gy: spawnPos.r,
+                  visualX: spawnPos.c,
+                  visualY: spawnPos.r,
+                  facingDir: Math.random() > 0.5 ? 1 : -1,
+                  isWalking: false,
+                  walkTimer: 0,
+                  targetGx: spawnPos.c,
+                  targetGy: spawnPos.r,
+                  isAttacking: false,
+                  attackProgress: 0,
+                  attackCooldown: 0,
+                  hitFlash: 0,
+                  hp: 2,
+                  maxHp: 2
+                };
+                state.enemies.push(respawnedZombie);
+
+                // Efeito visual de surgimento do zumbi na terra/rua
+                for (let sp = 0; sp < 10; sp++) {
+                  state.particles.push({
+                    x: spawnPos.c * TILE_SIZE + TILE_SIZE / 2,
+                    y: spawnPos.r * TILE_SIZE + TILE_SIZE / 2,
+                    vx: (Math.random() - 0.5) * 110,
+                    vy: (Math.random() - 0.5) * 110 - 20,
+                    color: '#84cc16',
+                    size: Math.random() * 3.5 + 2,
+                    life: 0.5,
+                    maxLife: 0.5
+                  });
+                }
+
+                state.floatTexts.push({
+                  text: '🧟 +HORDA',
+                  x: spawnPos.c * TILE_SIZE + TILE_SIZE / 2,
+                  y: spawnPos.r * TILE_SIZE - 8,
+                  color: '#a3e635',
+                  opacity: 0.95,
+                  vy: -22
+                });
+              }
             }
           }
         }
@@ -484,46 +548,72 @@ export default function GameBoard({
                 hitDamage = hitDamage * 2;
               }
 
+              const isZombie = blockType === BLOCK_ZOMBIE;
+              const effectiveCurHp = isZombie ? (curHp > 2 ? 2 : curHp) : curHp;
+              // Para zumbis: morrem com exatamente 2 tiros (1 por tiro normal, ou 2 se for crítico)
+              const hitDamageApplied = isZombie ? (isCrit ? 2 : 1) : hitDamage;
+              const newHp = Math.max(0, effectiveCurHp - hitDamageApplied);
+
               // Textos flutuantes otimizados para manter 60 FPS
-              const showFloat = isCrit || Math.random() < 0.25;
-              if (showFloat && state.floatTexts.length < 24) {
-                if (isCrit) {
-                  sfx.playCritHit();
+              if (isZombie) {
+                if (newHp === 1) {
                   state.floatTexts.push({
-                    text: `💥 CRÍTICO! -${hitDamage}`,
+                    text: '🎯 TIRO 1/2',
                     x: tx * TILE_SIZE + TILE_SIZE / 2,
                     y: ty * TILE_SIZE + 10,
-                    color: '#f97316',
-                    opacity: 1,
-                    vy: -45
-                  });
-                } else if (cid === 'mage') {
-                  state.floatTexts.push({
-                    text: isCrit ? `🩸 DRENO! -${hitDamage}` : `-${hitDamage}`,
-                    x: tx * TILE_SIZE + TILE_SIZE / 2,
-                    y: ty * TILE_SIZE + 10,
-                    color: isCrit ? '#ef4444' : '#f87171',
-                    opacity: 1,
-                    vy: isCrit ? -45 : -35
-                  });
-                } else {
-                  state.floatTexts.push({
-                    text: isWeaponDull ? `⚠️ -${hitDamage}` : `-${hitDamage}`,
-                    x: tx * TILE_SIZE + TILE_SIZE / 2,
-                    y: ty * TILE_SIZE + 10,
-                    color: isWeaponDull ? '#f59e0b' : '#f87171',
+                    color: '#eab308',
                     opacity: 1,
                     vy: -35
                   });
+                } else if (newHp <= 0) {
+                  state.floatTexts.push({
+                    text: isCrit ? '💥 CRÍTICO! (2/2)' : '💀 ABATIDO! (2/2)',
+                    x: tx * TILE_SIZE + TILE_SIZE / 2,
+                    y: ty * TILE_SIZE + 10,
+                    color: isCrit ? '#ef4444' : '#84cc16',
+                    opacity: 1,
+                    vy: -40
+                  });
+                }
+              } else {
+                const showFloat = isCrit || Math.random() < 0.25;
+                if (showFloat && state.floatTexts.length < 24) {
+                  if (isCrit) {
+                    sfx.playCritHit();
+                    state.floatTexts.push({
+                      text: `💥 CRÍTICO! -${hitDamage}`,
+                      x: tx * TILE_SIZE + TILE_SIZE / 2,
+                      y: ty * TILE_SIZE + 10,
+                      color: '#f97316',
+                      opacity: 1,
+                      vy: -45
+                    });
+                  } else if (cid === 'mage') {
+                    state.floatTexts.push({
+                      text: isCrit ? `🩸 DRENO! -${hitDamage}` : `-${hitDamage}`,
+                      x: tx * TILE_SIZE + TILE_SIZE / 2,
+                      y: ty * TILE_SIZE + 10,
+                      color: isCrit ? '#ef4444' : '#f87171',
+                      opacity: 1,
+                      vy: isCrit ? -45 : -35
+                    });
+                  } else {
+                    state.floatTexts.push({
+                      text: isWeaponDull ? `⚠️ -${hitDamage}` : `-${hitDamage}`,
+                      x: tx * TILE_SIZE + TILE_SIZE / 2,
+                      y: ty * TILE_SIZE + 10,
+                      color: isWeaponDull ? '#f59e0b' : '#f87171',
+                      opacity: 1,
+                      vy: -35
+                    });
+                  }
                 }
               }
-
-              const newHp = curHp - hitDamage;
 
               // Rastreia dano total infligido pelo herói
               if (miner && miner.id) {
                 const ms = state.minerStats[miner.id] || { blocksBroken: 0, bcoinEarned: 0, damageDealt: 0 };
-                ms.damageDealt = (ms.damageDealt || 0) + hitDamage;
+                ms.damageDealt = (ms.damageDealt || 0) + (isZombie ? hitDamageApplied : hitDamage);
                 state.minerStats[miner.id] = ms;
               }
 

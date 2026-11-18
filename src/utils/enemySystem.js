@@ -98,17 +98,18 @@ export function syncEnemiesWithMap(existingEnemies = [], mapData, grid, hpMap) {
         attackProgress: 0,
         attackCooldown: 0,
         hitFlash: 0,
-        hp: dep.currentHp || (isBoss ? 6000 : 2000),
-        maxHp: dep.maxHp || (isBoss ? 6000 : 2000)
+        hp: isBoss ? (dep.currentHp || 6000) : (dep.currentHp > 2 ? 2 : (dep.currentHp || 2)),
+        maxHp: isBoss ? (dep.maxHp || 6000) : 2
       };
     } else {
       // Sincroniza HP com mapa individual
       const cellKey = `${entity.gx},${entity.gy}`;
       if (hpMap[cellKey] !== undefined) {
-        if (hpMap[cellKey] < entity.hp) {
+        const targetHp = entity.type === 'zombie' && hpMap[cellKey] > 2 ? 2 : hpMap[cellKey];
+        if (targetHp < entity.hp) {
           entity.hitFlash = 0.25; // Pisca em vermelho ao levar golpe
         }
-        entity.hp = hpMap[cellKey];
+        entity.hp = targetHp;
       }
     }
 

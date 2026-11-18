@@ -18,7 +18,7 @@ export const ENEMIES = {
     sprite: '/enemies/zombie.png',
     cleanSprite: '/enemies/zombie_clean.png',
     speed: 0.65, // Células por segundo
-    baseHp: 2000, // Preserva a regra oficial 7.0 (tempo visual calibrado das 20 jazidas)
+    baseHp: 2, // Morre com exatamente 2 tiros conforme regra do usuário
     attackDamage: 0, // Visual apenas
     attackRange: 1.1,
     walkCadence: 6.0,

@@ -174,7 +174,7 @@ export function generatePlayerMap(playerId = DEFAULT_PLAYER_ID, cycleNumber = 1)
     const enemyConfig = ENEMIES.ZOMBIE;
     const cellKey = `${pos.c},${pos.r}`;
     const zombieId = `zombie_${mapId}_${idx}`;
-    const hp = enemyConfig.baseHp || 2000;
+    const hp = enemyConfig.baseHp || 2;
 
     const zombie = {
       id: zombieId,
