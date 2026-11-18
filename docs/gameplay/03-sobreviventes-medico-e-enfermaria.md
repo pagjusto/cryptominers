@@ -1,20 +1,19 @@
 # Sobreviventes, médico e enfermaria
 
-## Perfis de atributos dos 12 heróis
+## Elenco e especializações
 
 O elenco possui **12 heróis**, sem contar o médico: dois personagens para cada uma das seis raridades.
 
+- A raridade determina a produção-base e os parâmetros de combate e recuperação.
+- Os heróis não são mais divididos nas classes **Ágil** e **Resistente**.
+- Todos os heróis de uma mesma raridade seguem os mesmos parâmetros de HP, dano recebido, combate e recuperação.
+- As antigas diferenças de HP e tempo de recuperação entre Ágil e Resistente deixam de fazer parte do modelo.
+- Como identidade temática, poderão existir especializações como **Minerador**, **Engenheiro** e **Explorador**.
+- Na versão inicial, essas especializações não concedem bônus nem alteram HP, dano, recuperação ou produção de MNC. Eventuais habilidades e bônus ficam reservados para uma atualização futura.
 - Os dois heróis de uma mesma raridade produzem a mesma quantidade de MNC por segundo.
-- A raridade determina a produção-base e a faixa de HP.
-- Dentro de cada raridade, os dois heróis têm perfis diferentes:
-  - **Resistente:** maior HP máximo e recuperação mais demorada.
-  - **Ágil:** menor HP máximo e recuperação mais rápida.
-- A regra de proporção aprovada é: o resistente tem o dobro do HP do ágil; o ágil recupera 100% da vida em um terço do tempo do resistente.
-- Exemplo ilustrativo para uma dupla: resistente com 1.000 HP e recuperação em 90 minutos; ágil com 500 HP e recuperação em 30 minutos.
-- Não há atributo de dano para diferenciar a produção: a mineração é calculada continuamente por segundo e depende da raridade, não de dano ou abates.
 - O sistema de estrelas foi adiado para uma atualização futura. Na versão atual, todos os heróis ficam sem estrelas e não recebem bônus associados a estrelas.
 
-Os números completos de HP e de tempo-base de recuperação para cada uma das seis raridades ainda precisam ser fechados na tabela final de balanceamento. A proporção entre os dois perfis, porém, está definida.
+Os valores exatos de HP, dano e tempo-base de recuperação para cada uma das seis raridades ainda precisam ser fechados na tabela final de balanceamento. As metas médias de recuperações completas por dia já discutidas permanecem como referência de balanceamento, mas deverão ser recalculadas sem distinção entre Ágil e Resistente.
 
 ## Quando um sobrevivente fica ferido
 
@@ -60,7 +59,8 @@ A ativação, contratação e renovação do médico dependem da futura etapa co
 ## Recuperação
 
 - A recuperação acontece simultaneamente para os sobreviventes que ocupam leitos.
-- A velocidade depende do perfil do herói e do nível do abrigo.
+- A velocidade depende da raridade do herói e do nível do abrigo.
+- Não existe diferença de recuperação entre classes ou especializações na versão inicial.
 - O médico não modifica a velocidade de recuperação.
 - A recuperação restaura a vida do sobrevivente.
 - Ao alcançar 100% de vida, ele retorna automaticamente à reserva e libera o leito.
