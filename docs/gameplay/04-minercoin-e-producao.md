@@ -27,12 +27,21 @@ O valor de **480,24 MNC por dia** foi definido como resultado de uma **simulaç�
 
 A distribuição de produção aprovada usa os multiplicadores **1× para comum, 1,5× para raro, 2× para épico e 3× para lendário**. As taxas resultantes são:
 
-| Raridade | Multiplicador | Produção por sobrevivente/dia | Produção por sobrevivente/segundo |
+| Raridade | Multiplicador | Produção por sobrevivente/dia | Taxa exata por segundo (MNC) |
 |---|---:|---:|---:|
-| Comum | 1× | 20,88 MNC | 0,0002416667 MNC |
-| Raro | 1,5× | 31,32 MNC | 0,0003625 MNC |
-| Épico | 2× | 41,76 MNC | 0,0004833333 MNC |
-| Lendário | 3× | 62,64 MNC | 0,000725 MNC |
+| Comum | 1× | 20,88 MNC | 20,88 ÷ 86.400 = 0,000241666666… |
+| Raro | 1,5× | 31,32 MNC | 31,32 ÷ 86.400 = 0,0003625 |
+| Épico | 2× | 41,76 MNC | 41,76 ÷ 86.400 = 0,000483333333… |
+| Lendário | 3× | 62,64 MNC | 62,64 ÷ 86.400 = 0,000725 |
+
+### Regra de precisão para a mineração contínua
+
+- O cálculo da produção deve usar a taxa por segundo com precisão decimal suficiente, sem limitar o valor aos dígitos arredondados exibidos na interface ou em tabelas.
+- As taxas devem ser tratadas como a fração exata da produção diária dividida por **86.400 segundos**.
+- A produção fracionária deve ser acumulada internamente; não arredondar o saldo a cada segundo ou atualização.
+- O arredondamento deve ocorrer apenas para exibição ou no momento de contabilização definido pela implementação, preservando o total acumulado.
+- Em 86.400 segundos válidos de mineração contínua, cada sobrevivente deve produzir exatamente seu valor diário de referência.
+- Pausas por desconexão, ausência de sobreviventes em combate ou outras condições já definidas não contam como segundos válidos e não geram produção retroativa.
 
 ### Conferência da composição mediana
 
