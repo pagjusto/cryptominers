@@ -10,7 +10,7 @@ export const DEFAULT_CRIPTO_MYNERS_CONFIG = {
   // Limite da Mina
   maxActiveMiners: 15,
   // Hipótese editável de disponibilidade de sessão para a projeção; não representa mineração offline.
-  roiSessionAvailabilityPct: 45,
+  roiSessionAvailabilityPct: 60,
 
   // 1. SISTEMA DE BAÚS (Probabilidades Normais vs. Com Anúncio Recompensado)
   chests: {
