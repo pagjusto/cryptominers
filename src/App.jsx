@@ -20,7 +20,10 @@ import {
   Activity,
   Clock,
   Trophy,
-  Flame
+  Flame,
+  Users,
+  Pin,
+  ChevronDown
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { MINES, INITIAL_MINERS, MINER_CLASSES } from './data/minersData';
@@ -244,6 +247,23 @@ export default function App() {
   const [isRoiSimulatorOpen, setIsRoiSimulatorOpen] = useState(false);
   const [isAdminConfigOpen, setIsAdminConfigOpen] = useState(false);
   const [isStatisticsOpen, setIsStatisticsOpen] = useState(false);
+  const [isTeamDrawerOpen, setIsTeamDrawerOpen] = useState(false);
+  const [isNavPinned, setIsNavPinned] = useState(false);
+  const [isNavHovered, setIsNavHovered] = useState(false);
+  const showNavbar = isNavPinned || isNavHovered;
+
+  // Auto-exibe o navbar quando o cursor do mouse se aproxima do topo da tela
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (e.clientY <= 32) {
+        setIsNavHovered(true);
+      } else if (e.clientY > 85 && !isNavPinned) {
+        setIsNavHovered(false);
+      }
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, [isNavPinned]);
   const [criptoMynersConfig, setCriptoMynersConfig] = useState(() => getCriptoMynersConfig());
   const [walletState, setWalletState] = useState(() => getSavedWalletState());
   const activePlayerId = walletState?.address || DEFAULT_PLAYER_ID;
@@ -1166,8 +1186,33 @@ export default function App() {
   return (
     <div className="flex flex-col h-screen w-screen bg-slate-950 text-slate-100 font-tech overflow-hidden select-none">
       
-      {/* BARRA SUPERIOR (HEADER) */}
-      <header className="h-16 border-b border-slate-800 bg-slate-900/90 backdrop-blur-md px-6 flex items-center justify-between z-20 shrink-0">
+      {/* ABA INDICADORA DE MENU NO TOPO (QUANDO NAVBAR ESTÁ RECOLHIDO) */}
+      <div 
+        onClick={() => setIsNavHovered(true)}
+        onMouseEnter={() => setIsNavHovered(true)}
+        className={`fixed top-0 left-1/2 -translate-x-1/2 z-40 px-4 py-0.5 rounded-b-xl bg-slate-900/90 hover:bg-slate-800/95 border-b border-x border-amber-500/40 text-amber-300 text-[11px] font-bold flex items-center gap-2 shadow-2xl cursor-pointer backdrop-blur-md transition-all duration-300 ${
+          showNavbar ? 'opacity-0 pointer-events-none -translate-y-full' : 'opacity-100 translate-y-0'
+        }`}
+        title="Passe o mouse ou clique no topo para abrir o Menu"
+      >
+        <span className="text-[11px] animate-pulse">🧟</span>
+        <span className="font-arcade text-[9px] text-amber-400">CRIPTO MYNERS</span>
+        <span className="text-slate-600">|</span>
+        <span className="font-mono text-emerald-400 text-xs font-bold">🪙 {bcoin.toFixed(2)} MNC</span>
+        <span className="text-[10px] text-amber-400/80 bg-amber-500/15 px-1.5 py-0.2 rounded border border-amber-500/30 flex items-center gap-0.5">
+          <span>MENU</span>
+          <ChevronDown size={11} />
+        </span>
+      </div>
+
+      {/* BARRA SUPERIOR (HEADER) FLUTUANTE QUE DESLIZA AO MOVER O MOUSE */}
+      <header 
+        onMouseEnter={() => setIsNavHovered(true)}
+        onMouseLeave={() => { if (!isNavPinned) setIsNavHovered(false); }}
+        className={`fixed top-0 left-0 right-0 h-16 border-b border-slate-800 bg-slate-900/95 backdrop-blur-md px-4 sm:px-6 flex items-center justify-between z-50 shadow-2xl transition-all duration-300 ease-out transform ${
+          showNavbar ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0 pointer-events-none'
+        }`}
+      >
         
         {/* Marca: Crypto Miners */}
         <div className="flex items-center gap-3">
@@ -1255,6 +1300,48 @@ export default function App() {
           </button>
         </div>
 
+        {/* SELETOR DE MODO DE JOGO & STATUS DO MAPA */}
+        <div className="flex items-center gap-2 bg-slate-950 p-1 rounded-xl border border-slate-800 shadow-inner">
+          <div className="flex items-center bg-slate-900 p-0.5 rounded-lg border border-slate-700/60">
+            <button
+              onClick={() => setBoardMode('canyon')}
+              className={`px-2.5 py-1 rounded-md font-tech text-xs transition cursor-pointer flex items-center gap-1.5 ${
+                boardMode === 'canyon'
+                  ? 'bg-amber-500 text-slate-950 font-bold shadow-sm'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <span>🎮</span>
+              <span>Canvas HD</span>
+            </button>
+            <button
+              onClick={() => setBoardMode('tactical')}
+              className={`px-2.5 py-1 rounded-md font-tech text-xs transition cursor-pointer flex items-center gap-1.5 ${
+                boardMode === 'tactical'
+                  ? 'bg-emerald-500 text-slate-950 font-bold shadow-sm'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <span>📋</span>
+              <span>Grid Tático</span>
+            </button>
+          </div>
+
+          <span className="font-mono text-slate-300 bg-slate-900 px-2 py-0.5 rounded border border-slate-800 text-[11px]">
+            Ciclo #{mapData?.cycleNumber || 1}
+          </span>
+
+          <span className="flex items-center gap-1 text-[11px] bg-lime-950/70 text-lime-300 px-2 py-0.5 rounded border border-lime-500/40 font-bold" title="Zumbis restantes">
+            🧟 <b className="text-white">{mapData?.deposits?.filter(d => d.type === 'zombie' && !d.isCompleted).length ?? 19}</b>/19
+          </span>
+
+          <span className="flex items-center gap-1 text-[11px] bg-red-950/70 text-red-300 px-2 py-0.5 rounded border border-red-500/40 font-bold" title="Boss Mutante">
+            💀 Boss: <b className={mapData?.deposits?.some(d => d.type === 'boss' && !d.isCompleted) ? 'text-amber-300' : 'text-emerald-400'}>
+              {mapData?.deposits?.some(d => d.type === 'boss' && !d.isCompleted) ? 'Ativo' : 'Morto'}
+            </b>
+          </span>
+        </div>
+
         {/* Ações da Expedição */}
         <div className="flex items-center gap-2">
           
@@ -1319,6 +1406,19 @@ export default function App() {
             </span>
           </button>
 
+          {/* BOTÃO EQUIPE (JANELA FLUTUANTE) */}
+          <button
+            onClick={() => setIsTeamDrawerOpen(prev => !prev)}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-tech text-xs font-bold border border-amber-500/40 transition cursor-pointer shadow-md shadow-amber-950/30 active:scale-95"
+            title="Abrir Painel da Equipe de Heróis"
+          >
+            <Users size={15} className="text-amber-400" />
+            <span>EQUIPE</span>
+            <span className="px-1.5 py-0.2 rounded-full bg-amber-500 text-slate-950 text-[10px] font-bold font-mono">
+              {miners.filter(m => m.status === 'work').length}/15
+            </span>
+          </button>
+
           {/* BOTÃO MINT */}
           <button
             onClick={() => setIsSummonOpen(true)}
@@ -1354,94 +1454,48 @@ export default function App() {
           >
             {soundEnabled ? <Volume2 size={16} /> : <VolumeX size={16} className="text-rose-400" />}
           </button>
+
+          {/* Fixar / Desafixar Menu Superior */}
+          <button
+            onClick={() => setIsNavPinned(prev => !prev)}
+            title={isNavPinned ? "Menu fixado permanentemente. Clique para ativar auto-ocultação" : "Clique para fixar o menu no topo"}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl transition border cursor-pointer text-xs font-bold ${
+              isNavPinned 
+                ? 'bg-amber-500/20 text-amber-300 border-amber-400 shadow-sm' 
+                : 'bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white border-slate-700'
+            }`}
+          >
+            <Pin size={14} className={isNavPinned ? 'rotate-45 text-amber-400' : ''} />
+            <span className="hidden xl:inline text-[10px]">{isNavPinned ? 'FIXADO' : 'AUTO'}</span>
+          </button>
         </div>
       </header>
 
-      {/* ÁREA DO JOGO */}
-      <main className="flex-1 flex overflow-y-auto overflow-x-auto lg:overflow-x-hidden p-3 sm:p-4 gap-4 lg:gap-6 justify-center items-stretch relative w-full">
+      {/* ÁREA DO JOGO (FULLSCREEN SEM BARRA DE ROLAGEM) */}
+      <main className="flex-1 w-full h-screen flex flex-col items-center justify-start pt-0 px-1 pb-1 overflow-hidden relative select-none">
         
-        {/* ÁREA DO TABULEIRO COM SELETOR DE MODO */}
-        <div className="flex-1 min-w-0 flex flex-col items-center justify-start overflow-auto">
-          {/* SELETOR DE MODO DE VISUALIZAÇÃO */}
-          <div className="flex items-center gap-2 mb-3 bg-slate-900/90 p-1.5 rounded-2xl border border-slate-800 shadow-lg">
-            <button
-              onClick={() => setBoardMode('canyon')}
-              className={`px-3 py-1.5 rounded-xl font-tech text-xs transition cursor-pointer flex items-center gap-1.5 ${
-                boardMode === 'canyon'
-                  ? 'bg-amber-500 text-slate-950 font-bold shadow-md'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800'
-              }`}
-            >
-              <span>🎮</span>
-              <span>Mina de Combate (Canvas HD)</span>
-            </button>
-            <button
-              onClick={() => setBoardMode('tactical')}
-              className={`px-3 py-1.5 rounded-xl font-tech text-xs transition cursor-pointer flex items-center gap-1.5 ${
-                boardMode === 'tactical'
-                  ? 'bg-emerald-500 text-slate-950 font-bold shadow-md'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800'
-              }`}
-            >
-              <span>📋</span>
-              <span>Grid Tático de Sobrevivência</span>
-            </button>
-          </div>
-
+        {/* ÁREA DO TABULEIRO */}
+        <div className="w-full h-full flex flex-col items-center justify-start">
           {boardMode === 'tactical' ? (
-            <ZombieSurvivalBoard
-              survivors={miners}
-              onSurvivorsChange={setMiners}
-              house={currentHouse}
-              onOpenShelter={() => setIsHouseOpen(true)}
-            />
+            <div className="w-full flex flex-col items-center pt-2">
+              {/* Seletor quando no modo tático */}
+              <div className="flex items-center gap-2 mb-2 bg-slate-900/90 p-1.5 rounded-2xl border border-slate-800 shadow-lg">
+                <button
+                  onClick={() => setBoardMode('canyon')}
+                  className="px-3 py-1.5 rounded-xl font-tech text-xs text-slate-400 hover:text-white hover:bg-slate-800 cursor-pointer"
+                >
+                  🎮 Voltar para Mina de Combate (Canvas HD)
+                </button>
+              </div>
+              <ZombieSurvivalBoard
+                survivors={miners}
+                onSurvivorsChange={setMiners}
+                house={currentHouse}
+                onOpenShelter={() => setIsHouseOpen(true)}
+              />
+            </div>
           ) : (
-            <div className="flex flex-col items-center justify-center relative w-full">
-              <div className="w-full max-w-[900px] flex items-center justify-between mb-2 px-2 text-xs text-slate-400 font-tech">
-                <div className="flex items-center gap-3">
-                  <span className="flex items-center gap-2 text-xs">
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span className="text-slate-400">Em combate:</span>
-                    <b className="text-emerald-400 font-bold">{miners.filter(m => m.status === 'work').length}/15</b>
-                    <span className="text-slate-600">|</span>
-                    <span className="text-slate-400">No abrigo:</span>
-                    <b className="text-blue-400 font-bold">{miners.filter(m => m.status === 'house').length}/{currentHouse.slots}</b>
-                    <span className="text-slate-600">|</span>
-                    <span className="text-slate-400">Reservas:</span>
-                    <b className="text-amber-400 font-bold">{miners.filter(m => m.status === 'reserve' || m.status === 'sleep').length}</b>
-                  </span>
-                </div>
-                <div className="flex items-center gap-1.5 text-xs">
-                  <span className="text-slate-400">Farmado na Sessão:</span>
-                  <b className="text-amber-400 font-mono">+{totalMinedSession.toFixed(3)} MNC</b>
-                </div>
-              </div>
-
-              {/* BARRA HUD DO MAPA INDIVIDUAL & INIMIGOS */}
-              <div className="w-full max-w-[900px] mb-2 px-3 py-2 rounded-2xl bg-slate-900/90 border border-slate-700/80 flex flex-wrap items-center justify-between gap-2 text-xs shadow-md">
-                <div className="flex items-center gap-2">
-                  <span className="flex items-center gap-1 font-bold text-amber-400 bg-amber-500/15 px-2 py-0.5 rounded-lg border border-amber-500/30 text-[11px]">
-                    🗺️ Mapa Individual
-                  </span>
-                  <span className="font-mono text-slate-300 bg-slate-950 px-2 py-0.5 rounded-md border border-slate-800 text-[11px]">
-                    Ciclo #{mapData?.cycleNumber || 1}
-                  </span>
-                  <span className="text-emerald-400 font-bold bg-emerald-500/15 px-2 py-0.5 rounded-lg border border-emerald-500/30 text-[11px]">
-                    Inimigos: {mapData?.remainingDeposits ?? mapData?.totalDeposits ?? 20} / {mapData?.totalDeposits || 20}
-                  </span>
-                </div>
-
-                {/* BADGES DOS ZUMBIS E DO BOSS */}
-                <div className="flex items-center gap-2 text-[11px]">
-                  <span className="flex items-center gap-1 bg-lime-950/70 text-lime-300 px-2 py-0.5 rounded border border-lime-500/40 font-bold" title="Zumbis restantes">
-                    🧟 Zumbis: <b className="text-white">{mapData?.deposits?.filter(d => d.type === 'zombie' && !d.isCompleted).length ?? 19}</b> / 19
-                  </span>
-                  <span className="flex items-center gap-1 bg-red-950/70 text-red-300 px-2 py-0.5 rounded border border-red-500/40 font-bold" title="Boss Mutante">
-                    💀 Boss: <b className="text-amber-300">{mapData?.deposits?.some(d => d.type === 'boss' && !d.isCompleted) ? 'Ativo' : 'Derrotado'}</b>
-                  </span>
-                </div>
-              </div>
-
+            <div className="flex flex-col items-center justify-start relative w-full h-full max-w-[1200px] pt-0.5">
               <GameBoard
                 mine={currentMine}
                 mapData={mapData}
@@ -1490,22 +1544,22 @@ export default function App() {
           )}
         </div>
 
-        {/* EQUIPE DE MINERADORES (AMPLIADO LATERALMENTE) */}
-        <aside className="w-full sm:w-[500px] md:w-[560px] lg:w-[620px] xl:w-[680px] 2xl:w-[740px] max-w-[760px] h-full flex flex-col shrink-0 min-w-0">
-          <HeroList
-            miners={miners}
-            gold={bcoin}
-            onUpgradeMiner={handleUpgradeMiner}
-            onToggleStatus={handleToggleStatus}
-            onAllWork={handleAllWork}
-                        onOpenEnergyBoostAd={() => handleOpenEnergyRecovery(null)}
-            onOpenEnergyRecoveryModal={handleOpenEnergyRecovery}
-            onRepairMiner={handleRepairMiner}
-            onDiversifyTeam={handleDiversifyTeam}
-          />
-        </aside>
-
       </main>
+
+      {/* BOTÃO FLUTUANTE LATERAL RÁPIDO PARA ABRIR A EQUIPE */}
+      {!isTeamDrawerOpen && (
+        <button
+          onClick={() => setIsTeamDrawerOpen(true)}
+          className="fixed right-3 top-1/2 -translate-y-1/2 z-40 flex flex-col items-center gap-1.5 px-3 py-3 rounded-2xl bg-gradient-to-b from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold shadow-[0_4px_25px_rgba(245,158,11,0.45)] border-2 border-amber-300 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+          title="Abrir Painel da Equipe de Heróis"
+        >
+          <Users size={22} className="stroke-[2.5]" />
+          <span className="text-[11px] font-arcade tracking-wider font-extrabold">EQUIPE</span>
+          <span className="text-[10px] bg-slate-950 text-amber-300 px-1.5 py-0.5 rounded-full font-mono font-bold border border-amber-400/30">
+            {miners.filter(m => m.status === 'work').length}/15
+          </span>
+        </button>
+      )}
 
       {/* MODAL DO MARKETPLACE P2P (COMÉRCIO COM TAXA DE 5%) */}
       <MarketplaceModal
@@ -1748,6 +1802,55 @@ export default function App() {
         preselectedHeroId={preselectedHeroForEnergy}
         onEnergyRestored={handleHeroEnergyRestored}
       />
+
+      {/* JANELA FLUTUANTE LATERAL DA EQUIPE DE HERÓIS */}
+      {isTeamDrawerOpen && (
+        <div className="fixed inset-0 z-50 flex justify-end">
+          {/* Backdrop escurecido com blur que fecha ao clicar */}
+          <div 
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm transition-opacity cursor-pointer"
+            onClick={() => setIsTeamDrawerOpen(false)}
+          />
+
+          {/* Painel lateral flutuante */}
+          <div className="relative w-full max-w-[580px] sm:max-w-[640px] md:max-w-[700px] lg:max-w-[760px] h-full bg-slate-950 border-l-2 border-amber-500/40 shadow-2xl flex flex-col z-10 animate-slide-in-right">
+            {/* Header da Janela Flutuante */}
+            <div className="flex items-center justify-between px-5 py-3.5 bg-slate-900 border-b border-slate-800 shadow-md">
+              <div className="flex items-center gap-2.5">
+                <Users className="text-amber-400" size={20} />
+                <h2 className="font-arcade text-amber-300 text-sm tracking-wide">
+                  PAINEL DA EQUIPE DE HERÓIS
+                </h2>
+                <span className="text-xs bg-amber-500/20 text-amber-300 px-2.5 py-0.5 rounded-full font-mono font-bold border border-amber-500/30">
+                  {miners.filter(m => m.status === 'work').length}/15 em Campo
+                </span>
+              </div>
+              <button
+                onClick={() => setIsTeamDrawerOpen(false)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-rose-900/50 hover:text-rose-300 text-slate-300 transition text-xs font-bold border border-slate-700 cursor-pointer"
+              >
+                <X size={16} />
+                <span>FECHAR</span>
+              </button>
+            </div>
+
+            {/* Conteúdo da Lista de Heróis */}
+            <div className="flex-1 overflow-y-auto p-3">
+              <HeroList
+                miners={miners}
+                gold={bcoin}
+                onUpgradeMiner={handleUpgradeMiner}
+                onToggleStatus={handleToggleStatus}
+                onAllWork={handleAllWork}
+                onOpenEnergyBoostAd={() => handleOpenEnergyRecovery(null)}
+                onOpenEnergyRecoveryModal={handleOpenEnergyRecovery}
+                onRepairMiner={handleRepairMiner}
+                onDiversifyTeam={handleDiversifyTeam}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

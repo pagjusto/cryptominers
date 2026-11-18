@@ -4552,11 +4552,11 @@ if (typeof window !== 'undefined') {
 export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swingProgress = 0, isMining = false) {
   initRosterSprites();
 
-  // Dimensões proporcionais dos Heróis baseadas na entrada do bunker (~24px de altura)
-  const pw = 25; // Largura do herói calibrada
-  const ph = 28; // Altura do herói calibrada (28 * 0.85 ≈ 24px)
-  const gw = 22; // Largura proporcional da arma
-  const gh = 12; // Altura proporcional da arma
+  // Dimensões proporcionais dos Heróis baseadas na entrada do bunker (~36px de altura)
+  const pw = 32; // Largura do herói calibrada
+  const ph = 36; // Altura do herói calibrada (entra com folga na porta do bunker de 57px)
+  const gw = 28; // Largura proporcional da arma
+  const gh = 15; // Altura proporcional da arma
 
   const spriteIndex = hero?.spriteIndex ?? 0;
   const sourceIndex = weapon?.sourceIndex ?? spriteIndex ?? 0;
@@ -4575,7 +4575,7 @@ export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swi
   const wsy = 0;
 
   const dx = -pw / 2;
-  const dy = -ph + 6;
+  const dy = -ph + 8;
 
   // Pontos de pivô anatômicos do quadril para os heróis (proporcionais à moldura 128x128 centrada em x=64)
   const hipLeftX = dx + pw * (56 / 128);
@@ -4591,7 +4591,7 @@ export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swi
   // =========================================================================
   if (!isMining) {
     ctx.save();
-    ctx.translate(0, 10); // Pivot exatamente na base dos pés
+    ctx.translate(0, 14); // Pivot exatamente na base dos pés
 
     // Frequência dinâmica dos passos (mesmo ritmo e amplitude de passada dos zumbis)
     const stepPhase = now * 0.016;
@@ -4629,16 +4629,16 @@ export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swi
       // Arma apoiada na mão direita do herói em marcha
       if (weaponRosterLoaded && weaponRosterImg) {
         ctx.save();
-        ctx.translate(6, -6);
+        ctx.translate(8, -8);
         ctx.rotate(0.35 + Math.sin(stepPhase) * 0.04);
-        ctx.drawImage(weaponRosterImg, wsx, wsy, wsw, wsh, -4, -6, gw, gh);
+        ctx.drawImage(weaponRosterImg, wsx, wsy, wsw, wsh, -5, -8, gw, gh);
 
         // Mão do herói segurando a coronha / empunhadura
         ctx.fillStyle = '#fed7aa';
         ctx.strokeStyle = '#1c1917';
-        ctx.lineWidth = 1.0;
+        ctx.lineWidth = 1.2;
         ctx.beginPath();
-        ctx.arc(0, 0, 1.8, 0, Math.PI * 2);
+        ctx.arc(0, 0, 2.2, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
 
@@ -4654,9 +4654,9 @@ export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swi
       ctx.drawImage(heroRosterImg, sx, sy, sw, sh, dx, dy, pw, ph);
       if (weaponRosterLoaded && weaponRosterImg) {
         ctx.save();
-        ctx.translate(6, -6);
+        ctx.translate(8, -8);
         ctx.rotate(0.35);
-        ctx.drawImage(weaponRosterImg, wsx, wsy, wsw, wsh, -4, -6, gw, gh);
+        ctx.drawImage(weaponRosterImg, wsx, wsy, wsw, wsh, -5, -8, gw, gh);
         ctx.restore();
       }
       ctx.restore();
@@ -4673,13 +4673,13 @@ export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swi
   // 2. MODO ATAQUE: DISPARO DE ARMA COM RECUO, MUZZLE FLASH E BALÍSTICA (PIRATA)
   // =========================================================================
   ctx.save();
-  ctx.translate(0, 10); // Pivot nos pés
+  ctx.translate(0, 14); // Pivot nos pés
 
   let lungeX = 0;
   let bodyAngle = 0;
   let gunAngle = 0;
-  let handX = 5;
-  let handY = -7;
+  let handX = 7;
+  let handY = -10;
   let recoilDist = 0;
   let scaleY = 1;
   let scaleX = 1;
@@ -4687,40 +4687,40 @@ export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swi
   // FASE 1: MIRA & ENGATILHAMENTO HORIZONTAL (0.00 a 0.32)
   if (swingProgress < 0.32) {
     const p = swingProgress / 0.32;
-    lungeX = 1.5 * p;
+    lungeX = 2 * p;
     bodyAngle = 0.06 * p; // Postura firme de atirador
     gunAngle = 0.35 - p * 0.35; // Alinha rigorosamente na horizontal (0.0 rad)
-    handX = 5 + 1.5 * p;
-    handY = -6 - 1.5 * p;
+    handX = 7 + 2 * p;
+    handY = -8 - 2 * p;
   }
   // FASE 2: DETONAÇÃO, DISPARO E RECUO BRUTAL (0.32 a 0.48)
   else if (swingProgress < 0.48) {
     const p = (swingProgress - 0.32) / 0.16;
     // Recuo forte jogando o braço e tronco para trás
-    recoilDist = Math.sin(p * Math.PI) * 4;
-    lungeX = 1.5 - recoilDist * 0.5;
+    recoilDist = Math.sin(p * Math.PI) * 5;
+    lungeX = 2 - recoilDist * 0.5;
     bodyAngle = 0.06 - Math.sin(p * Math.PI) * 0.15; // Tronco empurrado para trás
-    gunAngle = -Math.sin(p * Math.PI) * 0.38; // Cano dá coice para cima
-    handX = 7 - recoilDist * 0.8;
-    handY = -7;
+    gunAngle = -Math.sin(p * Math.PI) * 0.40; // Cano dá coice para cima
+    handX = 9 - recoilDist * 0.8;
+    handY = -10;
     scaleX = 1 - Math.sin(p * Math.PI) * 0.05;
     scaleY = 1 + Math.sin(p * Math.PI) * 0.03;
   }
   // FASE 3: SUSTENTAÇÃO DE IMPACTO NA ROCHA & FUMAÇA (0.48 a 0.75)
   else if (swingProgress < 0.75) {
     const p = (swingProgress - 0.48) / 0.27;
-    lungeX = 1.5 * (1 - p);
+    lungeX = 2 * (1 - p);
     bodyAngle = -0.04 * (1 - p);
     gunAngle = -0.15 * (1 - p);
-    handX = 7 - 1 * p;
-    handY = -7;
+    handX = 9 - 1 * p;
+    handY = -10;
   }
   // FASE 4: RECUPERAÇÃO E RETORNO (0.75 a 1.00)
   else {
     const p = (swingProgress - 0.75) / 0.25;
     gunAngle = p * 0.35;
-    handX = 6 - 1 * p;
-    handY = -7 + 1.5 * p;
+    handX = 8 - 1 * p;
+    handY = -10 + 2 * p;
   }
 
   // Desenha Corpo do Herói: pernas firmes no chão e tronco absorvendo recuo
@@ -4763,25 +4763,25 @@ export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swi
     ctx.rotate(gunAngle);
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
-    ctx.drawImage(weaponRosterImg, wsx, wsy, wsw, wsh, -4, -6, gw, gh);
+    ctx.drawImage(weaponRosterImg, wsx, wsy, wsw, wsh, -5, -8, gw, gh);
 
     // Mão do herói segurando a empunhadura
     ctx.fillStyle = '#fed7aa';
     ctx.strokeStyle = '#1c1917';
-    ctx.lineWidth = 1.0;
+    ctx.lineWidth = 1.2;
     ctx.beginPath();
-    ctx.arc(0, 0, 1.8, 0, Math.PI * 2);
+    ctx.arc(0, 0, 2.2, 0, Math.PI * 2);
     ctx.fill();
     ctx.stroke();
 
     // Posição da boca do cano (Muzzle)
-    const muzzleLocalX = 18;
+    const muzzleLocalX = 25;
     const muzzleLocalY = -2;
 
     // 1. FLASH DE DISPARO DA BOCA DO CANO (0.32 a 0.42)
     if (swingProgress >= 0.32 && swingProgress <= 0.42) {
       const flashP = (swingProgress - 0.32) / 0.10;
-      const flashSize = 8 + (1 - flashP) * 5;
+      const flashSize = 10 + (1 - flashP) * 6;
       const category = weapon?.category || 'rifle';
 
       ctx.save();

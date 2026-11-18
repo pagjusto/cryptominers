@@ -176,9 +176,10 @@ export default function GameBoard({
 
     canvas.width = logicalWidth * dpr;
     canvas.height = logicalHeight * dpr;
-    canvas.style.width = `${logicalWidth}px`;
-    canvas.style.height = `${logicalHeight}px`;
     canvas.style.maxWidth = '100%';
+    canvas.style.maxHeight = 'calc(100vh - 24px)';
+    canvas.style.width = 'auto';
+    canvas.style.height = 'auto';
     canvas.style.aspectRatio = `${logicalWidth} / ${logicalHeight}`;
 
     let animationId;
@@ -464,7 +465,8 @@ export default function GameBoard({
         if (miner.targetBlock) {
           const { x: tx, y: ty } = miner.targetBlock;
           const currentType = state.grid[ty] ? state.grid[ty][tx] : BLOCK_EMPTY;
-          const isAdjacent = Math.abs(tx - mx) + Math.abs(ty - my) === 1;
+          // Adjacência cardinal e diagonal (raio de tiro de 1 bloco em 8 direções)
+          const isAdjacent = Math.max(Math.abs(tx - mx), Math.abs(ty - my)) === 1;
           const cellKey = `${tx},${ty}`;
           const hasHp = state.hpMap[cellKey] !== undefined && state.hpMap[cellKey] > 0;
           if (currentType === BLOCK_EMPTY || currentType === BLOCK_BEDROCK || !isAdjacent || !hasHp) {
@@ -977,10 +979,10 @@ export default function GameBoard({
   };
 
   return (
-    <div className="relative inline-block border-4 border-amber-950/60 rounded-3xl overflow-hidden shadow-[0_0_90px_rgba(0,0,0,0.95)] bg-slate-950 ring-2 ring-amber-500/20">
+    <div className="relative inline-flex items-center justify-center border-4 border-amber-950/60 rounded-3xl overflow-hidden shadow-[0_0_90px_rgba(0,0,0,0.95)] bg-slate-950 ring-2 ring-amber-500/20 max-h-[calc(100vh-16px)] max-w-full">
       <canvas 
         ref={canvasRef} 
-        className="block cursor-pointer"
+        className="block cursor-pointer max-w-full max-h-[calc(100vh-24px)] w-auto h-auto object-contain"
         onClick={handleCanvasClick}
       />
     </div>

@@ -267,10 +267,13 @@ export function updateEnemies(enemies, state, dt, now, isCanyon = true) {
           state.grid[chosen.y][chosen.x] = enemy.blockId;
           state.hpMap[newKey] = curHp;
 
+          const dir = chosen.x < enemy.gx ? -1 : 1;
           enemy.targetGx = chosen.x;
           enemy.targetGy = chosen.y;
+          enemy.gx = chosen.x;
+          enemy.gy = chosen.y;
           enemy.isWalking = true;
-          enemy.facingDir = chosen.x < enemy.gx ? -1 : 1;
+          enemy.facingDir = dir;
         } else {
           // Tenta novamente em 2 segundos se cercado
           enemy.moveCooldown = 2.0;
@@ -328,9 +331,9 @@ export function drawEnemyCharacter(ctx, enemy, now) {
   ctx.translate(px + lungeX * 0.35, py);
   ctx.fillStyle = isBoss ? 'rgba(0, 0, 0, 0.42)' : 'rgba(0, 0, 0, 0.35)';
   ctx.beginPath();
-  const shadowY = isBoss ? 16 : 10;
-  const shadowRx = isBoss ? 16 : 8.5;
-  const shadowRy = isBoss ? 5.0 : 2.8;
+  const shadowY = isBoss ? 20 : 14;
+  const shadowRx = isBoss ? 23 : 15;
+  const shadowRy = isBoss ? 6.5 : 4.2;
   ctx.ellipse(0, shadowY, shadowRx, shadowRy, 0, 0, Math.PI * 2);
   ctx.fill();
   ctx.restore();
@@ -341,12 +344,12 @@ export function drawEnemyCharacter(ctx, enemy, now) {
   ctx.scale(enemy.facingDir * attackScale, attackScale);
   ctx.rotate(walkTilt + attackTilt);
 
-  // Zumbis adequados ao tamanho dos heróis e proporcionais à entrada do bunker (~27px de altura)
-  const drawW = isBoss ? Math.floor(TILE_SIZE * 0.65) : Math.floor(TILE_SIZE * 0.40);
-  const drawH = isBoss ? Math.floor(TILE_SIZE * 0.65) : Math.floor(TILE_SIZE * 0.45);
+  // Zumbis mais encorpados e largos conforme solicitado (~40px de largura e ~36px de altura)
+  const drawW = isBoss ? Math.floor(TILE_SIZE * 0.74) : Math.floor(TILE_SIZE * 0.52);
+  const drawH = isBoss ? Math.floor(TILE_SIZE * 0.68) : Math.floor(TILE_SIZE * 0.47);
 
   const dx = -drawW / 2;
-  const dy = isBoss ? -drawH + 16 : -drawH + 10;
+  const dy = isBoss ? -drawH + 20 : -drawH + 14;
 
   // Pontos de pivô anatômicos das articulações do quadril (escala 640x640)
   const hipLeftX = dx + drawW * (294 / 640);

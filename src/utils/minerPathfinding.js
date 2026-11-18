@@ -40,10 +40,15 @@ export function findNextHeroAction(miner, grid, allMiners = [], isCanyon = true)
     { x: mx, y: my - 1, dir: miner.targetDir || 1 },
     { x: mx + 1, y: my, dir: 1 },
     { x: mx, y: my + 1, dir: miner.targetDir || 1 },
-    { x: mx - 1, y: my, dir: -1 }
+    { x: mx - 1, y: my, dir: -1 },
+    // Ataques em ângulo diagonal com armas de fogo
+    { x: mx + 1, y: my - 1, dir: 1 },
+    { x: mx - 1, y: my - 1, dir: -1 },
+    { x: mx + 1, y: my + 1, dir: 1 },
+    { x: mx - 1, y: my + 1, dir: -1 }
   ];
 
-  // 1. Verifica se já está encostado em uma jazida ativa que pode atacar agora
+  // 1. Verifica se já está no raio de tiro (adjacente cardinal ou diagonal) a uma criatura ativa
   const adjacentDeposit = neighbors.find(n => {
     if (n.x < 0 || n.x >= GRID_COLS || n.y < 0 || n.y >= GRID_ROWS) return false;
     const t = grid[n.y] ? grid[n.y][n.x] : BLOCK_EMPTY;
@@ -94,10 +99,9 @@ export function findNextHeroAction(miner, grid, allMiners = [], isCanyon = true)
   while (queue.length > 0) {
     const curr = queue.shift();
 
-    // Se este ponto está adjacente a uma jazida ativa
+    // Se este ponto está adjacente (cardinal ou diagonal) a uma jazida/zumbi ativo
     const touchingDeposit = activeDeposits.find(d => 
-      (Math.abs(d.x - curr.x) === 1 && d.y === curr.y) || 
-      (Math.abs(d.y - curr.y) === 1 && d.x === curr.x)
+      Math.max(Math.abs(d.x - curr.x), Math.abs(d.y - curr.y)) === 1
     );
 
     if (touchingDeposit && curr.path.length > 0) {
