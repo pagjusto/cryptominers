@@ -1,5 +1,21 @@
 # Sobreviventes, médico e enfermaria
 
+## Perfis de atributos dos 12 heróis
+
+O elenco possui **12 heróis**, sem contar o médico: dois personagens para cada uma das seis raridades.
+
+- Os dois heróis de uma mesma raridade produzem a mesma quantidade de MNC por segundo.
+- A raridade determina a produção-base e a faixa de HP.
+- Dentro de cada raridade, os dois heróis têm perfis diferentes:
+  - **Resistente:** maior HP máximo e recuperação mais demorada.
+  - **Ágil:** menor HP máximo e recuperação mais rápida.
+- A regra de proporção aprovada é: o resistente tem o dobro do HP do ágil; o ágil recupera 100% da vida em um terço do tempo do resistente.
+- Exemplo ilustrativo para uma dupla: resistente com 1.000 HP e recuperação em 90 minutos; ágil com 500 HP e recuperação em 30 minutos.
+- Não há atributo de dano para diferenciar a produção: a mineração é calculada continuamente por segundo e depende da raridade, não de dano ou abates.
+- O sistema de estrelas foi adiado para uma atualização futura. Na versão atual, todos os heróis ficam sem estrelas e não recebem bônus associados a estrelas.
+
+Os números completos de HP e de tempo-base de recuperação para cada uma das seis raridades ainda precisam ser fechados na tabela final de balanceamento. A proporção entre os dois perfis, porém, está definida.
+
 ## Quando um sobrevivente fica ferido
 
 Ao atingir **5% de vida**, o sobrevivente sai do combate e passa a ser considerado ferido. Não ocorre morte permanente por esse motivo.
@@ -44,7 +60,7 @@ A ativação, contratação e renovação do médico dependem da futura etapa co
 ## Recuperação
 
 - A recuperação acontece simultaneamente para os sobreviventes que ocupam leitos.
-- A velocidade depende apenas do nível do abrigo.
+- A velocidade depende do perfil do herói e do nível do abrigo.
 - O médico não modifica a velocidade de recuperação.
 - A recuperação restaura a vida do sobrevivente.
 - Ao alcançar 100% de vida, ele retorna automaticamente à reserva e libera o leito.
