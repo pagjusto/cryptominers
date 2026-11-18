@@ -72,15 +72,7 @@ function promoteReserves(survivors, capacity) {
     if (target) target.status = 'work';
   });
 
-  const occupied = next.filter(s => s.status === 'house').length;
-  let beds = Math.max(0, capacity - occupied);
-  next.forEach(s => {
-    if (s.status === 'waiting_house' && beds > 0) {
-      s.status = 'house';
-      beds -= 1;
-    }
-  });
-  return next;
+  return assignBedsFIFO(next, capacity);
 }
 
 export default function ZombieSurvivalBoard({ survivors = [], onSurvivorsChange, house, onOpenShelter, doctorActive = false }) {
