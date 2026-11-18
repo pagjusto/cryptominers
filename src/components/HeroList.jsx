@@ -158,7 +158,7 @@ export default function HeroList({
                     title={rosterHero.name}
                     style={{
                       borderColor: classInfo.color,
-                      backgroundImage: 'url(/assets/hero-avatars.png)',
+                      backgroundImage: 'url(/assets/hero-avatars.png?v=3)',
                       backgroundRepeat: 'no-repeat',
                       backgroundSize: '616px 56px',
                       backgroundPosition: `-${rosterHero.spriteIndex * 56}px center`,
