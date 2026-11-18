@@ -4579,12 +4579,12 @@ export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swi
   const dx = -pw / 2;
   const dy = -ph + 9;
 
-  // Pontos de pivô anatômicos do quadril para os 11 heróis (proporcionais à moldura 128x128)
-  const hipLeftX = dx + pw * (58 / 128);
-  const hipLeftY = dy + ph * (71 / 128);
+  // Pontos de pivô anatômicos do quadril para os 11 heróis (proporcionais à moldura 128x128 centrada em x=64)
+  const hipLeftX = dx + pw * (56 / 128);
+  const hipLeftY = dy + ph * (72 / 128);
 
-  const hipRightX = dx + pw * (76 / 128);
-  const hipRightY = dy + ph * (71 / 128);
+  const hipRightX = dx + pw * (72 / 128);
+  const hipRightY = dy + ph * (72 / 128);
 
   const hasParts = heroRosterUpperImg?.complete && heroRosterLegLeftImg?.complete && heroRosterLegRightImg?.complete;
 
