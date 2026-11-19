@@ -21,10 +21,10 @@ export default function MinerCatalogModal({ isOpen, onClose, onOpenMintModal }) 
             </div>
             <div>
               <h3 className="font-arcade text-base text-amber-400">
-                CATÁLOGO DE MINERADORES
+                CATÁLOGO DE COMBATENTES SOBREVIVENTES
               </h3>
               <p className="text-xs text-slate-400 font-tech">
-                Conheça todas as classes, atributos e habilidades especiais que podem ser adquiridos
+                Conheça os 13 heróis oficiais, armas equipadas, atributos e habilidades táticas de sobrevivência
               </p>
             </div>
           </div>
@@ -207,7 +207,7 @@ export default function MinerCatalogModal({ isOpen, onClose, onOpenMintModal }) 
             {/* Rodapé da Carta */}
             <div className="border-t border-slate-800 pt-4 flex items-center justify-between">
               <span className="text-xs text-slate-400 font-tech">
-                Disponível no Mint ou Contrato Direto por <b className="text-amber-300 font-mono">{selectedMiner.directCostBcoin} BCOIN</b>.
+                Disponível no Recrutamento ou Contrato Direto por <b className="text-amber-300 font-mono">{selectedMiner.directCostBcoin * 100} MNC</b>.
               </span>
               <button
                 onClick={() => {
@@ -217,7 +217,7 @@ export default function MinerCatalogModal({ isOpen, onClose, onOpenMintModal }) 
                 className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-arcade text-xs font-bold transition shadow-lg flex items-center gap-1.5"
               >
                 <Sparkles size={14} />
-                <span>ADQUIRIR MINERADOR</span>
+                <span>RECRUTAR COMBATENTE</span>
               </button>
             </div>
 

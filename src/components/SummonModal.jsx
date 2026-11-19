@@ -577,13 +577,21 @@ export default function SummonModal({
                       >
                         <div className="flex items-center gap-2.5">
                           <div 
-                            className="w-12 h-12 rounded-xl border flex items-center justify-center text-2xl shadow-inner shrink-0"
+                            className="w-12 h-12 rounded-xl border flex items-center justify-center text-2xl shadow-inner shrink-0 overflow-hidden"
                             style={{ 
                               borderColor: minerClass.color,
                               backgroundColor: `${minerClass.color}15`
                             }}
                           >
-                            {minerClass.avatar}
+                            {minerClass.image ? (
+                              <img 
+                                src={minerClass.image} 
+                                alt={minerClass.name} 
+                                className="w-full h-full object-cover" 
+                              />
+                            ) : (
+                              minerClass.avatar
+                            )}
                           </div>
 
                           <div>

@@ -711,8 +711,14 @@ export default function App() {
 
       newBatch.push({
         id: 'miner-batch-' + Date.now() + '-' + i,
-        name: `${name} #${Math.floor(Math.random() * 900 + 100)}`,
-        classId: picked.id.replace('class_', ''),
+        name: `${picked.name} #${Math.floor(Math.random() * 900 + 100)}`,
+        heroId: picked.heroId || picked.id.replace('class_', ''),
+        classId: picked.classId || picked.id.replace('class_', ''),
+        className: picked.title || picked.role,
+        weaponId: picked.weaponId || 'assault-rifle',
+        spriteIndex: picked.spriteIndex ?? 0,
+        rarity: picked.rarity,
+        rarityName: picked.badge,
         level: 1,
         power: picked.basePower,
         speed: picked.baseSpeed,
@@ -723,7 +729,7 @@ export default function App() {
         x: Math.floor(Math.random() * 3 + 1),
         y: Math.floor(Math.random() * 3 + 1),
         avatar: picked.avatar,
-        image: picked.image || `/miners/${picked.id.replace('class_', '')}.jpg`,
+        image: picked.image || `/assets/heroes/${picked.heroId}.png`,
         color: picked.color,
         passiveTrait: picked.passiveTrait
       });

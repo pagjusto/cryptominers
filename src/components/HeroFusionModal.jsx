@@ -30,7 +30,7 @@ export default function HeroFusionModal({
 
   // Mapeia raridade para cada classe a partir do MINER_ROSTER
   const getMinerRarity = (miner) => {
-    const fromRoster = MINER_ROSTER.find(r => r.id === `class_${miner.classId}`);
+    const fromRoster = MINER_ROSTER.find(r => r.id === `class_${miner.classId}` || r.heroId === miner.heroId || r.classId === miner.classId);
     return fromRoster ? fromRoster.rarity : 'common';
   };
 

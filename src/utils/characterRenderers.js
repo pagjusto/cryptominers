@@ -4940,17 +4940,17 @@ export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swi
       }
       ctx.restore();
     } else {
-      // Fissuras e cratera de impacto
-      ctx.strokeStyle = '#020617';
-      ctx.lineWidth = 2.4;
+      // Clarão sutil e faíscas de impacto balístico no alvo (sem linhas pretas de rachadura)
+      ctx.save();
+      const hitGrad = ctx.createRadialGradient(impactX, impactY, 0, impactX, impactY, 6);
+      hitGrad.addColorStop(0, '#ffffff');
+      hitGrad.addColorStop(0.5, '#fef08a');
+      hitGrad.addColorStop(1, 'rgba(239, 68, 68, 0)');
+      ctx.fillStyle = hitGrad;
       ctx.beginPath();
-      ctx.moveTo(impactX, impactY);
-      ctx.lineTo(impactX + 10, impactY - 8);
-      ctx.lineTo(impactX + 18, impactY - 14);
-      ctx.moveTo(impactX, impactY);
-      ctx.lineTo(impactX + 12, impactY + 6);
-      ctx.lineTo(impactX + 20, impactY + 12);
-      ctx.stroke();
+      ctx.arc(impactX, impactY, 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
     }
 
     // Faíscas incandescentes

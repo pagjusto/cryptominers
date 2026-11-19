@@ -71,9 +71,14 @@ export default function ChestOpeningModal({
 
         mintedBatch.push({
           id: 'miner-' + Date.now() + '-' + i,
-          name: `${randomName()} #${Math.floor(Math.random() * 900 + 100)}`,
-          classId: pickedRoster.id.replace('class_', ''),
+          name: `${pickedRoster.name} #${Math.floor(Math.random() * 900 + 100)}`,
+          heroId: pickedRoster.heroId || pickedRoster.id.replace('class_', ''),
+          classId: pickedRoster.classId || pickedRoster.id.replace('class_', ''),
+          className: pickedRoster.title || pickedRoster.role,
+          weaponId: pickedRoster.weaponId || 'assault-rifle',
+          spriteIndex: pickedRoster.spriteIndex ?? 0,
           rarity: selectedRarity,
+          rarityName: pickedRoster.badge,
           power: rolledPower,
           speed: pickedRoster.baseSpeed || 1.2,
           coinsPerHour: rolledCoins,
@@ -85,7 +90,7 @@ export default function ChestOpeningModal({
           x: Math.floor(Math.random() * 3 + 1),
           y: Math.floor(Math.random() * 3 + 1),
           avatar: pickedRoster.avatar,
-          image: pickedRoster.image || `/miners/${pickedRoster.id.replace('class_', '')}.png`,
+          image: pickedRoster.image || `/assets/heroes/${pickedRoster.heroId}.png`,
           color: pickedRoster.color,
           passiveTrait: pickedRoster.passiveTrait
         });
