@@ -86,6 +86,10 @@ export function isCityObstacle(c, r) {
   if ((c === 2 || c === 3) && r === 6) return true; // Cerca longa de arame sudoeste
   if (c === 3 && r === 7) return true; // Canto inferior da cerca sudoeste
 
+  // 7.1. TORRE DE SIRENE E ALARME DE VIGIA (Local exato demarcado em vermelho)
+  // Regra Oficial do Usuário: "os zumbies e herois nao podem passar por cima dela"
+  if (c === 2 && (r === 3 || r === 4)) return true;
+
   // 8. BASE MILITAR FORTIFICADA & COMPLEXO HOSPITALAR (Santuário Central)
   // Circulado pelo usuário: todo o complexo murado, pátio, ambulância, hangar e hospital
   if (isBaseCompound(c, r)) return true;

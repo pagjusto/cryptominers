@@ -555,12 +555,17 @@ export default function GameBoard({
             }
 
             // REGRA OFICIAL DO USUÁRIO: "enquanto o zumbi é atacado ele nao deve caminhar"
+            // REGRA OFICIAL DO USUÁRIO: "boss e zumbis devem virar para o lado que esta atacando"
             const targetEnemy = state.enemies?.find(e => e.gx === tx && e.gy === ty);
             if (targetEnemy) {
               targetEnemy.isUnderAttack = true;
               targetEnemy.attackedTimer = 1.2;
               targetEnemy.isWalking = false;
               targetEnemy.moveCooldown = 1.2;
+              const enemyCurrX = targetEnemy.visualX ?? targetEnemy.gx;
+              if (Math.abs(miner.x - enemyCurrX) > 0.05) {
+                targetEnemy.facingDir = miner.x < enemyCurrX ? -1 : 1;
+              }
             }
 
             if (blockType !== BLOCK_EMPTY && blockType !== BLOCK_BEDROCK) {
@@ -1016,8 +1021,23 @@ export default function GameBoard({
 
       ctx.clearRect(0, 0, logicalWidth, logicalHeight);
 
+      // Verificação do status do Boss para efeitos da torre de sirene e névoa
+      const bossEnemy = state.enemies?.find(e => e.type === 'boss' && (e.hp === undefined || e.hp > 0));
+      const isBossAlive = Boolean(bossEnemy);
+
+      // Sirene de alarme da torre de vigia toca periodicamente enquanto o Boss estiver vivo
+      if (isBossAlive) {
+        state.sirenSoundTimer = (state.sirenSoundTimer || 0) + dt;
+        if (state.sirenSoundTimer >= 2.8) {
+          state.sirenSoundTimer = 0;
+          sfx.playSirenWail?.();
+        }
+      } else {
+        state.sirenSoundTimer = 0;
+      }
+
       const railY = 5 * TILE_SIZE + 24;
-      drawContinuousCaveFloor(ctx, logicalWidth, logicalHeight, mine, now);
+      drawContinuousCaveFloor(ctx, logicalWidth, logicalHeight, mine, now, isBossAlive);
       if (mine?.id !== 'canyon') {
         drawTunnelPortals(ctx, logicalWidth, railY);
       }
@@ -1147,8 +1167,6 @@ export default function GameBoard({
       ctx.fillRect(0, 0, logicalWidth, logicalHeight);
 
       // Gestão suave da névoa verde atmosférica enquanto o Boss estiver vivo no mapa
-      const bossEnemy = state.enemies?.find(e => e.type === 'boss' && (e.hp === undefined || e.hp > 0));
-      const isBossAlive = Boolean(bossEnemy);
       const targetFogAlpha = isBossAlive ? 1.0 : 0.0;
       if (state.bossFogAlpha === undefined) {
         state.bossFogAlpha = targetFogAlpha;

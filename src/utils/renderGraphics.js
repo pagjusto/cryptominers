@@ -71,9 +71,31 @@ export function initBillboard(onLoaded) {
   };
 }
 
+let sirenTowerImg = null;
+let sirenTowerLoaded = false;
+
+export function initSirenTower(onLoaded) {
+  if (sirenTowerLoaded && sirenTowerImg) {
+    if (onLoaded) onLoaded();
+    return;
+  }
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.src = '/structures/siren_tower.png';
+  img.onload = () => {
+    sirenTowerImg = img;
+    sirenTowerLoaded = true;
+    if (onLoaded) onLoaded();
+  };
+  img.onerror = () => {
+    console.error('Falha ao carregar /structures/siren_tower.png');
+  };
+}
+
 export function initCityMap(onLoaded) {
   initBillboard();
   initUserFog();
+  initSirenTower();
   if (cityBgLoaded && cityBgImg) {
     if (onLoaded) onLoaded();
     return;
@@ -111,7 +133,7 @@ export function initCanyonMap(onLoaded) {
 }
 
 // 1. Chão do Mapa: Cidade de Sobrevivência Zumbi em Alta Definição
-export function drawContinuousCaveFloor(ctx, width, height, mine, now) {
+export function drawContinuousCaveFloor(ctx, width, height, mine, now, isBossAlive = false) {
   if (!cityBgImg && typeof window !== 'undefined') {
     initCityMap();
   }
@@ -168,6 +190,9 @@ export function drawContinuousCaveFloor(ctx, width, height, mine, now) {
       // Renderiza o outdoor vetorizado com proporções perfeitas e alta nitidez
       ctx.drawImage(billboardImg, bX, bY, bW, bH);
     }
+
+    // 1.2 TORRE DE VIGIA E ALARME DE SIRENE ("exatamente nesse local coloque essa torre , sem que ela fique sobre o muro")
+    drawSirenTower(ctx, now, isBossAlive);
 
     // Efeito suave de luz solar e calor na cidade
     const sunPulse = Math.sin((now || 0) * 0.002) * 0.03 + 0.97;
@@ -629,8 +654,8 @@ export function drawMinerCharacter(ctx, mx, my, miner, classInfo, now, swingProg
 }
 
 /**
- * Renderiza uma névoa verde atmosférica com mais ênfase, formas orgânicas irregulares
- * e textura de fumaça rasteira autêntica (sem formas arredondadas geométricas).
+ * Renderiza uma suave e elegante névoa verde rasteira sobre o mapa enquanto o Boss estiver vivo.
+ * Ondulações contínuas de margem a margem, sem cortes, sem costuras e sem formas geométricas duras.
  * Dissipa-se naturalmente quando o Boss é derrotado.
  */
 export function drawBossGreenFog(ctx, width, height, opacity, now, bossEnemy) {
@@ -639,137 +664,235 @@ export function drawBossGreenFog(ctx, width, height, opacity, now, bossEnemy) {
   ctx.save();
   const baseAlpha = Math.min(1, Math.max(0, opacity));
 
-  // 1. Tonalidade atmosférica ambiente verde tóxica (2x mais ênfase conforme pedido)
+  // 1. Tonalidade atmosférica ambiente suave em verde biológico/tóxico
   const ambientGrad = ctx.createLinearGradient(0, 0, 0, height);
-  ambientGrad.addColorStop(0, 'rgba(16, 185, 129, 0.18)');
-  ambientGrad.addColorStop(0.40, 'rgba(34, 197, 94, 0.16)');
-  ambientGrad.addColorStop(0.75, 'rgba(21, 128, 61, 0.24)');
-  ambientGrad.addColorStop(1, 'rgba(74, 222, 128, 0.35)'); // Base rasteira densa e luminosa
+  ambientGrad.addColorStop(0, 'rgba(16, 185, 129, 0.06)');
+  ambientGrad.addColorStop(0.40, 'rgba(34, 197, 94, 0.08)');
+  ambientGrad.addColorStop(0.75, 'rgba(21, 128, 61, 0.12)');
+  ambientGrad.addColorStop(1, 'rgba(74, 222, 128, 0.18)'); // Base rasteira suavemente iluminada
   ctx.fillStyle = ambientGrad;
   ctx.globalAlpha = baseAlpha;
   ctx.fillRect(0, 0, width, height);
 
-  // 2. Camada Autêntica de Textura de Fumaça/Névoa da Referência do Usuário (2x mais ênfase)
-  if (userFogLoaded && userFogImg) {
+  // 2. Lençóis contínuos de névoa rasteira ondulando pelo chão (de margem a margem, sem cortes)
+  const time = now * 0.0006;
+  const layers = [
+    { yRatio: 0.50, hRatio: 0.35, speed: 1.0, colorMid: 'rgba(74, 222, 128, 0.12)', colorBase: 'rgba(34, 197, 94, 0.16)' },
+    { yRatio: 0.65, hRatio: 0.30, speed: -0.7, colorMid: 'rgba(34, 197, 94, 0.14)', colorBase: 'rgba(21, 128, 61, 0.18)' },
+    { yRatio: 0.78, hRatio: 0.22, speed: 1.3, colorMid: 'rgba(132, 204, 22, 0.15)', colorBase: 'rgba(74, 222, 128, 0.20)' }
+  ];
+
+  layers.forEach((layer, lIdx) => {
     ctx.save();
-    // Camada rasteira 1: fumaça densa fluindo pelo solo da cidade
-    const scroll1 = (now * 0.018) % width;
-    ctx.globalAlpha = baseAlpha * 0.70;
-    ctx.drawImage(userFogImg, -scroll1, height * 0.35, width, height * 0.68);
-    ctx.drawImage(userFogImg, width - scroll1, height * 0.35, width, height * 0.68);
+    const yStart = height * layer.yRatio;
+    const bandHeight = height * layer.hRatio;
+    const waveOffset = time * layer.speed + lIdx * 2.0;
 
-    // Camada rasteira 2: plumas volumétricas flutuando em sentido cruzado
-    const scroll2 = (now * 0.010) % width;
-    ctx.globalAlpha = baseAlpha * 0.50;
-    ctx.save();
-    ctx.scale(-1, 1);
-    ctx.drawImage(userFogImg, -width + scroll2, height * 0.05, width * 1.2, height * 0.75);
-    ctx.drawImage(userFogImg, scroll2, height * 0.05, width * 1.2, height * 0.75);
-    ctx.restore();
-    ctx.restore();
-  }
-
-  // 3. Fitas e Plumas de Fumaça Orgânica Irregular (SEM NENHUMA FORMA ARREDONDADA)
-  // Desenhadas com curvas de Bezier sinuosas e pontas fluidas que imitam névoa real
-  ctx.save();
-  const time = now * 0.0005;
-
-  for (let r = 0; r < 3; r++) {
-    const yBase = height * (0.32 + r * 0.25);
-    const speed = 0.8 + r * 0.3;
-    const offset = Math.sin(time * speed + r) * 65;
-    
     ctx.beginPath();
-    ctx.moveTo(-60, yBase + Math.sin(time + r) * 28);
-    
-    // Curvas Bezier orgânicas sinuosas com formas distintas e assimétricas
-    ctx.bezierCurveTo(
-      width * 0.25 + offset, yBase - 40 + Math.cos(time * 1.2 + r) * 25,
-      width * 0.45 - offset, yBase + 55 + Math.sin(time * 0.9 + r) * 30,
-      width * 0.70 + offset * 0.5, yBase - 25 + Math.cos(time + r) * 22
-    );
-    ctx.bezierCurveTo(
-      width * 0.85 + offset, yBase + 35 + Math.sin(time * 1.1) * 25,
-      width + 70, yBase - 20,
-      width + 90, yBase + 70
-    );
-    ctx.bezierCurveTo(
-      width * 0.65, yBase + 85 + Math.cos(time) * 18,
-      width * 0.30, yBase + 95 + Math.sin(time) * 25,
-      -60, yBase + 80
-    );
+    ctx.moveTo(0, yStart);
+
+    // Linha de crista sinuosa e suave
+    const step = 40;
+    for (let x = 0; x <= width + step; x += step) {
+      const waveY = yStart + Math.sin(x * 0.006 + waveOffset) * 14 + Math.cos(x * 0.012 - waveOffset * 0.8) * 8;
+      ctx.lineTo(x, waveY);
+    }
+
+    ctx.lineTo(width, height);
+    ctx.lineTo(0, height);
     ctx.closePath();
 
-    const smokeGrad = ctx.createLinearGradient(0, yBase - 40, width, yBase + 90);
-    smokeGrad.addColorStop(0, 'rgba(74, 222, 128, 0)');
-    smokeGrad.addColorStop(0.3, 'rgba(74, 222, 128, 0.22)');
-    smokeGrad.addColorStop(0.6, 'rgba(34, 197, 94, 0.18)');
-    smokeGrad.addColorStop(1, 'rgba(21, 128, 61, 0)');
-    
-    ctx.fillStyle = smokeGrad;
-    ctx.globalAlpha = baseAlpha;
-    ctx.fill();
-  }
-  ctx.restore();
+    // Gradiente vertical que dissolve a crista para transparente sem nenhuma borda reta
+    const bandGrad = ctx.createLinearGradient(0, yStart - 10, 0, yStart + bandHeight);
+    bandGrad.addColorStop(0, 'rgba(74, 222, 128, 0)');
+    bandGrad.addColorStop(0.35, layer.colorMid);
+    bandGrad.addColorStop(1, layer.colorBase);
 
-  // 4. AURA DO BOSS: MESCLADA DE PRETO, ROXO E VERDE COM EMANAÇÃO ASCENDENTE
-  if (bossEnemy) {
-    const bx = (bossEnemy.visualX !== undefined ? bossEnemy.visualX : (bossEnemy.gx || 7)) * TILE_SIZE + TILE_SIZE / 2;
-    const by = (bossEnemy.visualY !== undefined ? bossEnemy.visualY : (bossEnemy.gy || 5)) * TILE_SIZE + TILE_SIZE / 2;
-    
-    ctx.save();
-    ctx.globalAlpha = baseAlpha;
-
-    // Pluma de vapor abissal mesclada de Preto, Roxo e Verde saindo do Boss
-    const steamTime = now * 0.002;
-    ctx.beginPath();
-    ctx.moveTo(bx - 24, by);
-    ctx.bezierCurveTo(
-      bx - 50 + Math.sin(steamTime) * 20, by - 60,
-      bx + 40 + Math.cos(steamTime) * 25, by - 95,
-      bx + 18, by - 130
-    );
-    ctx.bezierCurveTo(
-      bx - 30, by - 90,
-      bx + 40, by - 45,
-      bx + 24, by
-    );
-    ctx.closePath();
-
-    const bossSteamGrad = ctx.createLinearGradient(bx, by, bx, by - 130);
-    bossSteamGrad.addColorStop(0, 'rgba(0, 0, 0, 0.75)'); // Preto na raiz
-    bossSteamGrad.addColorStop(0.35, 'rgba(126, 34, 206, 0.50)'); // Roxo no meio
-    bossSteamGrad.addColorStop(0.70, 'rgba(34, 197, 94, 0.40)'); // Verde na borda
-    bossSteamGrad.addColorStop(1, 'rgba(132, 204, 22, 0)');
-    ctx.fillStyle = bossSteamGrad;
-    ctx.fill();
-
-    // Névoa mesclada rasteira aos pés do Boss (Preto + Roxo + Verde)
-    ctx.beginPath();
-    ctx.ellipse(bx, by + 18, 60 + Math.sin(steamTime) * 12, 20, 0, 0, Math.PI * 2);
-    const bossMistGrad = ctx.createRadialGradient(bx, by + 18, 4, bx, by + 18, 60);
-    bossMistGrad.addColorStop(0, 'rgba(0, 0, 0, 0.85)'); // Núcleo preto
-    bossMistGrad.addColorStop(0.40, 'rgba(147, 51, 234, 0.55)'); // Halo roxo
-    bossMistGrad.addColorStop(0.80, 'rgba(34, 197, 94, 0.45)'); // Borda verde tóxica
-    bossMistGrad.addColorStop(1, 'rgba(21, 128, 61, 0)');
-    ctx.fillStyle = bossMistGrad;
+    ctx.fillStyle = bandGrad;
+    ctx.globalAlpha = baseAlpha * 0.85;
     ctx.fill();
     ctx.restore();
-  }
+  });
 
-  // 5. Vinheta escura/verde periférica para fechar a atmosfera
+  // 3. Vinheta periférica suave para fechar a atmosfera
   ctx.save();
   const edgeVignette = ctx.createRadialGradient(
-    width / 2, height / 2, width * 0.35,
+    width / 2, height / 2, width * 0.38,
     width / 2, height / 2, width * 0.72
   );
   edgeVignette.addColorStop(0, 'rgba(0, 0, 0, 0)');
-  edgeVignette.addColorStop(0.65, 'rgba(22, 101, 52, 0.12)');
-  edgeVignette.addColorStop(1, 'rgba(2, 44, 18, 0.36)');
+  edgeVignette.addColorStop(0.70, 'rgba(22, 101, 52, 0.08)');
+  edgeVignette.addColorStop(1, 'rgba(2, 44, 18, 0.22)');
   ctx.fillStyle = edgeVignette;
   ctx.globalAlpha = baseAlpha;
   ctx.fillRect(0, 0, width, height);
   ctx.restore();
 
   ctx.restore();
+}
+
+/**
+ * Renderiza a Torre de Vigia e Alarme de Sirene no local exato demarcado pelo usuário.
+ * 
+ * Regras Oficiais do Usuário:
+ * 1. "exatamente nesse local coloque essa torre , sem que ela fique sobre o muro"
+ *    -> Posicionada no gramado oeste: tX = 138, tY = 218, tW = 84, tH = 120 (proporção 303x432).
+ *    -> Não encosta nem sobrepõe a cerca de arame (que começa em X=226) nem o gerador de água à esquerda.
+ * 2. "essa tore tocara uma sirene e a luz ficara girando em vermelho toda vez q o boss aparecer"
+ *    -> Quando o Boss estiver ativo (isBossAlive), a cúpula do topo emite feixe giratório 360° em vermelho vibrante,
+ *       com pulso de alerta no solo e efeito estroboscópico/lens flare.
+ *    -> Em repouso (Boss inativo), a luz fica apagada/sutil.
+ * 3. "adicione sombra tambem sem que pareça estar voando"
+ *    -> Sombra direcional suave no solo projetada para sudeste (alinhada à iluminação solar da cidade).
+ *    -> Sombras de oclusão profunda sob a base.
+ *    -> 4 sombras de contato direto desenhadas sob cada um dos 4 apoios metálicos para fixação perfeita no solo.
+ */
+export function drawSirenTower(ctx, now, isBossAlive = false) {
+  if (!sirenTowerImg && typeof window !== 'undefined') {
+    initSirenTower();
+  }
+  if (!sirenTowerLoaded || !sirenTowerImg) return;
+
+  // Imagem recortada proporcional (158x371, proporção 0.42587)
+  const tW = 62;
+  const tH = 144;
+  const tX = 149;
+  const groundY = 340; // Nível exato do solo onde as botas tocam o gramado
+  const tY = groundY - tH;
+
+  // 1. Sombras realistas com contato físico direto nas 4 sapatas (elimina qualquer efeito de flutuação)
+  ctx.save();
+  
+  // 1.1. Sombra direcional difusa projetada para sudeste (alinhada à iluminação da cidade)
+  ctx.fillStyle = 'rgba(5, 20, 5, 0.38)';
+  ctx.beginPath();
+  ctx.ellipse(tX + tW * 0.62, groundY + 1, tW * 0.46, 8.5, 0.12, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 1.2. Oclusão de ambiente escura sob a base da estrutura
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.32)';
+  ctx.beginPath();
+  ctx.ellipse(tX + tW * 0.50, groundY - 1, tW * 0.38, 7.0, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 1.3. 4 Sombras de oclusão de contato direto sob as 4 sapatas da torre
+  // As sapatas desenham por cima dessas elipses, ancorando os pés com zero folga no chão
+  ctx.fillStyle = 'rgba(0, 10, 0, 0.95)';
+
+  // Sapata frontal esquerda
+  ctx.beginPath();
+  ctx.ellipse(tX + tW * 0.12, groundY - 0.5, 8.5, 3.2, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Sapata frontal centro
+  ctx.beginPath();
+  ctx.ellipse(tX + tW * 0.52, groundY, 9.5, 3.6, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Sapata frontal direita
+  ctx.beginPath();
+  ctx.ellipse(tX + tW * 0.88, groundY - 0.5, 8.5, 3.2, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Sapata traseira (em perspectiva ligeiramente recuada)
+  ctx.fillStyle = 'rgba(0, 10, 0, 0.88)';
+  ctx.beginPath();
+  ctx.ellipse(tX + tW * 0.34, groundY - 3.5, 6.5, 2.6, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.restore();
+
+  // 2. Desenho da Torre em Alta Resolução (pés tocam exatamente em groundY)
+  ctx.drawImage(sirenTowerImg, tX, tY, tW, tH);
+
+  // 3. Efeito da Sirene e Luz Giratória Vermelha no Topo da Torre
+  const beaconX = tX + tW * 0.50;
+  const beaconY = tY + tH * 0.035;
+
+  if (isBossAlive) {
+    ctx.save();
+    const rotSpeed = 0.0055;
+    const sirenAngle = (now * rotSpeed) % (Math.PI * 2);
+
+    // REGRA OFICIAL DO USUÁRIO: "dois feches de luz do mesmo tamanh dos dois lados"
+    const beamLength = 160;
+    const beamSpread = 0.36; // ~20 graus de ângulo de abertura
+    
+    // Função para desenhar feixes de luz idênticos em ambos os lados
+    const drawBeam = (angle, len, alpha) => {
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(beaconX, beaconY);
+      ctx.arc(beaconX, beaconY, len, angle - beamSpread, angle + beamSpread);
+      ctx.closePath();
+
+      const beamGrad = ctx.createRadialGradient(beaconX, beaconY, 4, beaconX, beaconY, len);
+      beamGrad.addColorStop(0, `rgba(255, 70, 70, ${alpha * 0.95})`);
+      beamGrad.addColorStop(0.35, `rgba(239, 68, 68, ${alpha * 0.65})`);
+      beamGrad.addColorStop(1, 'rgba(220, 38, 38, 0)');
+      ctx.fillStyle = beamGrad;
+      ctx.fill();
+      ctx.restore();
+    };
+
+    // Feixes gêmeos 100% idênticos dos dois lados (opostos a 180° / Math.PI)
+    drawBeam(sirenAngle, beamLength, 0.85);
+    drawBeam(sirenAngle + Math.PI, beamLength, 0.85);
+
+    // 3.2. Reflexos gêmeos da luz no solo do gramado para ambos os lados
+    const drawGroundReflection = (ang) => {
+      const gx = beaconX + Math.cos(ang) * 75;
+      const gy = groundY + Math.sin(ang) * 16;
+      const gGrad = ctx.createRadialGradient(gx, gy, 2, gx, gy, 46);
+      gGrad.addColorStop(0, 'rgba(239, 68, 68, 0.30)');
+      gGrad.addColorStop(1, 'rgba(239, 68, 68, 0)');
+      ctx.fillStyle = gGrad;
+      ctx.beginPath();
+      ctx.ellipse(gx, gy, 46, 16, 0, 0, Math.PI * 2);
+      ctx.fill();
+    };
+    drawGroundReflection(sirenAngle);
+    drawGroundReflection(sirenAngle + Math.PI);
+
+    // 3.3. Cúpula da Sirene com Brilho Incandescente
+    const pulse = 1.0 + Math.sin(now * 0.015) * 0.15;
+    const beaconGlow = ctx.createRadialGradient(beaconX, beaconY, 1, beaconX, beaconY, 16 * pulse);
+    beaconGlow.addColorStop(0, '#ffffff');
+    beaconGlow.addColorStop(0.30, '#ff4444');
+    beaconGlow.addColorStop(0.70, 'rgba(239, 68, 68, 0.85)');
+    beaconGlow.addColorStop(1, 'rgba(220, 38, 38, 0)');
+    ctx.fillStyle = beaconGlow;
+    ctx.beginPath();
+    ctx.arc(beaconX, beaconY, 16 * pulse, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 3.4. Lens Flare / Feixe de Cruz quando qualquer um dos dois lados vira em direção à câmera
+    const facingCamera = Math.abs(Math.sin(sirenAngle));
+    if (facingCamera > 0.68) {
+      const flareAlpha = (facingCamera - 0.68) / 0.32;
+      ctx.fillStyle = `rgba(255, 255, 255, ${flareAlpha * 0.90})`;
+      ctx.beginPath();
+      ctx.arc(beaconX, beaconY, 6 * flareAlpha, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = `rgba(255, 200, 200, ${flareAlpha * 0.80})`;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(beaconX - 24 * flareAlpha, beaconY);
+      ctx.lineTo(beaconX + 24 * flareAlpha, beaconY);
+      ctx.moveTo(beaconX, beaconY - 24 * flareAlpha);
+      ctx.lineTo(beaconX, beaconY + 24 * flareAlpha);
+      ctx.stroke();
+    }
+
+    ctx.restore();
+  } else {
+    // 3.5. Sirene Desligada em Repouso
+    ctx.save();
+    ctx.fillStyle = 'rgba(120, 20, 20, 0.35)';
+    ctx.beginPath();
+    ctx.arc(beaconX, beaconY, 4.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
 }

@@ -213,9 +213,10 @@ export function updateEnemies(enemies, state, dt, now, isCanyon = true) {
     }
 
     if (targetHero) {
-      // Vira imediatamente para o herói-alvo
-      const targetDir = targetHero.x < ex ? -1 : 1;
-      enemy.facingDir = targetDir;
+      // REGRA OFICIAL DO USUÁRIO: "boss e zumbis devem virar para o lado que esta atacando"
+      if (Math.abs(targetHero.x - ex) > 0.05) {
+        enemy.facingDir = targetHero.x < ex ? -1 : 1;
+      }
       enemy.isAttacking = true;
 
       // Cadência do ataque de cuspe de gosma verde
@@ -226,8 +227,10 @@ export function updateEnemies(enemies, state, dt, now, isCanyon = true) {
 
         // DISPARA PROJÉTIL DE GOSMA VERDE EM DIREÇÃO AO HERÓI
         state.slimes = state.slimes || [];
-        const startPx = ex * TILE_SIZE + TILE_SIZE / 2;
-        const startPy = ey * TILE_SIZE + TILE_SIZE / 2 - (isBoss ? 16 : 8);
+        // Posição de origem na boca ajustada pela direção virada
+        const mouthOffsetX = (enemy.facingDir === 1 ? 1 : -1) * (isBoss ? 16 : 8);
+        const startPx = ex * TILE_SIZE + TILE_SIZE / 2 + mouthOffsetX;
+        const startPy = ey * TILE_SIZE + TILE_SIZE / 2 - (isBoss ? 20 : 12);
         const targetPx = targetHero.x * TILE_SIZE + TILE_SIZE / 2;
         const targetPy = targetHero.y * TILE_SIZE + TILE_SIZE / 2;
 
@@ -539,8 +542,13 @@ export function drawEnemyCharacter(ctx, enemy, now) {
   ctx.save();
   const rootBob = isBoss ? bobbing * 0.5 : 0;
   ctx.translate(px + lungeX, py + rootBob);
-  ctx.scale(enemy.facingDir * attackScale, attackScale);
   ctx.rotate(walkTilt + attackTilt);
+
+  // Como os sprites de alta definição (boss_clean.png e zombie_clean.png) foram desenhados virados para a ESQUERDA:
+  // - Para virar para a ESQUERDA (facingDir === -1): orientação natural (flipFactor = 1)
+  // - Para virar para a DIREITA (facingDir === 1): espelhamento horizontal (flipFactor = -1)
+  const flipFactor = (enemy.facingDir === 1 ? -1 : 1);
+  ctx.scale(flipFactor * attackScale, attackScale);
 
   // Pontos de pivô anatômicos das articulações do quadril (escala 640x640)
   const hipLeftX = dx + drawW * (294 / 640);

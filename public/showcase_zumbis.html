@@ -234,34 +234,29 @@
       // Névoa orgânica com 2x mais ênfase (SEM FORMAS ARREDONDADAS)
       if (showFog) {
         const fogGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-        fogGrad.addColorStop(0, 'rgba(16, 185, 129, 0.16)');
-        fogGrad.addColorStop(0.5, 'rgba(34, 197, 94, 0.14)');
-        fogGrad.addColorStop(1, 'rgba(74, 222, 128, 0.28)');
+        fogGrad.addColorStop(0, 'rgba(16, 185, 129, 0.08)');
+        fogGrad.addColorStop(0.5, 'rgba(34, 197, 94, 0.10)');
+        fogGrad.addColorStop(1, 'rgba(74, 222, 128, 0.20)');
         ctx.fillStyle = fogGrad;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Textura oficial da referência
-        if (fogImg.complete && fogImg.naturalWidth > 0) {
-          ctx.save();
-          const scroll1 = (now * 0.018) % canvas.width;
-          ctx.globalAlpha = 0.55;
-          ctx.drawImage(fogImg, -scroll1, canvas.height * 0.35, canvas.width, canvas.height * 0.65);
-          ctx.drawImage(fogImg, canvas.width - scroll1, canvas.height * 0.35, canvas.width, canvas.height * 0.65);
-          ctx.restore();
-        }
-
-        // Fitas de fumaça ondulantes orgânicas (curvas Bezier, sem círculos)
+        // Lençol orgânico ondulante de névoa rasteira
         ctx.save();
         ctx.beginPath();
-        ctx.moveTo(0, 220 + Math.sin(now * 0.001) * 20);
+        ctx.moveTo(0, 220 + Math.sin(now * 0.001) * 15);
         ctx.bezierCurveTo(
-          canvas.width * 0.3, 170 + Math.cos(now * 0.0015) * 30,
-          canvas.width * 0.6, 260 + Math.sin(now * 0.0012) * 25,
+          canvas.width * 0.3, 190 + Math.cos(now * 0.0012) * 20,
+          canvas.width * 0.6, 250 + Math.sin(now * 0.0009) * 20,
           canvas.width, 210
         );
-        ctx.bezierCurveTo(canvas.width * 0.7, 310, canvas.width * 0.3, 290, 0, 300);
+        ctx.lineTo(canvas.width, canvas.height);
+        ctx.lineTo(0, canvas.height);
         ctx.closePath();
-        ctx.fillStyle = 'rgba(74, 222, 128, 0.18)';
+        const bandGrad = ctx.createLinearGradient(0, 190, 0, canvas.height);
+        bandGrad.addColorStop(0, 'rgba(74, 222, 128, 0)');
+        bandGrad.addColorStop(0.4, 'rgba(74, 222, 128, 0.16)');
+        bandGrad.addColorStop(1, 'rgba(34, 197, 94, 0.22)');
+        ctx.fillStyle = bandGrad;
         ctx.fill();
         ctx.restore();
       }
@@ -326,7 +321,8 @@
         }
 
         // Desenho do sprite espelhado conforme a direção
-        if (e.dir < 0) ctx.scale(-1, 1);
+        // (sprites originais olham para a esquerda, então dir > 0 espelha para a direita)
+        if (e.dir > 0) ctx.scale(-1, 1);
         if (img.complete && img.naturalWidth > 0) {
           ctx.drawImage(img, -w / 2, -h / 2, w, h);
         } else {

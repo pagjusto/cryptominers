@@ -256,6 +256,34 @@ class MineSoundEffects {
     osc.start(now);
     osc.stop(now + 0.18);
   }
+
+  // Sirene de alarme da torre de vigia quando o Boss aparece
+  playSirenWail() {
+    if (!this.enabled) return;
+    this.init();
+    if (!this.ctx) return;
+    try {
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+
+      osc.type = 'sawtooth';
+      // Tom de alerta com modulação de frequência (sirene giratória)
+      osc.frequency.setValueAtTime(420, now);
+      osc.frequency.exponentialRampToValueAtTime(780, now + 0.7);
+      osc.frequency.exponentialRampToValueAtTime(440, now + 1.5);
+
+      gain.gain.setValueAtTime(0.001, now);
+      gain.gain.linearRampToValueAtTime(0.08, now + 0.25);
+      gain.gain.setValueAtTime(0.08, now + 1.1);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 1.6);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now);
+      osc.stop(now + 1.6);
+    } catch (e) {}
+  }
 }
 
 export const sfx = new MineSoundEffects();
