@@ -1,8 +1,12 @@
 # Cripto Myners — Calibração econômica do ROI em 90 dias
 
-## Objetivo aprovado
+## Objetivo corrigido após esclarecimento
 
-No cenário favorável, um jogador deve poder recuperar aproximadamente o investimento inicial ao longo de 90 dias. A meta não é prometer retorno nem impor um teto rígido à produção: é uma referência de balanceamento para calibrar produção efetiva, combate, recuperação e disponibilidade.
+O chamado cenário favorável é a composição de equipe de referência já discutida (6 Comuns, 4 Raros, 4 Épicos e 1 Lendário), não uma equipe comum ou facilmente obtida. O usuário considera essa composição difícil de conseguir com as probabilidades atuais, o que reduz a frequência de jogadores alcançando a produção teórica alta e ajuda a preservar a margem econômica do jogo.
+
+A equipe de referência deve ser tratada como um cenário de equipe forte/difícil de obter, e não como mediana estatística da distribuição de raridades. Não ajustar a produção dessa equipe para 170,89 MNC/dia apenas para forçar payback em 90 dias. Primeiro calcular o resultado efetivo dessa composição com as regras reais de combate, recuperação, presença online e fila de 15 leitos; depois comparar a frequência de obtenção da composição e o custo esperado dos baús.
+
+A meta de 90 dias é uma referência de análise do cenário de equipe difícil, não um teto rígido de produção nem uma promessa de retorno.
 
 ## Exemplo-base
 
@@ -61,9 +65,10 @@ A lógica de fila deve simular os 15 leitos simultâneos e a fila FIFO individua
 ## Critério de aceite do simulador
 
 Para o investimento-exemplo de US$ 153,80, o simulador deve mostrar:
-- cenário favorável próximo de 15.380 MNC acumulados em 90 dias;
-- cenários normal e desfavorável com resultados próprios, derivados das regras configuradas;
+- o resultado da equipe forte de referência (6 Comuns, 4 Raros, 4 Épicos e 1 Lendário), sem rebaixar artificialmente sua produção para caber em 90 dias;
+- cenários de equipe menos rara com resultados próprios, derivados das regras configuradas;
+- a probabilidade/custo esperado de obter a composição forte, calculados a partir das probabilidades efetivamente usadas pelo baú comprado;
 - memória de cálculo auditável, com cada fator de disponibilidade/produção visível;
 - nenhum rendimento garantido e nenhuma conversão de MNC tratada como caixa sem liquidação real.
 
-Este documento define a meta de calibração aprovada. Não altera por si só as taxas de emissão, o combate ou os valores de produção do jogo.
+Este documento registra a meta e a correção de interpretação. Não altera por si só as taxas de emissão, o combate ou os valores de produção do jogo.
