@@ -34,46 +34,50 @@ export default function HeroList({
       
       {/* 1. TOPO DA EQUIPE DE SOBREVIVENTES */}
       <div className="pb-3 mb-3 border-b border-slate-800 shrink-0">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-          <div>
-            <div className="flex items-center gap-2">
+        <div className="flex flex-col gap-2">
+          {/* Linha 1: Título e Contadores de Combate */}
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <div className="flex items-center gap-2 flex-wrap">
               <h3 className="font-arcade text-xs sm:text-sm text-amber-400 tracking-wide">
                 EQUIPE DE SOBREVIVENTES
               </h3>
-              <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/40 text-[10px] font-mono">
+              <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/40 text-[10px] font-mono whitespace-nowrap">
                 {workingCount}/15 EM COMBATE
               </span>
-              <span className="px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 font-bold border border-slate-700 text-[10px] font-mono">
+              <span className="px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 font-bold border border-slate-700 text-[10px] font-mono whitespace-nowrap">
                 {miners.length} TOTAL
               </span>
             </div>
-            <div className="flex items-center gap-2 text-[11px] text-slate-400 mt-1">
+          </div>
+
+          {/* Linha 2: Subtotais e Botões de Ação em Massa */}
+          <div className="flex items-center justify-between gap-2 flex-wrap pt-0.5">
+            <div className="flex items-center gap-2 text-[11px] text-slate-400">
               <span>🩺 No abrigo: <b className="text-blue-400">{houseCount}</b></span>
               <span>•</span>
               <span>🛡️ Reservas: <b className="text-amber-400">{reserveCount}</b></span>
             </div>
-          </div>
 
-          {/* Botões rápidos em massa */}
-          <div className="flex items-center gap-1.5 shrink-0">
-            {onDiversifyTeam && (
+            <div className="flex items-center gap-1.5 shrink-0">
+              {onDiversifyTeam && (
+                <button
+                  onClick={onDiversifyTeam}
+                  title="Equilibrar todas as classes na equipe"
+                  className="px-2.5 py-1.5 rounded-xl bg-purple-600/30 border border-purple-500/50 hover:bg-purple-600 hover:text-white text-purple-300 font-tech text-xs font-bold flex items-center gap-1 transition cursor-pointer shrink-0"
+                >
+                  <span>🎲</span>
+                  <span>Classes</span>
+                </button>
+              )}
               <button
-                onClick={onDiversifyTeam}
-                title="Equilibrar todas as classes na equipe"
-                className="px-2.5 py-1.5 rounded-xl bg-purple-600/30 border border-purple-500/50 hover:bg-purple-600 hover:text-white text-purple-300 font-tech text-xs font-bold flex items-center gap-1 transition cursor-pointer"
+                onClick={onAllWork}
+                className="px-3 py-1.5 rounded-xl bg-emerald-600/30 border border-emerald-500/50 hover:bg-emerald-600 hover:text-white text-emerald-300 font-tech text-xs font-bold flex items-center gap-1 transition cursor-pointer active:scale-95 shadow-sm whitespace-nowrap shrink-0"
               >
-                <span>🎲</span>
-                <span>Classes</span>
+                <Play size={12} className="fill-emerald-300 shrink-0" />
+                <span>Todos ao combate</span>
               </button>
-            )}
-            <button
-              onClick={onAllWork}
-              className="px-3 py-1.5 rounded-xl bg-emerald-600/30 border border-emerald-500/50 hover:bg-emerald-600 hover:text-white text-emerald-300 font-tech text-xs font-bold flex items-center gap-1 transition cursor-pointer active:scale-95 shadow-sm"
-            >
-              <Play size={12} className="fill-emerald-300" />
-              <span>Todos ao combate</span>
-            </button>
             </div>
+          </div>
         </div>
       </div>
 
@@ -144,43 +148,63 @@ export default function HeroList({
           return (
             <div 
               key={miner.id}
-              className={`bg-slate-950/80 border rounded-2xl p-2.5 sm:p-3 transition hover:border-slate-700 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-2.5 overflow-hidden w-full ${
+              className={`bg-slate-950/90 border rounded-2xl p-2.5 sm:p-3 transition hover:border-slate-700 shadow-sm flex flex-col gap-2.5 w-full ${
                 isDull ? 'border-amber-500/50 ring-1 ring-amber-500/20' : 'border-slate-800'
               }`}
             >
-              {/* COLUNA 1: IDENTIDADE DO HERÓI (AVATAR, NOME, CLASSE, TRAIT) */}
-              <div className="flex items-center gap-3 shrink-0 min-w-[260px] max-w-[290px]">
+              {/* LINHA 1: IDENTIDADE DO COMBATENTE + AÇÕES E STATUS */}
+              <div className="flex items-start justify-between gap-2.5 w-full">
+                
+                {/* AVATAR + ARMA */}
                 <div className="flex items-center gap-2 shrink-0">
-                  <div className="w-14 h-14 rounded-2xl border-2 shadow-lg shrink-0 bg-slate-900/90 flex items-center justify-center overflow-hidden"
+                  {/* Avatar do Herói */}
+                  <div 
+                    className="w-13 h-13 rounded-2xl border-2 shadow-lg shrink-0 bg-slate-900/90 flex items-center justify-center overflow-hidden"
                     title={rosterHero.name}
                     style={{
                       borderColor: classInfo.color,
                       backgroundImage: 'url(/assets/hero-avatars.png?v=4)',
                       backgroundRepeat: 'no-repeat',
-                      backgroundSize: '728px 56px',
-                      backgroundPosition: `-${rosterHero.spriteIndex * 56}px center`,
+                      backgroundSize: '676px 52px',
+                      backgroundPosition: `-${rosterHero.spriteIndex * 52}px center`,
                       imageRendering: 'auto'
-                    }} />
-                  <div className="w-[70px] h-14 rounded-xl border border-slate-700/90 bg-slate-900/90 flex flex-col items-center justify-center px-1 shrink-0 shadow-inner group hover:border-amber-400/50 transition">
-                    <div className="w-[60px] h-[33px] bg-no-repeat transition-transform group-hover:scale-105" title={rosterWeapon?.name}
+                    }} 
+                  />
+
+                  {/* Thumbnail da Arma */}
+                  <div 
+                    className="w-13 h-13 rounded-xl border border-slate-700/90 bg-slate-900/90 flex flex-col items-center justify-center p-1 shrink-0 shadow-inner group hover:border-amber-400/50 transition"
+                    title={`${rosterWeapon?.name || 'Sem arma'} (${rosterWeapon?.category || ''})`}
+                  >
+                    <div 
+                      className="w-[44px] h-[25px] bg-no-repeat transition-transform group-hover:scale-110"
                       style={{
                         backgroundImage: 'url(/assets/weapon-roster.png?v=4)',
                         backgroundRepeat: 'no-repeat',
-                        backgroundSize: '762.6px 33px',
-                        backgroundPosition: `-${(rosterWeapon?.sourceIndex || 0) * 58.66}px center`,
+                        backgroundSize: '572px 25px',
+                        backgroundPosition: `-${(rosterWeapon?.sourceIndex || 0) * 44}px center`,
                         transform: 'scaleX(-1)',
                         imageRendering: 'pixelated'
-                      }} />
-                    <span className="text-[8px] text-slate-300 font-bold text-center leading-tight truncate max-w-[64px] mt-0.5">{rosterWeapon?.name || 'Sem arma'}</span>
+                      }} 
+                    />
                   </div>
                 </div>
 
-                <div className="flex-1 min-w-0">
+                {/* INFORMAÇÕES DE NOME, CLASSE E TRAIT */}
+                <div className="flex-1 min-w-0 pr-1">
                   <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="font-tech font-bold text-xs sm:text-sm text-white truncate max-w-[130px]" title={rosterHero.name}>
+                    <span className="font-tech font-bold text-sm text-white truncate max-w-[140px]" title={rosterHero.name}>
                       {rosterHero.name}
                     </span>
-                    <span className={`text-[8px] px-1 py-0.2 rounded border font-bold uppercase shrink-0 ${rosterHero.rarity === 'legendary' ? 'bg-amber-500/20 text-amber-300 border-amber-500/40' : rosterHero.rarity === 'epic' ? 'bg-purple-500/20 text-purple-300 border-purple-500/40' : rosterHero.rarity === 'rare' ? 'bg-sky-500/20 text-sky-300 border-sky-500/40' : 'bg-slate-700/60 text-slate-300 border-slate-600'}`}>
+                    <span className={`text-[8px] px-1.5 py-0.5 rounded border font-bold uppercase shrink-0 ${
+                      rosterHero.rarity === 'legendary' 
+                        ? 'bg-amber-500/20 text-amber-300 border-amber-500/40' 
+                        : rosterHero.rarity === 'epic' 
+                          ? 'bg-purple-500/20 text-purple-300 border-purple-500/40' 
+                          : rosterHero.rarity === 'rare' 
+                            ? 'bg-sky-500/20 text-sky-300 border-sky-500/40' 
+                            : 'bg-slate-700/60 text-slate-300 border-slate-600'
+                    }`}>
                       {rosterHero.rarityName}
                     </span>
                     {miner.stars && miner.stars > 1 && (
@@ -190,18 +214,16 @@ export default function HeroList({
                     )}
                   </div>
 
-                  <span 
-                    className="text-[10px] font-bold uppercase tracking-wider block truncate max-w-[125px] mt-0.5"
-                    style={{ color: classInfo.color }}
-                    title={miner.passiveTrait ? miner.passiveTrait.description : classInfo.specialty}
-                  >
+                  {/* Classe do Herói */}
+                  <div className="text-[11px] font-bold tracking-wide mt-0.5 truncate" style={{ color: classInfo.color }}>
                     {rosterHero.className}
-                  </span>
+                  </div>
 
+                  {/* Trait Passivo */}
                   {miner.passiveTrait && (
-                    <span className="text-[9px] text-amber-300/90 font-tech block truncate max-w-[125px]" title={miner.passiveTrait.description}>
-                      ✦ {miner.passiveTrait.name}
-                    </span>
+                    <div className="text-[9px] text-amber-300/90 font-tech flex items-center gap-1 mt-0.5 truncate" title={miner.passiveTrait.description}>
+                      <span>✦ {miner.passiveTrait.name}</span>
+                    </div>
                   )}
 
                   {/* Relíquias Equipadas */}
@@ -225,98 +247,38 @@ export default function HeroList({
                     </div>
                   )}
                 </div>
-              </div>
 
-              {/* COLUNA 2: ATRIBUTOS, VIDA & EQUIPAMENTOS (ESPAÇOSO NO MEIO) */}
-              <div className="flex-1 flex flex-col justify-center gap-1 bg-slate-900/60 p-2 sm:p-2.5 rounded-xl border border-slate-800/80 min-w-0">
-                {/* Linha de Atributos */}
-                <div className="flex items-center justify-between text-xs font-mono">
-                  <div className="flex items-center gap-2">
-                    <span className="flex items-center gap-0.5 text-rose-400 font-bold" title="Poder de ataque">
-                      <Flame size={11} /> {miner.power}
-                    </span>
-                    <span className="flex items-center gap-0.5 text-amber-400 font-bold" title="Velocidade de movimento">
-                      <Zap size={11} /> {miner.speed.toFixed(1)}
-                    </span>
-                    <span className="flex items-center gap-0.5 text-sky-400 font-bold" title="Vida máxima">
-                      <HeartPulse size={11} /> {miner.maxHealth || 100}
-                    </span>
+                {/* STATUS & BOTÃO PAUSAR/ATIVAR NO TOPO DIREITO */}
+                <div className="flex flex-col items-end gap-1.5 shrink-0">
+                  {/* Badge de Status Atual */}
+                  <div>
+                    {miner.status === 'house' && (
+                      <span className="text-[9px] font-bold font-tech px-2 py-0.5 rounded-xl bg-blue-500/20 text-blue-300 border border-blue-500/40 flex items-center gap-1 animate-pulse whitespace-nowrap" title="Recuperando vida no abrigo">
+                        🩺 NO ABRIGO
+                      </span>
+                    )}
+                    {miner.status === 'waiting_house' && (
+                      <span className="text-[9px] font-bold font-tech px-2 py-0.5 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/40 flex items-center gap-1 whitespace-nowrap" title="Aguardando leito no abrigo">
+                        ⏳ FILA DO ABRIGO
+                      </span>
+                    )}
+                    {miner.status === 'reserve' && (
+                      <span className="text-[9px] font-bold font-tech px-2 py-0.5 rounded-xl bg-slate-800 text-slate-300 border border-slate-700 flex items-center gap-1 whitespace-nowrap" title="Na reserva, pronto para revezar">
+                        🛡️ RESERVA
+                      </span>
+                    )}
+                    {miner.status === 'work' && (
+                      <span className="text-[9px] font-bold font-tech px-2 py-0.5 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1 whitespace-nowrap" title="Combatendo zumbis automaticamente">
+                        ⚔️ EM COMBATE
+                      </span>
+                    )}
                   </div>
 
-
-                </div>
-
-                {/* Barra de vida */}
-                <div className="flex items-center justify-between gap-1.5">
-                  <div className="flex-1 flex items-center gap-1.5 min-w-0">
-                    <span className="text-[10px] text-slate-400 font-mono w-7 shrink-0">
-                      {staminaPct}%
-                    </span>
-                    <div className="flex-1 bg-slate-800 rounded-full h-1.5 sm:h-2 overflow-hidden shadow-inner">
-                      <div 
-                        className={`h-full rounded-full transition-all duration-300 ${
-                          staminaPct > 40 ? 'bg-gradient-to-r from-emerald-500 to-emerald-400' : (staminaPct > 15 ? 'bg-gradient-to-r from-amber-500 to-amber-400' : 'bg-gradient-to-r from-rose-600 to-rose-500')
-                        }`}
-                        style={{ width: `${staminaPct}%` }}
-                      />
-                    </div>
-                  </div>
-
-
-                </div>
-
-                {/* Barra de Durabilidade da Picareta */}
-                <div className="flex items-center justify-between border-t border-slate-800/80 pt-1 text-[10px]">
-                  <span className="flex items-center gap-1 text-slate-400 truncate">
-                    <Wrench size={10} className={isDull ? 'text-amber-400 animate-spin' : 'text-slate-400'} />
-                    <span>Arma: <b className={isDull ? 'text-amber-400' : 'text-slate-300 font-mono'}>{durability}%</b></span>
-                    {isDull && <span className="text-[9px] text-rose-400 font-bold shrink-0">(-50%)</span>}
-                  </span>
-
-                  {durability < 100 && (
-                    <button
-                      onClick={() => onRepairMiner(miner.id)}
-                      className="px-1.5 py-0.2 rounded-lg bg-amber-500/20 hover:bg-amber-500 hover:text-slate-950 text-amber-300 border border-amber-500/30 font-bold transition flex items-center gap-0.5 text-[9px] cursor-pointer shrink-0"
-                    >
-                      <Sparkles size={8} />
-                      <span>Afiar</span>
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* COLUNA 3: STATUS, COMBATE E EVOLUÇÃO */}
-              <div className="flex md:flex-col items-center md:items-end justify-between md:justify-center gap-1.5 shrink-0 w-[125px]">
-                {/* Badge de Status Atual */}
-                <div>
-                  {miner.status === 'house' && (
-                    <span className="text-[9px] font-bold font-tech px-2 py-0.5 rounded-xl bg-blue-500/20 text-blue-300 border border-blue-500/40 flex items-center gap-1 animate-pulse" title="Recuperando vida no abrigo">
-                      🩺 NO ABRIGO
-                    </span>
-                  )}
-                  {miner.status === 'waiting_house' && (
-                    <span className="text-[9px] font-bold font-tech px-2 py-0.5 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/40 flex items-center gap-1" title="Aguardando leito no abrigo">
-                      ⏳ FILA DO ABRIGO
-                    </span>
-                  )}
-                  {miner.status === 'reserve' && (
-                    <span className="text-[9px] font-bold font-tech px-2 py-0.5 rounded-xl bg-slate-800 text-slate-300 border border-slate-700 flex items-center gap-1" title="Na reserva, pronto para revezar">
-                      🛡️ RESERVA
-                    </span>
-                  )}
-                  {miner.status === 'work' && (
-                    <span className="text-[9px] font-bold font-tech px-2 py-0.5 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1" title="Combatendo zumbis automaticamente">
-                      ⚔️ EM COMBATE
-                    </span>
-                  )}
-                </div>
-
-                {/* Botões de Ação */}
-                <div className="flex items-center gap-1 w-full justify-end">
+                  {/* Botão de Ação */}
                   <button
                     onClick={() => onToggleStatus(miner.id)}
                     disabled={miner.status === 'house' || miner.status === 'waiting_house'}
-                    className={`px-3 py-1.5 rounded-xl text-[10px] font-tech font-bold flex items-center justify-center gap-1 transition cursor-pointer active:scale-95 shadow-sm shrink-0 ${
+                    className={`px-3 py-1 rounded-xl text-[10px] font-tech font-bold flex items-center justify-center gap-1 transition cursor-pointer active:scale-95 shadow-sm shrink-0 whitespace-nowrap ${
                       isWorking
                         ? 'bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700'
                         : (miner.status === 'house'
@@ -335,6 +297,65 @@ export default function HeroList({
                             : (miner.status === 'waiting_house' ? 'AGUARDANDO' : 'ATIVAR'))}
                     </span>
                   </button>
+                </div>
+              </div>
+
+              {/* LINHA 2: BANDEJA DE ATRIBUTOS, BARRA DE VIDA E DURABILIDADE */}
+              <div className="bg-slate-900/70 p-2 rounded-xl border border-slate-800/80 flex flex-col gap-1.5 w-full">
+                {/* Atributos Básicos & Porcentagem de Vida */}
+                <div className="flex items-center justify-between text-xs font-mono">
+                  <div className="flex items-center gap-3">
+                    <span className="flex items-center gap-1 text-rose-400 font-bold" title="Poder de ataque">
+                      <Flame size={12} /> {miner.power}
+                    </span>
+                    <span className="flex items-center gap-1 text-amber-400 font-bold" title="Velocidade de movimento">
+                      <Zap size={12} /> {miner.speed.toFixed(1)}
+                    </span>
+                    <span className="flex items-center gap-1 text-sky-400 font-bold" title="Vida máxima">
+                      <HeartPulse size={12} /> {miner.maxHealth || 100}
+                    </span>
+                  </div>
+
+                  <span className={`text-[10px] font-bold font-mono ${
+                    staminaPct > 40 ? 'text-emerald-400' : (staminaPct > 15 ? 'text-amber-400' : 'text-rose-400')
+                  }`}>
+                    {staminaPct}% VIDA
+                  </span>
+                </div>
+
+                {/* Barra de Vida Contínua de Ponta a Ponta */}
+                <div className="w-full bg-slate-800/90 rounded-full h-2 overflow-hidden shadow-inner">
+                  <div 
+                    className={`h-full rounded-full transition-all duration-300 ${
+                      staminaPct > 40 
+                        ? 'bg-gradient-to-r from-emerald-500 to-emerald-400' 
+                        : (staminaPct > 15 
+                            ? 'bg-gradient-to-r from-amber-500 to-amber-400' 
+                            : 'bg-gradient-to-r from-rose-600 to-rose-500')
+                    }`}
+                    style={{ width: `${staminaPct}%` }}
+                  />
+                </div>
+
+                {/* Durabilidade da Arma & Botão Afiar */}
+                <div className="flex items-center justify-between border-t border-slate-800/60 pt-1 text-[10px] gap-2">
+                  <span className="flex items-center gap-1.5 text-slate-300 truncate">
+                    <Wrench size={11} className={isDull ? 'text-amber-400 animate-spin shrink-0' : 'text-slate-400 shrink-0'} />
+                    <span className="truncate">
+                      <b className="text-amber-300/90">{rosterWeapon?.name || 'Arma'}</b>: <span className={isDull ? 'text-amber-400 font-bold' : 'text-slate-400 font-mono'}>{durability}%</span>
+                    </span>
+                    {isDull && <span className="text-[9px] text-rose-400 font-bold whitespace-nowrap">(-50% dano)</span>}
+                  </span>
+
+                  {durability < 100 && (
+                    <button
+                      onClick={() => onRepairMiner(miner.id)}
+                      className="px-2 py-0.5 rounded-lg bg-amber-500/20 hover:bg-amber-500 hover:text-slate-950 text-amber-300 border border-amber-500/40 font-bold transition flex items-center gap-1 text-[9px] cursor-pointer shadow-sm whitespace-nowrap shrink-0"
+                    >
+                      <Sparkles size={9} />
+                      <span>Afiar</span>
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
