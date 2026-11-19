@@ -606,3 +606,104 @@ export function drawMinerCharacter(ctx, mx, my, miner, classInfo, now, swingProg
 
   ctx.restore();
 }
+
+/**
+ * Renderiza uma suave névoa verde atmosférica sobre todo o mapa enquanto o Boss estiver vivo.
+ * Dissipa-se naturalmente quando o Boss é derrotado.
+ */
+export function drawBossGreenFog(ctx, width, height, opacity, now, bossEnemy) {
+  if (!opacity || opacity <= 0.005) return;
+
+  ctx.save();
+  ctx.globalAlpha = Math.min(1, Math.max(0, opacity));
+
+  // 1. Tonalidade atmosférica ambiente suave em verde biológico/tóxico
+  const ambientGrad = ctx.createLinearGradient(0, 0, 0, height);
+  ambientGrad.addColorStop(0, 'rgba(16, 185, 129, 0.08)');
+  ambientGrad.addColorStop(0.5, 'rgba(34, 197, 94, 0.06)');
+  ambientGrad.addColorStop(1, 'rgba(21, 128, 61, 0.10)');
+  ctx.fillStyle = ambientGrad;
+  ctx.fillRect(0, 0, width, height);
+
+  // 2. Camadas dinâmicas de nuvens de névoa ondulando pelo mapa
+  const time = now * 0.0004;
+  const fogPatches = [
+    {
+      x: width * 0.25 + Math.sin(time) * 45,
+      y: height * 0.28 + Math.cos(time * 0.8) * 30,
+      rx: width * 0.38,
+      ry: height * 0.30,
+      inner: 'rgba(74, 222, 128, 0.11)',
+      outer: 'rgba(22, 101, 52, 0)'
+    },
+    {
+      x: width * 0.72 + Math.cos(time * 0.7) * 50,
+      y: height * 0.32 + Math.sin(time * 0.9) * 35,
+      rx: width * 0.40,
+      ry: height * 0.32,
+      inner: 'rgba(34, 197, 94, 0.09)',
+      outer: 'rgba(20, 83, 45, 0)'
+    },
+    {
+      x: width * 0.35 + Math.cos(time * 0.6) * 40,
+      y: height * 0.72 + Math.sin(time * 0.7) * 30,
+      rx: width * 0.42,
+      ry: height * 0.32,
+      inner: 'rgba(132, 204, 22, 0.10)',
+      outer: 'rgba(22, 101, 52, 0)'
+    },
+    {
+      x: width * 0.78 + Math.sin(time * 0.85) * 45,
+      y: height * 0.78 + Math.cos(time * 0.65) * 30,
+      rx: width * 0.38,
+      ry: height * 0.32,
+      inner: 'rgba(74, 222, 128, 0.09)',
+      outer: 'rgba(21, 128, 61, 0)'
+    }
+  ];
+
+  fogPatches.forEach(patch => {
+    ctx.save();
+    ctx.translate(patch.x, patch.y);
+    ctx.scale(1, patch.ry / patch.rx);
+    const grad = ctx.createRadialGradient(0, 0, patch.rx * 0.15, 0, 0, patch.rx);
+    grad.addColorStop(0, patch.inner);
+    grad.addColorStop(0.65, patch.inner.replace(/[\d\.]+\)$/, '0.035)'));
+    grad.addColorStop(1, patch.outer);
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(0, 0, patch.rx, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  });
+
+  // 3. Foco de emanação tóxica ao redor do próprio Boss se estiver em tela
+  if (bossEnemy) {
+    const bx = (bossEnemy.visualX !== undefined ? bossEnemy.visualX : (bossEnemy.gx || 7)) * TILE_SIZE + TILE_SIZE / 2;
+    const by = (bossEnemy.visualY !== undefined ? bossEnemy.visualY : (bossEnemy.gy || 5)) * TILE_SIZE + TILE_SIZE / 2;
+    const pulse = Math.sin(now * 0.003) * 15;
+    const auraRadius = 110 + pulse;
+
+    const bossAura = ctx.createRadialGradient(bx, by, 10, bx, by, auraRadius);
+    bossAura.addColorStop(0, 'rgba(132, 204, 22, 0.18)');
+    bossAura.addColorStop(0.5, 'rgba(34, 197, 94, 0.09)');
+    bossAura.addColorStop(1, 'rgba(21, 128, 61, 0)');
+    ctx.fillStyle = bossAura;
+    ctx.beginPath();
+    ctx.arc(bx, by, auraRadius, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // 4. Vinheta verde periférica nas bordas do mapa para aumentar imersão
+  const edgeVignette = ctx.createRadialGradient(
+    width / 2, height / 2, width * 0.35,
+    width / 2, height / 2, width * 0.72
+  );
+  edgeVignette.addColorStop(0, 'rgba(0, 0, 0, 0)');
+  edgeVignette.addColorStop(0.7, 'rgba(22, 101, 52, 0.06)');
+  edgeVignette.addColorStop(1, 'rgba(5, 46, 22, 0.18)');
+  ctx.fillStyle = edgeVignette;
+  ctx.fillRect(0, 0, width, height);
+
+  ctx.restore();
+}

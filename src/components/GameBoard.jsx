@@ -23,6 +23,7 @@ import {
   drawContinuousCaveFloor, 
   drawVectorCartoonRock, 
   drawMinerCharacter,
+  drawBossGreenFog,
   initCanyonMap,
   initCityMap
 } from '../utils/renderGraphics';
@@ -988,6 +989,26 @@ export default function GameBoard({
       vignette.addColorStop(1, 'rgba(15, 23, 42, 0.22)');
       ctx.fillStyle = vignette;
       ctx.fillRect(0, 0, logicalWidth, logicalHeight);
+
+      // Gestão suave da névoa verde atmosférica enquanto o Boss estiver vivo no mapa
+      const bossEnemy = state.enemies?.find(e => e.type === 'boss' && (e.hp === undefined || e.hp > 0));
+      const isBossAlive = Boolean(bossEnemy);
+      const targetFogAlpha = isBossAlive ? 1.0 : 0.0;
+      if (state.bossFogAlpha === undefined) {
+        state.bossFogAlpha = targetFogAlpha;
+      } else {
+        const fadeSpeed = isBossAlive ? 1.2 : 0.8;
+        if (state.bossFogAlpha < targetFogAlpha) {
+          state.bossFogAlpha = Math.min(targetFogAlpha, state.bossFogAlpha + dt * fadeSpeed);
+        } else if (state.bossFogAlpha > targetFogAlpha) {
+          state.bossFogAlpha = Math.max(targetFogAlpha, state.bossFogAlpha - dt * fadeSpeed);
+        }
+      }
+
+      // Renderiza pequena névoa verde por todo o mapa enquanto o Boss estiver no jogo e vivo
+      if (state.bossFogAlpha > 0.005) {
+        drawBossGreenFog(ctx, logicalWidth, logicalHeight, state.bossFogAlpha, now, bossEnemy);
+      }
 
       state.floatTexts.forEach(ft => {
         ctx.save();
