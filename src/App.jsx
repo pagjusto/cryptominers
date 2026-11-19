@@ -1420,16 +1420,12 @@ export default function App() {
             </div>
           ) : (
             <div className="flex flex-col items-start justify-start relative h-full pt-0.5">
-              {/* STATUS DO MAPA NO CANTO SUPERIOR ESQUERDO DO MAPA */}
+              {/* STATUS DO MAPA INTERMITENTE NO CANTO SUPERIOR ESQUERDO DO MAPA */}
               <div 
-                title="Status do Ciclo Atual e Criaturas"
+                title="Batalha Intermitente & Status da Horda"
                 className="absolute top-2.5 left-3 z-30 flex items-center gap-1.5 bg-slate-950/85 backdrop-blur-md px-2.5 py-1.5 rounded-xl border border-slate-700/80 shadow-2xl pointer-events-none select-none"
               >
-                <span className="font-mono text-amber-300 bg-slate-900/90 px-2 py-0.5 rounded-md border border-slate-700/60 text-xs font-bold shadow-sm">
-                  Ciclo #{mapData?.cycleNumber || 1}
-                </span>
-
-                <span className="flex items-center gap-1 text-xs bg-lime-950/80 text-lime-300 px-2 py-0.5 rounded-md border border-lime-500/50 font-bold shadow-sm" title="Horda Contínua: 20 zumbis sempre ativos">
+                <span className="flex items-center gap-1 text-xs bg-lime-950/80 text-lime-300 px-2 py-0.5 rounded-md border border-lime-500/50 font-bold shadow-sm" title="Horda Contínua Intermitente: 20 zumbis sempre ativos">
                   🧟 <b className="text-white">{mapData?.deposits?.filter(d => d.type === 'zombie' && !d.isCompleted).length ?? 20}</b>/20 Horda
                 </span>
 

@@ -21,7 +21,7 @@ import {
   drawExecutive,
   drawRosterHero
 } from './characterRenderers';
-import { HERO_ROSTER, WEAPON_CATALOG, getHeroById, getWeaponById } from '../data/heroRoster';
+import { HERO_ROSTER, WEAPON_CATALOG, getHeroById, getWeaponById, getRarityConfig } from '../data/heroRoster';
 
 // ============================================================================
 // CITY SURVIVAL MAP & CANYON MAP IMAGE MANAGERS
@@ -447,22 +447,8 @@ export function drawMinerCharacter(ctx, mx, my, miner, classInfo, now, swingProg
   const legAngle = isWorking && !isMining ? Math.sin(now * 0.02) * 5 : 0;
   const swingAngle = isMining && swingProgress > 0 ? -Math.sin(swingProgress * Math.PI) * 1.35 : 0;
 
-  // Escala dos heróis calibrada na entrada do bunker (~36px de altura)
-  const CHAR_SCALE = 1.0;
-
-  // 1. Sombra Suave e Realista de Contato no Piso (fixa no solo em mx, my, sem saltar com bounceY)
-  // Posicionada rigorosamente sob os pés do herói (sem parecer que está voando)
-  ctx.save();
-  ctx.translate(mx, my);
-  ctx.scale(CHAR_SCALE, CHAR_SCALE);
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
-  ctx.beginPath();
-  ctx.ellipse(0, 14, 11, 3.6, 0, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.restore();
-
-  ctx.translate(mx, my + bounceY);
-  ctx.scale(CHAR_SCALE, CHAR_SCALE);
+  // Escala dos heróis aumentada suavemente (~15%) conforme solicitação
+  const CHAR_SCALE = 1.15;
 
   const cid = miner.classId || 'miner';
 
@@ -473,6 +459,56 @@ export function drawMinerCharacter(ctx, mx, my, miner, classInfo, now, swingProg
   const rosterWeapon = (miner.weaponId && getWeaponById(miner.weaponId))
     || (rosterHero && getWeaponById(rosterHero.weaponId))
     || WEAPON_CATALOG[rosterHero?.spriteIndex % WEAPON_CATALOG.length];
+  const rarityConfig = getRarityConfig(rosterHero?.rarity || miner.rarity);
+
+  // 1. Sombra Suave e Realista de Contato no Piso + Aura de Raridade
+  ctx.save();
+  ctx.translate(mx, my);
+  ctx.scale(CHAR_SCALE, CHAR_SCALE);
+
+  // Sombra sob os pés
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+  ctx.beginPath();
+  ctx.ellipse(0, 14, 11, 3.6, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Aura Radiante Oficial da Raridade no Solo e no Tronco
+  const pulse = 0.88 + Math.sin(now * 0.005 + minerIndex * 1.3) * 0.12;
+  const auraColor = rarityConfig.color;
+
+  // Halo no piso sob os pés do herói
+  const groundGrad = ctx.createRadialGradient(0, 13, 2, 0, 13, 19 * pulse);
+  groundGrad.addColorStop(0, rarityConfig.auraColor || `${auraColor}88`);
+  groundGrad.addColorStop(0.5, `${auraColor}40`);
+  groundGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+  ctx.fillStyle = groundGrad;
+  ctx.beginPath();
+  ctx.ellipse(0, 13, 19 * pulse, 7.5 * pulse, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Anel sutil de energia cintilante no chão
+  ctx.strokeStyle = auraColor;
+  ctx.lineWidth = 1.2;
+  ctx.globalAlpha = 0.45 * pulse;
+  ctx.beginPath();
+  ctx.ellipse(0, 13, 15 * pulse, 5.8 * pulse, 0, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Halo esférico ambiente ao redor do corpo
+  ctx.globalAlpha = 1.0;
+  const bodyGrad = ctx.createRadialGradient(0, -2, 3, 0, -2, 22 * pulse);
+  bodyGrad.addColorStop(0, `${auraColor}38`);
+  bodyGrad.addColorStop(0.6, `${auraColor}15`);
+  bodyGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+  ctx.fillStyle = bodyGrad;
+  ctx.beginPath();
+  ctx.arc(0, -2, 22 * pulse, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.restore();
+
+  ctx.translate(mx, my + bounceY);
+  ctx.scale(CHAR_SCALE, CHAR_SCALE);
 
   // 2. Corpo e Equipamento do Personagem (com suporte a espelhamento de direção)
   ctx.save();

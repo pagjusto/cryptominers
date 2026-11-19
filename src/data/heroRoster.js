@@ -1,6 +1,68 @@
-// CRIPTO MYNERS — elenco inicial de heróis e equipamentos
+// CRIPTO MYNERS — elenco oficial de heróis, raridades e equipamentos
 // Catálogo de dados: personagens e armas são entidades separadas.
-// As imagens originais serão ligadas pelos spriteIndex quando os assets forem adicionados.
+
+export const RARITY_CONFIG = {
+  super_legend: {
+    id: 'super_legend',
+    name: 'Super Legend',
+    color: '#ef4444', // Borda Vermelha
+    border: '#ef4444',
+    glowColor: 'rgba(239, 68, 68, 0.45)',
+    auraColor: 'rgba(239, 68, 68, 0.55)',
+    badgeBg: 'rgba(239, 68, 68, 0.2)',
+    badgeText: '#f87171',
+    badgeBorder: 'rgba(239, 68, 68, 0.45)'
+  },
+  legendary: {
+    id: 'legendary',
+    name: 'Legend',
+    color: '#f97316', // Borda Laranja
+    border: '#f97316',
+    glowColor: 'rgba(249, 115, 22, 0.45)',
+    auraColor: 'rgba(249, 115, 22, 0.55)',
+    badgeBg: 'rgba(249, 115, 22, 0.2)',
+    badgeText: '#fb923c',
+    badgeBorder: 'rgba(249, 115, 22, 0.45)'
+  },
+  epic: {
+    id: 'epic',
+    name: 'Épico',
+    color: '#a855f7', // Borda Roxa
+    border: '#a855f7',
+    glowColor: 'rgba(168, 85, 247, 0.45)',
+    auraColor: 'rgba(168, 85, 247, 0.55)',
+    badgeBg: 'rgba(168, 85, 247, 0.2)',
+    badgeText: '#c084fc',
+    badgeBorder: 'rgba(168, 85, 247, 0.45)'
+  },
+  rare: {
+    id: 'rare',
+    name: 'Raro',
+    color: '#38bdf8', // Borda Azul
+    border: '#38bdf8',
+    glowColor: 'rgba(56, 189, 248, 0.45)',
+    auraColor: 'rgba(56, 189, 248, 0.55)',
+    badgeBg: 'rgba(56, 189, 248, 0.2)',
+    badgeText: '#38bdf8',
+    badgeBorder: 'rgba(56, 189, 248, 0.45)'
+  },
+  common: {
+    id: 'common',
+    name: 'Comum',
+    color: '#22c55e', // Borda Verde
+    border: '#22c55e',
+    glowColor: 'rgba(34, 197, 94, 0.45)',
+    auraColor: 'rgba(34, 197, 94, 0.55)',
+    badgeBg: 'rgba(34, 197, 94, 0.2)',
+    badgeText: '#4ade80',
+    badgeBorder: 'rgba(34, 197, 94, 0.45)'
+  }
+};
+
+export function getRarityConfig(rarity) {
+  const key = (rarity || 'common').toLowerCase();
+  return RARITY_CONFIG[key] || RARITY_CONFIG.common;
+}
 
 export const HERO_ROSTER = [
   {
@@ -20,7 +82,7 @@ export const HERO_ROSTER = [
     classId: 'tank',
     className: 'Tanque',
     rarity: 'legendary',
-    rarityName: 'Lendário',
+    rarityName: 'Legend',
     spriteIndex: 1,
     weaponId: 'heavy-machine-gun',
     role: 'Absorção de dano e proteção'
@@ -30,19 +92,19 @@ export const HERO_ROSTER = [
     name: 'Nox',
     classId: 'fighter',
     className: 'Combatente',
-    rarity: 'rare',
-    rarityName: 'Raro',
+    rarity: 'epic',
+    rarityName: 'Épico',
     spriteIndex: 2,
     weaponId: 'energy-blaster',
-    role: 'Combate equilibrado'
+    role: 'Combate equilibrado com canhão de energia'
   },
   {
     id: 'brasa',
     name: 'Brasa',
     classId: 'assault',
     className: 'Assalto (Molotov)',
-    rarity: 'common',
-    rarityName: 'Comum',
+    rarity: 'legendary',
+    rarityName: 'Legend',
     spriteIndex: 3,
     weaponId: 'molotov',
     role: 'Arremesso de coquetel molotov e poça incendiária em área'
@@ -85,8 +147,8 @@ export const HERO_ROSTER = [
     name: 'Fênix',
     classId: 'assault',
     className: 'Assalto (Lança-chamas)',
-    rarity: 'epic',
-    rarityName: 'Épico',
+    rarity: 'super_legend',
+    rarityName: 'Super Legend',
     spriteIndex: 7,
     weaponId: 'flamethrower',
     role: 'Jato contínuo de chamas e dispersão de calor em área'
@@ -118,8 +180,8 @@ export const HERO_ROSTER = [
     name: 'Colosso',
     classId: 'juggernaut',
     className: 'Tanque de elite',
-    rarity: 'legendary',
-    rarityName: 'Lendário',
+    rarity: 'super_legend',
+    rarityName: 'Super Legend',
     spriteIndex: 10,
     weaponId: 'rocket-launcher',
     role: 'Poder de fogo pesado'

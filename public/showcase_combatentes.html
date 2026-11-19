@@ -139,10 +139,11 @@
       font-weight: 700;
       text-transform: uppercase;
     }
-    .rarity-common { background: #334155; color: #94a3b8; }
-    .rarity-rare { background: #0369a1; color: #7dd3fc; }
-    .rarity-epic { background: #6b21a8; color: #d8b4fe; }
-    .rarity-legendary { background: #92400e; color: #fde68a; }
+    .rarity-common { background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.4); }
+    .rarity-rare { background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); }
+    .rarity-epic { background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.4); }
+    .rarity-legendary { background: rgba(249, 115, 22, 0.2); color: #fb923c; border: 1px solid rgba(249, 115, 22, 0.4); }
+    .rarity-super_legend { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
 
     .canvas-container {
       position: relative;
@@ -237,16 +238,16 @@
     // Dados oficiais do HERO_ROSTER e WEAPON_CATALOG
     const HERO_ROSTER = [
       { id: 'verdant', name: 'Verdant', classId: 'explorer', className: 'Explorador', rarity: 'common', rarityName: 'Comum', spriteIndex: 0, weaponId: 'assault-rifle', role: 'Reconhecimento e mobilidade' },
-      { id: 'granito', name: 'Granito', classId: 'tank', className: 'Tanque', rarity: 'legendary', rarityName: 'Lendário', spriteIndex: 1, weaponId: 'heavy-machine-gun', role: 'Absorção de dano e proteção' },
-      { id: 'nox', name: 'Nox', classId: 'fighter', className: 'Combatente', rarity: 'rare', rarityName: 'Raro', spriteIndex: 2, weaponId: 'energy-blaster', role: 'Combate equilibrado' },
-      { id: 'brasa', name: 'Brasa', classId: 'assault', className: 'Assalto (Molotov)', rarity: 'common', rarityName: 'Comum', spriteIndex: 3, weaponId: 'molotov', role: 'Arremesso de coquetel molotov e poça incendiária em área' },
+      { id: 'granito', name: 'Granito', classId: 'tank', className: 'Tanque', rarity: 'legendary', rarityName: 'Legend', spriteIndex: 1, weaponId: 'heavy-machine-gun', role: 'Absorção de dano e proteção' },
+      { id: 'nox', name: 'Nox', classId: 'fighter', className: 'Combatente', rarity: 'epic', rarityName: 'Épico', spriteIndex: 2, weaponId: 'energy-blaster', role: 'Combate equilibrado' },
+      { id: 'brasa', name: 'Brasa', classId: 'assault', className: 'Assalto (Molotov)', rarity: 'legendary', rarityName: 'Legend', spriteIndex: 3, weaponId: 'molotov', role: 'Arremesso de coquetel molotov e poça incendiária em área' },
       { id: 'iris', name: 'Íris', classId: 'medic', className: 'Médica', rarity: 'epic', rarityName: 'Épico', spriteIndex: 4, weaponId: 'medical-kit', role: 'Suporte médico e salvaguarda' },
       { id: 'mumia', name: 'Múmia', classId: 'survivor', className: 'Sobrevivente', rarity: 'common', rarityName: 'Comum', spriteIndex: 5, weaponId: 'shotgun', role: 'Resistência e combate próximo' },
       { id: 'polar', name: 'Polar', classId: 'specialist', className: 'Especialista', rarity: 'rare', rarityName: 'Raro', spriteIndex: 6, weaponId: 'compact-rifle', role: 'Precisão e suporte tático' },
-      { id: 'fenix', name: 'Fênix', classId: 'assault', className: 'Assalto (Lança-chamas)', rarity: 'epic', rarityName: 'Épico', spriteIndex: 7, weaponId: 'flamethrower', role: 'Jato contínuo de chamas e dispersão de calor em área' },
+      { id: 'fenix', name: 'Fênix', classId: 'assault', className: 'Assalto (Lança-chamas)', rarity: 'super_legend', rarityName: 'Super Legend', spriteIndex: 7, weaponId: 'flamethrower', role: 'Jato contínuo de chamas e dispersão de calor em área' },
       { id: 'sombra', name: 'Sombra', classId: 'infiltrator', className: 'Infiltrador', rarity: 'rare', rarityName: 'Raro', spriteIndex: 8, weaponId: 'precision-rifle', role: 'Ataque de precisão de longo alcance' },
       { id: 'iron', name: 'Iron', classId: 'heavy', className: 'Granadeiro Blindado', rarity: 'epic', rarityName: 'Épico', spriteIndex: 9, weaponId: 'grenade', role: 'Arremesso de granadas e explosão em área' },
-      { id: 'colosso', name: 'Colosso', classId: 'juggernaut', className: 'Tanque de elite', rarity: 'legendary', rarityName: 'Lendário', spriteIndex: 10, weaponId: 'rocket-launcher', role: 'Poder de fogo pesado balístico' },
+      { id: 'colosso', name: 'Colosso', classId: 'juggernaut', className: 'Tanque de elite', rarity: 'super_legend', rarityName: 'Super Legend', spriteIndex: 10, weaponId: 'rocket-launcher', role: 'Poder de fogo pesado balístico' },
       { id: 'hunter', name: 'Hunter', classId: 'marksman', className: 'Atirador', rarity: 'common', rarityName: 'Comum', spriteIndex: 11, weaponId: 'tactical-carbine', role: 'Tiroteio tático e combate direto' },
       { id: 'scarlet', name: 'Scarlet', classId: 'guerrilla', className: 'Guerrilheira', rarity: 'common', rarityName: 'Comum', spriteIndex: 12, weaponId: 'heavy-pistol', role: 'Ataque rápido e suporte tático' }
     ];
@@ -412,24 +413,24 @@
         // Sombra do alvo zumbi fixada rigorosamente no chão
         ctx.fillStyle = 'rgba(0,0,0,0.4)';
         ctx.beginPath();
-        ctx.ellipse(targetX, targetY, 14, 4, 0, 0, Math.PI * 2);
+        ctx.ellipse(targetX, targetY, 16, 4.6, 0, 0, Math.PI * 2);
         ctx.fill();
 
         // Alvo estilizado (Silhueta de zumbi de treino) apoiado no chão
         ctx.fillStyle = '#4d7c0f';
         ctx.beginPath();
-        ctx.arc(targetX, targetY - 33, 7, 0, Math.PI * 2);
+        ctx.arc(targetX, targetY - 37, 8, 0, Math.PI * 2);
         ctx.fill();
-        ctx.fillRect(targetX - 6, targetY - 26, 12, 18);
+        ctx.fillRect(targetX - 7, targetY - 29, 14, 20);
         ctx.fillStyle = '#1e3a1e';
-        ctx.fillRect(targetX - 5, targetY - 8, 4, 8);
-        ctx.fillRect(targetX + 1, targetY - 8, 4, 8);
+        ctx.fillRect(targetX - 6, targetY - 9, 5, 9);
+        ctx.fillRect(targetX + 1, targetY - 9, 5, 9);
 
         // Placa de alvo no peito
         ctx.strokeStyle = '#ef4444';
         ctx.lineWidth = 1.5;
         ctx.beginPath();
-        ctx.arc(targetX, targetY - 17, 12, 0, Math.PI * 2);
+        ctx.arc(targetX, targetY - 19, 13, 0, Math.PI * 2);
         ctx.stroke();
         ctx.restore();
 
@@ -443,18 +444,18 @@
         // Sombra de contato do herói exatamente sob a sola das botas (sem flutuar)
         ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
         ctx.beginPath();
-        ctx.ellipse(0, 0, 16, 4.5, 0, 0, Math.PI * 2);
+        ctx.ellipse(0, 0, 18, 5.0, 0, 0, Math.PI * 2);
         ctx.fill();
 
         const isShooting = st.mode === 'shooting';
         const cadence = 650; // ms por ciclo de tiro
         const cycleProgress = (now % cadence) / cadence;
 
-        const pw = 48; // Escala calibrada do herói no showcase
-        const ph = 54;
+        const pw = 55; // Escala calibrada aumentada suavemente (~15%)
+        const ph = 62;
         const wScale = weapon.scale || 1.0;
-        const gw = 40 * wScale;
-        const gh = 22 * wScale;
+        const gw = 45 * wScale;
+        const gh = 25 * wScale;
 
         const sw = 128;
         const sh = 128;

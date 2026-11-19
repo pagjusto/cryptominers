@@ -448,10 +448,12 @@ export default function GameBoard({
           }
         }
 
-        if ((breakableCount === 0 || mapDamageResult?.cycleCompleted) && !state.isMapClearing) {
-          state.isMapClearing = true;
-          callbacksRef.current.onMapCleared?.(mapDamageResult?.newMap);
-        }
+        // Mapa intermitente e perpétuo: sem interrupções de ciclo ou reset de mapa.
+        // A horda se mantém contínua com 20 criaturas com respawn imediato nos cantos.
+        // if ((breakableCount === 0 || mapDamageResult?.cycleCompleted) && !state.isMapClearing) {
+        //   state.isMapClearing = true;
+        //   callbacksRef.current.onMapCleared?.(mapDamageResult?.newMap);
+        // }
       };
 
       state.miners.forEach((miner, minerIndex) => {

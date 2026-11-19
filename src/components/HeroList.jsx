@@ -12,7 +12,7 @@ import {
   Clock
 } from 'lucide-react';
 import { MINER_CLASSES } from '../data/minersData';
-import { HERO_ROSTER, getWeaponById } from '../data/heroRoster';
+import { HERO_ROSTER, getWeaponById, getRarityConfig } from '../data/heroRoster';
 
 export default function HeroList({ 
   miners, 
@@ -139,6 +139,7 @@ export default function HeroList({
         {miners.map((miner, index) => {
           const rosterHero = HERO_ROSTER.find(hero => hero.id === miner.heroId) || HERO_ROSTER[index % HERO_ROSTER.length];
           const rosterWeapon = getWeaponById(rosterHero.weaponId);
+          const rarityConfig = getRarityConfig(rosterHero.rarity);
           const classInfo = MINER_CLASSES[miner.classId] || MINER_CLASSES.miner;
           const isWorking = miner.status === 'work';
           const staminaPct = Math.round(((miner.currentHealth ?? miner.maxHealth ?? 100) / (miner.maxHealth || 100)) * 100);
@@ -157,12 +158,13 @@ export default function HeroList({
                 
                 {/* AVATAR + ARMA */}
                 <div className="flex items-center gap-2 shrink-0">
-                  {/* Avatar do Herói */}
+                  {/* Avatar do Herói (Borda com a Cor Oficial da Raridade) */}
                   <div 
-                    className="w-13 h-13 rounded-2xl border-2 shadow-lg shrink-0 bg-slate-900/90 flex items-center justify-center overflow-hidden"
-                    title={rosterHero.name}
+                    className="w-13 h-13 rounded-2xl border-2 shadow-lg shrink-0 bg-slate-900/90 flex items-center justify-center overflow-hidden transition-all duration-300"
+                    title={`${rosterHero.name} (${rarityConfig.name})`}
                     style={{
-                      borderColor: classInfo.color,
+                      borderColor: rarityConfig.color,
+                      boxShadow: `0 0 10px ${rarityConfig.glowColor}`,
                       backgroundImage: 'url(/assets/hero-avatars.png?v=4)',
                       backgroundRepeat: 'no-repeat',
                       backgroundSize: '676px 52px',
@@ -196,16 +198,15 @@ export default function HeroList({
                     <span className="font-tech font-bold text-sm text-white truncate max-w-[140px]" title={rosterHero.name}>
                       {rosterHero.name}
                     </span>
-                    <span className={`text-[8px] px-1.5 py-0.5 rounded border font-bold uppercase shrink-0 ${
-                      rosterHero.rarity === 'legendary' 
-                        ? 'bg-amber-500/20 text-amber-300 border-amber-500/40' 
-                        : rosterHero.rarity === 'epic' 
-                          ? 'bg-purple-500/20 text-purple-300 border-purple-500/40' 
-                          : rosterHero.rarity === 'rare' 
-                            ? 'bg-sky-500/20 text-sky-300 border-sky-500/40' 
-                            : 'bg-slate-700/60 text-slate-300 border-slate-600'
-                    }`}>
-                      {rosterHero.rarityName}
+                    <span 
+                      className="text-[8px] px-1.5 py-0.5 rounded border font-bold uppercase shrink-0 font-mono tracking-wider"
+                      style={{
+                        backgroundColor: rarityConfig.badgeBg,
+                        color: rarityConfig.badgeText,
+                        borderColor: rarityConfig.badgeBorder
+                      }}
+                    >
+                      {rarityConfig.name}
                     </span>
                     {miner.stars && miner.stars > 1 && (
                       <span className="text-[9px] px-1 py-0.2 rounded-md bg-amber-500/20 text-amber-400 font-bold border border-amber-500/40 shrink-0">

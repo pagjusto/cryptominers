@@ -401,9 +401,9 @@ export function drawEnemyCharacter(ctx, enemy, now) {
     }
   }
 
-  // Zumbis mais encorpados e largos conforme solicitado (~40px de largura e ~36px de altura)
-  const drawW = isBoss ? Math.floor(TILE_SIZE * 0.74) : Math.floor(TILE_SIZE * 0.52);
-  const drawH = isBoss ? Math.floor(TILE_SIZE * 0.68) : Math.floor(TILE_SIZE * 0.47);
+  // Zumbis e Boss com escala aumentada suavemente (~15%) conforme solicitação
+  const drawW = isBoss ? Math.floor(TILE_SIZE * 0.82) : Math.floor(TILE_SIZE * 0.60);
+  const drawH = isBoss ? Math.floor(TILE_SIZE * 0.75) : Math.floor(TILE_SIZE * 0.54);
 
   // Calibragem física exata para pés plantados no solo (elimina qualquer efeito de flutuação):
   // No sprite 640x640 do zumbi, a sola da bota está em Y=536 (536/640 = 0.8375)
@@ -418,8 +418,8 @@ export function drawEnemyCharacter(ctx, enemy, now) {
   ctx.save();
   ctx.translate(px + lungeX * 0.35, py);
   const shadowY = groundY;
-  const shadowRx = isBoss ? 24 : 16;
-  const shadowRy = isBoss ? 6.8 : 4.4;
+  const shadowRx = isBoss ? 27 : 18.5;
+  const shadowRy = isBoss ? 7.6 : 5.0;
 
   // Camada 1: Penumbra difusa suave
   ctx.beginPath();
