@@ -111,11 +111,13 @@ export default function HeroList({
         className="mb-3.5 p-2.5 sm:p-3 rounded-2xl bg-gradient-to-r from-emerald-500/15 via-teal-500/15 to-emerald-500/15 border border-emerald-500/40 hover:border-emerald-400 transition flex items-center justify-between group shadow-sm shrink-0"
       >
         <div className="flex items-center gap-3">
-          {/* Avatar da Médica Íris (NPC Oficial de Saúde) */}
+          {/* Avatar da Médica Íris (Borda Branca e Enquadramento Padrão Idêntico aos Combatentes) */}
           <div 
-            className="w-10 h-10 rounded-xl border border-emerald-400/60 shadow-inner shrink-0 bg-slate-900 flex items-center justify-center overflow-hidden"
+            className="w-13 h-13 rounded-2xl border-2 shadow-lg shrink-0 bg-slate-900/90 flex items-center justify-center overflow-hidden transition-all duration-300"
             title="Dra. Íris (Médica do Abrigo)"
             style={{
+              borderColor: '#ffffff',
+              boxShadow: '0 0 10px rgba(255, 255, 255, 0.45)',
               backgroundImage: 'url(/assets/hero-avatars.png?v=4)',
               backgroundRepeat: 'no-repeat',
               backgroundSize: '676px 52px',
