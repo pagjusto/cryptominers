@@ -8,7 +8,7 @@
 // ============================================================================
 
 import { TILE_SIZE, BLOCK_EMPTY, BLOCK_BEDROCK, BLOCK_ZOMBIE, BLOCK_BOSS } from '../data/minersData.js';
-import { isCityBuilding, isCanyonTrackOrTunnel, isBaseCompound, TACTICAL_ZONES } from './cityMapGeometry.js';
+import { isCityBuilding, isCanyonTrackOrTunnel, isBaseCompound, TACTICAL_ZONES, getCornerSpawnPoint } from './cityMapGeometry.js';
 import { ENEMIES } from '../data/enemiesCatalog.js';
 
 class EnemySpriteManager {
@@ -161,6 +161,31 @@ export function updateEnemies(enemies, state, dt, now, isCanyon = true) {
   const GRID_ROWS = state.grid.length || 11;
 
   enemies.forEach(enemy => {
+    // REGRA OFICIAL DO USUÁRIO: "onde foi selecionado em hiotese alguma zumbis e herois podem pizar em cima ou passar ali"
+    // Se o zumbi estiver sobre qualquer obstáculo ou ruína, reloca-o imediatamente para terreno livre
+    if (isCityBuilding(enemy.gx, enemy.gy) || isBaseCompound(enemy.gx, enemy.gy)) {
+      const openPoint = getCornerSpawnPoint(Math.floor(Math.random() * 8));
+      const oldKey = `${enemy.gx},${enemy.gy}`;
+      const newKey = `${openPoint.c},${openPoint.r}`;
+      if (state.grid[enemy.gy] && state.grid[enemy.gy][enemy.gx] === enemy.blockId) {
+        state.grid[enemy.gy][enemy.gx] = BLOCK_EMPTY;
+      }
+      if (state.hpMap[oldKey] !== undefined) {
+        state.hpMap[newKey] = state.hpMap[oldKey];
+        delete state.hpMap[oldKey];
+      }
+      enemy.gx = openPoint.c;
+      enemy.gy = openPoint.r;
+      enemy.visualX = openPoint.c;
+      enemy.visualY = openPoint.r;
+      enemy.targetGx = openPoint.c;
+      enemy.targetGy = openPoint.r;
+      enemy.isWalking = false;
+      if (state.grid[openPoint.r]) {
+        state.grid[openPoint.r][openPoint.c] = enemy.blockId;
+      }
+    }
+
     // Reduz flash de dano
     if (enemy.hitFlash > 0) {
       enemy.hitFlash = Math.max(0, enemy.hitFlash - dt * 2.5);
@@ -481,24 +506,7 @@ export function drawEnemyCharacter(ctx, enemy, now) {
     ctx.fillRect(dx, dy, drawW, drawH);
   }
 
-  // 5. Efeito Visual de Garras / Ataque Lacerante
-  if (enemy.isAttacking && enemy.attackProgress > 0.25 && enemy.attackProgress < 0.65) {
-    ctx.strokeStyle = isBoss ? '#ef4444' : '#bef264';
-    ctx.lineWidth = isBoss ? 2.5 : 1.5;
-    ctx.lineCap = 'round';
-
-    const slashForward = drawW * 0.45;
-    const slashTop = -drawH * 0.55;
-
-    // Três riscos diagonais de garras afiadas cortando o ar
-    for (let s = -1; s <= 1; s++) {
-      ctx.beginPath();
-      ctx.moveTo(slashForward - 6, slashTop + s * 5 - 6);
-      ctx.lineTo(slashForward + 7, slashTop + s * 5 + 7);
-      ctx.stroke();
-    }
-  }
-
+  // O efeito anterior de 3 riscos de garra cortando o ar (#bef264) foi removido a pedido do usuário.
   ctx.restore();
 
   // 6. Efeito Sísmico no chão do Boss ao esmagar

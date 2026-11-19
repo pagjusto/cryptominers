@@ -377,17 +377,17 @@ export default function GameBoard({
                 };
                 state.enemies.push(respawnedZombie);
 
-                // Efeito visual de surgimento do zumbi na terra/rua
-                for (let sp = 0; sp < 10; sp++) {
+                // Efeito sutil de poeira de terra batida no surgimento do zumbi (sem partículas verdes chamativas)
+                for (let sp = 0; sp < 6; sp++) {
                   state.particles.push({
                     x: spawnPos.c * TILE_SIZE + TILE_SIZE / 2,
                     y: spawnPos.r * TILE_SIZE + TILE_SIZE / 2,
-                    vx: (Math.random() - 0.5) * 110,
-                    vy: (Math.random() - 0.5) * 110 - 20,
-                    color: '#84cc16',
-                    size: Math.random() * 3.5 + 2,
-                    life: 0.5,
-                    maxLife: 0.5
+                    vx: (Math.random() - 0.5) * 60,
+                    vy: (Math.random() - 0.5) * 40 - 10,
+                    color: 'rgba(168, 140, 100, 0.45)',
+                    size: Math.random() * 2.0 + 1.2,
+                    life: 0.35,
+                    maxLife: 0.35
                   });
                 }
 
