@@ -12,6 +12,7 @@
     "test": "node test_cotacao_dinamica.mjs && node test_individual_maps_suite.mjs && node test_spiderman_and_robot_pocket.mjs"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.119.2",
     "canvas-confetti": "^1.9.4",
     "lucide-react": "^1.73.0",
     "react": "^19.3.1",

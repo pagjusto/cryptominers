@@ -35,6 +35,14 @@ import { MINER_ROSTER } from './data/minersCatalog';
 import { generateMineMap } from './utils/mapGenerator';
 import { getPlayerMap, generatePlayerMap, DEFAULT_PLAYER_ID } from './utils/individualMapEngine';
 import { sfx } from './utils/sfx';
+import { isSupabaseConfigured } from './lib/supabaseClient';
+import { 
+  loadPlayerDataFromSupabase, 
+  syncProfileToSupabase, 
+  syncHeroesToSupabase, 
+  syncInventoryToSupabase, 
+  logTransactionToSupabase 
+} from './services/supabaseService';
 import GameBoard from './components/GameBoard';
 import ZombieSurvivalBoard from './components/ZombieSurvivalBoard';
 import HeroList from './components/HeroList';
@@ -363,8 +371,10 @@ export default function App() {
   };
 
   const handleWithdrawClaim = (amount, netUsdt, taxPct) => {
+    let nextBcoinBalance = bcoin;
     setBcoin(prev => {
       const nextBalance = parseFloat(Math.max(0, prev - amount).toFixed(3));
+      nextBcoinBalance = nextBalance;
       localStorage.setItem('crypto_miners_bcoin', nextBalance.toString());
       return nextBalance;
     });
@@ -374,6 +384,16 @@ export default function App() {
       saveWalletState(nextState);
       return nextState;
     });
+
+    if (isSupabaseConfigured && walletState?.address) {
+      logTransactionToSupabase(walletState.address, {
+        type: 'withdraw',
+        amountMnc: amount,
+        netUsdt: netUsdt,
+        taxPct: taxPct,
+        details: { mncRemaining: nextBcoinBalance }
+      });
+    }
   };
 
   const handleConnectWallet = async (type) => {
@@ -673,6 +693,108 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('crypto_miners_chests', JSON.stringify(inventoryChests));
   }, [inventoryChests]);
+
+  // ============================================================================
+  // SINCRONIZAÇÃO E CARREGAMENTO EM NUVEM COM O SUPABASE
+  // ============================================================================
+  const [isCloudSyncing, setIsCloudSyncing] = useState(false);
+  const [cloudStatus, setCloudStatus] = useState(isSupabaseConfigured ? 'connected' : 'offline');
+
+  // 1. Carregamento inicial do jogador no Supabase
+  useEffect(() => {
+    let isMounted = true;
+    async function initCloudSync() {
+      if (!isSupabaseConfigured || !walletState?.address) return;
+      try {
+        setIsCloudSyncing(true);
+        const cloudData = await loadPlayerDataFromSupabase(walletState.address);
+        if (cloudData && isMounted) {
+          if (cloudData.profile?.mncBalance !== undefined) {
+            setBcoin(cloudData.profile.mncBalance);
+          }
+          if (cloudData.profile?.usdtBalance !== undefined) {
+            setWalletState(prev => ({ ...prev, usdtBalance: cloudData.profile.usdtBalance }));
+          }
+          if (cloudData.profile?.totalInvested !== undefined) {
+            setTotalInvested(cloudData.profile.totalInvested);
+          }
+          if (cloudData.profile?.studioRevenue !== undefined) {
+            setStudioRevenue(cloudData.profile.studioRevenue);
+          }
+          if (cloudData.profile?.currentHouseId) {
+            setCurrentHouseId(cloudData.profile.currentHouseId);
+          }
+          if (cloudData.heroes && cloudData.heroes.length > 0) {
+            setMiners(cloudData.heroes);
+          }
+          if (cloudData.inventory?.inventoryChests) {
+            setInventoryChests(cloudData.inventory.inventoryChests);
+          }
+          if (cloudData.inventory?.purchasedChests) {
+            setPurchasedChests(cloudData.inventory.purchasedChests);
+          }
+          if (cloudData.inventory?.gearStash) {
+            setGearStash(cloudData.inventory.gearStash);
+          }
+          setCloudStatus('synced');
+        } else if (isMounted) {
+          // Primeira inicialização deste jogador no Supabase: migra os dados locais atuais
+          await syncProfileToSupabase(walletState.address, {
+            mncBalance: bcoin,
+            usdtBalance: walletState.usdtBalance,
+            totalInvested,
+            studioRevenue,
+            currentHouseId
+          });
+          if (miners && miners.length > 0) {
+            await syncHeroesToSupabase(walletState.address, miners);
+          }
+          await syncInventoryToSupabase(walletState.address, {
+            inventoryChests,
+            purchasedChests,
+            gearStash
+          });
+          setCloudStatus('synced');
+        }
+      } catch (err) {
+        console.warn('[Supabase] Falha ao sincronizar estado da nuvem:', err);
+      } finally {
+        if (isMounted) setIsCloudSyncing(false);
+      }
+    }
+    initCloudSync();
+    return () => { isMounted = false; };
+  }, [walletState?.address]);
+
+  // 2. Sincronização periódica inteligente (Debounce de 4 segundos para evitar sobrecarga)
+  useEffect(() => {
+    if (!isSupabaseConfigured || !walletState?.address) return;
+
+    const timer = setTimeout(async () => {
+      try {
+        await syncProfileToSupabase(walletState.address, {
+          mncBalance: bcoin,
+          usdtBalance: walletState.usdtBalance,
+          totalInvested,
+          studioRevenue,
+          currentHouseId
+        });
+        if (miners && miners.length > 0) {
+          await syncHeroesToSupabase(walletState.address, miners);
+        }
+        await syncInventoryToSupabase(walletState.address, {
+          inventoryChests,
+          purchasedChests,
+          gearStash
+        });
+        setCloudStatus('synced');
+      } catch (e) {
+        console.warn('[Supabase] Erro no auto-sync:', e);
+      }
+    }, 4000);
+
+    return () => clearTimeout(timer);
+  }, [bcoin, miners, totalInvested, studioRevenue, currentHouseId, inventoryChests, purchasedChests, gearStash, walletState?.address]);
 
   const toggleSound = () => {
     const nextState = !soundEnabled;
@@ -1271,6 +1393,11 @@ export default function App() {
         <span className="font-arcade text-[9px] text-amber-400">CRIPTO MYNERS</span>
         <span className="text-slate-600">|</span>
         <span className="font-mono text-emerald-400 text-xs font-bold">🪙 {bcoin.toFixed(2)} MNC</span>
+        <span className="text-slate-600">|</span>
+        <span className="flex items-center gap-1 text-[9px] text-emerald-400 font-mono" title="Supabase Conectado">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>NUVEM</span>
+        </span>
         <span className="text-[10px] text-amber-400/80 bg-amber-500/15 px-1.5 py-0.2 rounded border border-amber-500/30 flex items-center gap-0.5">
           <span>MENU</span>
           <ChevronDown size={11} />
@@ -1411,6 +1538,15 @@ export default function App() {
           >
             <RefreshCw size={15} />
           </button>
+
+          {/* Status da Nuvem Supabase */}
+          <div 
+            className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-slate-950/80 border border-slate-800 text-[10px] font-mono shrink-0 cursor-help"
+            title={isCloudSyncing ? "Sincronizando dados com o Supabase..." : "Supabase: Nuvem Conectada e Sincronizada"}
+          >
+            <div className={`w-2 h-2 rounded-full ${isCloudSyncing ? 'bg-amber-400 animate-spin' : 'bg-emerald-400 animate-pulse'}`} />
+            <span className="text-slate-400 font-bold hidden xl:inline">NUVEM</span>
+          </div>
 
           {/* Som */}
           <button
