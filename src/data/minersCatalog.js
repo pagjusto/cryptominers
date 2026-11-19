@@ -115,34 +115,6 @@ export const MINER_ROSTER = [
     lore: 'Soldado de boina vermelha e óculos táticos. Especialista em combate urbano incendiário, queima grupos de infectados com garrafas de combustível.'
   },
   {
-    id: 'class_medic',
-    classId: 'medic',
-    heroId: 'iris',
-    name: 'Íris',
-    title: 'Médica Tática de Campo',
-    role: 'Suporte Médico & Salvaguarda',
-    rarity: 'epic',
-    avatar: '💉',
-    image: '/assets/heroes/iris.png',
-    bannerImage: '/assets/heroes/iris.png',
-    spriteIndex: 4,
-    color: '#a855f7',
-    borderColor: '#a855f7',
-    badge: 'ÉPICO',
-    basePower: 6.0,
-    baseSpeed: 1.5,
-    baseStamina: 130,
-    equipment: 'Kit Médico & Injetor Bio-Tático',
-    weaponId: 'medical-kit',
-    weaponType: 'medical-kit',
-    directCostBcoin: 50,
-    passiveTrait: {
-      name: 'Bio-Restauração',
-      description: 'Emite pulsos regenerativos para si e aliados próximos, mantendo a equipe em prontidão constante.'
-    },
-    lore: 'Médica cirurgiã armada com equipamento bio-tático de campo avançado. Mantém a linha de combate viva e ativa sob ataque de hordas.'
-  },
-  {
     id: 'class_survivor',
     classId: 'survivor',
     heroId: 'mumia',
@@ -436,3 +408,18 @@ export const MINT_CHEST_TYPES = [
     ]
   }
 ];
+
+// Íris: Médico do Abrigo & Hospital da Base (NPC / Não é jogador, não possui raridade)
+export const MEDIC_STAFF = {
+  id: 'npc_medic_iris',
+  heroId: 'iris',
+  name: 'Íris',
+  title: 'Médica Cirurgiã do Abrigo',
+  role: 'Atendimento Médico e Tratamento de Ferimentos',
+  avatar: '💉',
+  image: '/assets/heroes/iris.png',
+  bannerImage: '/assets/heroes/iris.png',
+  spriteIndex: 4,
+  isPlayable: false,
+  lore: 'Médica cirurgiã da base militar de sobrevivência. Responsável pelo hospital de campanha e recuperação dos combatentes feridos.'
+};

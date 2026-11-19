@@ -99,7 +99,7 @@ export default function App() {
     const saved = localStorage.getItem('crypto_miners_market');
     if (saved) {
       try {
-        const parsed = JSON.parse(saved);
+        let parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) return parsed;
       } catch (e) {}
     }
@@ -121,7 +121,7 @@ export default function App() {
     const saved = localStorage.getItem('crypto_miners_team');
     if (saved) {
       try {
-        const parsed = JSON.parse(saved);
+        let parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
           // Migração automática de bailarina para fada com asas
           let hasBallerina = false;
@@ -163,6 +163,28 @@ export default function App() {
             });
             localStorage.setItem('crypto_miners_team', JSON.stringify(balanced));
             return balanced;
+          }
+
+          // Sanitização: Íris é a médica do abrigo (NPC / não jogador, não possui raridade de combate)
+          if (parsed.some(m => m.heroId === 'iris')) {
+            parsed = parsed.map(m => {
+              if (m.heroId === 'iris') {
+                const fallback = HERO_ROSTER.find(h => h.id === 'nox') || HERO_ROSTER[0];
+                return {
+                  ...m,
+                  heroId: fallback.id,
+                  name: fallback.name,
+                  classId: fallback.classId,
+                  className: fallback.className,
+                  weaponId: fallback.weaponId,
+                  rarity: fallback.rarity,
+                  rarityName: fallback.rarityName,
+                  spriteIndex: fallback.spriteIndex
+                };
+              }
+              return m;
+            });
+            localStorage.setItem('crypto_miners_team', JSON.stringify(parsed));
           }
 
           // Sincronização definitiva dos 11 novos Heróis e Armas do HERO_ROSTER
@@ -242,7 +264,7 @@ export default function App() {
     const saved = localStorage.getItem('crypto_miners_chests');
     if (saved) {
       try {
-        const parsed = JSON.parse(saved);
+        let parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) return parsed;
       } catch (e) {}
     }
@@ -397,7 +419,7 @@ export default function App() {
     const saved = localStorage.getItem('crypto_miners_purchased_chests');
     if (saved) {
       try {
-        const parsed = JSON.parse(saved);
+        let parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) return parsed;
       } catch (e) {}
     }
@@ -474,7 +496,7 @@ export default function App() {
     const saved = localStorage.getItem('crypto_miners_gear_stash');
     if (saved) {
       try {
-        const parsed = JSON.parse(saved);
+        let parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) return parsed;
       } catch (e) {}
     }

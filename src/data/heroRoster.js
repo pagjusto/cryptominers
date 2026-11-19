@@ -110,17 +110,6 @@ export const HERO_ROSTER = [
     role: 'Arremesso de coquetel molotov e poça incendiária em área'
   },
   {
-    id: 'iris',
-    name: 'Íris',
-    classId: 'medic',
-    className: 'Médica',
-    rarity: 'epic',
-    rarityName: 'Épico',
-    spriteIndex: 4,
-    weaponId: 'medical-kit',
-    role: 'Suporte médico; não concede automação de abrigo por si só'
-  },
-  {
     id: 'mumia',
     name: 'Múmia',
     classId: 'survivor',
@@ -228,7 +217,21 @@ export const WEAPON_CATALOG = [
   { id: 'heavy-pistol', name: 'Pistola Pesada', sourceIndex: 12, facing: 'right', category: 'pistola', scale: 0.58 }
 ];
 
+// Íris não é combatente nem herói jogável: é o médico do abrigo e hospital
+export const MEDIC_STAFF = {
+  id: 'iris',
+  name: 'Íris',
+  title: 'Médica Cirurgiã do Abrigo',
+  role: 'Atendimento Médico e Tratamento de Ferimentos',
+  spriteIndex: 4,
+  weaponId: 'medical-kit',
+  avatar: '💉',
+  isPlayable: false,
+  description: 'Médica cirurgiã da base militar de sobrevivência. Responsável pelo hospital de campanha e recuperação dos sobreviventes feridos.'
+};
+
 export function getHeroById(heroId) {
+  if (heroId === 'iris') return MEDIC_STAFF;
   return HERO_ROSTER.find(hero => hero.id === heroId) || null;
 }
 

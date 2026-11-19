@@ -106,32 +106,41 @@ export default function HeroList({
         </button>
       </div>
 
-      {/* 3. STATUS DO TRATAMENTO AUTOMÁTICO */}
+      {/* 3. MÉDICA ÍRIS: TRATAMENTO E RECUPERAÇÃO DO ABRIGO (NPC / NÃO JOGADOR) */}
       <div 
-        className="mb-3.5 p-3 rounded-2xl bg-gradient-to-r from-amber-500/15 via-emerald-500/15 to-amber-500/15 border border-emerald-500/30 hover:border-emerald-400 transition flex items-center justify-between group shadow-sm shrink-0"
+        className="mb-3.5 p-2.5 sm:p-3 rounded-2xl bg-gradient-to-r from-emerald-500/15 via-teal-500/15 to-emerald-500/15 border border-emerald-500/40 hover:border-emerald-400 transition flex items-center justify-between group shadow-sm shrink-0"
       >
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xl group-hover:scale-110 transition shadow-inner">
-            ❤️‍🩹
-          </div>
+          {/* Avatar da Médica Íris (NPC Oficial de Saúde) */}
+          <div 
+            className="w-10 h-10 rounded-xl border border-emerald-400/60 shadow-inner shrink-0 bg-slate-900 flex items-center justify-center overflow-hidden"
+            title="Dra. Íris (Médica do Abrigo)"
+            style={{
+              backgroundImage: 'url(/assets/hero-avatars.png?v=4)',
+              backgroundRepeat: 'no-repeat',
+              backgroundSize: '676px 52px',
+              backgroundPosition: '-208px center',
+              imageRendering: 'auto'
+            }}
+          />
           <div>
             <div className="flex items-center gap-2">
               <span className="font-tech font-bold text-xs sm:text-sm text-emerald-300">
-                Tratamento de ferimentos
+                Dra. Íris • Médica do Abrigo
               </span>
               <span className="text-[9px] bg-emerald-400/20 text-emerald-300 px-1.5 py-0.2 rounded-full border border-emerald-400/40 font-bold font-mono">
-                AUTOMÁTICO
+                ENFERMARIA
               </span>
             </div>
             <span className="text-[11px] text-slate-400 font-tech block">
-              Recurso de tratamento acelerado será integrado após a rede de anúncios real
+              Cuidados médicos contínuos e recuperação de vida para os sobreviventes
             </span>
           </div>
         </div>
 
-        <button disabled className="px-3 py-1.5 rounded-xl bg-slate-800 text-slate-400 font-arcade font-bold text-[10px] shrink-0 cursor-not-allowed">
-          EM BREVE
-        </button>
+        <span className="px-2.5 py-1 rounded-xl bg-emerald-950/80 text-emerald-300 border border-emerald-500/40 font-mono font-bold text-[10px] shrink-0">
+          HOSPITAL ATIVO
+        </span>
       </div>
 
       {/* 4. LISTA DE SOBREVIVENTES */}
