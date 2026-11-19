@@ -46,6 +46,17 @@ export const RARITY_CONFIG = {
     badgeText: '#38bdf8',
     badgeBorder: 'rgba(56, 189, 248, 0.45)'
   },
+  super_rare: {
+    id: 'super_rare',
+    name: 'Super Raro',
+    color: '#eab308', // Borda Amarela
+    border: '#eab308',
+    glowColor: 'rgba(234, 179, 8, 0.50)',
+    auraColor: 'rgba(234, 179, 8, 0.60)',
+    badgeBg: 'rgba(234, 179, 8, 0.22)',
+    badgeText: '#fde047',
+    badgeBorder: 'rgba(234, 179, 8, 0.50)'
+  },
   common: {
     id: 'common',
     name: 'Comum',
@@ -60,8 +71,9 @@ export const RARITY_CONFIG = {
 };
 
 export function getRarityConfig(rarity) {
-  const key = (rarity || 'common').toLowerCase();
-  return RARITY_CONFIG[key] || RARITY_CONFIG.common;
+  const raw = (rarity || 'common').toLowerCase().replace(/[\s-]/g, '_');
+  if (raw === 'super_raro' || raw === 'superrare' || raw === 'sr') return RARITY_CONFIG.super_rare;
+  return RARITY_CONFIG[raw] || RARITY_CONFIG.common;
 }
 
 export const HERO_ROSTER = [
@@ -70,8 +82,8 @@ export const HERO_ROSTER = [
     name: 'Verdant',
     classId: 'explorer',
     className: 'Explorador',
-    rarity: 'common',
-    rarityName: 'Comum',
+    rarity: 'super_rare',
+    rarityName: 'Super Raro',
     spriteIndex: 0,
     weaponId: 'assault-rifle',
     role: 'Reconhecimento e mobilidade'
@@ -114,8 +126,8 @@ export const HERO_ROSTER = [
     name: 'Múmia',
     classId: 'survivor',
     className: 'Sobrevivente',
-    rarity: 'common',
-    rarityName: 'Comum',
+    rarity: 'super_rare',
+    rarityName: 'Super Raro',
     spriteIndex: 5,
     weaponId: 'shotgun',
     role: 'Resistência e combate próximo'
@@ -200,21 +212,205 @@ export const HERO_ROSTER = [
 ];
 
 export const WEAPON_CATALOG = [
-  { id: 'assault-rifle', name: 'Rifle de Assalto', sourceIndex: 0, facing: 'right', category: 'rifle' },
-  { id: 'pistol', name: 'Pistola', sourceIndex: 1, facing: 'right', category: 'pistola', scale: 0.62 },
-  { id: 'flamethrower', name: 'Lança-chamas', sourceIndex: 2, facing: 'right', category: 'especial' },
-  { id: 'energy-blaster', name: 'Canhão de Energia', sourceIndex: 3, facing: 'right', category: 'energia' },
-  { id: 'flare-launcher', name: 'Lançador Incendiário', sourceIndex: 4, facing: 'right', category: 'especial' },
-  { id: 'molotov', name: 'Coquetel Molotov', sourceIndex: 4, facing: 'right', category: 'molotov', scale: 0.65 },
-  { id: 'compact-rifle', name: 'Rifle Compacto', sourceIndex: 5, facing: 'right', category: 'rifle' },
-  { id: 'medical-kit', name: 'Kit Médico', sourceIndex: 6, facing: 'right', category: 'suporte' },
-  { id: 'grenade', name: 'Granada', sourceIndex: 7, facing: 'right', category: 'explosivo', scale: 0.68 },
-  { id: 'precision-rifle', name: 'Rifle de Precisão', sourceIndex: 8, facing: 'right', category: 'rifle' },
-  { id: 'heavy-machine-gun', name: 'Metralhadora Pesada', sourceIndex: 8, facing: 'right', category: 'pesada' },
-  { id: 'shotgun', name: 'Escopeta', sourceIndex: 9, facing: 'right', category: 'escopeta' },
-  { id: 'rocket-launcher', name: 'Lança-foguetes', sourceIndex: 10, facing: 'right', category: 'pesada' },
-  { id: 'tactical-carbine', name: 'Carbina Tática', sourceIndex: 11, facing: 'right', category: 'rifle' },
-  { id: 'heavy-pistol', name: 'Pistola Pesada', sourceIndex: 12, facing: 'right', category: 'pistola', scale: 0.58 }
+  { 
+    id: 'assault-rifle', 
+    name: 'Rifle de Assalto Tático', 
+    sourceIndex: 0, 
+    facing: 'right', 
+    category: 'Rifle Automático', 
+    damage: '+3 Poder', 
+    critBonus: '+8%', 
+    cadence: 'Muito Rápida', 
+    range: 'Médio / Longo',
+    hero: 'Verdant',
+    description: 'Arma padrão de forças especiais. Cadência sustentada e precisão balanceada para varredura de hordas.' 
+  },
+  { 
+    id: 'pistol', 
+    name: 'Pistola Tática 9mm', 
+    sourceIndex: 1, 
+    facing: 'right', 
+    category: 'Pistola Semiautomática', 
+    scale: 0.62,
+    damage: '+2 Poder', 
+    critBonus: '+12%', 
+    cadence: 'Rápida', 
+    range: 'Curto / Médio',
+    hero: 'Sobrevivente',
+    description: 'Leve e de saque imediato. Ideal para disparos cirúrgicos rápidos em curta distância.' 
+  },
+  { 
+    id: 'flamethrower', 
+    name: 'Lança-Chamas Militar', 
+    sourceIndex: 2, 
+    facing: 'right', 
+    category: 'Arma Incendiária', 
+    damage: '+6 Poder', 
+    critBonus: '+15%', 
+    cadence: 'Contínua', 
+    range: 'Curto (Cone de Fogo)',
+    hero: 'Fênix',
+    description: 'Jato contínuo de chamas que queima e incinera múltiplos alvos simultaneamente no campo.' 
+  },
+  { 
+    id: 'energy-blaster', 
+    name: 'Canhão de Energia Plasma', 
+    sourceIndex: 3, 
+    facing: 'right', 
+    category: 'Armamento de Energia', 
+    damage: '+5 Poder', 
+    critBonus: '+10%', 
+    cadence: 'Média', 
+    range: 'Longo',
+    hero: 'Nox',
+    description: 'Dispara pulsos ionizados de alta densidade que perfuram a couraça de infectados e estruturas.' 
+  },
+  { 
+    id: 'flare-launcher', 
+    name: 'Lançador Incendiário de Sinal', 
+    sourceIndex: 4, 
+    facing: 'right', 
+    category: 'Lançador de Artilharia', 
+    damage: '+4 Poder', 
+    critBonus: '+14%', 
+    cadence: 'Média', 
+    range: 'Longo',
+    hero: 'Assalto',
+    description: 'Projéteis incendiários de fósforo branco que iluminam o terreno e queimam alvos.' 
+  },
+  { 
+    id: 'molotov', 
+    name: 'Coquetel Molotov Incendiário', 
+    sourceIndex: 4, 
+    facing: 'right', 
+    category: 'Explosivo / Incendiário', 
+    scale: 0.65,
+    damage: '+6 Poder', 
+    critBonus: '+20%', 
+    cadence: 'Lenta', 
+    range: 'Médio (Área de Chamas)',
+    hero: 'Brasa',
+    description: 'Garrafa artesanal de combustível. Na explosão, gera uma poça flamejante contínua no chão.' 
+  },
+  { 
+    id: 'compact-rifle', 
+    name: 'Rifle Compacto Bullpup', 
+    sourceIndex: 5, 
+    facing: 'right', 
+    category: 'Rifle Tático', 
+    damage: '+4 Poder', 
+    critBonus: '+10%', 
+    cadence: 'Rápida', 
+    range: 'Médio',
+    hero: 'Polar',
+    description: 'Design compacto para manobras ágeis em corredores urbanos com alto controle de recuo.' 
+  },
+  { 
+    id: 'medical-kit', 
+    name: 'Kit Médico de Biorecuperação', 
+    sourceIndex: 6, 
+    facing: 'right', 
+    category: 'Equipamento de Suporte', 
+    damage: '+1 Poder', 
+    critBonus: '+5% Cura', 
+    cadence: 'Estável', 
+    range: 'Suporte de Campo',
+    hero: 'Dra. Íris',
+    description: 'Maleta cirúrgica e desfibrilador de campo para recuperação de sobreviventes feridos.' 
+  },
+  { 
+    id: 'grenade', 
+    name: 'Granada de Fragmentação', 
+    sourceIndex: 7, 
+    facing: 'right', 
+    category: 'Explosivo Pesado', 
+    scale: 0.68,
+    damage: '+7 Poder', 
+    critBonus: '+25%', 
+    cadence: 'Lenta', 
+    range: 'Médio (Impacto em Área)',
+    hero: 'Tropa de Choque',
+    description: 'Estilhaços balísticos e onda de choque devastadora para aniquilar aglomerados de infectados.' 
+  },
+  { 
+    id: 'precision-rifle', 
+    name: 'Rifle de Precisão Sniper .50', 
+    sourceIndex: 8, 
+    facing: 'right', 
+    category: 'Rifle de Precisão', 
+    damage: '+7 Poder', 
+    critBonus: '+28%', 
+    cadence: 'Lenta', 
+    range: 'Extremo (Tiro Certeiro)',
+    hero: 'Franco-Atirador',
+    description: 'Mira telescópica de alto alcance. Elimina alvos críticos com disparos de altíssimo impacto.' 
+  },
+  { 
+    id: 'heavy-machine-gun', 
+    name: 'Metralhadora Pesada Gatling', 
+    sourceIndex: 8, 
+    facing: 'right', 
+    category: 'Metralhadora Pesada', 
+    damage: '+8 Poder', 
+    critBonus: '+14%', 
+    cadence: 'Extrema', 
+    range: 'Médio / Longo',
+    hero: 'Granito',
+    description: 'Arma de supressão máxima. Barragem ininterrupta de projéteis de grosso calibre.' 
+  },
+  { 
+    id: 'shotgun', 
+    name: 'Escopeta Tática Calibre 12', 
+    sourceIndex: 9, 
+    facing: 'right', 
+    category: 'Escopeta Pesada', 
+    damage: '+5 Poder', 
+    critBonus: '+18%', 
+    cadence: 'Média', 
+    range: 'Curto (Dispersão de Chumbo)',
+    hero: 'Múmia',
+    description: 'Dispara múltiplos balotes de chumbo em leque. Devastadora em encontros cara a cara.' 
+  },
+  { 
+    id: 'rocket-launcher', 
+    name: 'Lança-Foguetes RPG Blindado', 
+    sourceIndex: 10, 
+    facing: 'right', 
+    category: 'Artilharia Pesada', 
+    damage: '+10 Poder', 
+    critBonus: '+20%', 
+    cadence: 'Lenta', 
+    range: 'Longo (Explosão Titânica)',
+    hero: 'Artilheiro',
+    description: 'Projéteis autopropulsados com ogiva explosiva para abater chefões e mutantes colossais.' 
+  },
+  { 
+    id: 'tactical-carbine', 
+    name: 'Carbina Tática de Reconhecimento', 
+    sourceIndex: 11, 
+    facing: 'right', 
+    category: 'Carbina Semiautomática', 
+    damage: '+5 Poder', 
+    critBonus: '+16%', 
+    cadence: 'Rápida', 
+    range: 'Médio / Longo',
+    hero: 'Hunter',
+    description: 'Combina leveza de empunhadura e disparos duplos de alta precisão contra mutantes rápidos.' 
+  },
+  { 
+    id: 'heavy-pistol', 
+    name: 'Revólver Pesado Magnum .44', 
+    sourceIndex: 12, 
+    facing: 'right', 
+    category: 'Arma Secundária Pesada', 
+    scale: 0.58,
+    damage: '+4 Poder', 
+    critBonus: '+22%', 
+    cadence: 'Média', 
+    range: 'Curto / Médio',
+    hero: 'Scarlet',
+    description: 'Poder de parada impressionante. Cada tiro causa impacto contundente com alta chance crítica.' 
+  }
 ];
 
 // Íris não é combatente nem herói jogável: é o médico do abrigo e hospital

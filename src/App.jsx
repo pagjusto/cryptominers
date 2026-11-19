@@ -187,6 +187,26 @@ export default function App() {
             localStorage.setItem('crypto_miners_team', JSON.stringify(parsed));
           }
 
+          // Sincronização automática das raridades oficiais do HERO_ROSTER (ex: Verdant e Múmia são Super Raros)
+          const needsRosterUpdate = parsed.some(m => {
+            const rh = HERO_ROSTER.find(h => h.id === m.heroId);
+            return rh && m.rarity !== rh.rarity;
+          });
+          if (needsRosterUpdate) {
+            parsed = parsed.map(m => {
+              const rh = HERO_ROSTER.find(h => h.id === m.heroId);
+              if (rh) {
+                return {
+                  ...m,
+                  rarity: rh.rarity,
+                  rarityName: rh.rarityName
+                };
+              }
+              return m;
+            });
+            localStorage.setItem('crypto_miners_team', JSON.stringify(parsed));
+          }
+
           // Sincronização definitiva dos 11 novos Heróis e Armas do HERO_ROSTER
           const needsRosterSync = parsed.some(m => !m.heroId || !m.weaponId);
           if (needsRosterSync) {
