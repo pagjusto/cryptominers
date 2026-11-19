@@ -173,20 +173,25 @@ export default function HeroList({
                     }} 
                   />
 
-                  {/* Thumbnail da Arma */}
+                  {/* Thumbnail da Arma (Quadro com Borda Branca Destacada e Contorno Luminoso) */}
                   <div 
-                    className="w-13 h-13 rounded-xl border border-slate-700/90 bg-slate-900/90 flex flex-col items-center justify-center p-1 shrink-0 shadow-inner group hover:border-amber-400/50 transition"
+                    className="w-13 h-13 rounded-2xl border-2 bg-slate-900/90 flex flex-col items-center justify-center shrink-0 shadow-md group hover:border-white transition-all duration-300 overflow-hidden"
                     title={`${rosterWeapon?.name || 'Sem arma'} (${rosterWeapon?.category || ''})`}
+                    style={{
+                      borderColor: '#ffffff',
+                      boxShadow: '0 0 8px rgba(255, 255, 255, 0.25)'
+                    }}
                   >
                     <div 
-                      className="w-[44px] h-[25px] bg-no-repeat transition-transform group-hover:scale-110"
+                      className="w-[44px] h-[25px] bg-no-repeat transition-transform group-hover:scale-[1.85]"
                       style={{
                         backgroundImage: 'url(/assets/weapon-roster.png?v=4)',
                         backgroundRepeat: 'no-repeat',
                         backgroundSize: '572px 25px',
                         backgroundPosition: `-${(rosterWeapon?.sourceIndex || 0) * 44}px center`,
-                        transform: 'scaleX(-1)',
-                        imageRendering: 'pixelated'
+                        transform: 'scaleX(-1) scale(1.68)',
+                        imageRendering: 'pixelated',
+                        filter: 'drop-shadow(0 0 1px rgba(255, 255, 255, 0.7))'
                       }} 
                     />
                   </div>

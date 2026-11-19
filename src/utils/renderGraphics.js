@@ -104,12 +104,12 @@ export function drawContinuousCaveFloor(ctx, width, height, mine, now) {
       initBillboard();
     }
     if (billboardLoaded && billboardImg) {
-      // Dimensões originais perfeitas aprovadas pelo usuário (180x101, proporção 16:9)
-      const bW = 180;
-      const bH = 101;
-      // Posicionado mais pra frente (Y=50) e mais pro lado no gramado livre (X=530)
-      const bX = 530;
-      const bY = 50;
+      // Dimensões do outdoor aumentadas conforme solicitação (~20% maior: 216x122)
+      const bW = 216;
+      const bH = 122;
+      // Posicionado no gramado norte (Cols 7 e 8, Rows 0 e 1)
+      const bX = 512;
+      const bY = 32;
 
       // Sombras realistas de contato e projeção solar no gramado (Sol vindo do noroeste)
       ctx.save();
@@ -117,13 +117,13 @@ export function drawContinuousCaveFloor(ctx, width, height, mine, now) {
       // 1. Sombra suave e difusa projetada pelo painel no gramado (diagonal para sudeste)
       ctx.fillStyle = 'rgba(5, 20, 5, 0.40)';
       ctx.beginPath();
-      ctx.ellipse(bX + bW * 0.58, bY + bH * 0.93, bW * 0.46, 15, 0.10, 0, Math.PI * 2);
+      ctx.ellipse(bX + bW * 0.58, bY + bH * 0.93, bW * 0.46, 17, 0.10, 0, Math.PI * 2);
       ctx.fill();
 
       // 2. Sombra de oclusão de ambiente sob a base da estrutura
       ctx.fillStyle = 'rgba(0, 0, 0, 0.28)';
       ctx.beginPath();
-      ctx.ellipse(bX + bW * 0.50, bY + bH * 0.88, bW * 0.42, 18, 0.05, 0, Math.PI * 2);
+      ctx.ellipse(bX + bW * 0.50, bY + bH * 0.88, bW * 0.42, 20, 0.05, 0, Math.PI * 2);
       ctx.fill();
 
       // 3. Sombra profunda de contato no pé esquerdo (apoio traseiro no gramado)
@@ -131,7 +131,7 @@ export function drawContinuousCaveFloor(ctx, width, height, mine, now) {
       const leftFootY = bY + bH * 0.89;
       ctx.fillStyle = 'rgba(0, 10, 0, 0.85)';
       ctx.beginPath();
-      ctx.ellipse(leftFootX, leftFootY, 11, 4.5, 0.12, 0, Math.PI * 2);
+      ctx.ellipse(leftFootX, leftFootY, 13, 5.2, 0.12, 0, Math.PI * 2);
       ctx.fill();
 
       // 4. Sombra profunda de contato no pé direito (apoio frontal no gramado)
@@ -139,7 +139,7 @@ export function drawContinuousCaveFloor(ctx, width, height, mine, now) {
       const rightFootY = bY + bH * 0.98;
       ctx.fillStyle = 'rgba(0, 10, 0, 0.88)';
       ctx.beginPath();
-      ctx.ellipse(rightFootX, rightFootY, 13, 5.5, 0.12, 0, Math.PI * 2);
+      ctx.ellipse(rightFootX, rightFootY, 15, 6.2, 0.12, 0, Math.PI * 2);
       ctx.fill();
 
       ctx.restore();
