@@ -262,13 +262,18 @@ export default function GameBoard({
         const cKey = `${bx},${by}`;
         delete state.hpMap[cKey];
         state.grid[by][bx] = BLOCK_EMPTY;
-        // Notifica todos os mineradores que estavam atacando esta jazida para liberarem o alvo
+
+        // Procura se havia um inimigo (Zumbi ou Boss) correspondente nesta célula
+        const defeatedEnemy = state.enemies?.find(e => e.gx === bx && e.gy === by);
+
+        // Notifica todos os mineradores que estavam atacando este zumbi para liberarem o alvo e a trava
         state.miners.forEach(m => {
-          if (m.targetBlock && m.targetBlock.x === bx && m.targetBlock.y === by) {
+          if ((m.targetBlock && m.targetBlock.x === bx && m.targetBlock.y === by) || (m.lockedEnemyId && defeatedEnemy && m.lockedEnemyId === defeatedEnemy.id)) {
             m.isMining = false;
             m.targetBlock = null;
+            m.lockedEnemyId = null;
             m.swingTimer = 0;
-            m.moveCooldown = 0; // Libera movimento imediato para a próxima jazida
+            m.moveCooldown = 0; // Libera movimento imediato para o próximo zumbi
           }
         });
 
@@ -502,24 +507,86 @@ export default function GameBoard({
           return;
         }
 
-        // Se o herói já tem um bloco alvo, valida se ele ainda existe, se tem HP e se está no alcance de combate com armas de fogo
-        if (miner.targetBlock) {
-          const { x: tx, y: ty } = miner.targetBlock;
-          const currentType = state.grid[ty] ? state.grid[ty][tx] : BLOCK_EMPTY;
-          const cellKey = `${tx},${ty}`;
-          const hasHp = state.hpMap[cellKey] !== undefined && state.hpMap[cellKey] > 0;
-          const dist = Math.abs(tx - mx) + Math.abs(ty - my);
-          const visualDist = Math.hypot(tx - miner.x, ty - miner.y);
-          const inRange = dist <= COMBAT_RANGE && visualDist <= 1.25 && hasClearLineOfSight(mx, my, tx, ty);
+        // ====================================================================
+        // REGRA OFICIAL DO USUÁRIO:
+        // "quando heroi começa atacar um zumbi ele deve continuar atacando
+        //  o mesmo zumbi ate mata-lo e nao deve caminhar enquanto isso"
+        // ====================================================================
 
-          if (currentType === BLOCK_EMPTY || currentType === BLOCK_BEDROCK || !hasHp || !inRange) {
-            miner.targetBlock = null;
-            miner.isMining = false;
-            miner.moveCooldown = 0;
+        // 1. Resolução do zumbi travado (Target Lock)
+        let lockedEnemy = null;
+        if (miner.lockedEnemyId) {
+          lockedEnemy = state.enemies?.find(e => e.id === miner.lockedEnemyId);
+        } else if (miner.isMining && miner.targetBlock) {
+          lockedEnemy = state.enemies?.find(e => e.gx === miner.targetBlock.x && e.gy === miner.targetBlock.y);
+          if (lockedEnemy) {
+            miner.lockedEnemyId = lockedEnemy.id;
           }
         }
 
-        // Se o herói está sem alvo ou não está minerando, busca a próxima criatura taticamente
+        // 2. Se o herói já começou a atacar um zumbi (possui lockedEnemy)
+        if (lockedEnemy) {
+          const cellKey = `${lockedEnemy.gx},${lockedEnemy.gy}`;
+          const curHp = state.hpMap[cellKey] ?? lockedEnemy.hp;
+          const blockType = state.grid[lockedEnemy.gy] ? state.grid[lockedEnemy.gy][lockedEnemy.gx] : BLOCK_EMPTY;
+          const isAlive = curHp !== undefined && curHp > 0 && blockType !== BLOCK_EMPTY && blockType !== BLOCK_BEDROCK && (lockedEnemy.hp === undefined || lockedEnemy.hp > 0);
+
+          if (!isAlive) {
+            // Zumbi foi morto! Apenas agora libera a trava do herói para buscar o próximo
+            miner.lockedEnemyId = null;
+            miner.targetBlock = null;
+            miner.isMining = false;
+            miner.swingTimer = 0;
+            miner.moveCooldown = 0;
+          } else {
+            // ZUMBI VIVO! O herói DEVE continuar atacando este MESMO zumbi e NÃO DEVE CAMINHAR!
+            miner.targetBlock = { x: lockedEnemy.gx, y: lockedEnemy.gy };
+            miner.isMining = true;
+
+            // Herói permanece 100% estático disparando no zumbi (não caminha)
+            miner.x = mx;
+            miner.y = my;
+
+            // Vira o herói diretamente na direção do zumbi atacado
+            if (lockedEnemy.gx < miner.x) {
+              miner.targetDir = -1;
+            } else if (lockedEnemy.gx > miner.x) {
+              miner.targetDir = 1;
+            }
+
+            // O zumbi também fica travado sob ataque (não caminha para longe)
+            lockedEnemy.isUnderAttack = true;
+            lockedEnemy.attackedTimer = 2.0;
+            lockedEnemy.isWalking = false;
+            lockedEnemy.moveCooldown = 2.0;
+            lockedEnemy.underAttackByHeroId = miner.id;
+            const enemyCurrX = lockedEnemy.visualX ?? lockedEnemy.gx;
+            if (Math.abs(miner.x - enemyCurrX) > 0.05) {
+              lockedEnemy.facingDir = miner.x < enemyCurrX ? -1 : 1;
+            }
+          }
+        } else if (miner.targetBlock) {
+          // Bloco genérico sem enemy (jazida comum)
+          const { x: tx, y: ty } = miner.targetBlock;
+          const matchedEnemy = state.enemies?.find(e => e.gx === tx && e.gy === ty);
+          if (matchedEnemy && (matchedEnemy.hp === undefined || matchedEnemy.hp > 0)) {
+            miner.lockedEnemyId = matchedEnemy.id;
+            miner.isMining = true;
+          } else {
+            const currentType = state.grid[ty] ? state.grid[ty][tx] : BLOCK_EMPTY;
+            const cellKey = `${tx},${ty}`;
+            const hasHp = state.hpMap[cellKey] !== undefined && state.hpMap[cellKey] > 0;
+            const dist = Math.abs(tx - mx) + Math.abs(ty - my);
+
+            if (currentType === BLOCK_EMPTY || currentType === BLOCK_BEDROCK || !hasHp || dist > COMBAT_RANGE) {
+              miner.targetBlock = null;
+              miner.isMining = false;
+              miner.moveCooldown = 0;
+            }
+          }
+        }
+
+        // 3. Se o herói está sem alvo ou não está minerando, busca a próxima criatura taticamente
         if (!miner.targetBlock || !miner.isMining) {
           const decision = findNextHeroAction(miner, state.grid, state.miners, isCanyon);
           if (decision.action === 'mine' && decision.targetBlock) {
@@ -527,11 +594,26 @@ export default function GameBoard({
             miner.targetDir = decision.targetDir;
             miner.isMining = true;
             miner.swingTimer = 0.4;
+
+            // Trava imediatamente no zumbi alvo para não trocar e não andar
+            const matchedEnemy = state.enemies?.find(e => e.gx === decision.targetBlock.x && e.gy === decision.targetBlock.y);
+            if (matchedEnemy) {
+              miner.lockedEnemyId = matchedEnemy.id;
+              matchedEnemy.isUnderAttack = true;
+              matchedEnemy.attackedTimer = 2.0;
+              matchedEnemy.isWalking = false;
+              matchedEnemy.moveCooldown = 2.0;
+              matchedEnemy.underAttackByHeroId = miner.id;
+            }
           }
         }
 
         if (miner.isMining && miner.targetBlock) {
-          // Garante que o herói SEMPRE esteja virado diretamente para a jazida que está atacando
+          // Garante que o herói permaneça 100% estático disparando no zumbi (não caminha)
+          miner.x = mx;
+          miner.y = my;
+
+          // Garante que o herói SEMPRE esteja virado diretamente para o zumbi que está atacando
           if (miner.targetBlock.x < miner.x) {
             miner.targetDir = -1;
           } else if (miner.targetBlock.x > miner.x) {
@@ -548,6 +630,7 @@ export default function GameBoard({
             const curHp = state.hpMap[cellKey];
 
             if (curHp === undefined || curHp <= 0 || blockType === BLOCK_EMPTY || blockType === BLOCK_BEDROCK) {
+              miner.lockedEnemyId = null;
               miner.targetBlock = null;
               miner.isMining = false;
               miner.moveCooldown = 0;
@@ -556,12 +639,13 @@ export default function GameBoard({
 
             // REGRA OFICIAL DO USUÁRIO: "enquanto o zumbi é atacado ele nao deve caminhar"
             // REGRA OFICIAL DO USUÁRIO: "boss e zumbis devem virar para o lado que esta atacando"
-            const targetEnemy = state.enemies?.find(e => e.gx === tx && e.gy === ty);
+            const targetEnemy = state.enemies?.find(e => (miner.lockedEnemyId && e.id === miner.lockedEnemyId) || (e.gx === tx && e.gy === ty));
             if (targetEnemy) {
               targetEnemy.isUnderAttack = true;
-              targetEnemy.attackedTimer = 1.2;
+              targetEnemy.attackedTimer = 2.0;
               targetEnemy.isWalking = false;
-              targetEnemy.moveCooldown = 1.2;
+              targetEnemy.moveCooldown = 2.0;
+              targetEnemy.underAttackByHeroId = miner.id;
               const enemyCurrX = targetEnemy.visualX ?? targetEnemy.gx;
               if (Math.abs(miner.x - enemyCurrX) > 0.05) {
                 targetEnemy.facingDir = miner.x < enemyCurrX ? -1 : 1;
@@ -871,9 +955,13 @@ export default function GameBoard({
                 }
               }
 
-              // Bloco alvo destruído
+              // Bloco alvo / zumbi destruído
               if (newHp <= 0) {
                 breakBlockAt(tx, ty, blockType, miner);
+                miner.lockedEnemyId = null;
+                miner.targetBlock = null;
+                miner.isMining = false;
+                miner.moveCooldown = 0;
               } else {
                 state.hpMap[cellKey] = newHp;
               }
@@ -882,7 +970,8 @@ export default function GameBoard({
           return;
         }
 
-        // Navegação e marcha inteligente em direção à próxima jazida do mapa
+        // Navegação e marcha inteligente em direção à próxima jazida/zumbi do mapa
+        // ESTE BLOCO SÓ EXECUTA SE O HERÓI NÃO ESTIVER EM COMBATE ATACANDO UM ZUMBI
         miner.moveCooldown = (miner.moveCooldown || 0) - dt * (miner.speed || 1);
 
         if (miner.moveCooldown <= 0) {
@@ -894,7 +983,16 @@ export default function GameBoard({
             miner.targetBlock = decision.targetBlock;
             miner.targetDir = decision.targetDir;
             miner.isMining = true;
-            miner.swingTimer = 0.5;
+            miner.swingTimer = 0.4;
+            const matchedEnemy = state.enemies?.find(e => e.gx === decision.targetBlock.x && e.gy === decision.targetBlock.y);
+            if (matchedEnemy) {
+              miner.lockedEnemyId = matchedEnemy.id;
+              matchedEnemy.isUnderAttack = true;
+              matchedEnemy.attackedTimer = 2.0;
+              matchedEnemy.isWalking = false;
+              matchedEnemy.moveCooldown = 2.0;
+              matchedEnemy.underAttackByHeroId = miner.id;
+            }
           } else if (decision.action === 'move' && decision.nextStep) {
             miner.x = decision.nextStep.x;
             miner.y = decision.nextStep.y;
@@ -902,13 +1000,22 @@ export default function GameBoard({
               miner.targetDir = decision.nextStep.dir;
             }
 
-            // Ao dar o passo, checa imediatamente se já encostou na jazida
+            // Ao dar o passo, checa imediatamente se já encostou ou entrou em alcance de tiro
             const immediateCheck = findNextHeroAction(miner, state.grid, state.miners, isCanyon);
             if (immediateCheck.action === 'mine' && immediateCheck.targetBlock) {
               miner.targetBlock = immediateCheck.targetBlock;
               miner.targetDir = immediateCheck.targetDir;
               miner.isMining = true;
-              miner.swingTimer = 0.5;
+              miner.swingTimer = 0.4;
+              const matchedEnemy = state.enemies?.find(e => e.gx === immediateCheck.targetBlock.x && e.gy === immediateCheck.targetBlock.y);
+              if (matchedEnemy) {
+                miner.lockedEnemyId = matchedEnemy.id;
+                matchedEnemy.isUnderAttack = true;
+                matchedEnemy.attackedTimer = 2.0;
+                matchedEnemy.isWalking = false;
+                matchedEnemy.moveCooldown = 2.0;
+                matchedEnemy.underAttackByHeroId = miner.id;
+              }
             }
           }
         }

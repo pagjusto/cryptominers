@@ -197,9 +197,9 @@ export function updateEnemies(enemies, state, dt, now, isCanyon = true) {
     const ey = enemy.visualY ?? enemy.gy;
     const combatRange = isBoss ? 7.5 : 5.5;
 
-    // Procura primeiro quem está atirando neste zumbi, ou o herói ativo mais próximo
+    // Procura primeiro quem está atirando neste zumbi (lock ativo), ou o herói ativo mais próximo
     const activeHeroes = state.miners?.filter(m => m.status === 'work' && (m.durability === undefined || m.durability > 0)) || [];
-    let targetHero = activeHeroes.find(m => m.targetBlock && m.targetBlock.x === enemy.gx && m.targetBlock.y === enemy.gy);
+    let targetHero = activeHeroes.find(m => (m.lockedEnemyId && m.lockedEnemyId === enemy.id) || (m.targetBlock && m.targetBlock.x === enemy.gx && m.targetBlock.y === enemy.gy));
     
     if (!targetHero && activeHeroes.length > 0) {
       let closestDist = Infinity;
@@ -337,10 +337,13 @@ export function updateEnemies(enemies, state, dt, now, isCanyon = true) {
       }
 
       // REGRA OFICIAL DO USUÁRIO: "enquanto o zumbi é atacado ele nao deve caminhar"
-      const isUnderAttack = (enemy.hitFlash > 0) || (enemy.attackedTimer > 0) || (enemy.isUnderAttack);
+      // REGRA OFICIAL DO USUÁRIO: "quando heroi começa atacar um zumbi ele deve continuar atacando o mesmo zumbi ate mata-lo e nao deve caminhar enquanto isso"
+      const isTargetedByHero = activeHeroes.some(m => m.isMining && ((m.lockedEnemyId && m.lockedEnemyId === enemy.id) || (m.targetBlock && m.targetBlock.x === enemy.gx && m.targetBlock.y === enemy.gy)));
+      const isUnderAttack = (enemy.hitFlash > 0) || (enemy.attackedTimer > 0) || (enemy.isUnderAttack) || isTargetedByHero;
       if (isUnderAttack) {
         enemy.isWalking = false;
-        enemy.moveCooldown = 1.2; // Permanece estático e em posição de combate enquanto sob ataque
+        enemy.isUnderAttack = true;
+        enemy.moveCooldown = 1.5; // Permanece estático e em posição de combate enquanto sob ataque
         return;
       }
 

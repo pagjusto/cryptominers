@@ -10,7 +10,7 @@
 import { GRID_COLS, GRID_ROWS, BLOCK_EMPTY, BLOCK_BEDROCK, BLOCK_ZOMBIE, BLOCK_BOSS } from '../data/minersData.js';
 import { isCityBuilding } from './cityMapGeometry.js';
 
-export const COMBAT_RANGE = 1; // Alcance tático encurtado pela metade (combate direto e queima-roupa: 1 bloco)
+export const COMBAT_RANGE = 2; // Alcance tático de combate com armas de fogo (até 2 blocos de distância, incluindo diagonais)
 
 /**
  * Determina se a célula contém um obstáculo intransponível para caminhada física:
