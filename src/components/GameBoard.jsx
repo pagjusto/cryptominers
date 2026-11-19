@@ -279,19 +279,7 @@ export default function GameBoard({
             state.enemies.splice(eIdx, 1);
             const isBoss = defeated.type === 'boss';
 
-            for (let p = 0; p < (isBoss ? 28 : 12); p++) {
-              state.particles.push({
-                x: bx * TILE_SIZE + TILE_SIZE / 2,
-                y: by * TILE_SIZE + TILE_SIZE / 2,
-                vx: (Math.random() - 0.5) * (isBoss ? 200 : 130),
-                vy: (Math.random() - 0.5) * (isBoss ? 200 : 130) - 25,
-                color: isBoss ? '#ef4444' : '#84cc16',
-                size: Math.random() * 4 + 2,
-                life: 0.6,
-                maxLife: 0.6
-              });
-            }
-
+            // Efeito limpo de abate (removidas as partículas verdes artificiais antigas)
             if (isBoss) {
               sfx.playChestOpen?.();
               state.floatTexts.push({
@@ -303,6 +291,8 @@ export default function GameBoard({
                 vy: -25
               });
               callbacksRef.current.onFindMysticChest?.({
+                x: bx,
+                y: by,
                 type: 'boss_defeat_reward',
                 rewardMnc: 25,
                 title: 'Abominação Mutante Derrotada'
@@ -377,20 +367,6 @@ export default function GameBoard({
                 };
                 state.enemies.push(respawnedZombie);
 
-                // Efeito sutil de poeira de terra batida no surgimento do zumbi (sem partículas verdes chamativas)
-                for (let sp = 0; sp < 6; sp++) {
-                  state.particles.push({
-                    x: spawnPos.c * TILE_SIZE + TILE_SIZE / 2,
-                    y: spawnPos.r * TILE_SIZE + TILE_SIZE / 2,
-                    vx: (Math.random() - 0.5) * 60,
-                    vy: (Math.random() - 0.5) * 40 - 10,
-                    color: 'rgba(168, 140, 100, 0.45)',
-                    size: Math.random() * 2.0 + 1.2,
-                    life: 0.35,
-                    maxLife: 0.35
-                  });
-                }
-
                 state.floatTexts.push({
                   text: '🧟 +HORDA (+0.05 MNC)',
                   x: spawnPos.c * TILE_SIZE + TILE_SIZE / 2,
@@ -412,20 +388,6 @@ export default function GameBoard({
           const ms = state.minerStats[hitter.id] || { blocksBroken: 0, bcoinEarned: 0, damageDealt: 0 };
           ms.blocksBroken = (ms.blocksBroken || 0) + 1;
           state.minerStats[hitter.id] = ms;
-        }
-
-        // Partículas de impacto mineral
-        for (let p = 0; p < 8; p++) {
-          state.particles.push({
-            x: bx * TILE_SIZE + TILE_SIZE / 2,
-            y: by * TILE_SIZE + TILE_SIZE / 2,
-            vx: (Math.random() - 0.5) * 120,
-            vy: (Math.random() - 0.5) * 120,
-            color: bType === BLOCK_ORE_GOLD ? '#facc15' : (bType === BLOCK_ORE_CRYSTAL ? '#38bdf8' : '#c27f42'),
-            size: Math.random() * 3.5 + 2,
-            life: 0.45,
-            maxLife: 0.45
-          });
         }
 
         sfx.playRockHit?.();
