@@ -533,10 +533,9 @@ export default function GameBoard({
         if (miner.targetBlock) {
           const { x: tx, y: ty } = miner.targetBlock;
           const currentType = state.grid[ty] ? state.grid[ty][tx] : BLOCK_EMPTY;
-          const dist = Math.max(Math.abs(tx - mx), Math.abs(ty - my));
-          const cellKey = `${tx},${ty}`;
-          const hasHp = state.hpMap[cellKey] !== undefined && state.hpMap[cellKey] > 0;
-          const inRange = dist <= COMBAT_RANGE && hasClearLineOfSight(mx, my, tx, ty);
+          const dist = Math.abs(tx - mx) + Math.abs(ty - my);
+          const visualDist = Math.hypot(tx - miner.x, ty - miner.y);
+          const inRange = dist <= COMBAT_RANGE && visualDist <= 1.25 && hasClearLineOfSight(mx, my, tx, ty);
 
           if (currentType === BLOCK_EMPTY || currentType === BLOCK_BEDROCK || !hasHp || !inRange) {
             miner.targetBlock = null;

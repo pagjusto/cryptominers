@@ -312,7 +312,7 @@
       cardStates[hero.id] = {
         mode: 'shooting', // 'shooting' ou 'walking'
         direction: 1,     // 1 = direita, -1 = esquerda
-        targetDist: 70,   // Distância encurtada pela metade para combate corpo a corpo
+        targetDist: 34,   // Bem perto: combate corpo a corpo / queima-roupa direto
         particles: [],
         sparks: [],
         explosions: [],
@@ -404,8 +404,8 @@
         const hX = cvs.width / 2 - (st.direction > 0 ? 35 : -35);
         const hY = 150; // Linha de solo sólida para herói e zumbi
 
-        // Alvo zumbi simulado à frente com distância encurtada pela metade (70px)
-        const targetX = hX + st.direction * 70;
+        // Alvo zumbi simulado à frente bem perto (distância de contato direto: 34px)
+        const targetX = hX + st.direction * 34;
         const targetY = hY;
 
         ctx.save();

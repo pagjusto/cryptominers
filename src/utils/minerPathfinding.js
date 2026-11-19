@@ -79,11 +79,11 @@ export function findNextHeroAction(miner, grid, allMiners = [], isCanyon = true)
     return { action: 'idle' };
   }
 
-  // 2. Se o herói já estava focado em um alvo e ele ainda existe e está no alcance de tiro (<= 2)
+  // 2. Se o herói já estava focado em um alvo e ele ainda existe e está bem perto (distância Manhattan <= 1)
   if (miner.targetBlock) {
     const stillAlive = activeTargets.find(t => t.x === miner.targetBlock.x && t.y === miner.targetBlock.y);
     if (stillAlive) {
-      const dist = Math.max(Math.abs(stillAlive.x - mx), Math.abs(stillAlive.y - my));
+      const dist = Math.abs(stillAlive.x - mx) + Math.abs(stillAlive.y - my);
       if (dist <= COMBAT_RANGE && hasClearLineOfSight(mx, my, stillAlive.x, stillAlive.y)) {
         const targetDir = stillAlive.x < mx ? -1 : (stillAlive.x > mx ? 1 : (miner.targetDir || 1));
         return {
@@ -95,12 +95,12 @@ export function findNextHeroAction(miner, grid, allMiners = [], isCanyon = true)
     }
   }
 
-  // 3. Verifica se qualquer criatura ativa está no raio de combate imediato (distância <= 2)
+  // 3. Verifica se qualquer criatura ativa está bem perto no raio imediato (adjacência estrita <= 1)
   // Ordena por proximidade para atirar na ameaça mais próxima
   const inRangeTargets = activeTargets
     .map(t => ({
       ...t,
-      dist: Math.max(Math.abs(t.x - mx), Math.abs(t.y - my))
+      dist: Math.abs(t.x - mx) + Math.abs(t.y - my)
     }))
     .filter(t => t.dist <= COMBAT_RANGE && hasClearLineOfSight(mx, my, t.x, t.y))
     .sort((a, b) => a.dist - b.dist);
@@ -134,9 +134,9 @@ export function findNextHeroAction(miner, grid, allMiners = [], isCanyon = true)
   while (queue.length > 0) {
     const curr = queue.shift();
 
-    // Se a partir desta posição 'curr' é possível atirar em algum alvo ativo (dist <= 2 e linha limpa)
+    // Se a partir desta posição 'curr' é possível atirar em algum alvo ativo (bem perto, dist <= 1 e linha limpa)
     const reachableTarget = activeTargets.find(t => {
-      const d = Math.max(Math.abs(t.x - curr.x), Math.abs(t.y - curr.y));
+      const d = Math.abs(t.x - curr.x) + Math.abs(t.y - curr.y);
       return d <= COMBAT_RANGE && hasClearLineOfSight(curr.x, curr.y, t.x, t.y);
     });
 

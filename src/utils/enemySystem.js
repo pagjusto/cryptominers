@@ -167,15 +167,18 @@ export function updateEnemies(enemies, state, dt, now, isCanyon = true) {
     }
 
     // 1. Detecta se há heróis mineradores adjacentes atacando este inimigo
+    // REGRA OFICIAL DO USUÁRIO: O zumbi só ataca se o herói estiver BEM PERTO (distância <= 1.2 blocos)
     const attackingMiner = state.miners?.find(m => {
       if (m.status !== 'work' || !m.isMining) return false;
       if (!m.targetBlock) return false;
-      return m.targetBlock.x === enemy.gx && m.targetBlock.y === enemy.gy;
+      if (m.targetBlock.x !== enemy.gx || m.targetBlock.y !== enemy.gy) return false;
+      const distToHero = Math.hypot(m.x - (enemy.visualX ?? enemy.gx), m.y - (enemy.visualY ?? enemy.gy));
+      return distToHero <= 1.25;
     });
 
     if (attackingMiner) {
-      // Em combate: vira imediatamente para o herói e ataca!
-      const targetDir = attackingMiner.x < enemy.visualX ? -1 : 1;
+      // Em combate corpo a corpo: vira imediatamente para o herói e ataca!
+      const targetDir = attackingMiner.x < (enemy.visualX ?? enemy.gx) ? -1 : 1;
       enemy.facingDir = targetDir;
       enemy.isAttacking = true;
 

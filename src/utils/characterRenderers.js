@@ -4795,7 +4795,7 @@ export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swi
   // 2. PROJÉTIL EM VOO ULTRARRÁPIDO (0.33 a 0.46) - Distância encurtada pela metade para 26px
   const muzzleWorldX = handBaseX + (gw - wGripX);
   const muzzleWorldY = handBaseY - 1;
-  const targetX = 26; // Encurtada pela metade (era 52)
+  const targetX = 16; // Bem perto (queima-roupa e contato direto com o zumbi)
   const targetY = -6;
 
   if (swingProgress >= 0.33 && swingProgress <= 0.46) {
