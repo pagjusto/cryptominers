@@ -60,6 +60,11 @@ export function hasClearLineOfSight(x1, y1, x2, y2) {
  * 2. Se não estiver, localiza o zumbi mais próximo alcançável via BFS e avança em direção a ele.
  */
 export function findNextHeroAction(miner, grid, allMiners = [], isCanyon = true) {
+  // REGRA OFICIAL DO USUÁRIO: "e se quebrar interrompe a mineração"
+  if (miner.durability !== undefined && miner.durability <= 0) {
+    return { action: 'broken', reason: 'weapon_broken' };
+  }
+
   const mx = Math.max(1, Math.min(GRID_COLS - 2, Math.round(miner.x)));
   const my = Math.max(1, Math.min(GRID_ROWS - 2, Math.round(miner.y)));
 

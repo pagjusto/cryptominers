@@ -191,43 +191,99 @@ export function updateEnemies(enemies, state, dt, now, isCanyon = true) {
       enemy.hitFlash = Math.max(0, enemy.hitFlash - dt * 2.5);
     }
 
-    // 1. Detecta se há heróis mineradores adjacentes atacando este inimigo
-    // REGRA OFICIAL DO USUÁRIO: O zumbi só ataca se o herói estiver BEM PERTO (distância <= 1.2 blocos)
-    const attackingMiner = state.miners?.find(m => {
-      if (m.status !== 'work' || !m.isMining) return false;
-      if (!m.targetBlock) return false;
-      if (m.targetBlock.x !== enemy.gx || m.targetBlock.y !== enemy.gy) return false;
-      const distToHero = Math.hypot(m.x - (enemy.visualX ?? enemy.gx), m.y - (enemy.visualY ?? enemy.gy));
-      return distToHero <= 1.25;
-    });
+    // 1. Detecta heróis em combate e alcance de ataque com Gosma Verde
+    const isBoss = enemy.type === 'boss';
+    const ex = enemy.visualX ?? enemy.gx;
+    const ey = enemy.visualY ?? enemy.gy;
+    const combatRange = isBoss ? 7.5 : 5.5;
 
-    if (attackingMiner) {
-      // Em combate corpo a corpo: vira imediatamente para o herói e ataca!
-      const targetDir = attackingMiner.x < (enemy.visualX ?? enemy.gx) ? -1 : 1;
+    // Procura primeiro quem está atirando neste zumbi, ou o herói ativo mais próximo
+    const activeHeroes = state.miners?.filter(m => m.status === 'work' && (m.durability === undefined || m.durability > 0)) || [];
+    let targetHero = activeHeroes.find(m => m.targetBlock && m.targetBlock.x === enemy.gx && m.targetBlock.y === enemy.gy);
+    
+    if (!targetHero && activeHeroes.length > 0) {
+      let closestDist = Infinity;
+      activeHeroes.forEach(m => {
+        const d = Math.hypot(m.x - ex, m.y - ey);
+        if (d <= combatRange && d < closestDist) {
+          closestDist = d;
+          targetHero = m;
+        }
+      });
+    }
+
+    if (targetHero) {
+      // Vira imediatamente para o herói-alvo
+      const targetDir = targetHero.x < ex ? -1 : 1;
       enemy.facingDir = targetDir;
       enemy.isAttacking = true;
 
-      // Cadência do ataque do zumbi/boss
+      // Cadência do ataque de cuspe de gosma verde
       enemy.attackCooldown = (enemy.attackCooldown || 0) - dt;
       if (enemy.attackCooldown <= 0) {
-        enemy.attackCooldown = enemy.type === 'boss' ? 1.1 : 0.85;
+        enemy.attackCooldown = isBoss ? (1.5 + Math.random() * 0.6) : (2.0 + Math.random() * 0.8);
         enemy.attackProgress = 0.01;
+
+        // DISPARA PROJÉTIL DE GOSMA VERDE EM DIREÇÃO AO HERÓI
+        state.slimes = state.slimes || [];
+        const startPx = ex * TILE_SIZE + TILE_SIZE / 2;
+        const startPy = ey * TILE_SIZE + TILE_SIZE / 2 - (isBoss ? 16 : 8);
+        const targetPx = targetHero.x * TILE_SIZE + TILE_SIZE / 2;
+        const targetPy = targetHero.y * TILE_SIZE + TILE_SIZE / 2;
+
+        state.slimes.push({
+          startX: startPx,
+          startY: startPy,
+          currentX: startPx,
+          currentY: startPy,
+          targetX: targetPx,
+          targetY: targetPy,
+          targetHeroId: targetHero.id,
+          progress: 0,
+          speed: isBoss ? 1.4 : 1.9,
+          arcHeight: isBoss ? 35 : 22,
+          radius: isBoss ? 9 : 5,
+          isBoss: isBoss,
+          damage: isBoss ? 6 : 3
+        });
+
+        // O Boss pode cuspir uma segunda gosma em dispersão se houver outro herói próximo
+        if (isBoss) {
+          const otherHero = activeHeroes.find(m => m.id !== targetHero.id && Math.hypot(m.x - ex, m.y - ey) <= combatRange);
+          if (otherHero) {
+            state.slimes.push({
+              startX: startPx,
+              startY: startPy,
+              currentX: startPx,
+              currentY: startPy,
+              targetX: otherHero.x * TILE_SIZE + TILE_SIZE / 2,
+              targetY: otherHero.y * TILE_SIZE + TILE_SIZE / 2,
+              targetHeroId: otherHero.id,
+              progress: 0,
+              speed: 1.3,
+              arcHeight: 38,
+              radius: 8,
+              isBoss: true,
+              damage: 5
+            });
+          }
+        }
       }
 
       if (enemy.attackProgress > 0) {
-        enemy.attackProgress += dt * (enemy.type === 'boss' ? 2.2 : 2.8);
+        enemy.attackProgress += dt * (isBoss ? 2.2 : 2.8);
         if (enemy.attackProgress >= 1.0) {
           enemy.attackProgress = 0;
         }
       }
 
-      // Em combate, o inimigo não anda para longe
+      // Em combate, o inimigo foca a mira
       enemy.isWalking = false;
       return;
     }
 
     // Se saiu de combate
-    if (!attackingMiner && enemy.isAttacking) {
+    if (!targetHero && enemy.isAttacking) {
       enemy.isAttacking = false;
       enemy.attackProgress = 0;
     }
@@ -433,6 +489,49 @@ export function drawEnemyCharacter(ctx, enemy, now) {
   ctx.ellipse(0, shadowY, shadowRx * 0.82, shadowRy * 0.72, 0, 0, Math.PI * 2);
   ctx.fill();
   ctx.restore();
+
+  // AURA OFICIAL DO BOSS: Mesclada de Preto com Roxo e Verde
+  if (isBoss) {
+    ctx.save();
+    ctx.translate(px + lungeX * 0.35, py + groundY);
+    const auraPulse = 1.0 + Math.sin(now * 0.005) * 0.12;
+    const auraRx = 44 * auraPulse;
+    const auraRy = 18 * auraPulse;
+
+    // 1. Halo no solo: Núcleo Preto Profundo -> Roxo Abissal -> Verde Tóxico Radioativo
+    const bossAuraGrad = ctx.createRadialGradient(0, 0, 4, 0, 0, auraRx);
+    bossAuraGrad.addColorStop(0, 'rgba(0, 0, 0, 0.88)'); // Preto profundo
+    bossAuraGrad.addColorStop(0.35, 'rgba(88, 28, 135, 0.70)'); // Roxo escuro
+    bossAuraGrad.addColorStop(0.65, 'rgba(168, 85, 247, 0.50)'); // Roxo vibrante
+    bossAuraGrad.addColorStop(0.85, 'rgba(34, 197, 94, 0.45)'); // Verde tóxico
+    bossAuraGrad.addColorStop(1, 'rgba(132, 204, 22, 0)');
+    ctx.fillStyle = bossAuraGrad;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, auraRx, auraRy, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 2. Anel de energia mística roxo-esmeralda cintilante no chão
+    ctx.strokeStyle = '#c084fc';
+    ctx.lineWidth = 1.5;
+    ctx.globalAlpha = 0.55 * auraPulse;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, auraRx * 0.78, auraRy * 0.78, 0, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // 3. Brilho esférico sombrio ascendente ao redor do corpo (Preto + Roxo + Verde)
+    ctx.globalAlpha = 1.0;
+    const bodyAura = ctx.createRadialGradient(0, -groundY - 14, 8, 0, -groundY - 14, 48 * auraPulse);
+    bodyAura.addColorStop(0, 'rgba(0, 0, 0, 0.65)');
+    bodyAura.addColorStop(0.38, 'rgba(147, 51, 234, 0.40)');
+    bodyAura.addColorStop(0.75, 'rgba(34, 197, 94, 0.30)');
+    bodyAura.addColorStop(1, 'rgba(21, 128, 61, 0)');
+    ctx.fillStyle = bodyAura;
+    ctx.beginPath();
+    ctx.arc(0, -groundY - 14, 48 * auraPulse, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+  }
 
   // 4. Desenho do Sprite do Inimigo com Transformações
   // Para os zumbis com pernas separadas, os pés ficam firmemente apoiados no chão

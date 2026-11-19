@@ -32,6 +32,26 @@ let billboardImg = null;
 let billboardLoaded = false;
 let canyonBgImg = null;
 let canyonBgLoaded = false;
+let userFogImg = null;
+let userFogLoaded = false;
+
+export function initUserFog(onLoaded) {
+  if (userFogLoaded && userFogImg) {
+    if (onLoaded) onLoaded();
+    return;
+  }
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.src = '/user_fog.avif';
+  img.onload = () => {
+    userFogImg = img;
+    userFogLoaded = true;
+    if (onLoaded) onLoaded();
+  };
+  img.onerror = () => {
+    console.warn('user_fog.avif não carregado, usando névoa procedural');
+  };
+}
 
 export function initBillboard(onLoaded) {
   if (billboardLoaded && billboardImg) {
@@ -53,6 +73,7 @@ export function initBillboard(onLoaded) {
 
 export function initCityMap(onLoaded) {
   initBillboard();
+  initUserFog();
   if (cityBgLoaded && cityBgImg) {
     if (onLoaded) onLoaded();
     return;
@@ -608,102 +629,147 @@ export function drawMinerCharacter(ctx, mx, my, miner, classInfo, now, swingProg
 }
 
 /**
- * Renderiza uma suave névoa verde atmosférica sobre todo o mapa enquanto o Boss estiver vivo.
+ * Renderiza uma névoa verde atmosférica com mais ênfase, formas orgânicas irregulares
+ * e textura de fumaça rasteira autêntica (sem formas arredondadas geométricas).
  * Dissipa-se naturalmente quando o Boss é derrotado.
  */
 export function drawBossGreenFog(ctx, width, height, opacity, now, bossEnemy) {
   if (!opacity || opacity <= 0.005) return;
 
   ctx.save();
-  ctx.globalAlpha = Math.min(1, Math.max(0, opacity));
+  const baseAlpha = Math.min(1, Math.max(0, opacity));
 
-  // 1. Tonalidade atmosférica ambiente suave em verde biológico/tóxico
+  // 1. Tonalidade atmosférica ambiente verde tóxica (2x mais ênfase conforme pedido)
   const ambientGrad = ctx.createLinearGradient(0, 0, 0, height);
-  ambientGrad.addColorStop(0, 'rgba(16, 185, 129, 0.08)');
-  ambientGrad.addColorStop(0.5, 'rgba(34, 197, 94, 0.06)');
-  ambientGrad.addColorStop(1, 'rgba(21, 128, 61, 0.10)');
+  ambientGrad.addColorStop(0, 'rgba(16, 185, 129, 0.18)');
+  ambientGrad.addColorStop(0.40, 'rgba(34, 197, 94, 0.16)');
+  ambientGrad.addColorStop(0.75, 'rgba(21, 128, 61, 0.24)');
+  ambientGrad.addColorStop(1, 'rgba(74, 222, 128, 0.35)'); // Base rasteira densa e luminosa
   ctx.fillStyle = ambientGrad;
+  ctx.globalAlpha = baseAlpha;
   ctx.fillRect(0, 0, width, height);
 
-  // 2. Camadas dinâmicas de nuvens de névoa ondulando pelo mapa
-  const time = now * 0.0004;
-  const fogPatches = [
-    {
-      x: width * 0.25 + Math.sin(time) * 45,
-      y: height * 0.28 + Math.cos(time * 0.8) * 30,
-      rx: width * 0.38,
-      ry: height * 0.30,
-      inner: 'rgba(74, 222, 128, 0.11)',
-      outer: 'rgba(22, 101, 52, 0)'
-    },
-    {
-      x: width * 0.72 + Math.cos(time * 0.7) * 50,
-      y: height * 0.32 + Math.sin(time * 0.9) * 35,
-      rx: width * 0.40,
-      ry: height * 0.32,
-      inner: 'rgba(34, 197, 94, 0.09)',
-      outer: 'rgba(20, 83, 45, 0)'
-    },
-    {
-      x: width * 0.35 + Math.cos(time * 0.6) * 40,
-      y: height * 0.72 + Math.sin(time * 0.7) * 30,
-      rx: width * 0.42,
-      ry: height * 0.32,
-      inner: 'rgba(132, 204, 22, 0.10)',
-      outer: 'rgba(22, 101, 52, 0)'
-    },
-    {
-      x: width * 0.78 + Math.sin(time * 0.85) * 45,
-      y: height * 0.78 + Math.cos(time * 0.65) * 30,
-      rx: width * 0.38,
-      ry: height * 0.32,
-      inner: 'rgba(74, 222, 128, 0.09)',
-      outer: 'rgba(21, 128, 61, 0)'
-    }
-  ];
-
-  fogPatches.forEach(patch => {
+  // 2. Camada Autêntica de Textura de Fumaça/Névoa da Referência do Usuário (2x mais ênfase)
+  if (userFogLoaded && userFogImg) {
     ctx.save();
-    ctx.translate(patch.x, patch.y);
-    ctx.scale(1, patch.ry / patch.rx);
-    const grad = ctx.createRadialGradient(0, 0, patch.rx * 0.15, 0, 0, patch.rx);
-    grad.addColorStop(0, patch.inner);
-    grad.addColorStop(0.65, patch.inner.replace(/[\d\.]+\)$/, '0.035)'));
-    grad.addColorStop(1, patch.outer);
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.arc(0, 0, patch.rx, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
-  });
+    // Camada rasteira 1: fumaça densa fluindo pelo solo da cidade
+    const scroll1 = (now * 0.018) % width;
+    ctx.globalAlpha = baseAlpha * 0.70;
+    ctx.drawImage(userFogImg, -scroll1, height * 0.35, width, height * 0.68);
+    ctx.drawImage(userFogImg, width - scroll1, height * 0.35, width, height * 0.68);
 
-  // 3. Foco de emanação tóxica ao redor do próprio Boss se estiver em tela
+    // Camada rasteira 2: plumas volumétricas flutuando em sentido cruzado
+    const scroll2 = (now * 0.010) % width;
+    ctx.globalAlpha = baseAlpha * 0.50;
+    ctx.save();
+    ctx.scale(-1, 1);
+    ctx.drawImage(userFogImg, -width + scroll2, height * 0.05, width * 1.2, height * 0.75);
+    ctx.drawImage(userFogImg, scroll2, height * 0.05, width * 1.2, height * 0.75);
+    ctx.restore();
+    ctx.restore();
+  }
+
+  // 3. Fitas e Plumas de Fumaça Orgânica Irregular (SEM NENHUMA FORMA ARREDONDADA)
+  // Desenhadas com curvas de Bezier sinuosas e pontas fluidas que imitam névoa real
+  ctx.save();
+  const time = now * 0.0005;
+
+  for (let r = 0; r < 3; r++) {
+    const yBase = height * (0.32 + r * 0.25);
+    const speed = 0.8 + r * 0.3;
+    const offset = Math.sin(time * speed + r) * 65;
+    
+    ctx.beginPath();
+    ctx.moveTo(-60, yBase + Math.sin(time + r) * 28);
+    
+    // Curvas Bezier orgânicas sinuosas com formas distintas e assimétricas
+    ctx.bezierCurveTo(
+      width * 0.25 + offset, yBase - 40 + Math.cos(time * 1.2 + r) * 25,
+      width * 0.45 - offset, yBase + 55 + Math.sin(time * 0.9 + r) * 30,
+      width * 0.70 + offset * 0.5, yBase - 25 + Math.cos(time + r) * 22
+    );
+    ctx.bezierCurveTo(
+      width * 0.85 + offset, yBase + 35 + Math.sin(time * 1.1) * 25,
+      width + 70, yBase - 20,
+      width + 90, yBase + 70
+    );
+    ctx.bezierCurveTo(
+      width * 0.65, yBase + 85 + Math.cos(time) * 18,
+      width * 0.30, yBase + 95 + Math.sin(time) * 25,
+      -60, yBase + 80
+    );
+    ctx.closePath();
+
+    const smokeGrad = ctx.createLinearGradient(0, yBase - 40, width, yBase + 90);
+    smokeGrad.addColorStop(0, 'rgba(74, 222, 128, 0)');
+    smokeGrad.addColorStop(0.3, 'rgba(74, 222, 128, 0.22)');
+    smokeGrad.addColorStop(0.6, 'rgba(34, 197, 94, 0.18)');
+    smokeGrad.addColorStop(1, 'rgba(21, 128, 61, 0)');
+    
+    ctx.fillStyle = smokeGrad;
+    ctx.globalAlpha = baseAlpha;
+    ctx.fill();
+  }
+  ctx.restore();
+
+  // 4. AURA DO BOSS: MESCLADA DE PRETO, ROXO E VERDE COM EMANAÇÃO ASCENDENTE
   if (bossEnemy) {
     const bx = (bossEnemy.visualX !== undefined ? bossEnemy.visualX : (bossEnemy.gx || 7)) * TILE_SIZE + TILE_SIZE / 2;
     const by = (bossEnemy.visualY !== undefined ? bossEnemy.visualY : (bossEnemy.gy || 5)) * TILE_SIZE + TILE_SIZE / 2;
-    const pulse = Math.sin(now * 0.003) * 15;
-    const auraRadius = 110 + pulse;
+    
+    ctx.save();
+    ctx.globalAlpha = baseAlpha;
 
-    const bossAura = ctx.createRadialGradient(bx, by, 10, bx, by, auraRadius);
-    bossAura.addColorStop(0, 'rgba(132, 204, 22, 0.18)');
-    bossAura.addColorStop(0.5, 'rgba(34, 197, 94, 0.09)');
-    bossAura.addColorStop(1, 'rgba(21, 128, 61, 0)');
-    ctx.fillStyle = bossAura;
+    // Pluma de vapor abissal mesclada de Preto, Roxo e Verde saindo do Boss
+    const steamTime = now * 0.002;
     ctx.beginPath();
-    ctx.arc(bx, by, auraRadius, 0, Math.PI * 2);
+    ctx.moveTo(bx - 24, by);
+    ctx.bezierCurveTo(
+      bx - 50 + Math.sin(steamTime) * 20, by - 60,
+      bx + 40 + Math.cos(steamTime) * 25, by - 95,
+      bx + 18, by - 130
+    );
+    ctx.bezierCurveTo(
+      bx - 30, by - 90,
+      bx + 40, by - 45,
+      bx + 24, by
+    );
+    ctx.closePath();
+
+    const bossSteamGrad = ctx.createLinearGradient(bx, by, bx, by - 130);
+    bossSteamGrad.addColorStop(0, 'rgba(0, 0, 0, 0.75)'); // Preto na raiz
+    bossSteamGrad.addColorStop(0.35, 'rgba(126, 34, 206, 0.50)'); // Roxo no meio
+    bossSteamGrad.addColorStop(0.70, 'rgba(34, 197, 94, 0.40)'); // Verde na borda
+    bossSteamGrad.addColorStop(1, 'rgba(132, 204, 22, 0)');
+    ctx.fillStyle = bossSteamGrad;
     ctx.fill();
+
+    // Névoa mesclada rasteira aos pés do Boss (Preto + Roxo + Verde)
+    ctx.beginPath();
+    ctx.ellipse(bx, by + 18, 60 + Math.sin(steamTime) * 12, 20, 0, 0, Math.PI * 2);
+    const bossMistGrad = ctx.createRadialGradient(bx, by + 18, 4, bx, by + 18, 60);
+    bossMistGrad.addColorStop(0, 'rgba(0, 0, 0, 0.85)'); // Núcleo preto
+    bossMistGrad.addColorStop(0.40, 'rgba(147, 51, 234, 0.55)'); // Halo roxo
+    bossMistGrad.addColorStop(0.80, 'rgba(34, 197, 94, 0.45)'); // Borda verde tóxica
+    bossMistGrad.addColorStop(1, 'rgba(21, 128, 61, 0)');
+    ctx.fillStyle = bossMistGrad;
+    ctx.fill();
+    ctx.restore();
   }
 
-  // 4. Vinheta verde periférica nas bordas do mapa para aumentar imersão
+  // 5. Vinheta escura/verde periférica para fechar a atmosfera
+  ctx.save();
   const edgeVignette = ctx.createRadialGradient(
     width / 2, height / 2, width * 0.35,
     width / 2, height / 2, width * 0.72
   );
   edgeVignette.addColorStop(0, 'rgba(0, 0, 0, 0)');
-  edgeVignette.addColorStop(0.7, 'rgba(22, 101, 52, 0.06)');
-  edgeVignette.addColorStop(1, 'rgba(5, 46, 22, 0.18)');
+  edgeVignette.addColorStop(0.65, 'rgba(22, 101, 52, 0.12)');
+  edgeVignette.addColorStop(1, 'rgba(2, 44, 18, 0.36)');
   ctx.fillStyle = edgeVignette;
+  ctx.globalAlpha = baseAlpha;
   ctx.fillRect(0, 0, width, height);
+  ctx.restore();
 
   ctx.restore();
 }

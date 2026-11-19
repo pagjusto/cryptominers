@@ -494,6 +494,14 @@ export default function GameBoard({
           miner.isMining = false;
         }
 
+        // REGRA OFICIAL DO USUÁRIO: "e se quebrar interrompe a mineração"
+        if (miner.durability !== undefined && miner.durability <= 0) {
+          miner.isMining = false;
+          miner.targetBlock = null;
+          miner.swingTimer = 0;
+          return;
+        }
+
         // Se o herói já tem um bloco alvo, valida se ele ainda existe, se tem HP e se está no alcance de combate com armas de fogo
         if (miner.targetBlock) {
           const { x: tx, y: ty } = miner.targetBlock;
@@ -576,17 +584,37 @@ export default function GameBoard({
                 }
               }
 
-              // Desgaste suave da durabilidade (ferramenta dura múltiplos mapas)
+              // Desgaste da durabilidade da arma
               if (miner.durability === undefined) miner.durability = 100;
-              miner.durability = Math.max(0, parseFloat((miner.durability - 0.005).toFixed(3)));
-              const isWeaponDull = miner.durability <= 15;
+              miner.durability = Math.max(0, parseFloat((miner.durability - 0.05).toFixed(3)));
+
+              // REGRA OFICIAL DO USUÁRIO: "e se quebrar interrompe a mineração"
+              if (miner.durability <= 0) {
+                miner.durability = 0;
+                miner.isMining = false;
+                miner.targetBlock = null;
+                miner.swingTimer = 0;
+                state.floatTexts.push({
+                  text: '🔧 ARMA QUEBRADA!',
+                  x: miner.x * TILE_SIZE + TILE_SIZE / 2,
+                  y: miner.y * TILE_SIZE - 12,
+                  color: '#ef4444',
+                  opacity: 1,
+                  vy: -30
+                });
+                return;
+              }
+
+              // REGRA OFICIAL DO USUÁRIO: "se baixar de 50% deve diminuir a capacidade de mineração do heroi pela metade"
+              const isWeaponDamaged = miner.durability < 50;
 
               // Bônus de Arma / Picareta: Aumenta Poder e Chance de Crítico
               const weaponPower = miner.equippedGear?.weapon?.powerBonus || 0;
               const weaponCrit = miner.equippedGear?.weapon?.critBonus || 0;
 
-              let hitDamage = miner.power + weaponPower;
-              if (isWeaponDull) {
+              let basePower = isWeaponDamaged ? Math.max(1, miner.power * 0.5) : miner.power;
+              let hitDamage = basePower + weaponPower;
+              if (isWeaponDamaged) {
                 hitDamage = Math.max(1, Math.floor(hitDamage * 0.5));
               }
 
@@ -601,9 +629,23 @@ export default function GameBoard({
               const effectiveCurHp = isZombie 
                 ? (curHp > 2 ? 2 : curHp) 
                 : (isBoss ? (curHp > 30 ? 30 : curHp) : curHp);
-              // Para zumbis: morrem com exatamente 2 tiros (1 por tiro normal, ou 2 se for crítico)
-              // Para o boss: morre com exatamente 30 tiros (1 por tiro normal, ou 2 se for crítico)
-              const hitDamageApplied = (isZombie || isBoss) ? (isCrit ? 2 : 1) : hitDamage;
+              
+              // Se a arma estiver danificada (<50%), capacidade reduzida pela metade (50% de chance de causar o dano balístico no zumbi)
+              let hitDamageApplied = (isZombie || isBoss) ? (isCrit ? 2 : 1) : hitDamage;
+              if (isWeaponDamaged && (isZombie || isBoss)) {
+                // Se estiver com <50%, eficácia cai pela metade
+                if (Math.random() < 0.5 && !isCrit) {
+                  hitDamageApplied = 0;
+                  state.floatTexts.push({
+                    text: '⚠️ DANO REDUZIDO (50%)',
+                    x: tx * TILE_SIZE + TILE_SIZE / 2,
+                    y: ty * TILE_SIZE - 8,
+                    color: '#f59e0b',
+                    opacity: 0.9,
+                    vy: -25
+                  });
+                }
+              }
               const newHp = Math.max(0, effectiveCurHp - hitDamageApplied);
 
               // Textos flutuantes otimizados para manter 60 FPS
@@ -867,6 +909,78 @@ export default function GameBoard({
         }
       });
 
+      // 1.5. ATUALIZAÇÃO DOS PROJÉTEIS DE GOSMA VERDE (ZUMBIS & BOSS)
+      state.slimes = state.slimes || [];
+      for (let i = state.slimes.length - 1; i >= 0; i--) {
+        const s = state.slimes[i];
+        s.progress += dt * s.speed;
+
+        s.currentX = s.startX + (s.targetX - s.startX) * s.progress;
+        s.currentY = s.startY + (s.targetY - s.startY) * s.progress - Math.sin(s.progress * Math.PI) * s.arcHeight;
+
+        // Rastro de gotículas de gosma verde
+        if (Math.random() < 0.65) {
+          state.sparks.push({
+            x: s.currentX + (Math.random() - 0.5) * 6,
+            y: s.currentY + (Math.random() - 0.5) * 6,
+            vx: (Math.random() - 0.5) * 15,
+            vy: (Math.random() - 0.5) * 15,
+            color: Math.random() > 0.4 ? '#84cc16' : '#22c55e',
+            life: 0.25,
+            maxLife: 0.25
+          });
+        }
+
+        // Impacto no herói ou solo
+        if (s.progress >= 1.0) {
+          for (let sp = 0; sp < (s.isBoss ? 12 : 6); sp++) {
+            const ang = Math.random() * Math.PI * 2;
+            state.sparks.push({
+              x: s.targetX,
+              y: s.targetY,
+              vx: Math.cos(ang) * (25 + Math.random() * 45),
+              vy: Math.sin(ang) * (25 + Math.random() * 45),
+              color: Math.random() > 0.4 ? '#84cc16' : '#15803d',
+              life: 0.30,
+              maxLife: 0.30
+            });
+          }
+
+          const hitHero = state.miners?.find(m => m.id === s.targetHeroId);
+          if (hitHero) {
+            hitHero.currentStamina = Math.max(0, hitHero.currentStamina - s.damage);
+            state.floatTexts.push({
+              text: `-${s.damage} GOSMA`,
+              x: s.targetX,
+              y: s.targetY - 14,
+              color: '#84cc16',
+              opacity: 1.0,
+              vy: -28
+            });
+          }
+
+          if (s.isBoss) {
+            state.slimePuddles = state.slimePuddles || [];
+            state.slimePuddles.push({
+              x: s.targetX,
+              y: s.targetY,
+              radius: 18,
+              life: 2.8,
+              maxLife: 2.8
+            });
+          }
+
+          state.slimes.splice(i, 1);
+        }
+      }
+
+      state.slimePuddles = state.slimePuddles || [];
+      for (let i = state.slimePuddles.length - 1; i >= 0; i--) {
+        const p = state.slimePuddles[i];
+        p.life -= dt;
+        if (p.life <= 0) state.slimePuddles.splice(i, 1);
+      }
+
       // 2. PARTÍCULAS & FAÍSCAS
       for (let i = state.sparks.length - 1; i >= 0; i--) {
         const s = state.sparks[i];
@@ -942,6 +1056,23 @@ export default function GameBoard({
         }
       }
 
+      // 1.8. POÇAS ÁCIDAS BORBULHANTES NO CHÃO (DEIXADAS PELO BOSS)
+      if (state.slimePuddles && state.slimePuddles.length > 0) {
+        state.slimePuddles.forEach(p => {
+          const alpha = Math.min(1, p.life / 0.6) * 0.42;
+          ctx.save();
+          const pGrad = ctx.createRadialGradient(p.x, p.y, 2, p.x, p.y, p.radius);
+          pGrad.addColorStop(0, `rgba(132, 204, 22, ${alpha})`);
+          pGrad.addColorStop(0.5, `rgba(34, 197, 94, ${alpha * 0.7})`);
+          pGrad.addColorStop(1, 'rgba(21, 128, 61, 0)');
+          ctx.fillStyle = pGrad;
+          ctx.beginPath();
+          ctx.ellipse(p.x, p.y, p.radius, p.radius * 0.42, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        });
+      }
+
       // 2. RENDERIZAÇÃO DOS ZUMBIS E DO BOSS COM CAMINHADA E ATAQUE
       if (state.enemies && state.enemies.length > 0) {
         state.enemies.forEach(enemy => {
@@ -962,6 +1093,31 @@ export default function GameBoard({
         ctx.arc(p.x, p.y, p.size || 2.5, 0, Math.PI * 2);
         ctx.fill();
       });
+
+      // 2.5. PROJÉTEIS DE GOSMA VERDE (VOANDO EM ARCO PARABÓLICO)
+      if (state.slimes && state.slimes.length > 0) {
+        state.slimes.forEach(s => {
+          ctx.save();
+          const r = s.radius || 5;
+
+          // Orbe de gosma luminescente
+          const sGrad = ctx.createRadialGradient(s.currentX, s.currentY, 1, s.currentX, s.currentY, r);
+          sGrad.addColorStop(0, '#fef08a');
+          sGrad.addColorStop(0.35, '#84cc16');
+          sGrad.addColorStop(0.85, '#15803d');
+          sGrad.addColorStop(1, '#052e16');
+          ctx.fillStyle = sGrad;
+          ctx.beginPath();
+          ctx.arc(s.currentX, s.currentY, r, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Contorno de brilho tóxico
+          ctx.strokeStyle = 'rgba(250, 204, 21, 0.7)';
+          ctx.lineWidth = 1.2;
+          ctx.stroke();
+          ctx.restore();
+        });
+      }
 
       state.miners.forEach((miner, minerIndex) => {
         if (miner.status === 'house' || miner.status === 'waiting_house' || miner.status === 'reserve') return;

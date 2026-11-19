@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CRIPTO MYNERS — Mecânica & Movimentação dos Zumbis e Boss</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700;900&family=Press+Start+2P&family=Share+Tech+Mono&display=swap');
+    body {
+      background: radial-gradient(circle at 50% 20%, #0f172a 0%, #020617 100%);
+      color: #f8fafc;
+      font-family: 'Chakra Petch', sans-serif;
+    }
+    .font-arcade { font-family: 'Press Start 2P', monospace; }
+    .font-mono { font-family: 'Share Tech Mono', monospace; }
+    canvas {
+      image-rendering: auto;
+      box-shadow: 0 0 25px rgba(34, 197, 94, 0.15);
+    }
+  </style>
+</head>
+<body class="p-4 sm:p-6 min-h-screen flex flex-col items-center">
+  <!-- TOPO DE NAVEGAÇÃO -->
+  <header class="w-full max-w-5xl flex items-center justify-between mb-5 border-b border-slate-800 pb-4">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-2xl shadow-inner">
+        🧟
+      </div>
+      <div>
+        <h1 class="text-xl font-black text-emerald-400 tracking-wide flex items-center gap-2">
+          MECÂNICA DOS ZUMBIS & BOSS
+          <span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-500/30 font-mono">
+            LIVE ENGINE
+          </span>
+        </h1>
+        <p class="text-xs text-slate-400 font-mono">
+          Arquivo fonte: <span class="text-amber-400">src/utils/enemySystem.js</span> (linhas 157 a 330)
+        </p>
+      </div>
+    </div>
+    
+    <div class="flex items-center gap-3">
+      <a href="/" class="px-4 py-2 rounded-xl bg-emerald-500 text-slate-950 font-bold hover:bg-emerald-400 transition flex items-center gap-2 text-xs shadow-lg shadow-emerald-500/20">
+        🎮 Voltar ao Jogo
+      </a>
+    </div>
+  </header>
+
+  <!-- PAINEL CENTRAL DE TESTES E VISUALIZAÇÃO -->
+  <main class="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-3 gap-6">
+    
+    <!-- CANVAS DE SIMULAÇÃO DE MOVIMENTO & GOSMA -->
+    <div class="lg:col-span-2 bg-slate-900/90 border border-slate-800 rounded-3xl p-5 flex flex-col items-center">
+      <div class="w-full flex items-center justify-between mb-3 text-xs">
+        <span class="font-bold text-slate-300 flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+          Simulador de Movimento & Disparo de Gosma
+        </span>
+        <span class="text-slate-400 font-mono text-[11px]" id="statsFps">60 FPS</span>
+      </div>
+
+      <div class="relative w-full rounded-2xl overflow-hidden border border-emerald-500/30 bg-slate-950 flex items-center justify-center">
+        <canvas id="zombieCanvas" width="700" height="420" class="w-full h-auto"></canvas>
+      </div>
+
+      <!-- CONTROLES INTERATIVOS -->
+      <div class="w-full grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-4">
+        <button id="btnSpawnZombie" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-xs transition">
+          + Criar Zumbi
+        </button>
+        <button id="btnSpawnBoss" class="px-3 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 font-bold text-xs transition">
+          💀 Boss Mutante
+        </button>
+        <button id="btnShootSlime" class="px-3 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 font-bold text-xs transition">
+          🧪 Disparar Gosma
+        </button>
+        <button id="btnToggleFog" class="px-3 py-2 rounded-xl bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/40 font-bold text-xs transition">
+          🌫️ Alternar Névoa
+        </button>
+      </div>
+    </div>
+
+    <!-- PAINEL DE EXPLICAÇÃO DA MECÂNICA -->
+    <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 flex flex-col gap-4 text-xs">
+      <div>
+        <h3 class="font-bold text-sm text-slate-200 mb-1 flex items-center gap-1.5">
+          <span>🧠</span> Como funciona a Movimentação:
+        </h3>
+        <p class="text-slate-400 leading-relaxed">
+          Os zumbis caminham livremente pelo mapa de forma autônoma pelas ruas e estradas livres de obstáculos.
+        </p>
+      </div>
+
+      <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800 space-y-2">
+        <div class="flex justify-between items-center text-slate-300">
+          <span>Velocidade do Zumbi:</span>
+          <b class="text-emerald-400 font-mono">0.65 blocos/s</b>
+        </div>
+        <div class="flex justify-between items-center text-slate-300">
+          <span>Velocidade do Boss:</span>
+          <b class="text-amber-400 font-mono">0.42 blocos/s (Pesado)</b>
+        </div>
+        <div class="flex justify-between items-center text-slate-300">
+          <span>Detecção de Obstáculos:</span>
+          <b class="text-sky-400 font-mono">100% Estrita</b>
+        </div>
+        <div class="flex justify-between items-center text-slate-300">
+          <span>Vida (Zumbi / Boss):</span>
+          <b class="text-rose-400 font-mono">2 HP / 30 HP</b>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="font-bold text-sm text-emerald-300 mb-1 flex items-center gap-1.5">
+          <span>🧪</span> Mecânica de Gosma Verde:
+        </h3>
+        <ul class="text-slate-400 space-y-1.5 list-disc pl-4">
+          <li><b>Zumbis Comuns:</b> cospem projéteis rápidos de gosma ácida em arco parabólico em direção aos heróis.</li>
+          <li><b>Boss Mutante:</b> arremessa orbes densos que deixam poças tóxicas no solo ao explodir.</li>
+        </ul>
+      </div>
+
+      <div class="mt-auto p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300">
+        <b>💡 Código Fonte:</b>
+        <div class="text-[11px] text-slate-300 font-mono mt-1">
+          A lógica central de movimentação e passos está em <code>src/utils/enemySystem.js</code> dentro de <code>updateEnemies()</code>.
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const canvas = document.getElementById('zombieCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Imagens dos inimigos e textura de névoa
+    const zombieImg = new Image();
+    zombieImg.src = '/enemies/zombie_clean.png';
+    const bossImg = new Image();
+    bossImg.src = '/enemies/boss_clean.png';
+    const fogImg = new Image();
+    fogImg.src = '/user_fog.avif';
+
+    let showFog = true;
+    const slimes = [];
+    let autoAttackTimer = 0;
+
+    // Entidades de simulação
+    const entities = [
+      { type: 'zombie', x: 120, y: 220, targetX: 280, targetY: 220, vx: 1, speed: 55, dir: 1, timer: 0, hp: 2, maxHp: 2 },
+      { type: 'zombie', x: 480, y: 280, targetX: 350, targetY: 280, vx: -1, speed: 60, dir: -1, timer: 1, hp: 2, maxHp: 2 },
+      { type: 'boss', x: 350, y: 150, targetX: 420, targetY: 150, vx: 1, speed: 30, dir: 1, timer: 0.5, hp: 30, maxHp: 30 }
+    ];
+
+    function shootSlime(fromBoss = false) {
+      const shooter = fromBoss ? entities.find(e => e.type === 'boss') : entities.find(e => e.type === 'zombie');
+      if (!shooter) return;
+      const targetX = shooter.dir > 0 ? shooter.x + 200 : shooter.x - 200;
+      const targetY = shooter.y + (Math.random() - 0.5) * 40;
+      slimes.push({
+        startX: shooter.x,
+        startY: shooter.y - 10,
+        targetX: targetX,
+        targetY: targetY,
+        progress: 0,
+        isBoss: fromBoss,
+        speed: fromBoss ? 1.0 : 1.6
+      });
+    }
+
+    document.getElementById('btnSpawnZombie').onclick = () => {
+      entities.push({
+        type: 'zombie',
+        x: 80 + Math.random() * 540,
+        y: 100 + Math.random() * 240,
+        targetX: Math.random() * 600,
+        targetY: Math.random() * 300,
+        speed: 50 + Math.random() * 20,
+        dir: Math.random() > 0.5 ? 1 : -1,
+        timer: Math.random() * 5,
+        hp: 2,
+        maxHp: 2
+      });
+    };
+
+    document.getElementById('btnSpawnBoss').onclick = () => {
+      if (!entities.some(e => e.type === 'boss')) {
+        entities.push({ type: 'boss', x: 350, y: 160, targetX: 380, targetY: 160, speed: 30, dir: 1, timer: 0, hp: 30, maxHp: 30 });
+      }
+    };
+
+    document.getElementById('btnShootSlime').onclick = () => {
+      shootSlime(Math.random() > 0.5);
+    };
+
+    document.getElementById('btnToggleFog').onclick = () => {
+      showFog = !showFog;
+    };
+
+    let lastTime = performance.now();
+
+    function render(now) {
+      const dt = Math.min(0.1, (now - lastTime) / 1000);
+      lastTime = now;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Fundo estilizado do campo
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Grade de ruas
+      ctx.strokeStyle = 'rgba(51, 65, 85, 0.4)';
+      ctx.lineWidth = 1;
+      for (let x = 0; x < canvas.width; x += 50) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+      }
+      for (let y = 0; y < canvas.height; y += 50) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+      }
+
+      // Estrada central
+      ctx.fillStyle = 'rgba(30, 41, 59, 0.8)';
+      ctx.fillRect(0, 200, canvas.width, 100);
+
+      // Disparo automático periódico de gosma para demonstrar o ataque
+      autoAttackTimer += dt;
+      if (autoAttackTimer > 1.8) {
+        autoAttackTimer = 0;
+        shootSlime(Math.random() > 0.4);
+      }
+
+      // Névoa orgânica com 2x mais ênfase (SEM FORMAS ARREDONDADAS)
+      if (showFog) {
+        const fogGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        fogGrad.addColorStop(0, 'rgba(16, 185, 129, 0.16)');
+        fogGrad.addColorStop(0.5, 'rgba(34, 197, 94, 0.14)');
+        fogGrad.addColorStop(1, 'rgba(74, 222, 128, 0.28)');
+        ctx.fillStyle = fogGrad;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Textura oficial da referência
+        if (fogImg.complete && fogImg.naturalWidth > 0) {
+          ctx.save();
+          const scroll1 = (now * 0.018) % canvas.width;
+          ctx.globalAlpha = 0.55;
+          ctx.drawImage(fogImg, -scroll1, canvas.height * 0.35, canvas.width, canvas.height * 0.65);
+          ctx.drawImage(fogImg, canvas.width - scroll1, canvas.height * 0.35, canvas.width, canvas.height * 0.65);
+          ctx.restore();
+        }
+
+        // Fitas de fumaça ondulantes orgânicas (curvas Bezier, sem círculos)
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(0, 220 + Math.sin(now * 0.001) * 20);
+        ctx.bezierCurveTo(
+          canvas.width * 0.3, 170 + Math.cos(now * 0.0015) * 30,
+          canvas.width * 0.6, 260 + Math.sin(now * 0.0012) * 25,
+          canvas.width, 210
+        );
+        ctx.bezierCurveTo(canvas.width * 0.7, 310, canvas.width * 0.3, 290, 0, 300);
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(74, 222, 128, 0.18)';
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // Atualiza e desenha entidades
+      entities.forEach(e => {
+        // Movimentação de patrulha
+        e.timer += dt;
+        const dx = e.targetX - e.x;
+        const dist = Math.abs(dx);
+        if (dist > 5) {
+          e.dir = dx > 0 ? 1 : -1;
+          e.x += e.dir * e.speed * dt;
+        } else {
+          e.targetX = 80 + Math.random() * (canvas.width - 160);
+        }
+
+        // Animação de caminhada (bobbing vertical)
+        const walkBob = Math.abs(Math.sin(e.timer * 7)) * 5;
+        const isBoss = e.type === 'boss';
+        const img = isBoss ? bossImg : zombieImg;
+        const w = isBoss ? 70 : 45;
+        const h = isBoss ? 76 : 48;
+
+        ctx.save();
+        ctx.translate(e.x, e.y - walkBob);
+
+        // AURA OFICIAL DO BOSS: Mesclada de Preto, Roxo e Verde
+        if (isBoss) {
+          const auraPulse = 1.0 + Math.sin(now * 0.006) * 0.12;
+          const auraRx = 46 * auraPulse;
+          const auraRy = 18 * auraPulse;
+
+          // 1. Halo no solo: Preto -> Roxo -> Verde
+          const auraGrad = ctx.createRadialGradient(0, h * 0.42 + walkBob, 3, 0, h * 0.42 + walkBob, auraRx);
+          auraGrad.addColorStop(0, 'rgba(0, 0, 0, 0.90)'); // Preto profundo
+          auraGrad.addColorStop(0.35, 'rgba(88, 28, 135, 0.75)'); // Roxo escuro
+          auraGrad.addColorStop(0.65, 'rgba(168, 85, 247, 0.55)'); // Roxo vibrante
+          auraGrad.addColorStop(0.85, 'rgba(34, 197, 94, 0.48)'); // Verde tóxico
+          auraGrad.addColorStop(1, 'rgba(132, 204, 22, 0)');
+          ctx.fillStyle = auraGrad;
+          ctx.beginPath();
+          ctx.ellipse(0, h * 0.42 + walkBob, auraRx, auraRy, 0, 0, Math.PI * 2);
+          ctx.fill();
+
+          // 2. Halo corporal: Preto + Roxo + Verde
+          const bodyAura = ctx.createRadialGradient(0, -6, 8, 0, -6, 52 * auraPulse);
+          bodyAura.addColorStop(0, 'rgba(0, 0, 0, 0.65)');
+          bodyAura.addColorStop(0.38, 'rgba(147, 51, 234, 0.42)');
+          bodyAura.addColorStop(0.75, 'rgba(34, 197, 94, 0.32)');
+          bodyAura.addColorStop(1, 'rgba(21, 128, 61, 0)');
+          ctx.fillStyle = bodyAura;
+          ctx.beginPath();
+          ctx.arc(0, -6, 52 * auraPulse, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          // Sombra regular do zumbi
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+          ctx.beginPath();
+          ctx.ellipse(0, h * 0.42 + walkBob, w * 0.35, 6, 0, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Desenho do sprite espelhado conforme a direção
+        if (e.dir < 0) ctx.scale(-1, 1);
+        if (img.complete && img.naturalWidth > 0) {
+          ctx.drawImage(img, -w / 2, -h / 2, w, h);
+        } else {
+          ctx.fillStyle = isBoss ? '#ef4444' : '#22c55e';
+          ctx.fillRect(-w / 2, -h / 2, w, h);
+        }
+        ctx.restore();
+
+        // Barra de Vida
+        ctx.save();
+        ctx.fillStyle = 'rgba(0,0,0,0.8)';
+        ctx.fillRect(e.x - 20, e.y - h * 0.65, 40, 5);
+        ctx.fillStyle = isBoss ? '#ef4444' : '#22c55e';
+        ctx.fillRect(e.x - 20, e.y - h * 0.65, 40 * (e.hp / e.maxHp), 5);
+        ctx.restore();
+      });
+
+      // Atualiza e desenha projéteis de gosma verde
+      for (let i = slimes.length - 1; i >= 0; i--) {
+        const s = slimes[i];
+        s.progress += dt * s.speed;
+        if (s.progress >= 1) {
+          // Splat no chão
+          slimes.splice(i, 1);
+          continue;
+        }
+
+        const curX = s.startX + (s.targetX - s.startX) * s.progress;
+        const curY = s.startY + (s.targetY - s.startY) * s.progress - Math.sin(s.progress * Math.PI) * 45;
+        const radius = s.isBoss ? 9 : 5;
+
+        // Rastro de gosma
+        ctx.fillStyle = 'rgba(132, 204, 22, 0.4)';
+        ctx.beginPath();
+        ctx.arc(curX - (s.targetX - s.startX) * 0.05, curY + 2, radius * 0.7, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Orbe da gosma
+        const slimeGrad = ctx.createRadialGradient(curX, curY, 1, curX, curY, radius);
+        slimeGrad.addColorStop(0, '#facc15');
+        slimeGrad.addColorStop(0.4, '#84cc16');
+        slimeGrad.addColorStop(1, '#15803d');
+        ctx.fillStyle = slimeGrad;
+        ctx.beginPath();
+        ctx.arc(curX, curY, radius, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      requestAnimationFrame(render);
+    }
+
+    requestAnimationFrame(render);
+  </script>
+</body>
+</html>

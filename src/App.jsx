@@ -1029,11 +1029,11 @@ export default function App() {
     });
   };
 
-  // Anúncio Patrocinado: Afiar picareta / Restaurar durabilidade
+  // Anúncio Patrocinado: Consertar arma / Restaurar durabilidade
   const handleRepairMiner = (minerId) => {
     setAdModalConfig({
       isOpen: true,
-      title: 'Afiar e Reparar Ferramenta (100% Durabilidade)',
+      title: 'Consertar e Reparar Arma (100% Durabilidade)',
       icon: '🔧',
       onGranted: () => {
         setMiners(prev => prev.map(m => {
