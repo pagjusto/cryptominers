@@ -171,7 +171,7 @@ export default function HouseModal({
 
               {minersInHouse.length === 0 ? (
                 <div className="p-6 rounded-2xl bg-slate-950/40 border border-dashed border-slate-800 text-center text-xs text-slate-500">
-                  Nenhum sobrevivente em tratamento. Ao atingir 5% de vida, um combatente será enviado para cá automaticamente.
+                  Nenhum sobrevivente em tratamento no momento.
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
