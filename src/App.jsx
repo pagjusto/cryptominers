@@ -420,6 +420,15 @@ export default function App() {
   // Baús de Construção e Fragmentos de Construção
   const [constructionChests, setConstructionChests] = useState(() => getStoredConstructionChests());
   const [constructionFragments, setConstructionFragments] = useState(() => getStoredConstructionFragments());
+  // Saldo empilhável de Poções do Rejuvenescimento, persistido localmente.
+  const [rejuvenationPotions, setRejuvenationPotions] = useState(() => {
+    const saved = localStorage.getItem('cryptozombies_rejuvenation_potions_v1');
+    const parsed = Number(saved);
+    return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
+  });
+  useEffect(() => {
+    localStorage.setItem('cryptozombies_rejuvenation_potions_v1', String(rejuvenationPotions));
+  }, [rejuvenationPotions]);
   const [constructionDailyStats, setConstructionDailyStats] = useState(() => getDailyConstructionStats());
   const [newlyFoundConstructionChest, setNewlyFoundConstructionChest] = useState(null);
 
@@ -1880,6 +1889,7 @@ export default function App() {
         purchasedChests={purchasedChests}
         constructionChests={constructionChests}
         constructionFragments={constructionFragments}
+        rejuvenationPotions={rejuvenationPotions}
         onOpenHeroChest={handleOpenPurchasedChest}
         onOpenConstructionChest={handleOpenConstructionChest}
         onSelectChestToOpen={handleSelectChestToOpen}
