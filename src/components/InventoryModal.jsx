@@ -3,6 +3,16 @@ import { X, Package, Sparkles, Shield, Gift, ChevronRight, Zap, Home } from 'luc
 import confetti from 'canvas-confetti';
 import { sfx } from '../utils/sfx';
 
+function groupInventoryItems(items, getKey) {
+  const groups = new Map();
+  items.forEach((item, index) => {
+    const key = getKey(item);
+    if (!groups.has(key)) groups.set(key, { item, quantity: 0, key: String(key ?? index) });
+    groups.get(key).quantity += 1;
+  });
+  return Array.from(groups.values());
+}
+
 export default function InventoryModal({ 
   isOpen, 
   onClose, 
@@ -10,6 +20,7 @@ export default function InventoryModal({
   purchasedChests = [],
   constructionChests = [],
   constructionFragments = 0,
+  rejuvenationPotions = 0,
   onOpenHeroChest,
   onOpenConstructionChest,
   onSelectChestToOpen,
@@ -23,6 +34,9 @@ export default function InventoryModal({
     return 'mine';
   });
   const [justOpenedChest, setJustOpenedChest] = useState(null);
+  const groupedPurchasedChests = groupInventoryItems(purchasedChests, chest => chest.id);
+  const groupedConstructionChests = groupInventoryItems(constructionChests, chest => chest.type || chest.name || 'boss-chest');
+  const groupedMineChests = groupInventoryItems(chests, chest => chest.type || chest.title || 'mystic-chest');
 
   if (!isOpen) return null;
 
@@ -139,7 +153,7 @@ export default function InventoryModal({
                   )}
                 </div>
 
-                {purchasedChests.map((chest, index) => {
+                {groupedPurchasedChests.map(({ item: chest, quantity, key }) => {
                   const chestIcon = chest.icon || (chest.id === 'legendary' ? '👑' : (chest.id === 'elite' ? '🛡️' : (chest.id === 'explorer' ? '🧭' : '⛏️')));
                   const heroesCount = chest.heroesCount || 1;
                   const currency = chest.currency || 'USDT';
@@ -147,7 +161,7 @@ export default function InventoryModal({
 
                   return (
                     <div 
-                      key={chest.instanceId || chest.id || index}
+                      key={key}
                       className="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800 hover:border-amber-500/50 transition flex items-center justify-between group shadow-sm"
                     >
                       <div className="flex items-center gap-3">
@@ -162,6 +176,7 @@ export default function InventoryModal({
                             <span className="text-[9px] font-bold font-arcade bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full border border-amber-500/40">
                               {heroesCount} {heroesCount === 1 ? 'HERÓI' : 'HERÓIS'}
                             </span>
+                            <span className="text-[9px] font-bold font-mono bg-slate-800 text-white px-2 py-0.5 rounded-full border border-slate-700">×{quantity}</span>
                           </div>
 
                           <div className="flex items-center gap-2 text-[11px] text-slate-400 mt-0.5">
@@ -231,6 +246,17 @@ export default function InventoryModal({
                 )}
               </div>
 
+              <div className="bg-gradient-to-r from-fuchsia-500/15 via-slate-950 to-purple-500/15 border border-fuchsia-500/30 rounded-2xl p-4 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-11 h-11 rounded-xl bg-fuchsia-500/15 border border-fuchsia-400/40 text-fuchsia-300 flex items-center justify-center text-2xl shrink-0">🧪</div>
+                  <div>
+                    <span className="font-arcade text-sm text-fuchsia-300">{rejuvenationPotions} POÇÃO{rejuvenationPotions === 1 ? '' : 'ÕES'} DO REJUVENESCIMENTO</span>
+                    <p className="text-[11px] text-slate-400">Itens acumulados em um único slot do inventário.</p>
+                  </div>
+                </div>
+                <span className="text-xs font-mono font-bold text-white bg-slate-800 border border-slate-700 rounded-lg px-2 py-1">×{rejuvenationPotions}</span>
+              </div>
+
               {/* Feedback de Baú Aberto Recentemente */}
               {justOpenedChest && (
                 <div className="p-4 rounded-2xl bg-emerald-950/60 border border-emerald-500/50 text-center space-y-2 animate-fadeIn">
@@ -264,9 +290,9 @@ export default function InventoryModal({
                   </p>
                 </div>
               ) : (
-                constructionChests.map((chest, index) => (
+                groupedConstructionChests.map(({ item: chest, quantity, key }) => (
                   <div 
-                    key={chest.id || index}
+                    key={key}
                     className="p-3.5 rounded-2xl bg-slate-950/80 border border-amber-500/30 hover:border-amber-400 transition flex items-center justify-between group"
                   >
                     <div className="flex items-center gap-3">
@@ -281,6 +307,7 @@ export default function InventoryModal({
                           <span className="text-[9px] font-bold font-mono bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full border border-amber-500/30">
                             {chest.id}
                           </span>
+                          <span className="text-[9px] font-bold font-mono bg-slate-800 text-white px-2 py-0.5 rounded-full border border-slate-700">×{quantity}</span>
                         </div>
 
                         <span className="text-[11px] text-slate-300 block mt-0.5">
@@ -338,9 +365,9 @@ export default function InventoryModal({
                 </button>
               </div>
             ) : (
-              chests.map((chest, index) => (
+              groupedMineChests.map(({ item: chest, quantity, key }) => (
                 <div 
-                  key={chest.id || index}
+                  key={key}
                   className="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800 hover:border-amber-500/50 transition flex items-center justify-between group"
                 >
                   <div className="flex items-center gap-3">
@@ -352,9 +379,8 @@ export default function InventoryModal({
                         <h4 className="font-bold text-sm text-white">
                           {chest.title || 'Baú Místico de Titânio'}
                         </h4>
-                        <span className="text-[9px] font-bold font-arcade bg-amber-400/20 text-amber-300 px-2 py-0.5 rounded-full border border-amber-400/30">
-                          PATROCINADO
-                        </span>
+                        <span className="text-[9px] font-bold font-arcade bg-amber-400/20 text-amber-300 px-2 py-0.5 rounded-full border border-amber-400/30">PATROCINADO</span>
+                        <span className="text-[9px] font-bold font-mono bg-slate-800 text-white px-2 py-0.5 rounded-full border border-slate-700">×{quantity}</span>
                       </div>
 
                       <span className="text-[11px] text-slate-400 block">
