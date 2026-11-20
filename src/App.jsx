@@ -53,7 +53,7 @@ import ConstructionChestFoundModal from './components/ConstructionChestFoundModa
 import RoiSimulatorModal from './components/RoiSimulatorModal';
 import AdminConfigModal from './components/AdminConfigModal';
 import StatisticsModal from './components/StatisticsModal';
-import { getCriptoMynersConfig } from './data/criptoMynersConfig';
+import { getCryptoZombiesConfig } from './data/cryptoZombiesConfig';
 import { 
   DEFAULT_CONSTRUCTION_CHEST_CONFIG,
   calculateActiveMinersChance,
@@ -333,7 +333,7 @@ export default function App() {
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, [isNavPinned]);
-  const [criptoMynersConfig, setCriptoMynersConfig] = useState(() => getCriptoMynersConfig());
+  const [cryptoZombiesConfig, setCryptoZombiesConfig] = useState(() => getCryptoZombiesConfig());
   const [walletState, setWalletState] = useState(() => getSavedWalletState());
   const activePlayerId = walletState?.address || DEFAULT_PLAYER_ID;
 
@@ -701,7 +701,7 @@ export default function App() {
   const currentHouse = HOUSE_TIERS.find(h => h.id === currentHouseId) || HOUSE_TIERS[1];
   const minersInHouse = miners.filter(m => m.status === 'house');
 
-  const currentMinerRate = criptoMynersConfig?.minerCoinUsdtRate || 0.01;
+  const currentMinerRate = cryptoZombiesConfig?.minerCoinUsdtRate || 0.01;
   const currentWithdrawalTax = calculateWithdrawalTax(totalInvested, totalMinedSession, currentMinerRate);
   const roiPct = totalInvested > 0 ? Math.min(500, Math.round(((totalMinedSession * currentMinerRate) / totalInvested) * 100)) : 0;
 
@@ -1834,10 +1834,10 @@ export default function App() {
         isOpen={isAdminConfigOpen}
         onClose={() => {
           setIsAdminConfigOpen(false);
-          setCriptoMynersConfig(getCriptoMynersConfig());
+          setCryptoZombiesConfig(getCryptoZombiesConfig());
         }}
         onSaveConfig={(newCfg) => {
-          setCriptoMynersConfig(newCfg);
+          setCryptoZombiesConfig(newCfg);
         }}
         miners={miners}
       />
