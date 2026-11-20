@@ -1,12 +1,13 @@
-// CRIPTO MYNERS — BAÚ DE CONSTRUÇÃO POR BOSS DERROTADO
+// CRIPTO MYNERS — BAÚ DO BOSS
 // - Um sorteio individual por jogador a cada Boss derrotado
-// - Chance-base de 15% por sobrevivente participante, multiplicada pela raridade
-// - Multiplicadores: Comum 1x, Raro 1,5x, Épico 2x, Lendário 3x
+// - Chance-base Comum: 2% por sobrevivente elegível
+// - Multiplicadores oficiais: Comum 1x, Raro 1,1x, Épico 1,1667x, Lendário 1,3333x
+// - Chances individuais resultantes: Comum 2%, Raro 2,2%, Épico 2,3333%, Lendário 2,6667%
 // - Soma das contribuições limitada ao teto máximo de 40% por Boss e por jogador
-// - Limite diário por jogador de no máximo 3 Baús de Construção por dia
+// - Limite diário por jogador de no máximo 3 Baús do Boss por dia
 // - Renovação diária à meia-noite no horário de Brasília (America/Sao_Paulo)
 // - Recebimento automático no inventário sem necessidade de clicar no mapa
-// - Cada Baú de Construção entrega exatamente 1 Fragmento de Construção (usado na evolução das casas)
+// - Recompensas do Baú do Boss: Fragmentos de Construção, poções e chance de Baú de Herói; parâmetros de recompensa ainda em consolidação
 // - Registro de auditoria administrativa e proteção contra duplicação/fraudes
 
 export const DEFAULT_CONSTRUCTION_CHEST_CONFIG = {
