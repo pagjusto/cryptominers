@@ -2,7 +2,7 @@
 
 ![CryptoZombies Banner](public/miners/all_miners_banner.png)
 
-> **CryptoZombies** é um jogo Web3 de sobrevivência e estratégia contra hordas de zumbis, com estética pixel art retrô. Desenvolvido em **React 19**, **Vite** e **Canvas**, o jogo implementa mapas individuais por jogador, economia dinâmica sustentável baseada em **Minercoin (MNC)**, sistema de sobreviventes, abrigos médicos, baús de construção e simulador completo de ROI.
+> **CryptoZombies** é um jogo Web3 de sobrevivência e estratégia contra hordas de zumbis, com estética pixel art retrô. Desenvolvido em **React 19**, **Vite** e **Canvas**, o jogo implementa mapas individuais por jogador, economia dinâmica sustentável baseada em **Minercoin (MNC)**, sistema de sobreviventes, abrigos médicos, Baús do Boss e simulador completo de ROI.
 
 ---
 
@@ -27,12 +27,12 @@
   - 🟡 **Lendário** (3×)
 - **Revezamento Automático**: Heróis sem energia descansam automaticamente e dão lugar aos heróis recuperados da reserva.
 
-### 4. 📦 Sistema de Baús de Construção & Fragmentos
-- **Sorteio por Boss**: O sorteio de Baú de Construção é realizado ao término de cada batalha contra o Boss.
+### 4. 📦 Sistema de Baús do Boss & Fragmentos
+- **Sorteio por Boss**: O sorteio de Baú do Boss é realizado ao término de cada batalha contra o Boss.
 - **Elegibilidade**: Participam do sorteio os sobreviventes registrados na equipe no início da batalha, conforme as regras de participação do Boss. Sobreviventes que entram como substitutos durante o evento não participam daquele sorteio.
 - **Teto de probabilidade**: A chance total por jogador é limitada a **40% por Boss**.
-- **Limite diário**: Máximo de **3 Baús de Construção por dia** por jogador, com renovação à meia-noite (horário de Brasília - America/Sao_Paulo).
-- **Recompensa**: Cada baú concede **1 Fragmento de Construção**, utilizado na evolução das casas.
+- **Limite diário**: Máximo de **3 Baús do Boss por dia** por jogador, com renovação à meia-noite (horário de Brasília - America/Sao_Paulo).
+- **Recompensas**: O Baú do Boss contempla Fragmentos de Construção, poções e a possibilidade de obter um Baú de Herói. Quantidades, probabilidades e distribuição das recompensas ainda precisam ser consolidadas na regra específica.
 
 ### 5. 🏡 Casas de Repouso
 - Aceleração da recuperação de energia dos heróis.
@@ -60,7 +60,7 @@
   - **5%**: Mais de 100% do investimento recuperado (pós-breakeven).
 
 ### 8. 🛠️ Painel Administrativo
-- Configuração de probabilidades de drop de baús de construção e taxa-base.
+- Configuração de probabilidades de drop de Baús do Boss e taxa-base.
 - Cotação em tempo real de 1 MNC em USDT.
 - Gestão de anúncios premiados (Rewarded Ads).
 - Ajustes de parâmetros da economia e mineração.
