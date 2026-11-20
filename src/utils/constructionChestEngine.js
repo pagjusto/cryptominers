@@ -79,7 +79,8 @@ export function normalizeHeroRarity(hero) {
 
 /**
  * Calcula a chance aditiva do Baú do Boss.
- * A elegibilidade oficial exige snapshot da equipe inicial e sobrevivência no encerramento.
+ * A elegibilidade oficial depende exclusivamente do snapshot imutável da equipe inicial.
+ * Heróis não morrem; portanto, não há validação de vida ou status no encerramento.
  * A visualização/teste administrativo pode solicitar explicitamente uma prévia dos trabalhadores atuais.
  */
 export function calculateActiveMinersChance(miners = [], config = DEFAULT_CONSTRUCTION_CHEST_CONFIG, options = {}) {
@@ -87,12 +88,11 @@ export function calculateActiveMinersChance(miners = [], config = DEFAULT_CONSTR
   const chances = config.chanceByRarityPct || DEFAULT_CONSTRUCTION_CHEST_CONFIG.chanceByRarityPct;
   const maxCap = config.maxAccountChanceCapPct ?? DEFAULT_CONSTRUCTION_CHEST_CONFIG.maxAccountChanceCapPct;
 
-  // Sorteio oficial: somente participantes do snapshot inicial ainda vivos ao final.
+  // Sorteio oficial: todos os integrantes do snapshot inicial são elegíveis.
+  // Heróis não morrem; ferimentos, HP e status no encerramento não removem participação.
   // A condição work só é usada em prévias/simulações administrativas explicitamente solicitadas.
   const activeMiners = miners.filter(m => {
-    if (m.bossSnapshotParticipant === true) {
-      return m.isAliveAtBossEnd === true && (m.currentHealth ?? 100) > 0;
-    }
+    if (m.bossSnapshotParticipant === true) return true;
     return allowWorkforcePreview === true && m.status === 'work' && (m.currentHealth ?? 100) > 5;
   });
 
