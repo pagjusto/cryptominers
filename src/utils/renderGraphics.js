@@ -106,7 +106,7 @@ export function initSirenTower(onLoaded) {
       }
     } catch (e) {}
 
-    // 2. Pré-renderiza a torre com iluminação volumétrica própria (Sol no Sudeste, sombra no Noroeste/face esquerda)
+    // 2. Pré-renderiza a torre com iluminação volumétrica própria (Sol no Noroeste, sombra no Sudeste/face direita)
     try {
       const shCanvas = document.createElement('canvas');
       shCanvas.width = w;
@@ -116,10 +116,10 @@ export function initSirenTower(onLoaded) {
         shCtx.drawImage(img, 0, 0);
         shCtx.globalCompositeOperation = 'source-atop'; // Aplica iluminação estritamente nos pixels da torre
         const grad = shCtx.createLinearGradient(0, 0, w, 0);
-        grad.addColorStop(0, 'rgba(0, 15, 0, 0.32)'); // Sombra volumétrica na face oeste/noroeste
-        grad.addColorStop(0.35, 'rgba(0, 10, 0, 0.14)');
-        grad.addColorStop(0.70, 'rgba(0, 0, 0, 0)');
-        grad.addColorStop(1.0, 'rgba(255, 255, 255, 0.12)'); // Face sudeste/direita iluminada pelo sol
+        grad.addColorStop(0, 'rgba(255, 255, 255, 0.12)'); // Face noroeste/esquerda iluminada pelo sol
+        grad.addColorStop(0.35, 'rgba(0, 0, 0, 0)');
+        grad.addColorStop(0.70, 'rgba(0, 10, 0, 0.14)');
+        grad.addColorStop(1.0, 'rgba(0, 15, 0, 0.32)'); // Face sudeste/direita sombreada
         shCtx.fillStyle = grad;
         shCtx.fillRect(0, 0, w, h);
         sirenTowerShadedCanvas = shCanvas;
@@ -815,43 +815,43 @@ export function drawSirenTower(ctx, now, isBossAlive = false) {
   // 1. Sombras realistas da torre (corpo projetado no gramado + oclusão de contato nas 4 sapatas)
   ctx.save();
   
-  // 1.0. SOMBRA DIRECIONAL COMPLETA DA ESTRUTURA DA TORRE NO SOLO (Sol vindo do Sudeste, sombra projetada para o Noroeste seguindo as edificações)
+  // 1.0. SOMBRA DIRECIONAL COMPLETA DA ESTRUTURA DA TORRE NO SOLO (Giro de ~190° para o outro lado, projetando para Sudeste/Leste)
   if (sirenTowerShadowCanvas) {
     ctx.save();
     // Ponto de fixação no pé central da torre
     ctx.translate(footCenterX, footCenterY);
-    // Cisalhamento e achatamento isométrico projetando para Noroeste (acompanha as sombras da base militar e ruínas):
-    // c = +0.70 (projeta a sombra para a esquerda/oeste à medida que sobe)
-    // d = +0.35 (projeta a sombra para trás/cima na perspectiva isométrica 2.5D)
-    ctx.transform(1.0, 0.0, 0.70, 0.35, 0, 0);
+    // Cisalhamento e achatamento isométrico projetando para Sudeste (190° em relação ao Noroeste):
+    // c = -0.75 (projeta a sombra para a direita/leste à medida que desce/afasta)
+    // d = -0.26 (projeta a sombra para a frente/sudeste na perspectiva isométrica)
+    ctx.transform(1.0, 0.0, -0.75, -0.26, 0, 0);
     ctx.drawImage(sirenTowerShadowCanvas, -tW * (73 / 158), -tH, tW, tH);
     ctx.restore();
   } else {
-    // Fallback: projeção trapezoidal translúcida no solo para Noroeste
+    // Fallback: projeção trapezoidal translúcida no solo para Sudeste
     ctx.save();
     ctx.fillStyle = 'rgba(6, 20, 8, 0.55)';
     ctx.beginPath();
     ctx.moveTo(footLeftX, footLeftY);
     ctx.lineTo(footRightX, footRightY);
-    const topProjX = footCenterX - tH * 0.70;
-    const topProjY = footCenterY - tH * 0.35;
-    ctx.lineTo(topProjX - 16, topProjY - 5);
+    const topProjX = footCenterX + tH * 0.75;
+    const topProjY = footCenterY + tH * 0.26;
     ctx.lineTo(topProjX + 16, topProjY + 5);
+    ctx.lineTo(topProjX - 16, topProjY - 5);
     ctx.closePath();
     ctx.fill();
     ctx.restore();
   }
 
-  // 1.1. Sombra suave difusa conectando a base da estrutura (deslocada suavemente para noroeste)
+  // 1.1. Sombra suave difusa conectando a base da estrutura (deslocada suavemente para sudeste)
   ctx.fillStyle = 'rgba(6, 20, 8, 0.45)';
   ctx.beginPath();
-  ctx.ellipse(tX + tW * 0.46, tY + tH * 0.940, tW * 0.46, 6.5, -0.08, 0, Math.PI * 2);
+  ctx.ellipse(tX + tW * 0.52, tY + tH * 0.955, tW * 0.46, 6.5, 0.08, 0, Math.PI * 2);
   ctx.fill();
 
   // 1.2. Oclusão de ambiente escura no solo sob a base da estrutura
   ctx.fillStyle = 'rgba(0, 10, 0, 0.58)';
   ctx.beginPath();
-  ctx.ellipse(tX + tW * 0.46, tY + tH * 0.945, tW * 0.36, 5.0, -0.05, 0, Math.PI * 2);
+  ctx.ellipse(tX + tW * 0.50, tY + tH * 0.950, tW * 0.36, 5.0, 0.05, 0, Math.PI * 2);
   ctx.fill();
 
   // 1.3. Sombras de oclusão de contato direto sob as 4 sapatas (ancoragem física precisa sem folga)
