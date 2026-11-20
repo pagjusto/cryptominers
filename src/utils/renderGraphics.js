@@ -823,8 +823,8 @@ export function drawSirenTower(ctx, now, isBossAlive = false) {
     // Cisalhamento e achatamento isométrico projetando para Sudeste (190° em relação ao Noroeste):
     // c = -0.75 (projeta a sombra para a direita/leste à medida que desce/afasta)
     // d = -0.26 (projeta a sombra para a frente/sudeste na perspectiva isométrica)
-    ctx.transform(1.0, 0.0, -0.75, -0.26, 0, 0);
-    ctx.drawImage(sirenTowerShadowCanvas, -tW * (73 / 158), -tH, tW, tH);
+    ctx.transform(1.0, 0.08, -0.75, -0.26, 0, 0);
+    ctx.drawImage(sirenTowerShadowCanvas, -tW * (73 / 158), -tH * (362 / 371), tW, tH);
     ctx.restore();
   } else {
     // Fallback: projeção trapezoidal translúcida no solo para Sudeste
@@ -854,7 +854,7 @@ export function drawSirenTower(ctx, now, isBossAlive = false) {
   ctx.ellipse(tX + tW * 0.50, tY + tH * 0.950, tW * 0.36, 5.0, 0.05, 0, Math.PI * 2);
   ctx.fill();
 
-  // 1.3. Sombras de oclusão de contato direto sob as 4 sapatas (ancoragem física precisa sem folga)
+  // 1.3. Sombras de oclusão de contato direto sob as 4 sapatas ajustadas à inclinação
   ctx.fillStyle = 'rgba(0, 8, 0, 0.94)';
 
   // Sapata traseira
@@ -862,26 +862,32 @@ export function drawSirenTower(ctx, now, isBossAlive = false) {
   ctx.ellipse(footBackX, footBackY + 0.5, 6.5, 2.5, -0.05, 0, Math.PI * 2);
   ctx.fill();
 
-  // Sapata frontal esquerda
+  // Sapata frontal esquerda (subida de 1.4px pelo tilt de 0.08)
   ctx.beginPath();
-  ctx.ellipse(footLeftX, footLeftY + 0.5, 8.0, 3.0, -0.05, 0, Math.PI * 2);
+  ctx.ellipse(footLeftX, footLeftY - 1.0, 8.0, 3.0, -0.05, 0, Math.PI * 2);
   ctx.fill();
 
-  // Sapata frontal direita
+  // Sapata frontal direita (descida de 1.7px pelo tilt de 0.08)
   ctx.beginPath();
-  ctx.ellipse(footRightX, footRightY + 0.5, 8.5, 3.2, 0.05, 0, Math.PI * 2);
+  ctx.ellipse(footRightX, footRightY + 1.8, 8.5, 3.2, 0.05, 0, Math.PI * 2);
   ctx.fill();
 
-  // Sapata frontal centro
+  // Sapata frontal centro (pivô principal)
   ctx.beginPath();
   ctx.ellipse(footCenterX, footCenterY + 0.5, 9.5, 3.5, 0, 0, Math.PI * 2);
   ctx.fill();
 
   ctx.restore();
 
-  // 2. Desenho da Torre em Alta Resolução (com iluminação e sombreamento volumétrico já aplicados aos seus pixels)
+  // 2. Desenho da Torre em Alta Resolução com inclinação idêntica à torre do canto direito do mapa
+  // REGRA OFICIAL DO USUÁRIO: "ajuste agora a nossa torre para ficar exatamente no mesmo grau e inclinação da outra torre que temos no canto direito"
   const towerDrawable = sirenTowerShadedCanvas || sirenTowerImg;
-  ctx.drawImage(towerDrawable, tX, tY, tW, tH);
+  ctx.save();
+  ctx.translate(footCenterX, footCenterY);
+  // Transformação isométrica que alinha perfeitamente as vigas horizontais (slope +0.08) e colunas (-0.025) à torre do canto direito
+  ctx.transform(1.0, 0.08, -0.025, 1.0, 0, 0);
+  ctx.drawImage(towerDrawable, -tW * (73 / 158), -tH * (362 / 371), tW, tH);
+  ctx.restore();
 
   // 2.1. Oclusão de contato na quina frontal da sapata central para perfeita ancoragem no solo
   ctx.save();
@@ -892,50 +898,70 @@ export function drawSirenTower(ctx, now, isBossAlive = false) {
   ctx.restore();
 
   // 3. Efeito da Sirene e Luz Giratória Vermelha no Topo da Torre
-  const beaconX = tX + tW * 0.50;
-  const beaconY = tY + tH * 0.035;
+  // Posição exata do bulbo vermelho da sirene no topo após a transformação de inclinação da torre:
+  const localBeaconX = tW * (6 / 158);
+  const localBeaconY = -tH * (349 / 371);
+  const beaconX = footCenterX + localBeaconX - 0.025 * localBeaconY;
+  const beaconY = footCenterY + 0.08 * localBeaconX + localBeaconY;
 
   if (isBossAlive) {
     ctx.save();
     const rotSpeed = 0.0055;
     const sirenAngle = (now * rotSpeed) % (Math.PI * 2);
 
-    // REGRA OFICIAL DO USUÁRIO: "dois feches de luz do mesmo tamanh dos dois lados"
-    const beamLength = 160;
-    const beamSpread = 0.36; // ~20 graus de ângulo de abertura
-    
-    // Função para desenhar feixes de luz idênticos em ambos os lados
-    const drawBeam = (angle, len, alpha) => {
+    // REGRA OFICIAL DO USUÁRIO: "a luz deve girar em sentido horizontal tipo helice de helicoptero e nao parecendo um relogio"
+    // e "dois feches de luz do mesmo tamanh dos dois lados"
+    const beamLength = 170;
+    const beamSpread = 0.34; // ~19 graus de abertura do feixe
+
+    // Função para desenhar feixes de luz que giram no plano horizontal isométrico (como hélice de helicóptero):
+    const drawHelicopterBeam = (angle, len, alpha) => {
       ctx.save();
+      ctx.translate(beaconX, beaconY);
+      // Plano horizontal 2.5D:
+      // scale Y (0.28) achata a rotação no plano do solo/plataforma
+      // shear (0.08) acompanha o grau e a inclinação da torre
+      ctx.transform(1.0, 0.08, 0.0, 0.28, 0, 0);
+
       ctx.beginPath();
-      ctx.moveTo(beaconX, beaconY);
-      ctx.arc(beaconX, beaconY, len, angle - beamSpread, angle + beamSpread);
+      ctx.moveTo(0, 0);
+      ctx.arc(0, 0, len, angle - beamSpread, angle + beamSpread);
       ctx.closePath();
 
-      const beamGrad = ctx.createRadialGradient(beaconX, beaconY, 4, beaconX, beaconY, len);
-      beamGrad.addColorStop(0, `rgba(255, 70, 70, ${alpha * 0.95})`);
+      const beamGrad = ctx.createRadialGradient(0, 0, 4, 0, 0, len);
+      beamGrad.addColorStop(0, `rgba(255, 80, 80, ${alpha * 0.95})`);
       beamGrad.addColorStop(0.35, `rgba(239, 68, 68, ${alpha * 0.65})`);
+      beamGrad.addColorStop(0.80, `rgba(220, 38, 38, ${alpha * 0.20})`);
       beamGrad.addColorStop(1, 'rgba(220, 38, 38, 0)');
       ctx.fillStyle = beamGrad;
       ctx.fill();
+
+      // Feixe central laser luminoso dando corpo de hélice incandescente
+      ctx.strokeStyle = `rgba(255, 220, 220, ${alpha * 0.70})`;
+      ctx.lineWidth = 2.0;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(Math.cos(angle) * len * 0.88, Math.sin(angle) * len * 0.88);
+      ctx.stroke();
+
       ctx.restore();
     };
 
-    // Feixes gêmeos 100% idênticos dos dois lados (opostos a 180° / Math.PI)
-    drawBeam(sirenAngle, beamLength, 0.85);
-    drawBeam(sirenAngle + Math.PI, beamLength, 0.85);
+    // Feixes gêmeos 100% idênticos girando em sentido horizontal como hélice de helicóptero (opostos a 180° / Math.PI)
+    drawHelicopterBeam(sirenAngle, beamLength, 0.85);
+    drawHelicopterBeam(sirenAngle + Math.PI, beamLength, 0.85);
 
-    // 3.2. Reflexos gêmeos da luz no solo do gramado para ambos os lados
-    const groundReflectY = tY + tH * 0.96;
+    // 3.2. Reflexos gêmeos no solo do gramado acompanhando a rotação horizontal
+    const groundReflectY = footCenterY + 4;
     const drawGroundReflection = (ang) => {
-      const gx = beaconX + Math.cos(ang) * 65;
-      const gy = groundReflectY + Math.sin(ang) * 9;
+      const gx = beaconX + Math.cos(ang) * 70;
+      const gy = groundReflectY + Math.sin(ang) * 18 + Math.cos(ang) * 5.6;
       const gGrad = ctx.createRadialGradient(gx, gy, 2, gx, gy, 38);
       gGrad.addColorStop(0, 'rgba(239, 68, 68, 0.28)');
       gGrad.addColorStop(1, 'rgba(239, 68, 68, 0)');
       ctx.fillStyle = gGrad;
       ctx.beginPath();
-      ctx.ellipse(gx, gy, 38, 12, 0, 0, Math.PI * 2);
+      ctx.ellipse(gx, gy, 38, 12, 0.08, 0, Math.PI * 2);
       ctx.fill();
     };
     drawGroundReflection(sirenAngle);
@@ -953,22 +979,22 @@ export function drawSirenTower(ctx, now, isBossAlive = false) {
     ctx.arc(beaconX, beaconY, 16 * pulse, 0, Math.PI * 2);
     ctx.fill();
 
-    // 3.4. Lens Flare / Feixe de Cruz quando qualquer um dos dois lados vira em direção à câmera
-    const facingCamera = Math.abs(Math.sin(sirenAngle));
-    if (facingCamera > 0.68) {
-      const flareAlpha = (facingCamera - 0.68) / 0.32;
-      ctx.fillStyle = `rgba(255, 255, 255, ${flareAlpha * 0.90})`;
+    // 3.4. Lens Flare / Flash quando qualquer uma das pás/feixes passa apontando para frente (câmera)
+    const bladeFacingCamera = Math.sin(sirenAngle);
+    const facingIntensity = Math.max(0, Math.abs(bladeFacingCamera) - 0.72) / 0.28;
+    if (facingIntensity > 0) {
+      ctx.fillStyle = `rgba(255, 255, 255, ${facingIntensity * 0.90})`;
       ctx.beginPath();
-      ctx.arc(beaconX, beaconY, 6 * flareAlpha, 0, Math.PI * 2);
+      ctx.arc(beaconX, beaconY, 6 * facingIntensity, 0, Math.PI * 2);
       ctx.fill();
 
-      ctx.strokeStyle = `rgba(255, 200, 200, ${flareAlpha * 0.80})`;
+      ctx.strokeStyle = `rgba(255, 200, 200, ${facingIntensity * 0.80})`;
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.moveTo(beaconX - 24 * flareAlpha, beaconY);
-      ctx.lineTo(beaconX + 24 * flareAlpha, beaconY);
-      ctx.moveTo(beaconX, beaconY - 24 * flareAlpha);
-      ctx.lineTo(beaconX, beaconY + 24 * flareAlpha);
+      ctx.moveTo(beaconX - 26 * facingIntensity, beaconY);
+      ctx.lineTo(beaconX + 26 * facingIntensity, beaconY);
+      ctx.moveTo(beaconX, beaconY - 10 * facingIntensity);
+      ctx.lineTo(beaconX, beaconY + 10 * facingIntensity);
       ctx.stroke();
     }
 
