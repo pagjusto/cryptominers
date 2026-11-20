@@ -493,6 +493,22 @@ export default function GameBoard({
       });
 
       state.miners.forEach((miner, minerIndex) => {
+        // Feridos com 5% de vida ou menos ficam deitados/aguardando resgate:
+        // não atacam, não mineram e não podem ser alvos dos inimigos.
+        const maxHealth = Number(miner.maxHealth) > 0 ? Number(miner.maxHealth) : 100;
+        const currentHealth = Number.isFinite(Number(miner.currentHealth)) ? Number(miner.currentHealth) : maxHealth;
+        if (miner.status === 'injured' || miner.injuredAwaitingRescue || (currentHealth / maxHealth) * 100 <= 5) {
+          miner.maxHealth = maxHealth;
+          miner.currentHealth = Math.min(currentHealth, maxHealth * 0.05);
+          miner.status = 'injured';
+          miner.injuredAwaitingRescue = true;
+          miner.isMining = false;
+          miner.targetBlock = null;
+          miner.lockedEnemyId = null;
+          miner.swingTimer = 0;
+          return;
+        }
+
         // 1. Descanso na Casa (Recuperação rápida e transição para reserva quando 100%)
         if (miner.status === 'house') {
           miner.isMining = false;
@@ -1182,15 +1198,43 @@ export default function GameBoard({
 
           const hitHero = state.miners?.find(m => m.id === s.targetHeroId);
           if (hitHero) {
-            hitHero.currentStamina = Math.max(0, hitHero.currentStamina - s.damage);
-            state.floatTexts.push({
-              text: `-${s.damage} GOSMA`,
-              x: s.targetX,
-              y: s.targetY - 14,
-              color: '#84cc16',
-              opacity: 1.0,
-              vy: -28
-            });
+            const maxHealth = Number(hitHero.maxHealth) > 0 ? Number(hitHero.maxHealth) : 100;
+            const currentHealth = Number.isFinite(Number(hitHero.currentHealth)) ? Number(hitHero.currentHealth) : maxHealth;
+            const healthPct = (currentHealth / maxHealth) * 100;
+
+            // Heróis feridos (5% de vida ou menos) não recebem dano de nenhuma criatura.
+            if (hitHero.status === 'work' && healthPct > 5 && !hitHero.injuredAwaitingRescue) {
+              const nextHealth = Math.max(maxHealth * 0.05, currentHealth - s.damage);
+              hitHero.maxHealth = maxHealth;
+              hitHero.currentHealth = nextHealth;
+
+              if ((nextHealth / maxHealth) * 100 <= 5) {
+                hitHero.status = 'injured';
+                hitHero.injuredAwaitingRescue = true;
+                hitHero.isMining = false;
+                hitHero.targetBlock = null;
+                hitHero.lockedEnemyId = null;
+                hitHero.swingTimer = 0;
+                hitHero.moveCooldown = 0;
+                state.floatTexts.push({
+                  text: 'FERIDO! 5% PV',
+                  x: s.targetX,
+                  y: s.targetY - 14,
+                  color: '#fbbf24',
+                  opacity: 1.0,
+                  vy: -28
+                });
+              } else {
+                state.floatTexts.push({
+                  text: `-${s.damage} PV`,
+                  x: s.targetX,
+                  y: s.targetY - 14,
+                  color: '#84cc16',
+                  opacity: 1.0,
+                  vy: -28
+                });
+              }
+            }
           }
 
           if (s.isBoss) {
