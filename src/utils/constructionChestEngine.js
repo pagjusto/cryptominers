@@ -69,7 +69,7 @@ export function getBrasiliaTimeString(date = new Date()) {
  */
 export function normalizeHeroRarity(hero) {
   const r = String(hero.rarity || hero.classInfo?.rarity || 'common').toLowerCase();
-  if (r.includes('super') && (r.includes('legendary') || r.includes('lend'))) return 'superLegendary';
+  if (r.includes('super') && (r.includes('legend') || r.includes('lend'))) return 'superLegendary';
   if (r.includes('super') && (r.includes('rare') || r.includes('raro'))) return 'superRare';
   if (r.includes('legendary') || r.includes('lend')) return 'legendary';
   if (r.includes('epic') || r.includes('épico') || r.includes('epico')) return 'epic';
@@ -87,7 +87,12 @@ export function calculateActiveMinersChance(miners = [], config = DEFAULT_CONSTR
 
   // Somente sobreviventes realmente em combate participam do cálculo.
   // Feridos, fila do abrigo, reservas e personagens pausados não geram Baú de Construção.
-  const activeMiners = miners.filter(m => m.status === 'work' && (m.currentHealth ?? 100) > 5);
+  const activeMiners = miners.filter(m => {
+    if (m.bossSnapshotParticipant === true) {
+      return m.isAliveAtBossEnd === true && (m.currentHealth ?? 100) > 0;
+    }
+    return m.status === 'work' && (m.currentHealth ?? 100) > 5;
+  });
 
   const breakdownByRarity = {
     common: 0,
