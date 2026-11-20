@@ -71,6 +71,25 @@ export function initBillboard(onLoaded) {
   };
 }
 
+// Configuração de inclinação da torre de vigia:
+// REGRA OFICIAL DO USUÁRIO: "ainda esta pendida a frente dela deve descer uns graus para alinhar", "penda pro sentido da perna do meio"
+export const towerTiltConfig = {
+  scaleX: 1.0,
+  skewY: 0.05,   // Desce a frente da torre ~3 graus para alinhar com o solo isométrico
+  skewX: 0.04,   // Pende suavemente no sentido da perna do meio (frente da base)
+  scaleY: 0.96,  // Traz o topo para frente na perspectiva isométrica
+  pitchY: 0
+};
+if (typeof window !== 'undefined') {
+  window.towerTiltConfig = towerTiltConfig;
+  window.setTowerTilt = (skewY = 0.05, skewX = 0.04, scaleY = 0.96) => {
+    window.towerTiltConfig.skewY = skewY;
+    window.towerTiltConfig.skewX = skewX;
+    window.towerTiltConfig.scaleY = scaleY;
+    return window.towerTiltConfig;
+  };
+}
+
 let sirenTowerImg = null;
 let sirenTowerLoaded = false;
 let sirenTowerShadowCanvas = null;
@@ -879,11 +898,17 @@ export function drawSirenTower(ctx, now, isBossAlive = false) {
 
   ctx.restore();
 
-  // 2. Desenho da Torre em Alta Resolução aprumada perfeitamente na vertical
-  // REGRA OFICIAL DO USUÁRIO: "a nossa torre parece q esta pendida para traz ,corrija"
-  // Corrigido: Torre 100% vertical e aprumada, sem inclinação/cisalhamento artificial para trás
+  // 2. Desenho da Torre em Alta Resolução inclinada no sentido da perna do meio
+  // REGRA OFICIAL DO USUÁRIO: "ainda esta pendida a frente dela deve descer uns graus para alinhar", "penda pro sentido da perna do meio"
+  const cfg = (typeof window !== 'undefined' && window.towerTiltConfig) || towerTiltConfig;
   const towerDrawable = sirenTowerShadedCanvas || sirenTowerImg;
-  ctx.drawImage(towerDrawable, tX, tY, tW, tH);
+
+  ctx.save();
+  ctx.translate(footCenterX, footCenterY);
+  // Ancorado na perna do meio (sapata frontal): pende suavemente no sentido da perna do meio e desce a frente
+  ctx.transform(cfg.scaleX, cfg.skewY, cfg.skewX, cfg.scaleY, 0, cfg.pitchY);
+  ctx.drawImage(towerDrawable, -tW * (73 / 158), -tH * (370 / 371), tW, tH);
+  ctx.restore();
 
   // 2.1. Oclusão de contato na quina frontal da sapata central para perfeita ancoragem no solo
   ctx.save();
@@ -894,9 +919,11 @@ export function drawSirenTower(ctx, now, isBossAlive = false) {
   ctx.restore();
 
   // 3. Efeito da Sirene e Luz Giratória Vermelha no Topo da Torre
-  // Posição exata do bulbo vermelho da sirene centralizado no topo da cabine:
-  const beaconX = tX + tW * 0.50;
-  const beaconY = tY + tH * 0.040;
+  // Posição exata do bulbo vermelho da sirene acompanhando com precisão a inclinação da torre:
+  const localBeaconX = tW * (70 / 158) - tW * (73 / 158);
+  const localBeaconY = -tH * (350 / 371);
+  const beaconX = footCenterX + cfg.scaleX * localBeaconX + cfg.skewX * localBeaconY;
+  const beaconY = footCenterY + cfg.skewY * localBeaconX + cfg.scaleY * localBeaconY + cfg.pitchY;
 
   if (isBossAlive) {
     ctx.save();
@@ -912,9 +939,8 @@ export function drawSirenTower(ctx, now, isBossAlive = false) {
     const drawHelicopterBeam = (angle, len, alpha) => {
       ctx.save();
       ctx.translate(beaconX, beaconY);
-      // Plano horizontal 2.5D perfeitamente nivelado:
-      // scale Y (0.28) achata a rotação no plano horizontal do topo da torre como hélice de helicóptero
-      ctx.transform(1.0, 0.0, 0.0, 0.28, 0, 0);
+      // Plano horizontal 2.5D acompanhando suavemente o ângulo de nivelamento da cabine:
+      ctx.transform(1.0, cfg.skewY * 0.6, 0.0, 0.28, 0, 0);
 
       ctx.beginPath();
       ctx.moveTo(0, 0);
