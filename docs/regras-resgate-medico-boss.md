@@ -85,7 +85,7 @@ Este documento registra as regras de gameplay aprovadas para o sistema de sobrev
 - As recompensas possíveis dentro do Baú do Boss incluem **Fragmentos de Construção**, **Poção do Rejuvenecimento** e a possibilidade de obter um **Baú de Herói**.
 - A **Poção do Rejuvenecimento não é concedida por um sorteio independente após a batalha**; ela é uma possível recompensa na abertura do Baú do Boss.
 - A chance de obter um **Baú de Herói** na abertura é de **5%**, em um sorteio independente da equipe utilizada pelo jogador e da raridade ou quantidade de sobreviventes elegíveis.
-- Ao abrir cada Baú do Boss, o jogador recebe obrigatoriamente **uma** destas duas recompensas: **1 Fragmento de Construção (50% de chance)** ou **Poção do Rejuvenecimento (50% de chance)**. O sorteio é único e mutuamente exclusivo: nunca deixa de conceder uma dessas duas recompensas e nunca concede as duas na mesma abertura.
+- Ao abrir cada Baú do Boss, o jogador recebe obrigatoriamente **uma** destas duas recompensas: **1 Fragmento de Construção (50% de chance)** ou **1 Poção do Rejuvenecimento (50% de chance)**. O sorteio é único e mutuamente exclusivo: nunca deixa de conceder uma dessas duas recompensas e nunca concede as duas na mesma abertura.
 - A chance de obter um **Baú de Herói** permanece em **5%**, em um sorteio separado e independente. Assim, o Baú de Herói pode sair junto com qualquer uma das duas recompensas principais ou não sair.
 - Ficam sem efeito as regras anteriores de sorteio independente de poções, inclusive a chance por raridade e o limite diário de 4 poções associado àquele sorteio. Eventuais limites de recebimento por abertura ou por dia deverão ser definidos para o conteúdo do baú.
 
