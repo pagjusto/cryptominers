@@ -53,16 +53,17 @@ canvas.pixelated {
 @keyframes bossFlashCycle {
   0%, 100% {
     opacity: 0;
-    transform: translate(-50%, -50%) scale(0.92);
+    transform: scale(0.92);
     filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.2));
   }
   15%, 80% {
     opacity: 1;
-    transform: translate(-50%, -50%) scale(1.05);
+    transform: scale(1.05);
     filter: drop-shadow(0 0 35px rgba(239, 68, 68, 0.95)) drop-shadow(0 0 70px rgba(220, 38, 38, 0.85)) drop-shadow(0 14px 28px rgba(153, 27, 27, 0.9));
   }
 }
 
 .boss-alert-flashing {
+  transform-origin: center center;
   animation: bossFlashCycle 1.05s ease-in-out 4 forwards;
 }

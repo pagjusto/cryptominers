@@ -1525,10 +1525,10 @@ export default function GameBoard({
     if (typeof window === 'undefined') return;
     const coords = getCanvasCoords(e.clientX, e.clientY);
     const towerCoords = window.sirenTowerCoordinates || {
-      baseX: 170,
-      baseY: 328,
-      topX: 170,
-      topY: 210
+      baseX: 174,
+      baseY: 335,
+      topX: 174,
+      topY: 198
     };
 
     const cfg = window.towerTiltConfig || {};
@@ -1661,25 +1661,29 @@ export default function GameBoard({
         onMouseDown={handleCanvasMouseDown}
       />
 
-      {/* REGRA OFICIAL DO USUÁRIO: "ALERTA DE BOSS", "jogue o alerta pro meio do mapa", "poem uma sombra vermelha", "PISCANDO UMAS 4 VEZES" */}
+      {/* REGRA OFICIAL DO USUÁRIO: "ALERTA DE BOSS", "deve ficar bem no meio do mapa", "poem uma sombra vermelha", "PISCANDO UMAS 4 VEZES" */}
       {bossAlert && (
         <div 
           key={bossAlertKey}
-          className="boss-alert-flashing absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40 pointer-events-none select-none flex flex-col items-center justify-center"
-          onAnimationEnd={() => setBossAlert(false)}
+          className="absolute inset-0 z-40 pointer-events-none select-none flex items-center justify-center"
         >
-          {/* Brilho e sombra ambiental vermelha profunda no fundo */}
-          <div className="absolute w-[85%] h-[65%] rounded-full bg-red-600/35 blur-3xl pointer-events-none" />
+          <div 
+            className="boss-alert-flashing relative flex flex-col items-center justify-center"
+            onAnimationEnd={() => setBossAlert(false)}
+          >
+            {/* Brilho e sombra ambiental vermelha profunda no fundo */}
+            <div className="absolute w-[120%] h-[120%] rounded-full bg-red-600/35 blur-3xl pointer-events-none" />
 
-          {/* Emblema Oficial com Sombra Vermelha Intensa */}
-          <img 
-            src="/enemies/boss_alert.png" 
-            alt="Alerta de Boss" 
-            className="relative w-[340px] md:w-[420px] max-w-[85vw] h-auto object-contain select-none pointer-events-none"
-            style={{
-              filter: 'drop-shadow(0 0 25px rgba(239, 68, 68, 0.95)) drop-shadow(0 0 55px rgba(220, 38, 38, 0.85)) drop-shadow(0 12px 24px rgba(153, 27, 27, 0.9))'
-            }}
-          />
+            {/* Emblema Oficial com Sombra Vermelha Intensa */}
+            <img 
+              src="/enemies/boss_alert.png" 
+              alt="Alerta de Boss" 
+              className="relative w-[340px] md:w-[420px] max-w-[85vw] h-auto object-contain select-none pointer-events-none"
+              style={{
+                filter: 'drop-shadow(0 0 25px rgba(239, 68, 68, 0.95)) drop-shadow(0 0 55px rgba(220, 38, 38, 0.85)) drop-shadow(0 12px 24px rgba(153, 27, 27, 0.9))'
+              }}
+            />
+          </div>
         </div>
       )}
     </div>

@@ -75,16 +75,16 @@ export function initBillboard(onLoaded) {
 // REGRA OFICIAL DO USUÁRIO: A FRENTE DA TORRE É A PERNA DO MEIO (e deve deitar sentido a frente / Sul).
 export const DEFAULT_TOWER_CONFIG = {
   // Parâmetros de Deitar a Torre Sentido a Frente
-  topDeltaX: -5,             // Deslocamento horizontal do topo da torre (-50px a +50px)
-  topDeltaY: 32,             // Deitar para a Frente / Perna do Meio (Sul: desce o topo em px, 0 a 80px)
-  scaleX: 0.90,              // Largura / Escala Horizontal calibrada
+  topDeltaX: 0,              // Deslocamento horizontal do topo da torre (-50px a +50px)
+  topDeltaY: 0,              // Deitar para a Frente / Perna do Meio (Sul: desce o topo em px, 0 a 80px)
+  scaleX: 1.0,               // Largura / Escala Horizontal
   scaleY: 1.0,               // Altura / Escala Vertical
   rotDeg: 0,                 // Rotação no plano
   yawDeg: 0,                 // Rotação horizontal Yaw 3D (-180° a +180°)
-  offsetX: -7,               // Posição calibrada no solo X
-  offsetY: -12,              // Posição calibrada no solo Y
+  offsetX: 0,                // Posição calibrada no solo X
+  offsetY: 0,                // Posição calibrada no solo Y
 
-  // Parâmetros da Sombra Calibrados Oficialmente pelo Usuário
+  // Parâmetros da Sombra Calibrados para o novo sprite 3D
   shadowRotDeg: -35.5,
   shadowYawDeg: 0,
   shadowSkewX: -0.80,
@@ -93,8 +93,8 @@ export const DEFAULT_TOWER_CONFIG = {
   shadowScaleX: 1.0,
   shadowScaleY: 1.0,
   shadowOpacity: 0.85,
-  shadowOffsetX: -8,
-  shadowOffsetY: -6
+  shadowOffsetX: -4,
+  shadowOffsetY: -2
 };
 
 export const towerTiltConfig = { ...DEFAULT_TOWER_CONFIG };
@@ -142,8 +142,8 @@ export function initSirenTower(onLoaded) {
     sirenTowerImg = img;
     sirenTowerLoaded = true;
 
-    const w = img.naturalWidth || 158;
-    const h = img.naturalHeight || 371;
+    const w = img.naturalWidth || 682;
+    const h = img.naturalHeight || 1024;
 
     // 1. Pré-renderiza a silhueta da torre inteira para a sombra projetada no solo
     try {
@@ -850,21 +850,21 @@ export function drawSirenTower(ctx, now, isBossAlive = false) {
   }
   if (!sirenTowerLoaded || !sirenTowerImg) return;
 
-  // Imagem recortada proporcional (158x371, proporção 0.42587)
-  const tW = 62;
-  const tH = 144;
-  const tX = 149;
-  const tY = 196; // tY fixado para tH = 144
+  // Imagem oficial recortada em alta definição (682x1024)
+  const tW = 108;
+  const tH = 162;
+  const tX = 121;
+  const tY = 183;
 
-  // Coordenadas físicas exatas da base de cada uma das sapatas metálicas da torre (medidas no sprite 158x371)
-  const footLeftX = tX + tW * (20 / 158);       // ~156.8
-  const footLeftY = tY + tH * (358 / 371);      // ~335.0
-  const footCenterX = tX + tW * (73 / 158);     // ~177.6
-  const footCenterY = tY + tH * (370 / 371);    // ~339.6
-  const footRightX = tX + tW * (136 / 158);     // ~202.4
-  const footRightY = tY + tH * (360 / 371);     // ~335.7
-  const footBackX = tX + tW * (92 / 158);       // ~185.1
-  const footBackY = tY + tH * (336 / 371);      // ~326.3
+  // Coordenadas físicas exatas da base de cada uma das sapatas metálicas da torre (medidas no sprite oficial 682x1024)
+  const footLeftX = tX + tW * (235 / 682);       // ~158.2
+  const footLeftY = tY + tH * (894 / 1024);      // ~324.4
+  const footCenterX = tX + tW * (337 / 682);     // ~174.4 (Perna do meio / frente)
+  const footCenterY = tY + tH * (958 / 1024);    // ~334.6
+  const footRightX = tX + tW * (458 / 682);      // ~193.5
+  const footRightY = tY + tH * (895 / 1024);     // ~324.6
+  const footBackX = tX + tW * (322 / 682);       // ~172.0 (Sapata traseira)
+  const footBackY = tY + tH * (860 / 1024);      // ~319.1
 
   // 1. Sombras realistas da torre (corpo projetado no gramado + oclusão de contato nas 4 sapatas)
   ctx.save();
@@ -916,7 +916,7 @@ export function drawSirenTower(ctx, now, isBossAlive = false) {
     const sScaleY = (cfg.shadowScaleY ?? 1.0);
 
     ctx.transform(sScaleX, 0.0, sSkewX, sSkewY * sScaleY, 0, 0);
-    ctx.drawImage(sirenTowerShadowCanvas, -tW * (73 / 158), -tH, tW, tH);
+    ctx.drawImage(sirenTowerShadowCanvas, -tW * (337 / 682), -tH * (958 / 1024), tW, tH);
     ctx.restore();
   } else {
     // Fallback: projeção trapezoidal translúcida no solo para Sudeste
@@ -952,8 +952,8 @@ export function drawSirenTower(ctx, now, isBossAlive = false) {
   const getTransformedFoot = (rawX, rawY) => {
     const dx = rawX - footCenterX;
     const dy = rawY - footCenterY;
-    const tx = horizScale * dx + vertSkewX * dy;
-    const ty = horizSkewY * dx + vertScale * dy;
+    const tx = horizScale * dx + shearX * dy;
+    const ty = horizSkewY * dx + scaleYFactor * dy;
     const rx = tx * cosR - ty * sinR;
     const ry = tx * sinR + ty * cosR;
     return {
@@ -1000,7 +1000,7 @@ export function drawSirenTower(ctx, now, isBossAlive = false) {
 
   // Ancorado na perna do meio (sapata frontal): deita o topo para frente
   ctx.transform(horizScale, horizSkewY, shearX, scaleYFactor, 0, 0);
-  ctx.drawImage(towerDrawable, -tW * (73 / 158), -tH * (370 / 371), tW, tH);
+  ctx.drawImage(towerDrawable, -tW * (337 / 682), -tH * (958 / 1024), tW, tH);
   ctx.restore();
 
   // 2.1. Oclusão de contato na quina frontal da sapata central para perfeita ancoragem no solo
@@ -1013,8 +1013,8 @@ export function drawSirenTower(ctx, now, isBossAlive = false) {
 
   // 3. Efeito da Sirene e Luz Giratória Vermelha no Topo da Torre
   // Posição exata do bulbo vermelho da sirene acompanhando o topo deitado da torre:
-  const localBeaconX = tW * (70 / 158) - tW * (73 / 158);
-  const localBeaconY = -tH * (350 / 371);
+  const localBeaconX = tW * (338 / 682) - tW * (337 / 682);
+  const localBeaconY = tH * (93 / 1024) - tH * (958 / 1024);
   
   const transBeaconX = horizScale * localBeaconX + shearX * localBeaconY;
   const transBeaconY = horizSkewY * localBeaconX + scaleYFactor * localBeaconY;
