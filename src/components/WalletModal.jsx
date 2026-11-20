@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, CheckCircle2, AlertCircle, Copy, ExternalLink, Wallet, ShieldCheck, ArrowRight, RefreshCw, Zap } from 'lucide-react';
-import { getCriptoMynersConfig } from '../data/criptoMynersConfig';
+import { getCryptoZombiesConfig } from '../data/cryptoZombiesConfig';
 
 export default function WalletModal({
   isOpen,
@@ -139,7 +139,7 @@ export default function WalletModal({
               <div className="p-3.5 rounded-2xl bg-gradient-to-r from-blue-950/40 to-slate-900 border border-blue-500/20 text-xs text-slate-300 space-y-1">
                 <div className="flex items-center gap-1.5 font-bold text-blue-400">
                   <ShieldCheck size={16} />
-                  <span>Cotação Oficial da Minercoin (1 MNC = US$ {(getCriptoMynersConfig()?.minerCoinUsdtRate || 0.01).toFixed(2)})</span>
+                  <span>Cotação Oficial da Minercoin (1 MNC = US$ {(getCryptoZombiesConfig()?.minerCoinUsdtRate || 0.01).toFixed(2)})</span>
                 </div>
                 <p className="text-[11px] text-slate-400 leading-relaxed">
                   Novos heróis são adquiridos diretamente com <b>USDT</b> da sua carteira ou com <b>MNC</b>. Os lucros minerados no jogo são acumulados em <b>MNC</b> e convertidos para USDT com base na cotação oficial configurada (1 MNC = US$ 0,01) no Saque (Claim).
