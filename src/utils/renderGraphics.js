@@ -150,8 +150,8 @@ export function initBillboard(onLoaded) {
 // Configuração Oficial da Torre de Vigia e de sua Sombra Projetada (Calibrada pelo Usuário)
 // REGRA OFICIAL DO USUÁRIO: A FRENTE DA TORRE É A PERNA DO MEIO (e deve deitar sentido a frente / Sul).
 export const DEFAULT_TOWER_CONFIG = {
-  topDeltaX: -3,
-  topDeltaY: 16,
+  topDeltaX: -4,
+  topDeltaY: 13,
   scaleX: -1.5,
   scaleY: 1.18,
   rotDeg: 0.4,
