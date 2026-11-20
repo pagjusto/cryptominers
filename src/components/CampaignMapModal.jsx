@@ -142,7 +142,7 @@ export const CAMPAIGN_STAGES = [
     stars: 0,
     bcoinReward: 12.00,
     difficulty: 'Lendário (Boss)',
-    description: 'O portal final dos trilhos da mina. O chefão de titânio guarda o tesouro definitivo do Bomb Crypto!',
+    description: 'O portal final dos trilhos da mina. O chefão de titânio guarda o tesouro definitivo do CryptoZombies!',
     drops: 'Tesouro Lendário (~12.00 BCOIN + 5★ Drop)',
     x: 905,
     y: 370
@@ -191,7 +191,7 @@ export default function CampaignMapModal({
                   TRILHA DA MINA · MAPA DE FASES
                 </h3>
                 <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/40 text-[10px] font-bold font-mono">
-                  SAGA BOMBCRYPTO
+                  SAGA CRYPTOZOMBIES
                 </span>
               </div>
               <p className="text-xs text-amber-200/70 font-tech">
