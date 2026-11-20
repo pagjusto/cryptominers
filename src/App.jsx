@@ -1274,11 +1274,12 @@ export default function App() {
       title: 'Recuperar 100% da Estamina de Toda a Equipe',
       icon: '☕',
       onGranted: () => {
-        setMiners(prev => prev.map(m => ({
-          ...m,
-          currentStamina: m.maxStamina,
-          status: 'work'
-        })));
+        setMiners(prev => prev.map(m => {
+          const maxHealth = Number(m.maxHealth) > 0 ? Number(m.maxHealth) : 100;
+          const currentHealth = Number.isFinite(Number(m.currentHealth)) ? Number(m.currentHealth) : maxHealth;
+          if (m.status === 'injured' || m.injuredAwaitingRescue || (currentHealth / maxHealth) * 100 <= 5) return m;
+          return { ...m, currentStamina: m.maxStamina, status: 'work' };
+        }));
         sfx.playLevelUp();
       }
     });
@@ -1371,23 +1372,30 @@ export default function App() {
   const handleToggleStatus = (minerId) => {
     setMiners(prev => prev.map(m => {
       if (m.id !== minerId) return m;
-      if (m.status === 'house' || m.status === 'waiting_house' || (m.currentHealth !== undefined && m.currentHealth <= 5)) return m;
+      const maxHealth = Number(m.maxHealth) > 0 ? Number(m.maxHealth) : 100;
+      const currentHealth = Number.isFinite(Number(m.currentHealth)) ? Number(m.currentHealth) : maxHealth;
+      if (m.status === 'house' || m.status === 'waiting_house' || m.status === 'injured' ||
+          m.injuredAwaitingRescue || (currentHealth / maxHealth) * 100 <= 5) return m;
       return { ...m, status: m.status === 'work' ? 'reserve' : 'work' };
     }));
   };
 
   const handleAllWork = () => {
     setMiners(prev => {
-      // Ordena por eficiência para colocar os 15 melhores em campo
-      const sorted = [...prev].sort((a, b) => calculateMinerEfficiency(b) - calculateMinerEfficiency(a));
+      // Ordena por eficiência apenas heróis saudáveis; feridos nunca retornam ao combate por ação em massa.
+      const eligible = prev.filter(m => {
+        const maxHealth = Number(m.maxHealth) > 0 ? Number(m.maxHealth) : 100;
+        const currentHealth = Number.isFinite(Number(m.currentHealth)) ? Number(m.currentHealth) : maxHealth;
+        return m.status !== 'injured' && !m.injuredAwaitingRescue && (currentHealth / maxHealth) * 100 > 5;
+      });
+      const sorted = [...eligible].sort((a, b) => calculateMinerEfficiency(b) - calculateMinerEfficiency(a));
       const top15Ids = new Set(sorted.slice(0, 15).map(m => m.id));
       const updated = prev.map(m => {
+        const maxHealth = Number(m.maxHealth) > 0 ? Number(m.maxHealth) : 100;
+        const currentHealth = Number.isFinite(Number(m.currentHealth)) ? Number(m.currentHealth) : maxHealth;
+        if (m.status === 'injured' || m.injuredAwaitingRescue || (currentHealth / maxHealth) * 100 <= 5) return m;
         if (top15Ids.has(m.id)) {
-          return {
-            ...m,
-            status: 'work',
-            currentStamina: Math.max(m.currentStamina || 0, 80) // Garante estamina para combate contínuo
-          };
+          return { ...m, status: 'work', currentStamina: Math.max(m.currentStamina || 0, 80) };
         }
         return { ...m, status: 'reserve' };
       });
@@ -1397,7 +1405,11 @@ export default function App() {
   };
 
   const handleAllRest = () => {
-    setMiners(prev => prev.map(m => ({ ...m, status: m.status === 'house' ? 'house' : 'sleep' })));
+    setMiners(prev => prev.map(m => (
+      m.status === 'injured' || m.injuredAwaitingRescue
+        ? m
+        : { ...m, status: m.status === 'house' ? 'house' : 'sleep' }
+    )));
   };
 
   const handleSelectMine = (newMine) => {
