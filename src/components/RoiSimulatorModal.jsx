@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, TrendingUp, Calculator, ShieldCheck, Sparkles, Home, Layers, DollarSign, Calendar, Clock, ArrowRight, Settings, Info, Award, BarChart3 } from 'lucide-react';
 import { calculateRoiScenario } from '../utils/roiSimulatorEngine';
-import { getCriptoMynersConfig } from '../data/criptoMynersConfig';
+import { getCryptoZombiesConfig } from '../data/cryptoZombiesConfig';
 
 export default function RoiSimulatorModal({
   isOpen,
@@ -16,7 +16,7 @@ export default function RoiSimulatorModal({
 
   if (!isOpen) return null;
 
-  const config = getCriptoMynersConfig();
+  const config = getCryptoZombiesConfig();
 
   // Calcula os 3 cenários simultaneamente para permitir comparação lado a lado
   const conservativeData = calculateRoiScenario({
