@@ -104,3 +104,19 @@ As mesmas chances individuais e diretas por raridade são aplicadas aos sorteios
 - Para poções, permanece o limite de **4 por jogador por dia**, renovado à meia-noite de Brasília.
 - Para Baús do Boss, permanece o limite de **3 por jogador por dia**, renovado à meia-noite de Brasília.
 - A elegibilidade continua vinculada à equipe registrada no início da batalha; substitutos não participam do sorteio daquele evento.
+
+### Exemplo de cálculo — cenário mediano
+
+Considerando a equipe de referência definida em `MINING_ECONOMY_BASELINE.md` (6 Comuns, 4 Raros, 4 Épicos e 1 Lendário), sem Super Raros ou Super Lendários:
+
+| Raridade | Quantidade | Chance individual | Contribuição |
+|---|---:|---:|---:|
+| Comum | 6 | 2% | 12% |
+| Raro | 4 | 2,2% | 8,8% |
+| Super Raro | 0 | 2,3% | 0% |
+| Épico | 4 | 2,4% | 9,6% |
+| Lendário | 1 | 2,6667% | 2,6667% |
+| Super Lendário | 0 | 3% | 0% |
+| **Total** | **15** | | **33,0667%** |
+
+A contribuição bruta do cenário mediano é **33,0667% por jogador e por tipo de sorteio** (Baú do Boss ou poção), abaixo do teto de 40%. O cálculo é a soma direta das chances individuais, conforme a regra aditiva implementada na engine; não é uma probabilidade composta por independência. A composição mediana não contém Super Raros nem Super Lendários, portanto essas duas raridades contribuem com zero neste exemplo.
