@@ -353,8 +353,8 @@ export function updateEnemies(enemies, state, dt, now, isCanyon = true) {
           arcHeight: isBoss ? 35 : 22,
           radius: isBoss ? 9 : 5,
           isBoss: isBoss,
-          // REGRA OFICIAL DO USUÁRIO: "coloque dano de zumis de 1 por hit"
-          damage: isBoss ? 6 : 1
+          // REGRA OFICIAL DO USUÁRIO: "o boss deve tirar 20 de dano por hit", "coloque dano de zumis de 1 por hit"
+          damage: isBoss ? 20 : 1
         });
 
         // O Boss pode cuspir uma segunda gosma em dispersão se houver outro herói próximo
@@ -374,7 +374,7 @@ export function updateEnemies(enemies, state, dt, now, isCanyon = true) {
               arcHeight: 38,
               radius: 8,
               isBoss: true,
-              damage: 5
+              damage: 20
             });
           }
         }
