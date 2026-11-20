@@ -53,6 +53,7 @@ import ConstructionChestFoundModal from './components/ConstructionChestFoundModa
 import RoiSimulatorModal from './components/RoiSimulatorModal';
 import AdminConfigModal from './components/AdminConfigModal';
 import StatisticsModal from './components/StatisticsModal';
+import TowerCalibrationModal from './components/TowerCalibrationModal';
 import { getCryptoZombiesConfig } from './data/cryptoZombiesConfig';
 import { 
   DEFAULT_CONSTRUCTION_CHEST_CONFIG,
@@ -574,6 +575,7 @@ export default function App() {
 
   // Painel de Inteligência & Estatísticas da Mineração (Dashboard & Previsão de Tempo)
   const [isStatsModalOpen, setIsStatsModalOpen] = useState(false);
+  const [isTowerModalOpen, setIsTowerModalOpen] = useState(false);
   const [statsData, setStatsData] = useState({
     remainingHp: 2800,
     totalHp: 3200,
@@ -1717,6 +1719,14 @@ export default function App() {
                 >
                   🔄 Testar
                 </button>
+
+                <button
+                  onClick={() => setIsTowerModalOpen(prev => !prev)}
+                  className="text-[11px] bg-sky-950/90 hover:bg-sky-900 border border-sky-500/60 text-sky-200 hover:text-white px-2 py-0.5 rounded-md cursor-pointer transition-all active:scale-95 flex items-center gap-1 font-bold shadow"
+                  title="Abrir Calibrador Manual da Torre e da Sombra"
+                >
+                  🗼 Torre & Sombra
+                </button>
               </div>
 
               <GameBoard
@@ -1977,6 +1987,12 @@ export default function App() {
         miners={miners}
         currentMine={currentMine}
         onResetStats={() => setStatsResetTrigger(prev => prev + 1)}
+      />
+
+      {/* PAINEL DE CALIBRAÇÃO MANUAL DA TORRE E DA SOMBRA */}
+      <TowerCalibrationModal
+        isOpen={isTowerModalOpen}
+        onClose={() => setIsTowerModalOpen(false)}
       />
 
       {/* MODAL DE FUSÃO & QUEIMA DE HERÓIS (ESTRELAS & PODER) */}

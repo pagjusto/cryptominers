@@ -71,21 +71,54 @@ export function initBillboard(onLoaded) {
   };
 }
 
-// Configuração de inclinação da torre de vigia:
-// REGRA OFICIAL DO USUÁRIO: "ainda esta pendida a frente dela deve descer uns graus para alinhar", "penda pro sentido da perna do meio"
-export const towerTiltConfig = {
+// Configuração Oficial da Torre de Vigia e de sua Sombra Projetada
+// Permite ajuste interativo em tempo real via painel HUD
+export const DEFAULT_TOWER_CONFIG = {
+  // Parâmetros da Torre
   scaleX: 1.0,
-  skewY: 0.05,   // Desce a frente da torre ~3 graus para alinhar com o solo isométrico
-  skewX: 0.04,   // Pende suavemente no sentido da perna do meio (frente da base)
-  scaleY: 0.96,  // Traz o topo para frente na perspectiva isométrica
-  pitchY: 0
+  skewY: 0.05,
+  skewX: 0.04,
+  scaleY: 0.96,
+  rotDeg: 0,
+  offsetX: 0,
+  offsetY: 0,
+
+  // Parâmetros da Sombra
+  shadowRotDeg: 0,
+  shadowSkewX: -0.75,
+  shadowSkewY: -0.26,
+  shadowLength: 1.0,
+  shadowScaleX: 1.0,
+  shadowScaleY: 1.0,
+  shadowOpacity: 0.85,
+  shadowOffsetX: 0,
+  shadowOffsetY: 0
 };
+
+export const towerTiltConfig = { ...DEFAULT_TOWER_CONFIG };
+
 if (typeof window !== 'undefined') {
+  try {
+    const saved = localStorage.getItem('crypto_zombies_tower_calibration');
+    if (saved) {
+      Object.assign(towerTiltConfig, JSON.parse(saved));
+    }
+  } catch (e) {}
   window.towerTiltConfig = towerTiltConfig;
-  window.setTowerTilt = (skewY = 0.05, skewX = 0.04, scaleY = 0.96) => {
-    window.towerTiltConfig.skewY = skewY;
-    window.towerTiltConfig.skewX = skewX;
-    window.towerTiltConfig.scaleY = scaleY;
+
+  window.saveTowerConfig = (cfg) => {
+    Object.assign(window.towerTiltConfig, cfg);
+    try {
+      localStorage.setItem('crypto_zombies_tower_calibration', JSON.stringify(window.towerTiltConfig));
+    } catch (e) {}
+    return window.towerTiltConfig;
+  };
+
+  window.resetTowerConfig = () => {
+    Object.assign(window.towerTiltConfig, DEFAULT_TOWER_CONFIG);
+    try {
+      localStorage.removeItem('crypto_zombies_tower_calibration');
+    } catch (e) {}
     return window.towerTiltConfig;
   };
 }
@@ -834,15 +867,30 @@ export function drawSirenTower(ctx, now, isBossAlive = false) {
   // 1. Sombras realistas da torre (corpo projetado no gramado + oclusão de contato nas 4 sapatas)
   ctx.save();
   
-  // 1.0. SOMBRA DIRECIONAL COMPLETA DA ESTRUTURA DA TORRE NO SOLO (Giro de ~190° para o outro lado, projetando para Sudeste/Leste)
+  const cfg = (typeof window !== 'undefined' && window.towerTiltConfig) || towerTiltConfig;
+  const towerDrawable = sirenTowerShadedCanvas || sirenTowerImg;
+
+  // 1.0. SOMBRA DIRECIONAL DA ESTRUTURA DA TORRE NO SOLO (Controlada por cfg)
   if (sirenTowerShadowCanvas) {
     ctx.save();
-    // Ponto de fixação no pé central da torre
-    ctx.translate(footCenterX, footCenterY);
-    // Cisalhamento e achatamento isométrico projetando para Sudeste (190° em relação ao Noroeste):
-    // c = -0.75 (projeta a sombra para a direita/leste à medida que desce/afasta)
-    // d = -0.26 (projeta a sombra para a frente/sudeste na perspectiva isométrica)
-    ctx.transform(1.0, 0.0, -0.75, -0.26, 0, 0);
+    ctx.globalAlpha = cfg.shadowOpacity ?? 0.85;
+    // Ponto de fixação na sapata central (perna do meio) + offsets
+    ctx.translate(
+      footCenterX + (cfg.offsetX || 0) + (cfg.shadowOffsetX || 0), 
+      footCenterY + (cfg.offsetY || 0) + (cfg.shadowOffsetY || 0)
+    );
+    
+    if (cfg.shadowRotDeg) {
+      ctx.rotate((cfg.shadowRotDeg * Math.PI) / 180);
+    }
+
+    const sLength = cfg.shadowLength ?? 1.0;
+    const sSkewX = (cfg.shadowSkewX ?? -0.75) * sLength;
+    const sSkewY = (cfg.shadowSkewY ?? -0.26) * sLength;
+    const sScaleX = cfg.shadowScaleX ?? 1.0;
+    const sScaleY = cfg.shadowScaleY ?? 1.0;
+
+    ctx.transform(sScaleX, 0.0, sSkewX, sSkewY * sScaleY, 0, 0);
     ctx.drawImage(sirenTowerShadowCanvas, -tW * (73 / 158), -tH, tW, tH);
     ctx.restore();
   } else {
@@ -864,13 +912,13 @@ export function drawSirenTower(ctx, now, isBossAlive = false) {
   // 1.1. Sombra suave difusa conectando a base da estrutura (deslocada suavemente para sudeste)
   ctx.fillStyle = 'rgba(6, 20, 8, 0.45)';
   ctx.beginPath();
-  ctx.ellipse(tX + tW * 0.52, tY + tH * 0.955, tW * 0.46, 6.5, 0.08, 0, Math.PI * 2);
+  ctx.ellipse(tX + tW * 0.52 + (cfg.offsetX || 0), tY + tH * 0.955 + (cfg.offsetY || 0), tW * 0.46, 6.5, 0.08, 0, Math.PI * 2);
   ctx.fill();
 
   // 1.2. Oclusão de ambiente escura no solo sob a base da estrutura
   ctx.fillStyle = 'rgba(0, 10, 0, 0.58)';
   ctx.beginPath();
-  ctx.ellipse(tX + tW * 0.50, tY + tH * 0.950, tW * 0.36, 5.0, 0.05, 0, Math.PI * 2);
+  ctx.ellipse(tX + tW * 0.50 + (cfg.offsetX || 0), tY + tH * 0.950 + (cfg.offsetY || 0), tW * 0.36, 5.0, 0.05, 0, Math.PI * 2);
   ctx.fill();
 
   // 1.3. Sombras de oclusão de contato direto sob as 4 sapatas (ancoragem física precisa e aprumada)
@@ -878,35 +926,37 @@ export function drawSirenTower(ctx, now, isBossAlive = false) {
 
   // Sapata traseira
   ctx.beginPath();
-  ctx.ellipse(footBackX, footBackY + 0.5, 6.5, 2.5, 0, 0, Math.PI * 2);
+  ctx.ellipse(footBackX + (cfg.offsetX || 0), footBackY + 0.5 + (cfg.offsetY || 0), 6.5, 2.5, 0, 0, Math.PI * 2);
   ctx.fill();
 
   // Sapata frontal esquerda
   ctx.beginPath();
-  ctx.ellipse(footLeftX, footLeftY + 0.5, 8.0, 3.0, 0, 0, Math.PI * 2);
+  ctx.ellipse(footLeftX + (cfg.offsetX || 0), footLeftY + 0.5 + (cfg.offsetY || 0), 8.0, 3.0, 0, 0, Math.PI * 2);
   ctx.fill();
 
   // Sapata frontal direita
   ctx.beginPath();
-  ctx.ellipse(footRightX, footRightY + 0.5, 8.5, 3.2, 0, 0, Math.PI * 2);
+  ctx.ellipse(footRightX + (cfg.offsetX || 0), footRightY + 0.5 + (cfg.offsetY || 0), 8.5, 3.2, 0, 0, Math.PI * 2);
   ctx.fill();
 
   // Sapata frontal centro (pivô principal)
   ctx.beginPath();
-  ctx.ellipse(footCenterX, footCenterY + 0.5, 9.5, 3.5, 0, 0, Math.PI * 2);
+  ctx.ellipse(footCenterX + (cfg.offsetX || 0), footCenterY + 0.5 + (cfg.offsetY || 0), 9.5, 3.5, 0, 0, Math.PI * 2);
   ctx.fill();
 
   ctx.restore();
 
   // 2. Desenho da Torre em Alta Resolução inclinada no sentido da perna do meio
   // REGRA OFICIAL DO USUÁRIO: "ainda esta pendida a frente dela deve descer uns graus para alinhar", "penda pro sentido da perna do meio"
-  const cfg = (typeof window !== 'undefined' && window.towerTiltConfig) || towerTiltConfig;
-  const towerDrawable = sirenTowerShadedCanvas || sirenTowerImg;
-
   ctx.save();
-  ctx.translate(footCenterX, footCenterY);
+  ctx.translate(footCenterX + (cfg.offsetX || 0), footCenterY + (cfg.offsetY || 0));
+  
+  if (cfg.rotDeg) {
+    ctx.rotate((cfg.rotDeg * Math.PI) / 180);
+  }
+
   // Ancorado na perna do meio (sapata frontal): pende suavemente no sentido da perna do meio e desce a frente
-  ctx.transform(cfg.scaleX, cfg.skewY, cfg.skewX, cfg.scaleY, 0, cfg.pitchY);
+  ctx.transform(cfg.scaleX ?? 1.0, cfg.skewY ?? 0, cfg.skewX ?? 0, cfg.scaleY ?? 1.0, 0, 0);
   ctx.drawImage(towerDrawable, -tW * (73 / 158), -tH * (370 / 371), tW, tH);
   ctx.restore();
 
@@ -914,7 +964,7 @@ export function drawSirenTower(ctx, now, isBossAlive = false) {
   ctx.save();
   ctx.fillStyle = 'rgba(0, 10, 0, 0.65)';
   ctx.beginPath();
-  ctx.ellipse(footCenterX, footCenterY, 7.5, 1.8, 0, 0, Math.PI * 2);
+  ctx.ellipse(footCenterX + (cfg.offsetX || 0), footCenterY + (cfg.offsetY || 0), 7.5, 1.8, 0, 0, Math.PI * 2);
   ctx.fill();
   ctx.restore();
 
@@ -922,8 +972,18 @@ export function drawSirenTower(ctx, now, isBossAlive = false) {
   // Posição exata do bulbo vermelho da sirene acompanhando com precisão a inclinação da torre:
   const localBeaconX = tW * (70 / 158) - tW * (73 / 158);
   const localBeaconY = -tH * (350 / 371);
-  const beaconX = footCenterX + cfg.scaleX * localBeaconX + cfg.skewX * localBeaconY;
-  const beaconY = footCenterY + cfg.skewY * localBeaconX + cfg.scaleY * localBeaconY + cfg.pitchY;
+  const rotRad = ((cfg.rotDeg || 0) * Math.PI) / 180;
+  
+  const transBeaconX = (cfg.scaleX ?? 1.0) * localBeaconX + (cfg.skewX ?? 0) * localBeaconY;
+  const transBeaconY = (cfg.skewY ?? 0) * localBeaconX + (cfg.scaleY ?? 1.0) * localBeaconY;
+  
+  const cosR = Math.cos(rotRad);
+  const sinR = Math.sin(rotRad);
+  const rotatedBeaconX = transBeaconX * cosR - transBeaconY * sinR;
+  const rotatedBeaconY = transBeaconX * sinR + transBeaconY * cosR;
+
+  const beaconX = footCenterX + (cfg.offsetX || 0) + rotatedBeaconX;
+  const beaconY = footCenterY + (cfg.offsetY || 0) + rotatedBeaconY;
 
   if (isBossAlive) {
     ctx.save();
