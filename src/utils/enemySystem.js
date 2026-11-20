@@ -307,7 +307,13 @@ export function updateEnemies(enemies, state, dt, now, isCanyon = true) {
     const combatRange = isBoss ? 7.5 : 1.8;
 
     // Procura herói alvo ESTRITAMENTE dentro do combatRange permitido
-    const activeHeroes = state.miners?.filter(m => m.status === 'work' && (m.durability === undefined || m.durability > 0)) || [];
+    const activeHeroes = state.miners?.filter(m => {
+      const maxHealth = Number(m.maxHealth) > 0 ? Number(m.maxHealth) : 100;
+      const currentHealth = Number.isFinite(Number(m.currentHealth)) ? Number(m.currentHealth) : maxHealth;
+      const healthPct = (currentHealth / maxHealth) * 100;
+      return m.status === 'work' && healthPct > 5 && !m.injuredAwaitingRescue &&
+        (m.durability === undefined || m.durability > 0);
+    }) || [];
     let targetHero = null;
     let closestDist = Infinity;
 
