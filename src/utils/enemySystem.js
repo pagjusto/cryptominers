@@ -352,7 +352,8 @@ export function updateEnemies(enemies, state, dt, now, isCanyon = true) {
           arcHeight: isBoss ? 35 : 22,
           radius: isBoss ? 9 : 5,
           isBoss: isBoss,
-          damage: isBoss ? 6 : 3
+          // REGRA OFICIAL DO USUÁRIO: "coloque dano de zumis de 1 por hit"
+          damage: isBoss ? 6 : 1
         });
 
         // O Boss pode cuspir uma segunda gosma em dispersão se houver outro herói próximo
@@ -682,10 +683,18 @@ export function drawEnemyCharacter(ctx, enemy, now) {
   ctx.translate(px + lungeX, py + rootBob);
   ctx.rotate(walkTilt + attackTilt);
 
-  // Como os sprites de alta definição (boss_clean.png e zombie_clean.png) foram desenhados virados para a ESQUERDA:
-  // - Para virar para a ESQUERDA (facingDir === -1): orientação natural (flipFactor = 1)
-  // - Para virar para a DIREITA (facingDir === 1): espelhamento horizontal (flipFactor = -1)
-  const flipFactor = (enemy.facingDir === 1 ? -1 : 1);
+  // Orientação dos sprites de origem:
+  // - boss_clean.png foi desenhado originalmente virado para a ESQUERDA.
+  // - zombie_clean.png (e as partes das pernas) foram desenhados originalmente virados para a DIREITA.
+  // REGRA OFICIAL DO USUÁRIO: "eles estao andando de ré" -> Corrigido para andar sempre de frente na direção do movimento!
+  let flipFactor;
+  if (isBoss) {
+    // Para o Boss: facingDir === 1 (Direita) espelha (-1); facingDir === -1 (Esquerda) natural (1)
+    flipFactor = enemy.facingDir === 1 ? -1 : 1;
+  } else {
+    // Para os Zumbis: facingDir === 1 (Direita) natural (1); facingDir === -1 (Esquerda) espelha (-1)
+    flipFactor = enemy.facingDir === -1 ? -1 : 1;
+  }
   ctx.scale(flipFactor * attackScale, attackScale);
 
   // Pontos de pivô anatômicos das articulações do quadril (escala 640x640)
