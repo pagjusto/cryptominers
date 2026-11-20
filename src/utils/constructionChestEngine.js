@@ -78,15 +78,17 @@ export function normalizeHeroRarity(hero) {
 }
 
 /**
- * Calcula a probabilidade de aparição com base EXCLUSIVAMENTE nos sobreviventes em combate ativo
- * Sobreviventes feridos, em tratamento, na fila ou na reserva NÃO participam do cálculo
+ * Calcula a chance aditiva do Baú do Boss.
+ * No sorteio real, aceita participantes marcados pelo snapshot inicial que estejam vivos ao fim,
+ * independentemente de estarem em combate, no ambulatório ou aguardando atendimento.
+ * Simulações administrativas sem snapshot continuam considerando apenas combatentes ativos.
  */
 export function calculateActiveMinersChance(miners = [], config = DEFAULT_CONSTRUCTION_CHEST_CONFIG) {
   const chances = config.chanceByRarityPct || DEFAULT_CONSTRUCTION_CHEST_CONFIG.chanceByRarityPct;
   const maxCap = config.maxAccountChanceCapPct ?? DEFAULT_CONSTRUCTION_CHEST_CONFIG.maxAccountChanceCapPct;
 
-  // Somente sobreviventes realmente em combate participam do cálculo.
-  // Feridos, fila do abrigo, reservas e personagens pausados não geram Baú de Construção.
+  // Participantes do snapshot do Boss são elegíveis se ainda estiverem vivos no encerramento.
+  // Fora desse fluxo, mantém-se o filtro tradicional de combatentes ativos para simulações.
   const activeMiners = miners.filter(m => {
     if (m.bossSnapshotParticipant === true) {
       return m.isAliveAtBossEnd === true && (m.currentHealth ?? 100) > 0;
@@ -295,7 +297,7 @@ export function logConstructionAudit(action, details, adminName = 'Administrador
 
 /**
  * Executa o sorteio individual após a derrota de um Boss.
- * Aplica o teto de 40%, limite diário de 3 e considera somente participantes ativos.
+ * Aplica o teto de 40%, limite diário de 3 e a elegibilidade da equipe inicial viva ao fim.
  */
 export function executeConstructionBossRoll(miners = [], config = DEFAULT_CONSTRUCTION_CHEST_CONFIG, options = {}) {
   const { isSimulated = false, forceSuccess = false, bossId = null } = options;
