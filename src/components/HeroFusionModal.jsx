@@ -84,12 +84,10 @@ export default function HeroFusionModal({
     if (!sac1 || !sac2) return;
 
     const oldPower = targetMiner.power;
-    const oldStamina = targetMiner.maxStamina;
     const newStars = targetStars + 1;
-    // Bônus: +25% de Poder (mínimo +2) e +15 Max Stamina
+    // Bônus: +25% de Poder (mínimo +2)
     const powerGain = Math.max(2, Math.round(oldPower * 0.25));
     const newPower = oldPower + powerGain;
-    const newMaxStamina = oldStamina + 15;
 
     // Dispara animação épica de fusão
     confetti({
@@ -104,8 +102,7 @@ export default function HeroFusionModal({
       targetId: targetMiner.id,
       sacrificeIds: [sac1.id, sac2.id],
       newStars,
-      newPower,
-      newMaxStamina
+      newPower
     });
 
     setFusionSuccessData({
@@ -242,7 +239,6 @@ export default function HeroFusionModal({
 
                     <div className="text-xs text-slate-300 space-y-0.5 mt-1 font-mono">
                       <div>Poder: <b className="text-amber-300">{targetMiner.power}</b></div>
-                      <div>Estamina: <b className="text-blue-300">{targetMiner.maxStamina}</b></div>
                     </div>
 
                     <button
@@ -275,7 +271,6 @@ export default function HeroFusionModal({
                     <p className="text-amber-300 font-arcade">PRONTO PARA FUNDIR!</p>
                     <p>Novo Grau: <b>{targetStars + 1}★ (+1)</b></p>
                     <p>Poder: <b>+{Math.max(2, Math.round(targetMiner.power * 0.25))} Bônus</b></p>
-                    <p>Estamina: <b>+15 Max</b></p>
                   </div>
                 ) : (
                   <div className="text-[11px] text-slate-500 space-y-1">
@@ -452,7 +447,6 @@ export default function HeroFusionModal({
 
                     <div className="flex items-center justify-between text-[11px] text-slate-400 mt-2 font-mono pt-2 border-t border-slate-800/60">
                       <span>Poder: <b className="text-white">{m.power}</b></span>
-                      <span>Stam: <b className="text-blue-400">{m.maxStamina}</b></span>
                     </div>
                   </div>
                 );
