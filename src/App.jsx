@@ -634,7 +634,7 @@ export default function App() {
     return top && top.blocksBroken > 0 ? top : null;
   }, [miners, statsData.minerStats]);
   
-  // Estado para Anúncios Patrocinados Gerais (Estamina Turbo, Reparo de Picareta, Bênção da Sorte)
+  // Estado para Anúncios Patrocinados Gerais (Reparo de Picareta, Bênção da Sorte)
   const [adModalConfig, setAdModalConfig] = useState({
     isOpen: false,
     title: '',
