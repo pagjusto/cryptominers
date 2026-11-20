@@ -26,6 +26,7 @@ export default function HeroList({
   onDiversifyTeam
 }) {
   const workingCount = miners.filter(m => m.status === 'work').length;
+  const injuredCount = miners.filter(m => m.status === 'injured' || m.injuredAwaitingRescue).length;
   const houseCount = miners.filter(m => m.status === 'house').length;
   const reserveCount = miners.filter(m => m.status === 'reserve' || m.status === 'sleep').length;
 
@@ -47,6 +48,11 @@ export default function HeroList({
               <span className="px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 font-bold border border-slate-700 text-[10px] font-mono whitespace-nowrap">
                 {miners.length} TOTAL
               </span>
+              {injuredCount > 0 && (
+                <span className="px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 font-bold border border-rose-500/40 text-[10px] font-mono whitespace-nowrap">
+                  {injuredCount} FERIDOS
+                </span>
+              )}
             </div>
           </div>
 
@@ -287,6 +293,11 @@ export default function HeroList({
                         🛡️ RESERVA
                       </span>
                     )}
+                    {(miner.status === 'injured' || miner.injuredAwaitingRescue) && (
+                      <span className="text-[9px] font-bold font-tech px-2 py-0.5 rounded-xl bg-rose-500/20 text-rose-300 border border-rose-500/40 flex items-center gap-1 whitespace-nowrap" title="Ferido: não combate nem minera; aguardando resgate">
+                        🩹 FERIDO — AGUARDANDO RESGATE
+                      </span>
+                    )}
                     {miner.status === 'work' && (
                       <span className="text-[9px] font-bold font-tech px-2 py-0.5 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1 whitespace-nowrap" title="Combatendo zumbis automaticamente">
                         ⚔️ EM COMBATE
@@ -297,7 +308,7 @@ export default function HeroList({
                   {/* Botão de Ação */}
                   <button
                     onClick={() => onToggleStatus(miner.id)}
-                    disabled={miner.status === 'house' || miner.status === 'waiting_house'}
+                    disabled={miner.status === 'house' || miner.status === 'waiting_house' || miner.status === 'injured' || miner.injuredAwaitingRescue}
                     className={`px-3 py-1 rounded-xl text-[10px] font-tech font-bold flex items-center justify-center gap-1 transition cursor-pointer active:scale-95 shadow-sm shrink-0 whitespace-nowrap ${
                       isWorking
                         ? 'bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700'
