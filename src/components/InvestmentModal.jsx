@@ -60,7 +60,7 @@ export default function InvestmentModal({
                   INVESTIMENTO & PAINEL DE ROI
                 </h3>
                 <span className="text-[10px] font-bold font-tech px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
-                  REGRAS DO BOMBCRYPTO
+                  REGRAS DE ECONOMIA E ROI
                 </span>
               </div>
               <p className="text-xs text-slate-400 font-tech">
@@ -102,7 +102,7 @@ export default function InvestmentModal({
           </div>
         </div>
 
-        {/* ABA 1: PACOTES DE ENTRADA (MINT EM LOTE DO BOMBCRYPTO) */}
+        {/* ABA 1: PACOTES DE ENTRADA DO CRYPTOZOMBIES */}
         {activeTab === 'packages' && (
           <div className="flex-1 overflow-y-auto no-scrollbar py-4 space-y-4">
             <div className="flex items-center justify-between text-xs text-slate-400 font-tech bg-slate-950 p-3 rounded-2xl border border-slate-800">
@@ -169,7 +169,7 @@ export default function InvestmentModal({
                         ))}
                       </div>
 
-                      {/* Estimativas de retorno do Bomb Crypto (Modelo 3 Meses) */}
+                      {/* Estimativas de retorno do CryptoZombies (Modelo de 90 dias) */}
                       <div className="bg-slate-900 p-2.5 rounded-xl text-[10px] font-tech text-slate-400 space-y-1 mb-2">
                         <div className="flex justify-between items-center">
                           <span>Farm estimado:</span>
@@ -209,7 +209,7 @@ export default function InvestmentModal({
           </div>
         )}
 
-        {/* ABA 2: TERMÔMETRO DE ROI & REGRAS DE SAQUE (MECÂNICA REAL DO BOMBCRYPTO) */}
+        {/* ABA 2: TERMÔMETRO DE ROI & REGRAS DE SAQUE (MECÂNICA ECONÔMICA DO CRYPTOZOMBIES) */}
         {activeTab === 'roi' && (
           <div className="flex-1 overflow-y-auto no-scrollbar py-4 space-y-4">
             
@@ -322,16 +322,16 @@ export default function InvestmentModal({
                   Por que a Curva de 3 Meses é a Mais Saudável?
                 </span>
                 <p className="leading-relaxed">
-                  Diferente do Bomb Crypto de 2021 (onde ROIs de 15 a 30 dias geraram hiperinflação rápida e esgotaram a liquidez), o ciclo de ~90 dias equilibra a emissão controlada de BCOIN com drenos contínuos (Casas, Afiação de Picaretas e Taxa de 6% do Marketplace) somados à injeção de capital real via Anúncios Patrocinados (Playable Ads).
+                  Diferente de modelos play-to-earn anteriores, que apresentaram ciclos de ROI muito curtos e pressão inflacionária, o ciclo de ~90 dias equilibra a emissão controlada de BCOIN com drenos contínuos (Casas, Afiação de Picaretas e Taxa de 6% do Marketplace) somados à injeção de capital real via Anúncios Patrocinados (Playable Ads).
                 </p>
               </div>
             </div>
 
-            {/* Tabela de Imposto de Saque (ROI Tax do Bomb Crypto) */}
+            {/* Tabela de Imposto de Saque (taxa de saque do CryptoZombies) */}
             <div className="p-4 rounded-3xl bg-slate-950/80 border border-slate-800">
               <h4 className="font-tech font-bold text-xs text-amber-300 uppercase tracking-wider mb-2 flex items-center gap-1.5">
                 <ShieldCheck size={14} />
-                <span>Tabela Oficial de Taxa de Saque (ROI Fee do Bomb Crypto):</span>
+                <span>Tabela Oficial de Taxa de Saque (taxa de saque do CryptoZombies):</span>
               </h4>
 
               <div className="space-y-1.5 text-xs font-tech">
@@ -364,7 +364,7 @@ export default function InvestmentModal({
               </div>
 
               <p className="text-[10px] text-slate-500 font-tech mt-3 leading-relaxed">
-                * No Bomb Crypto, quanto mais você reinveste e joga, menor fica a taxa de saque para proteger a liquidez do ecossistema.
+                * No CryptoZombies, quanto mais você reinveste e joga, menor fica a taxa de saque para proteger a liquidez do ecossistema.
               </p>
             </div>
 
