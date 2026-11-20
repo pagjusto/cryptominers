@@ -70,6 +70,30 @@ Exemplo: um herói de 60 anos cuja eficiência-base seja 50%, com três estrelas
 
 O bônus das estrelas não elimina nem reverte a penalidade de envelhecimento. O bônus máximo é de +15% em ★★★.
 
+## Envelhecimento — tabela de referência e média diária aprovada
+
+A tabela de marcos registrada no planejamento foi:
+
+| Dias de vida | Idade indicada | Eficiência-base | HP |
+|---:|---:|---:|---:|
+| 0 | 20 anos | 100% | 100% |
+| 90 | 30 anos | 90% | 90% |
+| 120 | 40 anos | 80% | 80% |
+| 150 | 50 anos | 70% | 70% |
+| 180 | 60 anos | 50% | 50% |
+| 240 | 70 anos | 30% | 30% |
+| 270 | 80 anos | 0% | Aposentado |
+
+Regra de envelhecimento médio aprovada:
+
+- O ciclo vai dos 20 aos 80 anos: **60 anos de idade em 270 dias reais**.
+- Média de envelhecimento: **60 ÷ 270 = 0,222222... ano de idade por dia real**.
+- Equivalência aproximada: **2,67 meses de idade por dia real**.
+- O envelhecimento deve ser calculado continuamente, inclusive em frações de dia.
+- Aos 80 anos / 270 dias, o herói se aposenta.
+
+**Nota de consistência pendente:** os marcos de idade da tabela acima não seguem uma taxa uniforme de 0,222222 ano/dia entre cada intervalo. A média diária foi aprovada como taxa contínua geral do ciclo; antes de implementar, é necessário confirmar se os valores de idade intermediários da tabela devem ser substituídos pela idade calculada continuamente. Os marcos de eficiência-base e HP também devem ser preservados até que sua interpolação seja confirmada.
+
 ## Observações de balanceamento
 
 - Estes números representam a base do cenário mediano com mineração válida durante 24 horas.
