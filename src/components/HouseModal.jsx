@@ -176,7 +176,7 @@ export default function HouseModal({
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {minersInHouse.map(miner => {
-                    const staminaPct = Math.round(((miner.currentHealth ?? 5) / (miner.maxHealth || 100)) * 100);
+                    const healthPct = Math.round(((miner.currentHealth ?? 5) / (miner.maxHealth || 100)) * 100);
                     return (
                       <div 
                         key={miner.id}
@@ -190,7 +190,7 @@ export default function HouseModal({
                             </span>
                             <div className="flex items-center gap-1 text-[10px] text-blue-300 font-mono">
                               <HeartPulse size={11} className="text-rose-400" />
-                              <span>{staminaPct}% ({Math.round(miner.currentHealth ?? 5)}/{miner.maxHealth || 100} PV)</span>
+                              <span>{healthPct}% ({Math.round(miner.currentHealth ?? 5)}/{miner.maxHealth || 100} PV)</span>
                             </div>
                           </div>
                         </div>
@@ -233,14 +233,14 @@ export default function HouseModal({
               </h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {miners.filter(m => m.status === 'work').map(miner => {
-                  const staminaPct = Math.round(((miner.currentHealth ?? 100) / (miner.maxHealth || 100)) * 100);
+                  const healthPct = Math.round(((miner.currentHealth ?? 100) / (miner.maxHealth || 100)) * 100);
                                     return (
                     <div key={miner.id} className="p-2.5 rounded-2xl bg-slate-950/60 border border-slate-800 flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <span className="text-xl">{miner.avatar}</span>
                         <div>
                           <span className="font-bold text-xs text-white block">{miner.name}</span>
-                          <span className="text-[10px] text-emerald-400 font-mono">Vida: {staminaPct}%</span>
+                          <span className="text-[10px] text-emerald-400 font-mono">Vida: {healthPct}%</span>
                         </div>
                       </div>
 
