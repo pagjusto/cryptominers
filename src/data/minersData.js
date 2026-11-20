@@ -182,7 +182,7 @@ export const MINER_CLASSES = {
     name: 'Verdant',
     subtitle: 'Explorador da Vanguarda',
     avatar: '🧭',
-    color: '#eab308',
+    color: '#38bdf8',
     rarity: 'super_rare',
     basePower: 5,
     baseSpeed: 1.6,
@@ -248,7 +248,7 @@ export const MINER_CLASSES = {
     name: 'Múmia',
     subtitle: 'Sobrevivente Resiliente',
     avatar: '🧟‍♂️',
-    color: '#eab308',
+    color: '#38bdf8',
     rarity: 'super_rare',
     basePower: 6,
     baseSpeed: 1.3,
@@ -262,7 +262,8 @@ export const MINER_CLASSES = {
     name: 'Polar',
     subtitle: 'Especialista Tático Glacial',
     avatar: '🎯',
-    color: '#60a5fa',
+    color: '#22c55e',
+    rarity: 'rare',
     basePower: 5,
     baseSpeed: 1.6,
     baseStamina: 115,
@@ -275,7 +276,8 @@ export const MINER_CLASSES = {
     name: 'Sombra',
     subtitle: 'Infiltrador Silencioso',
     avatar: '👤',
-    color: '#94a3b8',
+    color: '#22c55e',
+    rarity: 'rare',
     basePower: 5,
     baseSpeed: 1.8,
     baseStamina: 105,
@@ -314,7 +316,8 @@ export const MINER_CLASSES = {
     name: 'Hunter',
     subtitle: 'Atirador de Vanguarda',
     avatar: '🎯',
-    color: '#84cc16',
+    color: '#64748b',
+    rarity: 'common',
     basePower: 3,
     baseSpeed: 1.4,
     baseStamina: 100,
@@ -327,7 +330,8 @@ export const MINER_CLASSES = {
     name: 'Scarlet',
     subtitle: 'Guerrilheira Ágil',
     avatar: '🦊',
-    color: '#f97316',
+    color: '#64748b',
+    rarity: 'common',
     basePower: 3,
     baseSpeed: 1.6,
     baseStamina: 95,
@@ -479,7 +483,7 @@ export const INITIAL_MINERS = [
     x: 1,
     y: 1,
     avatar: '🧭',
-    color: '#34d399'
+    color: '#38bdf8'
   },
   {
     id: 'miner-2',
@@ -539,7 +543,7 @@ export const INITIAL_MINERS = [
     x: 7,
     y: 7,
     avatar: '🎯',
-    color: '#84cc16'
+    color: '#64748b'
   },
   {
     id: 'miner-scarlet',
@@ -559,6 +563,6 @@ export const INITIAL_MINERS = [
     x: 8,
     y: 7,
     avatar: '🦊',
-    color: '#f97316'
+    color: '#64748b'
   }
 ];

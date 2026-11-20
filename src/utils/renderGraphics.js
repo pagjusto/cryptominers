@@ -518,38 +518,40 @@ export function drawMinerCharacter(ctx, mx, my, miner, classInfo, now, swingProg
   ctx.ellipse(0, 14, 11, 3.6, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // Aura Radiante Oficial da Raridade no Solo e no Tronco
-  const pulse = 0.88 + Math.sin(now * 0.005 + minerIndex * 1.3) * 0.12;
-  const auraColor = rarityConfig.color;
+  // Aura Radiante Oficial da Raridade no Solo e no Tronco (apenas para heróis com raridade colorida)
+  if (rarityConfig.hasBorderColor !== false && rarityConfig.auraColor && rarityConfig.auraColor !== 'transparent') {
+    const pulse = 0.88 + Math.sin(now * 0.005 + minerIndex * 1.3) * 0.12;
+    const auraColor = rarityConfig.color;
 
-  // Halo no piso sob os pés do herói
-  const groundGrad = ctx.createRadialGradient(0, 13, 2, 0, 13, 19 * pulse);
-  groundGrad.addColorStop(0, rarityConfig.auraColor || `${auraColor}88`);
-  groundGrad.addColorStop(0.5, `${auraColor}40`);
-  groundGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-  ctx.fillStyle = groundGrad;
-  ctx.beginPath();
-  ctx.ellipse(0, 13, 19 * pulse, 7.5 * pulse, 0, 0, Math.PI * 2);
-  ctx.fill();
+    // Halo no piso sob os pés do herói
+    const groundGrad = ctx.createRadialGradient(0, 13, 2, 0, 13, 19 * pulse);
+    groundGrad.addColorStop(0, rarityConfig.auraColor || `${auraColor}88`);
+    groundGrad.addColorStop(0.5, `${auraColor}40`);
+    groundGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    ctx.fillStyle = groundGrad;
+    ctx.beginPath();
+    ctx.ellipse(0, 13, 19 * pulse, 7.5 * pulse, 0, 0, Math.PI * 2);
+    ctx.fill();
 
-  // Anel sutil de energia cintilante no chão
-  ctx.strokeStyle = auraColor;
-  ctx.lineWidth = 1.2;
-  ctx.globalAlpha = 0.45 * pulse;
-  ctx.beginPath();
-  ctx.ellipse(0, 13, 15 * pulse, 5.8 * pulse, 0, 0, Math.PI * 2);
-  ctx.stroke();
+    // Anel sutil de energia cintilante no chão
+    ctx.strokeStyle = auraColor;
+    ctx.lineWidth = 1.2;
+    ctx.globalAlpha = 0.45 * pulse;
+    ctx.beginPath();
+    ctx.ellipse(0, 13, 15 * pulse, 5.8 * pulse, 0, 0, Math.PI * 2);
+    ctx.stroke();
 
-  // Halo esférico ambiente ao redor do corpo
-  ctx.globalAlpha = 1.0;
-  const bodyGrad = ctx.createRadialGradient(0, -2, 3, 0, -2, 22 * pulse);
-  bodyGrad.addColorStop(0, `${auraColor}38`);
-  bodyGrad.addColorStop(0.6, `${auraColor}15`);
-  bodyGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-  ctx.fillStyle = bodyGrad;
-  ctx.beginPath();
-  ctx.arc(0, -2, 22 * pulse, 0, Math.PI * 2);
-  ctx.fill();
+    // Halo esférico ambiente ao redor do corpo
+    ctx.globalAlpha = 1.0;
+    const bodyGrad = ctx.createRadialGradient(0, -2, 3, 0, -2, 22 * pulse);
+    bodyGrad.addColorStop(0, `${auraColor}38`);
+    bodyGrad.addColorStop(0.6, `${auraColor}15`);
+    bodyGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    ctx.fillStyle = bodyGrad;
+    ctx.beginPath();
+    ctx.arc(0, -2, 22 * pulse, 0, Math.PI * 2);
+    ctx.fill();
+  }
 
   ctx.restore();
 
@@ -757,53 +759,68 @@ export function drawSirenTower(ctx, now, isBossAlive = false) {
   const tW = 62;
   const tH = 144;
   const tX = 149;
-  const groundY = 340; // Nível exato do solo onde as botas tocam o gramado
-  const tY = groundY - tH;
+  const tY = 196; // tY fixado para tH = 144
 
-  // 1. Sombras realistas com contato físico direto nas 4 sapatas (elimina qualquer efeito de flutuação)
+  // Coordenadas físicas exatas da base de cada uma das sapatas metálicas da torre (medidas no sprite 158x371)
+  const footLeftX = tX + tW * (20 / 158);       // ~156.8
+  const footLeftY = tY + tH * (358 / 371);      // ~335.0
+  const footCenterX = tX + tW * (73 / 158);     // ~177.6
+  const footCenterY = tY + tH * (370 / 371);    // ~339.6
+  const footRightX = tX + tW * (136 / 158);     // ~202.4
+  const footRightY = tY + tH * (360 / 371);     // ~335.7
+  const footBackX = tX + tW * (92 / 158);       // ~185.1
+  const footBackY = tY + tH * (336 / 371);      // ~326.3
+
+  // 1. Sombras realistas de contato direto e ancoragem física no solo (elimina qualquer efeito de flutuação)
   ctx.save();
   
-  // 1.1. Sombra direcional difusa projetada para sudeste (alinhada à iluminação da cidade)
-  ctx.fillStyle = 'rgba(5, 20, 5, 0.38)';
+  // 1.1. Sombra suave difusa projetada para sudeste (alinhada à iluminação do sol no gramado)
+  ctx.fillStyle = 'rgba(5, 20, 5, 0.35)';
   ctx.beginPath();
-  ctx.ellipse(tX + tW * 0.62, groundY + 1, tW * 0.46, 8.5, 0.12, 0, Math.PI * 2);
+  ctx.ellipse(tX + tW * 0.52, tY + tH * 0.955, tW * 0.48, 6.5, 0.08, 0, Math.PI * 2);
   ctx.fill();
 
-  // 1.2. Oclusão de ambiente escura sob a base da estrutura
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.32)';
+  // 1.2. Oclusão de ambiente escura no solo sob a base da estrutura
+  ctx.fillStyle = 'rgba(0, 10, 0, 0.45)';
   ctx.beginPath();
-  ctx.ellipse(tX + tW * 0.50, groundY - 1, tW * 0.38, 7.0, 0, 0, Math.PI * 2);
+  ctx.ellipse(tX + tW * 0.48, tY + tH * 0.945, tW * 0.38, 5.0, 0.05, 0, Math.PI * 2);
   ctx.fill();
 
-  // 1.3. 4 Sombras de oclusão de contato direto sob as 4 sapatas da torre
-  // As sapatas desenham por cima dessas elipses, ancorando os pés com zero folga no chão
-  ctx.fillStyle = 'rgba(0, 10, 0, 0.95)';
+  // 1.3. Sombras de oclusão de contato direto sob as 4 sapatas (ancoragem física precisa sem folga)
+  ctx.fillStyle = 'rgba(0, 8, 0, 0.92)';
+
+  // Sapata traseira
+  ctx.beginPath();
+  ctx.ellipse(footBackX, footBackY + 0.5, 5.5, 2.2, 0, 0, Math.PI * 2);
+  ctx.fill();
 
   // Sapata frontal esquerda
   ctx.beginPath();
-  ctx.ellipse(tX + tW * 0.12, groundY - 0.5, 8.5, 3.2, 0, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Sapata frontal centro
-  ctx.beginPath();
-  ctx.ellipse(tX + tW * 0.52, groundY, 9.5, 3.6, 0, 0, Math.PI * 2);
+  ctx.ellipse(footLeftX, footLeftY + 0.5, 8.0, 3.0, 0.05, 0, Math.PI * 2);
   ctx.fill();
 
   // Sapata frontal direita
   ctx.beginPath();
-  ctx.ellipse(tX + tW * 0.88, groundY - 0.5, 8.5, 3.2, 0, 0, Math.PI * 2);
+  ctx.ellipse(footRightX, footRightY + 0.5, 8.5, 3.2, 0.05, 0, Math.PI * 2);
   ctx.fill();
 
-  // Sapata traseira (em perspectiva ligeiramente recuada)
-  ctx.fillStyle = 'rgba(0, 10, 0, 0.88)';
+  // Sapata frontal centro
   ctx.beginPath();
-  ctx.ellipse(tX + tW * 0.34, groundY - 3.5, 6.5, 2.6, 0, 0, Math.PI * 2);
+  ctx.ellipse(footCenterX, footCenterY + 0.5, 9.5, 3.5, 0, 0, Math.PI * 2);
   ctx.fill();
 
   ctx.restore();
 
-  // 2. Desenho da Torre em Alta Resolução (pés tocam exatamente em groundY)
+  // 2. Desenho da Torre em Alta Resolução (pés ancorados exatamente sobre suas sombras)
   ctx.drawImage(sirenTowerImg, tX, tY, tW, tH);
+
+  // 2.1. Oclusão de contato na quina frontal da sapata central para perfeita ancoragem no solo
+  ctx.save();
+  ctx.fillStyle = 'rgba(0, 10, 0, 0.60)';
+  ctx.beginPath();
+  ctx.ellipse(footCenterX, footCenterY, 7.5, 1.8, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
 
   // 3. Efeito da Sirene e Luz Giratória Vermelha no Topo da Torre
   const beaconX = tX + tW * 0.50;
@@ -840,15 +857,16 @@ export function drawSirenTower(ctx, now, isBossAlive = false) {
     drawBeam(sirenAngle + Math.PI, beamLength, 0.85);
 
     // 3.2. Reflexos gêmeos da luz no solo do gramado para ambos os lados
+    const groundReflectY = tY + tH * 0.96;
     const drawGroundReflection = (ang) => {
-      const gx = beaconX + Math.cos(ang) * 75;
-      const gy = groundY + Math.sin(ang) * 16;
-      const gGrad = ctx.createRadialGradient(gx, gy, 2, gx, gy, 46);
-      gGrad.addColorStop(0, 'rgba(239, 68, 68, 0.30)');
+      const gx = beaconX + Math.cos(ang) * 65;
+      const gy = groundReflectY + Math.sin(ang) * 9;
+      const gGrad = ctx.createRadialGradient(gx, gy, 2, gx, gy, 38);
+      gGrad.addColorStop(0, 'rgba(239, 68, 68, 0.28)');
       gGrad.addColorStop(1, 'rgba(239, 68, 68, 0)');
       ctx.fillStyle = gGrad;
       ctx.beginPath();
-      ctx.ellipse(gx, gy, 46, 16, 0, 0, Math.PI * 2);
+      ctx.ellipse(gx, gy, 38, 12, 0, 0, Math.PI * 2);
       ctx.fill();
     };
     drawGroundReflection(sirenAngle);

@@ -104,9 +104,9 @@ export default function MinerCatalogModal({ isOpen, onClose, onOpenMintModal }) 
                       <div 
                         className="w-12 h-12 rounded-xl border-2 flex items-center justify-center text-2xl shadow-inner overflow-hidden relative shrink-0"
                         style={{ 
-                          borderColor: m.color,
-                          backgroundColor: `${m.color}20`,
-                          boxShadow: `0 0 8px ${m.color}40`
+                          borderColor: m.hasBorderColor === false ? '#334155' : m.color,
+                          backgroundColor: m.hasBorderColor === false ? 'rgba(30, 41, 59, 0.4)' : `${m.color}20`,
+                          boxShadow: m.hasBorderColor === false ? 'none' : `0 0 8px ${m.color}40`
                         }}
                       >
                         {m.image ? (
@@ -175,10 +175,10 @@ export default function MinerCatalogModal({ isOpen, onClose, onOpenMintModal }) 
                   <div 
                     className="w-24 h-24 rounded-3xl border-2 flex items-center justify-center text-5xl shadow-2xl overflow-hidden relative shrink-0 ring-2"
                     style={{ 
-                      borderColor: selectedMiner.color,
-                      backgroundColor: `${selectedMiner.color}15`,
-                      ringColor: `${selectedMiner.color}50`,
-                      boxShadow: `0 0 20px ${selectedMiner.color}30`
+                      borderColor: selectedMiner.hasBorderColor === false ? '#334155' : selectedMiner.color,
+                      backgroundColor: selectedMiner.hasBorderColor === false ? 'rgba(30, 41, 59, 0.4)' : `${selectedMiner.color}15`,
+                      ringColor: selectedMiner.hasBorderColor === false ? 'transparent' : `${selectedMiner.color}50`,
+                      boxShadow: selectedMiner.hasBorderColor === false ? 'none' : `0 0 20px ${selectedMiner.color}30`
                     }}
                   >
                     {selectedMiner.image ? (

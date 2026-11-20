@@ -38,35 +38,38 @@ export const RARITY_CONFIG = {
   rare: {
     id: 'rare',
     name: 'Raro',
-    color: '#38bdf8', // Borda Azul
-    border: '#38bdf8',
-    glowColor: 'rgba(56, 189, 248, 0.45)',
-    auraColor: 'rgba(56, 189, 248, 0.55)',
-    badgeBg: 'rgba(56, 189, 248, 0.2)',
-    badgeText: '#38bdf8',
-    badgeBorder: 'rgba(56, 189, 248, 0.45)'
-  },
-  super_rare: {
-    id: 'super_rare',
-    name: 'Super Raro',
-    color: '#eab308', // Borda Amarela
-    border: '#eab308',
-    glowColor: 'rgba(234, 179, 8, 0.50)',
-    auraColor: 'rgba(234, 179, 8, 0.60)',
-    badgeBg: 'rgba(234, 179, 8, 0.22)',
-    badgeText: '#fde047',
-    badgeBorder: 'rgba(234, 179, 8, 0.50)'
-  },
-  common: {
-    id: 'common',
-    name: 'Comum',
     color: '#22c55e', // Borda Verde
     border: '#22c55e',
+    hasBorderColor: true,
     glowColor: 'rgba(34, 197, 94, 0.45)',
     auraColor: 'rgba(34, 197, 94, 0.55)',
     badgeBg: 'rgba(34, 197, 94, 0.2)',
     badgeText: '#4ade80',
-    badgeBorder: 'rgba(34, 197, 94, 0.45)'
+    badgeBorder: '#22c55e'
+  },
+  super_rare: {
+    id: 'super_rare',
+    name: 'Super Raro',
+    color: '#38bdf8', // Borda Azul
+    border: '#38bdf8',
+    hasBorderColor: true,
+    glowColor: 'rgba(56, 189, 248, 0.50)',
+    auraColor: 'rgba(56, 189, 248, 0.60)',
+    badgeBg: 'rgba(56, 189, 248, 0.22)',
+    badgeText: '#38bdf8',
+    badgeBorder: '#38bdf8'
+  },
+  common: {
+    id: 'common',
+    name: 'Comum',
+    color: '#475569', // Sem cor de borda (borda neutra de ardósia escuro)
+    border: '#334155',
+    hasBorderColor: false,
+    glowColor: 'transparent',
+    auraColor: 'transparent',
+    badgeBg: 'rgba(100, 116, 139, 0.18)',
+    badgeText: '#94a3b8',
+    badgeBorder: '#475569'
   }
 };
 

@@ -113,7 +113,7 @@ export default function HeroList({
         <div className="flex items-center gap-3">
           {/* Avatar da Médica Íris (Borda Branca e Enquadramento Padrão Idêntico aos Combatentes) */}
           <div 
-            className="w-13 h-13 rounded-2xl border-2 shadow-lg shrink-0 bg-slate-900/90 flex items-center justify-center overflow-hidden transition-all duration-300"
+            className="w-[52px] h-[52px] rounded-2xl border-2 shadow-lg shrink-0 bg-slate-900/90 flex items-center justify-center overflow-hidden transition-all duration-300"
             title="Dra. Íris (Médica do Abrigo)"
             style={{
               borderColor: '#ffffff',
@@ -174,11 +174,11 @@ export default function HeroList({
                 <div className="flex items-center gap-2 shrink-0">
                   {/* Avatar do Herói (Borda com a Cor Oficial da Raridade) */}
                   <div 
-                    className="w-13 h-13 rounded-2xl border-2 shadow-lg shrink-0 bg-slate-900/90 flex items-center justify-center overflow-hidden transition-all duration-300"
+                    className="w-[52px] h-[52px] rounded-2xl border-2 shadow-lg shrink-0 bg-slate-900/90 flex items-center justify-center overflow-hidden transition-all duration-300"
                     title={`${rosterHero.name} (${rarityConfig.name})`}
                     style={{
-                      borderColor: rarityConfig.color,
-                      boxShadow: `0 0 10px ${rarityConfig.glowColor}`,
+                      borderColor: rarityConfig.hasBorderColor === false ? '#334155' : rarityConfig.color,
+                      boxShadow: rarityConfig.hasBorderColor === false ? 'none' : `0 0 10px ${rarityConfig.glowColor}`,
                       backgroundImage: 'url(/assets/hero-avatars.png?v=4)',
                       backgroundRepeat: 'no-repeat',
                       backgroundSize: '676px 52px',
@@ -189,7 +189,7 @@ export default function HeroList({
 
                   {/* Thumbnail da Arma (Quadro com Borda Branca Destacada e Contorno Luminoso) */}
                   <div 
-                    className="w-13 h-13 rounded-2xl border-2 bg-slate-900/90 flex flex-col items-center justify-center shrink-0 shadow-md group hover:border-white transition-all duration-300 overflow-hidden"
+                    className="w-[52px] h-[52px] rounded-2xl border-2 bg-slate-900/90 flex flex-col items-center justify-center shrink-0 shadow-md group hover:border-white transition-all duration-300 overflow-hidden"
                     title={`${rosterWeapon?.name || 'Sem arma'} (${rosterWeapon?.category || ''})`}
                     style={{
                       borderColor: '#ffffff',
