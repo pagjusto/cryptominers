@@ -19,7 +19,7 @@ export const GEAR_TYPES = {
     name: 'Capacete / Elmo',
     icon: '🪖',
     slotLabel: 'Capacete',
-    desc: 'Bônus temporariamente desativado enquanto a estamina estiver fora do jogo'
+    desc: 'Efeito temporariamente indisponível'
   },
   amulet: {
     id: 'amulet',
