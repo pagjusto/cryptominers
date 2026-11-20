@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Save, RotateCcw, AlertTriangle, CheckCircle2, Sliders, Shield, DollarSign, Home, Layers, Sparkles, Zap, Tv } from 'lucide-react';
-import { getCriptoMynersConfig, saveCriptoMynersConfig, resetCriptoMynersConfig, DEFAULT_CRIPTO_MYNERS_CONFIG } from '../data/criptoMynersConfig';
+import { getCryptoZombiesConfig, saveCryptoZombiesConfig, resetCryptoZombiesConfig, DEFAULT_CRYPTO_ZOMBIES_CONFIG } from '../data/cryptoZombiesConfig';
 import AdminAdsMonetizationTab from './AdminAdsMonetizationTab';
 import AdminConstructionChestsTab from './AdminConstructionChestsTab';
 import AdminIndividualMapsTab from './AdminIndividualMapsTab';
@@ -11,14 +11,14 @@ export default function AdminConfigModal({
   onConfigUpdated,
   miners = []
 }) {
-  const [config, setConfig] = useState(() => getCriptoMynersConfig());
+  const [config, setConfig] = useState(() => getCryptoZombiesConfig());
   const [activeTab, setActiveTab] = useState('chests'); // 'chests' | 'houses' | 'rarities' | 'general'
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
 
   useEffect(() => {
     if (isOpen) {
-      setConfig(getCriptoMynersConfig());
+      setConfig(getCryptoZombiesConfig());
       setSaveSuccess(false);
       setValidationErrors({});
     }
@@ -119,7 +119,7 @@ export default function AdminConfigModal({
       return;
     }
 
-    saveCriptoMynersConfig(config);
+    saveCryptoZombiesConfig(config);
     setSaveSuccess(true);
     if (onConfigUpdated) onConfigUpdated(config);
     setTimeout(() => setSaveSuccess(false), 2500);
@@ -127,7 +127,7 @@ export default function AdminConfigModal({
 
   const handleReset = () => {
     if (window.confirm('Deseja restaurar todos os parâmetros para os valores originais da especificação?')) {
-      const def = resetCriptoMynersConfig();
+      const def = resetCryptoZombiesConfig();
       setConfig(def);
       setValidationErrors({});
       if (onConfigUpdated) onConfigUpdated(def);
