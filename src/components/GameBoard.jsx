@@ -310,7 +310,7 @@ export default function GameBoard({
             } else {
               // Abate do zumbi concluído: recompensa e texto flutuante
               state.floatTexts.push({
-                text: '🧟 +HORDA (+0.05 MNC)',
+                text: '🧟 +ZUMBI (+0.05 MNC)',
                 x: bx * TILE_SIZE + TILE_SIZE / 2,
                 y: by * TILE_SIZE - 8,
                 color: '#a3e635',

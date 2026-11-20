@@ -796,13 +796,13 @@ export function drawEnemyCharacter(ctx, enemy, now) {
     ctx.fillStyle = grad;
     ctx.fillRect(barX, barY, barW * hpRatio, barH);
 
-    // Tag '💀 BOSS'
+    // Tag '💀 BOSS' (REGRA OFICIAL DO USUÁRIO: "remova a descrição de 30/30 do boss")
     ctx.font = 'bold 8.5px var(--font-arcade, sans-serif)';
     ctx.fillStyle = '#fca5a5';
     ctx.textAlign = 'center';
     ctx.shadowColor = '#000000';
     ctx.shadowBlur = 4;
-    ctx.fillText(`💀 BOSS (${Math.ceil(enemy.hp)}/30)`, px, barY - 3);
+    ctx.fillText('💀 BOSS', px, barY - 3);
     ctx.restore();
   } else if (hpRatio < 1.0) {
     // Mini Barra de Vida para Zumbis danificados
