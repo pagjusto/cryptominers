@@ -985,7 +985,7 @@ export default function UserProfileModal({
                       <span>Como funciona a taxa de saque?</span>
                     </div>
                     <p>
-                      Inspirada no modelo sustentável do Bomb Crypto: jogadores com ROI inicial pagam taxa reduzida (10%); conforme o lucro acumulado ultrapassa 100%, 200% ou 300% do investimento inicial, a taxa escala progressivamente até 30%, alimentando o tesouro da mina e garantindo longevidade ao jogo.
+                      Inspirada no modelo econômico do CryptoZombies: jogadores com ROI inicial pagam taxa reduzida (10%); conforme o lucro acumulado ultrapassa 100%, 200% ou 300% do investimento inicial, a taxa escala progressivamente até 30%, alimentando o tesouro da mina e garantindo longevidade ao jogo.
                     </p>
                   </div>
 
