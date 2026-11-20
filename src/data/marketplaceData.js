@@ -1,4 +1,4 @@
-// Dados Iniciais e Estrutura do Marketplace P2P do Cripto Myners
+// Dados Iniciais e Estrutura do Marketplace P2P do CryptoZombies
 // Comissão oficial do jogo: exatamente 5% sobre cada venda (95% Vendedor, 5% Jogo)
 
 export const MARKETPLACE_FEE_PCT = 5;
