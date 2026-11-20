@@ -83,7 +83,7 @@ export default function GameBoard({
     if (alertTimeoutRef.current) clearTimeout(alertTimeoutRef.current);
     alertTimeoutRef.current = setTimeout(() => {
       setBossAlert(false);
-    }, 2800);
+    }, 4600);
   }, []);
 
   useEffect(() => {
