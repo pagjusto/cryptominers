@@ -21,7 +21,7 @@ Este documento registra as regras de gameplay aprovadas para o sistema de sobrev
 - Durante o Boss, só é permitido substituir um sobrevivente que ficou ferido e foi enviado ao ambulatório.
 - Não é permitido retirar um sobrevivente saudável para colocar outro durante o Boss.
 - A substituição pode ser feita manualmente pelo jogador ou automaticamente pelo médico contratado.
-- O sobrevivente substituto pode combater normalmente, mas não recebe participação no sorteio do Baú de Construção daquele Boss.
+- O sobrevivente substituto pode combater normalmente, mas não recebe participação no sorteio do Baú do Boss daquele Boss.
 
 ## Participação no sorteio do Boss
 
@@ -75,4 +75,4 @@ Este documento registra as regras de gameplay aprovadas para o sistema de sobrev
 
 - Cada batalha dura 5 minutos.
 - O Boss é encerrado automaticamente ao fim dos 5 minutos.
-- A regra de participação acima é aplicada ao sorteio de Baú de Construção do evento.
+- A regra de participação acima é aplicada ao sorteio de Baú do Boss do evento.
