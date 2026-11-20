@@ -1,4 +1,4 @@
-// CRIPTO MYNERS — SISTEMA OFICIAL DE ABRIGOS
+// CRYPTOZOMBIES — SISTEMA OFICIAL DE ABRIGOS
 // 4 categorias de abrigo para tratamento e recuperação da vida dos sobreviventes:
 // - Básica: Capacidade 5, Velocidade 100%
 // - Reforçada: Capacidade 10, Velocidade 125%
