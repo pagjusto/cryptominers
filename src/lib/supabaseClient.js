@@ -1,5 +1,5 @@
 // ============================================================================
-// CRIPTO MYNERS — CLIENTE OFICIAL DO SUPABASE
+// CRYPTOZOMBIES — CLIENTE OFICIAL DO SUPABASE
 // ============================================================================
 
 import { createClient } from '@supabase/supabase-js';
