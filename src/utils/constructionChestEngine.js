@@ -6,7 +6,7 @@
 // - Limite diário por jogador de no máximo 3 Baús do Boss por dia
 // - Renovação diária à meia-noite no horário de Brasília (America/Sao_Paulo)
 // - Recebimento automático no inventário sem necessidade de clicar no mapa
-// - Recompensas do Baú do Boss: Fragmentos de Construção, poções e chance de Baú de Herói; parâmetros de recompensa ainda em consolidação
+// - Recompensas ao abrir: 45% fragmento, 45% poção, 10% ambos; Baú de Herói adicional independente de 5%
 // - Registro de auditoria administrativa e proteção contra duplicação/fraudes
 
 export const DEFAULT_CONSTRUCTION_CHEST_CONFIG = {
@@ -23,7 +23,7 @@ export const DEFAULT_CONSTRUCTION_CHEST_CONFIG = {
   cycleDurationSeconds: 0,      // Sem ciclo horário; sorteio a cada Boss derrotado
   dailyLimitPerPlayer: 3,       // Máximo de 3 baús por dia
   timezone: 'America/Sao_Paulo',// Horário oficial de Brasília
-  rewardFragmentCount: 1        // Exatamente 1 Fragmento de Construção por baú
+  rewardFragmentCount: 1        // Quantidade concedida quando o sorteio inclui Fragmento
 };
 
 const DAILY_STORAGE_KEY = 'cripto_myners_construction_daily_v1';
@@ -435,8 +435,9 @@ export function executeConstructionBossRoll(miners = [], config = DEFAULT_CONSTR
 export const executeConstructionCycleRoll = executeConstructionBossRoll;
 
 /**
- * Abre um Baú de Construção do inventário de forma idempotente e segura
- * Cada baú entrega exatamente 1 Fragmento de Construção.
+ * Abre um Baú do Boss e concede as recompensas oficiais.
+ * Recompensa principal: 45% fragmento, 45% poção, 10% ambos.
+ * Baú de Herói: chance adicional e independente de 5%.
  */
 export function openConstructionChestById(chestId) {
   if (typeof window === 'undefined') return { success: false, message: 'Janela indisponível' };
@@ -445,39 +446,56 @@ export function openConstructionChestById(chestId) {
   const targetIndex = chests.findIndex(c => c.id === chestId);
 
   if (targetIndex === -1) {
-    return { success: false, message: 'Baú de Construção não encontrado no inventário.' };
+    return { success: false, message: 'Baú do Boss não encontrado no inventário.' };
   }
 
   const targetChest = chests[targetIndex];
   if (targetChest.opened) {
-    return { success: false, message: 'Este Baú de Construção já foi aberto anteriormente.' };
+    return { success: false, message: 'Este Baú do Boss já foi aberto anteriormente.' };
   }
 
-  // Remove o baú do inventário ou marca como aberto
-  const updatedChests = chests.filter(c => c.id !== chestId);
+  // Sorteios independentes: um resultado principal garantido e chance extra de Baú de Herói.
+  const mainRoll = Math.random();
+  const fragmentGranted = mainRoll < 0.45 || mainRoll >= 0.90;
+  const potionGranted = mainRoll >= 0.45;
+  const heroChestGranted = Math.random() < 0.05;
+
+  // Consome exatamente uma unidade do inventário.
+  const updatedChests = chests.filter((c, index) => index !== targetIndex);
   saveStoredConstructionChests(updatedChests);
 
-  // Adiciona exatamente 1 Fragmento de Construção
   const currentFragments = getStoredConstructionFragments();
-  const nextFragments = currentFragments + 1;
-  saveStoredConstructionFragments(nextFragments);
+  const nextFragments = currentFragments + (fragmentGranted ? 1 : 0);
+  if (fragmentGranted) saveStoredConstructionFragments(nextFragments);
 
-  // Registra no histórico
+  const rewardParts = [];
+  if (fragmentGranted) rewardParts.push('1 Fragmento de Construção');
+  if (potionGranted) rewardParts.push('1 Poção do Rejuvenecimento');
+  if (heroChestGranted) rewardParts.push('1 Baú de Herói');
+
   addConstructionHistoryEntry({
     id: `OPEN-${Date.now().toString(36).toUpperCase()}`,
     timestamp: getBrasiliaTimeString(),
     type: 'CHEST_OPENED',
     chestId,
-    fragmentsGranted: 1,
-    result: `Baú de Construção aberto: +1 Fragmento de Construção (Total: ${nextFragments})`
+    fragmentsGranted: fragmentGranted ? 1 : 0,
+    potionsGranted: potionGranted ? 1 : 0,
+    heroChestsGranted: heroChestGranted ? 1 : 0,
+    mainRoll,
+    heroChestRoll: heroChestGranted,
+    result: `Baú do Boss aberto: ${rewardParts.join(' + ')}`
   });
 
   return {
     success: true,
     chestId,
-    fragmentCountAdded: 1,
+    fragmentGranted,
+    potionGranted,
+    heroChestGranted,
+    fragmentCountAdded: fragmentGranted ? 1 : 0,
     totalFragments: nextFragments,
-    updatedChests
+    updatedChests,
+    rewardParts
   };
 }
 
