@@ -58,6 +58,7 @@ import { getCryptoZombiesConfig } from './data/cryptoZombiesConfig';
 import { 
   DEFAULT_CONSTRUCTION_CHEST_CONFIG,
   calculateActiveMinersChance,
+  executeConstructionBossRoll,
   getDailyConstructionStats,
   getStoredConstructionChests,
   saveStoredConstructionChests,
@@ -504,6 +505,26 @@ export default function App() {
       return `🔄 Ciclo iniciado: Boss removido agora e retornará em ${delayMs}ms com alerta e torre.`;
     };
   }, [activePlayerId]);
+
+  // Executa o sorteio oficial quando o Boss é derrotado.
+  // A lista recebida já contém apenas sobreviventes da equipe registrada no início da batalha.
+  const handleBossDefeated = ({ bossId, participants = [] }) => {
+    const result = executeConstructionBossRoll(participants, DEFAULT_CONSTRUCTION_CHEST_CONFIG, {
+      bossId,
+      eventType: 'boss_defeat'
+    });
+    if (result?.won) {
+      console.info('[CryptoZombies] Baú do Boss concedido', { bossId, chestId: result.chest?.id });
+    } else {
+      console.info('[CryptoZombies] Sorteio do Boss concluído sem concessão', {
+        bossId,
+        reason: result?.reason || 'not_won',
+        chance: result?.activeChance?.finalChance ?? 0,
+        roll: result?.roll
+      });
+    }
+    return result;
+  };
 
   // Abrir Baú do Boss e integrar todas as recompensas ao inventário persistente.
   const handleOpenConstructionChest = (chestId) => {
@@ -1744,6 +1765,7 @@ export default function App() {
                     }));
                   }
                 }}
+                onBossDefeated={handleBossDefeated}
                 onMinersChange={setMiners}
                 onCollectBcoin={handleCollectBcoin}
                 onRescueMiner={handleRescueMiner}
