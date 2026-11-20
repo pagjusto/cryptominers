@@ -127,6 +127,34 @@ Aos 270 dias, o herói chega a 80 anos, tem eficiência-base 0%, HP 0% e se apos
 - Esta regra de combate é distinta da redução gradual do HP máximo causada pelo envelhecimento.
 - O método, a duração e o custo da recuperação no ambulatório ainda não foram definidos.
 
+## Recuperação de heróis no ambulatório
+
+**Tabela de recuperação confirmada pelo usuário.** Quando um herói sofre dano durante a partida e seu HP chega a 5%, ele é retirado do combate e encaminhado automaticamente ao ambulatório para recuperar os 95% de HP perdidos.
+
+| Raridade | HP recuperado | Abrigo Básico | Abrigo Reforçado | Abrigo Avançado |
+|---|---:|---:|---:|---:|
+| Comum | 7.579 HP | 2h | 1h36 | 1h20 |
+| Raro | 9.095 HP | 2h24 | 1h55 | 1h36 |
+| Super Raro | 11.368 HP | 3h | 2h24 | 2h |
+| Épico | 12.992 HP | 3h26 | 2h45 | 2h17 |
+| Lendário | 15.158 HP | 4h | Não definido | Não definido |
+| Super Lendário | 18.189 HP | 4h48 | Não definido | Não definido |
+
+### Regras de capacidade e fila
+
+- A equipe de combate possui **15 vagas**.
+- O ambulatório possui **15 vagas independentes**.
+- Se o ambulatório estiver cheio, os heróis feridos aguardam em fila FIFO (primeiro que entra, primeiro que sai).
+- O encaminhamento do herói ao ambulatório acontece automaticamente ao atingir 5% de HP.
+
+### Velocidade de recuperação por abrigo
+
+- Abrigo Básico: tempo de referência.
+- Abrigo Reforçado: recuperação 25% mais rápida.
+- Abrigo Avançado: recuperação 50% mais rápida.
+
+**Pendência de dados:** os tempos para Lendário e Super Lendário nos abrigos Reforçado e Avançado não constavam na tabela recuperada e permanecem sem definição. Não estimar nem preencher esses valores sem aprovação.
+
 ## Observações de balanceamento
 
 - Estes números representam a base do cenário mediano com mineração válida durante 24 horas.
