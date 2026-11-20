@@ -8,15 +8,10 @@
 
 ## 🌟 Principais Funcionalidades
 
-### 1. 🗺️ Mapas Individuais & Jazidas Dinâmicas
-- **Mapas Isolados**: Cada jogador possui seu próprio mapa exclusivo associado à sua conta, garantindo independência total de ciclo e desempenho para milhares de usuários simultâneos.
-- **Geração de Jazidas (Até 20 simultâneas)**:
-  - 🪨 **Pedra**: 50%
-  - 🪙 **Ouro**: 25%
-  - 💎 **Diamante**: 17%
-  - ❇️ **Esmeralda**: 8%
-- **Desacoplamento Visual vs Econômico**: As jazidas são elementos visuais dinâmicos de ambientação. A economia é calculada no motor de mineração independente da aparência visual da jazida.
-- **Renovação Contínua de Ciclos**: Ao concluir o trabalho nas 20 jazidas, um novo ciclo se inicia automaticamente com novas posições aleatórias sem colisões.
+### 1. 🗺️ Mapas e sobrevivência
+- **Mapas individuais**: Cada jogador possui seu próprio mapa associado à conta.
+- **Sobrevivência contra zumbis**: A experiência de jogo é centrada no combate e na sobrevivência contra hordas de zumbis.
+- **Sem sistema de jazidas**: As antigas mecânicas de jazidas de recursos não fazem mais parte da versão atual do jogo.
 
 ### 2. 💰 Economia Oficial da Minercoin (MNC)
 - **Cotação Oficial do Projeto**: **1 MNC = US$ 0,01** (100 MNC = US$ 1,00).
@@ -33,10 +28,11 @@
 - **Revezamento Automático**: Heróis sem energia descansam automaticamente e dão lugar aos heróis recuperados da reserva.
 
 ### 4. 📦 Sistema de Baús de Construção & Fragmentos
-- **Aparição Automática**: A cada 1 hora de mineração válida, calcula a chance de drop baseada nos heróis ativos.
-- **Teto de Probabilidade**: Máximo de **10% de chance por conta** em cada ciclo de 1 hora.
-- **Limite Diário**: Máximo de **3 Baús de Construção por dia** por jogador, com renovação à meia-noite (horário de Brasília - America/Sao_Paulo).
-- **Recompensa Garantida**: Cada baú concede **1 Fragmento de Construção**, utilizado na evolução das casas.
+- **Sorteio por Boss**: O sorteio de Baú de Construção é realizado ao término de cada batalha contra o Boss.
+- **Elegibilidade**: Participam do sorteio os sobreviventes registrados na equipe no início da batalha, conforme as regras de participação do Boss. Sobreviventes que entram como substitutos durante o evento não participam daquele sorteio.
+- **Teto de probabilidade**: A chance total por jogador é limitada a **40% por Boss**.
+- **Limite diário**: Máximo de **3 Baús de Construção por dia** por jogador, com renovação à meia-noite (horário de Brasília - America/Sao_Paulo).
+- **Recompensa**: Cada baú concede **1 Fragmento de Construção**, utilizado na evolução das casas.
 
 ### 5. 🏡 Casas de Repouso
 - Aceleração da recuperação de energia dos heróis.
@@ -108,8 +104,7 @@ npm test
 ### Cobertura dos Testes:
 - ✅ Cotação oficial `1 MNC = US$ 0,01` e cálculos de breakeven.
 - ✅ Escala de taxas de saque regressivas (15%, 10%, 5%).
-- ✅ Mapas individuais e isolamento de ciclo entre jogadores.
-- ✅ Distribuição Monte Carlo das 4 jazidas (Pedra 50%, Ouro 25%, Diamante 17%, Esmeralda 8%).
+- ✅ Mapas individuais e isolamento entre jogadores.
 - ✅ Suporte a 1.000 jogadores simultâneos gerando mapas em menos de 600ms.
 
 ---
