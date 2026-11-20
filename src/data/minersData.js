@@ -17,7 +17,7 @@ export const BLOCK_DEPOSIT_EMERALD = 8; // Jazida oficial de esmeralda verde (8%
 export const BLOCK_ZOMBIE = 9; // Zumbi oficial (substitui as jazidas com movimento e ataque)
 export const BLOCK_BOSS = 10; // Boss oficial (substitui o baú de tesouro com movimento e ataque)
 
-// As 6 Classes de Personagens (Elenco Oficial Bomb Crypto: Criaturas & Fantasia)
+// As 6 Classes de Personagens (Elenco de personagens CryptoZombies: Criaturas & Fantasia)
 export const MINER_CLASSES = {
   miner: {
     id: 'miner',
@@ -55,7 +55,7 @@ export const MINER_CLASSES = {
     baseSpeed: 2.1,
     baseStamina: 90,
     specialty: 'Arremesso de Kunai: crítico ácido veloz e +50% bônus em BCOIN',
-    description: 'O clássico ninja do Bomb Crypto! Sapinho anfíbio veloz com bandana preta que arremessa velozes Kunais de veneno ácido cortante com impacto perfurante.',
+    description: 'O ninja clássico do CryptoZombies! Sapinho anfíbio veloz com bandana preta que arremessa velozes Kunais de veneno ácido cortante com impacto perfurante.',
     chance: 0.10
   },
   engineer: {
