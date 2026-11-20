@@ -32,6 +32,8 @@ Este documento registra as regras de gameplay aprovadas para o sistema de sobrev
 - Sobreviventes que entram como substitutos depois do início do Boss não recebem participação naquele sorteio.
 - Retornar ao combate durante o mesmo evento não gera participação adicional.
 - Cada sobrevivente inicial pode contar no máximo uma vez.
+- Validação obrigatória na engine: o sorteio real aceita exclusivamente sobreviventes identificados no snapshot imutável da equipe inicial (bossSnapshotParticipant) e confirmados vivos no encerramento (isAliveAtBossEnd e vida maior que zero). O status atual — combate, ambulatório, fila ou reserva — não altera essa elegibilidade. Sobreviventes sem snapshot, inclusive substitutos, são excluídos.
+- Trabalhadores atuais sem snapshot só podem aparecer em prévias e simulações administrativas explicitamente marcadas como simulação; esse caminho não é usado no sorteio real.
 
 ## Bloqueios enquanto o Boss estiver vivo
 
