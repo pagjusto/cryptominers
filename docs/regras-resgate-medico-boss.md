@@ -78,19 +78,18 @@ Este documento registra as regras de gameplay aprovadas para o sistema de sobrev
 - A regra de participação acima é aplicada ao sorteio de Baú do Boss do evento.
 
 
-## Sorteio de poções por Boss
+## Recompensas do Baú do Boss
 
-- O sorteio de poções usa as mesmas chances individuais por raridade definidas para o Baú do Boss: Comum **2%**, Raro **2,2%**, Super Raro **2,3%**, Épico **2,4%**, Lendário **2,6667%** e Super Lendário **3%** por sobrevivente elegível.
-- A soma das contribuições dos sobreviventes elegíveis fica limitada a **40% por jogador em cada Boss**.
-- Limite diário: **4 poções por jogador**, com renovação à meia-noite no horário de Brasília (America/Sao_Paulo).
-- A elegibilidade considera a equipe registrada no início da batalha, conforme as regras de participação do Boss; substitutos que entram durante o evento não participam do sorteio daquele Boss.
-- Cada sorteio de poção bem-sucedido concede **exatamente 1 poção** ao jogador.
-- A poção concedida nesse sorteio é a **Poção do Rejuvenecimento**.
+- O sorteio realizado após a derrota do Boss determina se o jogador recebe um **Baú do Boss**; quando recebido, o baú é enviado ao inventário.
+- O jogador abre o Baú do Boss pelo inventário, e as recompensas são concedidas nesse momento.
+- As recompensas possíveis dentro do Baú do Boss incluem **Fragmentos de Construção**, **Poção do Rejuvenecimento** e a possibilidade de obter um **Baú de Herói**.
+- A **Poção do Rejuvenecimento não é concedida por um sorteio independente após a batalha**; ela é uma possível recompensa na abertura do Baú do Boss.
+- As quantidades de cada recompensa, suas probabilidades individuais e as regras de coexistência ou exclusividade entre recompensas ainda precisam ser definidas.
+- Ficam sem efeito as regras anteriores de sorteio independente de poções, inclusive a chance por raridade e o limite diário de 4 poções associado àquele sorteio. Eventuais limites de recebimento por abertura ou por dia deverão ser definidos para o conteúdo do baú.
 
+## Chances por raridade — Baú do Boss
 
-## Chances por raridade — Baú do Boss e poções
-
-As mesmas chances individuais e diretas por raridade são aplicadas aos sorteios de Baú do Boss e de poções. Não existe chance-base intermediária nem multiplicador:
+O sorteio para receber um Baú do Boss usa as seguintes chances individuais e diretas por raridade. Não existe chance-base intermediária nem multiplicador:
 
 | Raridade | Chance direta por sobrevivente elegível |
 |---|---:|
@@ -101,9 +100,8 @@ As mesmas chances individuais e diretas por raridade são aplicadas aos sorteios
 | Lendário | 2,6667% |
 | Super Lendário | 3% |
 
-- A soma das contribuições dos sobreviventes elegíveis é limitada a **40% por jogador em cada Boss**, separadamente para cada tipo de sorteio.
-- Para poções, permanece o limite de **4 por jogador por dia**, renovado à meia-noite de Brasília.
-- Para Baús do Boss, permanece o limite de **3 por jogador por dia**, renovado à meia-noite de Brasília.
+- A soma das contribuições dos sobreviventes elegíveis é limitada a **40% por jogador em cada Boss**.
+- Para Baús do Boss, permanece o limite de **3 por jogador por dia**, renovado à meia-noite no horário de Brasília (America/Sao_Paulo).
 - A elegibilidade continua vinculada à equipe registrada no início da batalha; substitutos não participam do sorteio daquele evento.
 
 ### Exemplo de cálculo — cenário mediano
@@ -120,4 +118,4 @@ Considerando a equipe de referência definida em `MINING_ECONOMY_BASELINE.md` (6
 | Super Lendário | 0 | 3% | 0% |
 | **Total** | **15** | | **33,0667%** |
 
-A composição acima é **apenas uma simulação de referência do cenário mediano**, não uma equipe fixa ou obrigatória para os jogadores. A chance real varia conforme a quantidade e a raridade dos sobreviventes elegíveis na equipe de cada jogador. O cálculo é a soma direta das chances individuais, conforme a regra aditiva implementada na engine; não é uma probabilidade composta por independência. Independentemente da composição da equipe ou da soma bruta calculada, a chance efetivamente aplicada **nunca pode ultrapassar 40% por jogador, por Boss e por tipo de sorteio** (Baú do Boss ou poção). Quando a soma ultrapassar 40%, o sistema limita o resultado aplicado a 40%.
+A composição acima é **apenas uma simulação de referência do cenário mediano**, não uma equipe fixa ou obrigatória para os jogadores. A chance real varia conforme a quantidade e a raridade dos sobreviventes elegíveis na equipe de cada jogador. O cálculo é a soma direta das chances individuais, conforme a regra aditiva implementada na engine; não é uma probabilidade composta por independência. Independentemente da composição da equipe ou da soma bruta calculada, a chance efetivamente aplicada **nunca pode ultrapassar 40% por jogador e por Boss**. Quando a soma ultrapassar 40%, o sistema limita o resultado aplicado a 40%.
