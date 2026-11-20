@@ -574,6 +574,19 @@ export default function GameBoard({
           }
         }
 
+        // REGRA OFICIAL DO USUÁRIO: "quando o boss aparece todos os herois devem caminhar para perto dele e atacalo"
+        // Se o Boss está vivo no mapa e o herói está focado em um zumbi comum (não-boss):
+        // Cancela a trava no zumbi comum para que toda a equipe marche imediatamente em direção ao Boss!
+        const isBossOnField = state.enemies?.some(e => (e.type === 'boss' || e.blockId === BLOCK_BOSS) && e.hp > 0);
+        if (isBossOnField && lockedEnemy && lockedEnemy.type !== 'boss' && lockedEnemy.blockId !== BLOCK_BOSS) {
+          lockedEnemy = null;
+          miner.lockedEnemyId = null;
+          miner.targetBlock = null;
+          miner.isMining = false;
+          miner.swingTimer = 0;
+          miner.moveCooldown = 0;
+        }
+
         // 2. Se o herói já começou a atacar um zumbi (possui lockedEnemy)
         if (lockedEnemy) {
           const cellKey = `${lockedEnemy.gx},${lockedEnemy.gy}`;

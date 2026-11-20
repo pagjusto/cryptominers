@@ -302,9 +302,9 @@ export function updateEnemies(enemies, state, dt, now, isCanyon = true) {
     const ex = enemy.visualX ?? enemy.gx;
     const ey = enemy.visualY ?? enemy.gy;
 
-    // REGRA OFICIAL DO USUÁRIO: "zumbis so atacam se estiverem muito perto do heroi"
-    // O Boss ataca à distância (7.5 tiles), mas zumbis comuns atacam APENAS se estiverem MUITO PERTO do herói (alcance curto de até 1.8 tiles)
-    const combatRange = isBoss ? 7.5 : 1.8;
+    // REGRA OFICIAL DO USUÁRIO: "boss tambem so ataca herois que tiverem perto"
+    // Tanto os zumbis comuns quanto o Boss atacam APENAS heróis muito próximos (alcance curto de combate <= 2.0 tiles)
+    const combatRange = isBoss ? 2.0 : 1.8;
 
     // Procura herói alvo ESTRITAMENTE dentro do combatRange permitido
     const activeHeroes = state.miners?.filter(m => {

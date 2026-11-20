@@ -144,6 +144,105 @@ export function findNextHeroAction(miner, grid, allMiners = [], isCanyon = true)
     return { action: 'idle' };
   }
 
+  // ============================================================================
+  // REGRA OFICIAL DO USUÁRIO:
+  // "quando o boss aparece todos os herois devem caminhar para perto dele e atacalo"
+  // ============================================================================
+  const activeBoss = activeTargets.find(t => t.isBoss);
+
+  if (activeBoss) {
+    // 1. O Boss é o alvo SUPREMO e PRIORITÁRIO de toda a equipe
+    const distToBoss = Math.abs(activeBoss.x - mx) + Math.abs(activeBoss.y - my);
+    if (distToBoss <= COMBAT_RANGE && hasClearLineOfSight(mx, my, activeBoss.x, activeBoss.y)) {
+      const targetDir = activeBoss.x < mx ? -1 : (activeBoss.x > mx ? 1 : (miner.targetDir || 1));
+      return {
+        action: 'mine',
+        targetBlock: { x: activeBoss.x, y: activeBoss.y },
+        targetDir
+      };
+    }
+
+    // 2. Se o herói ainda não está no alcance de combate do Boss, todos devem marchar até ele!
+    // Busca em Largura (BFS) focada exclusivamente em aproximar o herói do Boss
+    const queue = [{ x: mx, y: my, path: [] }];
+    const visited = new Set();
+    visited.add(`${mx},${my}`);
+
+    let bestCandidate = null;
+    let closestNodeToBoss = null;
+    let minDistanceToBoss = Infinity;
+
+    while (queue.length > 0) {
+      const curr = queue.shift();
+
+      const distFromCurrToBoss = Math.hypot(activeBoss.x - curr.x, activeBoss.y - curr.y);
+      if (curr.path.length > 0 && distFromCurrToBoss < minDistanceToBoss) {
+        minDistanceToBoss = distFromCurrToBoss;
+        closestNodeToBoss = curr;
+      }
+
+      // Posição de ataque 'curr' só é adotada se nenhum outro herói estiver parado estacionado nela
+      const isHeroStandingHere = curr.path.length > 0 && allMiners.some(other => 
+        other.id !== miner.id && 
+        (other.status === 'work' || !other.status) &&
+        Math.round(other.x) === curr.x && 
+        Math.round(other.y) === curr.y
+      );
+
+      const canShootBoss = !isHeroStandingHere && 
+        (Math.abs(activeBoss.x - curr.x) + Math.abs(activeBoss.y - curr.y) <= COMBAT_RANGE) && 
+        hasClearLineOfSight(curr.x, curr.y, activeBoss.x, activeBoss.y);
+
+      if (canShootBoss && curr.path.length > 0) {
+        bestCandidate = {
+          target: activeBoss,
+          nextStep: curr.path[0],
+          pathLength: curr.path.length,
+          score: curr.path.length
+        };
+        break; // Encontrou a rota mais curta até a posição de disparo contra o Boss!
+      }
+
+      // Exploração nas 4 direções cardinais
+      const nextMoves = [
+        { x: curr.x, y: curr.y - 1, dir: miner.targetDir || 1 },
+        { x: curr.x + 1, y: curr.y, dir: 1 },
+        { x: curr.x, y: curr.y + 1, dir: miner.targetDir || 1 },
+        { x: curr.x - 1, y: curr.y, dir: -1 }
+      ];
+
+      for (const m of nextMoves) {
+        const key = `${m.x},${m.y}`;
+        if (!visited.has(key) && !isSolidTerrain(m.x, m.y, grid, isCanyon)) {
+          visited.add(key);
+          queue.push({
+            x: m.x,
+            y: m.y,
+            path: [...curr.path, { x: m.x, y: m.y, dir: m.dir }]
+          });
+        }
+      }
+    }
+
+    if (bestCandidate && bestCandidate.nextStep) {
+      return {
+        action: 'move',
+        nextStep: bestCandidate.nextStep,
+        targetDeposit: activeBoss,
+        pathLength: bestCandidate.pathLength
+      };
+    }
+
+    if (closestNodeToBoss && closestNodeToBoss.path.length > 0) {
+      return {
+        action: 'move',
+        nextStep: closestNodeToBoss.path[0],
+        targetDeposit: activeBoss,
+        pathLength: closestNodeToBoss.path.length
+      };
+    }
+  }
+
   // 2. Se o herói já estava focado em um alvo e ele ainda existe e está bem perto (distância Manhattan <= 1)
   if (miner.targetBlock) {
     const stillAlive = activeTargets.find(t => t.x === miner.targetBlock.x && t.y === miner.targetBlock.y);

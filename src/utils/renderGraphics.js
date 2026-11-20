@@ -147,30 +147,35 @@ export function initBillboard(onLoaded) {
   };
 }
 
-// Configuração Oficial da Torre de Vigia e de sua Sombra Projetada
+// Configuração Oficial da Torre de Vigia e de sua Sombra Projetada (Calibrada pelo Usuário)
 // REGRA OFICIAL DO USUÁRIO: A FRENTE DA TORRE É A PERNA DO MEIO (e deve deitar sentido a frente / Sul).
 export const DEFAULT_TOWER_CONFIG = {
-  // Parâmetros de Deitar a Torre Sentido a Frente
-  topDeltaX: 0,              // Deslocamento horizontal do topo da torre (-50px a +50px)
-  topDeltaY: 0,              // Deitar para a Frente / Perna do Meio (Sul: desce o topo em px, 0 a 80px)
-  scaleX: 1.0,               // Largura / Escala Horizontal
-  scaleY: 1.0,               // Altura / Escala Vertical
-  rotDeg: 0,                 // Rotação no plano
-  yawDeg: 0,                 // Rotação horizontal Yaw 3D (-180° a +180°)
-  offsetX: 0,                // Posição calibrada no solo X
-  offsetY: 0,                // Posição calibrada no solo Y
+  topDeltaX: -3,
+  topDeltaY: 16,
+  scaleX: -1.5,
+  scaleY: 1.18,
+  rotDeg: 0.4,
+  yawDeg: -180,
+  offsetX: -21,
+  offsetY: -12,
 
-  // Parâmetros da Sombra Calibrados para o novo sprite 3D
   shadowRotDeg: -35.5,
-  shadowYawDeg: 0,
-  shadowSkewX: -0.80,
-  shadowSkewY: -0.43,
-  shadowLength: 1.0,
-  shadowScaleX: 1.0,
-  shadowScaleY: 1.0,
+  shadowYawDeg: 4,
+  shadowSkewX: -1.06,
+  shadowSkewY: -0.5,
+  shadowLength: 0.95,
+  shadowScaleX: 1,
+  shadowScaleY: 1,
   shadowOpacity: 0.85,
-  shadowOffsetX: -4,
-  shadowOffsetY: -2
+  shadowOffsetX: -19,
+  shadowOffsetY: -6,
+
+  leanSouth: 0.35,
+  leanFront: 0.8,
+  levelSides: -0.01,
+  leanSides: 0.025,
+  skewY: -0.01,
+  skewX: 0.025
 };
 
 export const towerTiltConfig = { ...DEFAULT_TOWER_CONFIG };
