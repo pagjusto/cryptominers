@@ -40,7 +40,7 @@ import {
   TACTICAL_ZONES,
   CORNER_SPAWN_POINTS 
 } from '../utils/cityMapGeometry';
-import { findNextHeroAction, COMBAT_RANGE, hasClearLineOfSight } from '../utils/minerPathfinding';
+import { findNextHeroAction, findNearestFreeHeroCell, COMBAT_RANGE, hasClearLineOfSight } from '../utils/minerPathfinding';
 import { getHeroById, getWeaponById } from '../data/heroRoster';
 
 export default function GameBoard({ 
@@ -169,6 +169,8 @@ export default function GameBoard({
           ...m, 
           x: initX, 
           y: initY, 
+          visualX: existing.visualX ?? initX,
+          visualY: existing.visualY ?? initY,
           moveCooldown: existing.moveCooldown,
           isMining: existing.isMining,
           targetBlock: existing.targetBlock,
@@ -180,6 +182,8 @@ export default function GameBoard({
         ...m, 
         x: initX,
         y: initY,
+        visualX: initX,
+        visualY: initY,
         moveCooldown: 0, 
         isMining: false, 
         targetBlock: null, 
@@ -359,6 +363,29 @@ export default function GameBoard({
         //   callbacksRef.current.onMapCleared?.(mapDamageResult?.newMap);
         // }
       };
+
+      // REGRA OFICIAL DO USUÁRIO: "Anti-Stacking de personagens tbm"
+      // Passo 1: Nenhum herói pode ocupar a mesma célula de grid (x, y) de outro herói
+      const occupiedHeroTiles = new Map();
+      state.miners.forEach(m => {
+        if (m.status !== 'work') return;
+        const hx = Math.round(m.x);
+        const hy = Math.round(m.y);
+        const key = `${hx},${hy}`;
+        if (!occupiedHeroTiles.has(key)) {
+          occupiedHeroTiles.set(key, m);
+        } else {
+          // Conflito! Já existe outro herói nesta célula exata. Reloca para a célula livre adjacente mais próxima
+          const freeCell = findNearestFreeHeroCell(hx, hy, m.id, state.miners, state.grid, isCanyon, state.enemies);
+          if (freeCell) {
+            m.x = freeCell.x;
+            m.y = freeCell.y;
+            m.visualX = freeCell.x;
+            m.visualY = freeCell.y;
+            occupiedHeroTiles.set(`${freeCell.x},${freeCell.y}`, m);
+          }
+        }
+      });
 
       state.miners.forEach((miner, minerIndex) => {
         // 1. Descanso na Casa (Recuperação rápida e transição para reserva quando 100%)
@@ -930,10 +957,23 @@ export default function GameBoard({
               matchedEnemy.underAttackByHeroId = miner.id;
             }
           } else if (decision.action === 'move' && decision.nextStep) {
-            miner.x = decision.nextStep.x;
-            miner.y = decision.nextStep.y;
-            if (decision.nextStep.dir) {
-              miner.targetDir = decision.nextStep.dir;
+            // Anti-stacking na movimentação: verifica se a célula de destino já está ocupada por outro herói
+            const isDestOccupied = state.miners.some(other => 
+              other.id !== miner.id && 
+              other.status === 'work' && 
+              Math.round(other.x) === decision.nextStep.x && 
+              Math.round(other.y) === decision.nextStep.y
+            );
+
+            if (!isDestOccupied) {
+              miner.x = decision.nextStep.x;
+              miner.y = decision.nextStep.y;
+              if (decision.nextStep.dir) {
+                miner.targetDir = decision.nextStep.dir;
+              }
+            } else {
+              // Célula temporariamente ocupada: pausa breve para desvio
+              miner.moveCooldown = 0.15;
             }
 
             // Ao dar o passo, checa imediatamente se já encostou ou entrou em alcance de tiro
@@ -956,6 +996,47 @@ export default function GameBoard({
           }
         }
       });
+
+      // REGRA OFICIAL DO USUÁRIO: "Anti-Stacking de personagens tbm"
+      // Passo 3: Atualização visual contínua (lerp) e força de repulsão suave entre heróis
+      state.miners.forEach(m => {
+        if (m.visualX === undefined || isNaN(m.visualX)) m.visualX = m.x;
+        if (m.visualY === undefined || isNaN(m.visualY)) m.visualY = m.y;
+        const lerpSpeed = Math.min(1.0, dt * ((m.speed || 1) * 7.5 + 4.0));
+        m.visualX += (m.x - m.visualX) * lerpSpeed;
+        m.visualY += (m.y - m.visualY) * lerpSpeed;
+      });
+
+      const activeMiners = state.miners.filter(m => m.status === 'work');
+      for (let i = 0; i < activeMiners.length; i++) {
+        const m1 = activeMiners[i];
+        for (let j = i + 1; j < activeMiners.length; j++) {
+          const m2 = activeMiners[j];
+          const dx = m1.visualX - m2.visualX;
+          const dy = m1.visualY - m2.visualY;
+          const dist = Math.hypot(dx, dy);
+          const MIN_HERO_DIST = 0.92; // ~44px de distância mínima
+          if (dist < MIN_HERO_DIST && dist > 0.0001) {
+            const overlap = MIN_HERO_DIST - dist;
+            const pushFactor = (overlap / dist) * 0.45;
+            const px = dx * pushFactor;
+            const py = dy * pushFactor;
+
+            const n1x = m1.visualX + px;
+            const n1y = m1.visualY + py;
+            if (!isCityBuilding(Math.round(n1x), Math.round(n1y))) {
+              m1.visualX = n1x;
+              m1.visualY = n1y;
+            }
+            const n2x = m2.visualX - px;
+            const n2y = m2.visualY - py;
+            if (!isCityBuilding(Math.round(n2x), Math.round(n2y))) {
+              m2.visualX = n2x;
+              m2.visualY = n2y;
+            }
+          }
+        }
+      }
 
       // 1.5. ATUALIZAÇÃO DOS PROJÉTEIS DE GOSMA VERDE (ZUMBIS & BOSS)
       state.slimes = state.slimes || [];
@@ -1185,15 +1266,17 @@ export default function GameBoard({
       state.miners.forEach((miner, minerIndex) => {
         if (miner.status === 'house' || miner.status === 'waiting_house' || miner.status === 'reserve') return;
         const classInfo = MINER_CLASSES[miner.classId] || MINER_CLASSES.miner;
-        const mx = miner.x * TILE_SIZE + TILE_SIZE / 2;
-        const my = miner.y * TILE_SIZE + TILE_SIZE / 2;
+        const rx = miner.visualX !== undefined ? miner.visualX : miner.x;
+        const ry = miner.visualY !== undefined ? miner.visualY : miner.y;
+        const mx = rx * TILE_SIZE + TILE_SIZE / 2;
+        const my = ry * TILE_SIZE + TILE_SIZE / 2;
         const swingProgress = miner.swingTimer ? Math.max(0, Math.min(1, 1 - (miner.swingTimer / 0.85))) : 0;
 
         // Garante que o herói SEMPRE esteja virado diretamente para o bloco alvo que está atacando
         let faceDir = miner.targetDir || 1;
         if (miner.targetBlock) {
-          if (miner.targetBlock.x < miner.x) faceDir = -1;
-          else if (miner.targetBlock.x > miner.x) faceDir = 1;
+          if (miner.targetBlock.x < rx) faceDir = -1;
+          else if (miner.targetBlock.x > rx) faceDir = 1;
         }
 
         drawMinerCharacter(ctx, mx, my, miner, classInfo, now, swingProgress, faceDir, minerIndex);

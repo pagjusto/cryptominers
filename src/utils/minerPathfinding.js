@@ -55,6 +55,66 @@ export function hasClearLineOfSight(x1, y1, x2, y2) {
 }
 
 /**
+ * Localiza a célula transitável livre mais próxima para um herói (Anti-Stacking)
+ * Garante que nenhum herói seja realocado para uma célula já ocupada por outro herói, zumbi ou obstáculo.
+ */
+export function findNearestFreeHeroCell(hx, hy, heroId, allMiners = [], grid = null, isCanyon = true, enemies = []) {
+  const GRID_COLS = grid && grid[0] ? grid[0].length : 15;
+  const GRID_ROWS = grid ? grid.length : 11;
+  const visited = new Set([`${hx},${hy}`]);
+  const queue = [{ x: hx, y: hy, dist: 0 }];
+
+  while (queue.length > 0) {
+    const cur = queue.shift();
+    if (cur.dist > 8) break;
+
+    const neighbors = [
+      { x: cur.x + 1, y: cur.y },
+      { x: cur.x - 1, y: cur.y },
+      { x: cur.x, y: cur.y + 1 },
+      { x: cur.x, y: cur.y - 1 }
+    ];
+
+    for (const nb of neighbors) {
+      const key = `${nb.x},${nb.y}`;
+      if (visited.has(key)) continue;
+      visited.add(key);
+
+      if (nb.x <= 0 || nb.x >= GRID_COLS - 1 || nb.y <= 0 || nb.y >= GRID_ROWS - 1) continue;
+      if (isCityBuilding(nb.x, nb.y) || isSolidTerrain(nb.x, nb.y, grid, isCanyon)) continue;
+
+      // REGRA OFICIAL DO USUÁRIO: "Anti-Stacking de personagens tbm"
+      // Nenhum outro herói pode estar nesta célula
+      const isOccupiedByHero = allMiners.some(o => 
+        o.id !== heroId && 
+        (o.status === 'work' || !o.status) && 
+        Math.round(o.x) === nb.x && 
+        Math.round(o.y) === nb.y
+      );
+      if (isOccupiedByHero) {
+        queue.push({ x: nb.x, y: nb.y, dist: cur.dist + 1 });
+        continue;
+      }
+
+      // Nenhum bloco ou zumbi pode estar nessa célula
+      if (grid && grid[nb.y] && grid[nb.y][nb.x] !== BLOCK_EMPTY) {
+        queue.push({ x: nb.x, y: nb.y, dist: cur.dist + 1 });
+        continue;
+      }
+
+      if (enemies && enemies.some(e => e.hp > 0 && e.gx === nb.x && e.gy === nb.y)) {
+        queue.push({ x: nb.x, y: nb.y, dist: cur.dist + 1 });
+        continue;
+      }
+
+      return { x: nb.x, y: nb.y };
+    }
+  }
+
+  return null;
+}
+
+/**
  * Encontra a melhor ação e o próximo passo para o herói minerador.
  * 1. Se estiver no raio de combate (distância <= 2 com linha de tiro limpa), passa a atirar imediatamente.
  * 2. Se não estiver, localiza o zumbi mais próximo alcançável via BFS e avança em direção a ele.
@@ -139,11 +199,20 @@ export function findNextHeroAction(miner, grid, allMiners = [], isCanyon = true)
   while (queue.length > 0) {
     const curr = queue.shift();
 
+    // REGRA OFICIAL DO USUÁRIO: "Anti-Stacking de personagens tbm"
+    // Posição de ataque 'curr' só é adotada se nenhum outro herói estiver parado minerando ou estacionado nela
+    const isHeroStandingHere = curr.path.length > 0 && allMiners.some(other => 
+      other.id !== miner.id && 
+      (other.status === 'work' || !other.status) &&
+      Math.round(other.x) === curr.x && 
+      Math.round(other.y) === curr.y
+    );
+
     // Se a partir desta posição 'curr' é possível atirar em algum alvo ativo (bem perto, dist <= 1 e linha limpa)
-    const reachableTarget = activeTargets.find(t => {
+    const reachableTarget = !isHeroStandingHere ? activeTargets.find(t => {
       const d = Math.abs(t.x - curr.x) + Math.abs(t.y - curr.y);
       return d <= COMBAT_RANGE && hasClearLineOfSight(curr.x, curr.y, t.x, t.y);
-    });
+    }) : null;
 
     if (reachableTarget && curr.path.length > 0) {
       const key = `${reachableTarget.x},${reachableTarget.y}`;
@@ -178,9 +247,12 @@ export function findNextHeroAction(miner, grid, allMiners = [], isCanyon = true)
       const key = `${m.x},${m.y}`;
       if (!visited.has(key) && !isSolidTerrain(m.x, m.y, grid, isCanyon)) {
         visited.add(key);
+        // Desencoraja rotas que atravessem outro herói parado
+        const hasStationaryHero = allMiners.some(o => o.id !== miner.id && o.isMining && Math.round(o.x) === m.x && Math.round(o.y) === m.y);
         queue.push({
           x: m.x,
           y: m.y,
+          cost: (curr.cost || 0) + 1 + (hasStationaryHero ? 3.0 : 0),
           path: [...curr.path, { x: m.x, y: m.y, dir: m.dir }]
         });
       }
@@ -208,12 +280,20 @@ export function findNextHeroAction(miner, grid, allMiners = [], isCanyon = true)
   }
 
   if (closestTarget) {
-    const candidates = [
+    let candidates = [
       { x: mx + 1, y: my, dir: 1 },
       { x: mx - 1, y: my, dir: -1 },
       { x: mx, y: my + 1, dir: miner.targetDir || 1 },
       { x: mx, y: my - 1, dir: miner.targetDir || 1 }
     ].filter(pos => !isSolidTerrain(pos.x, pos.y, grid, isCanyon));
+
+    // Anti-stacking: prefere células vizinhas que não estejam ocupadas por outro herói
+    const freeCandidates = candidates.filter(pos => 
+      !allMiners.some(o => o.id !== miner.id && (o.status === 'work' || !o.status) && Math.round(o.x) === pos.x && Math.round(o.y) === pos.y)
+    );
+    if (freeCandidates.length > 0) {
+      candidates = freeCandidates;
+    }
 
     if (candidates.length > 0) {
       // Escolhe o vizinho livre que mais reduz a distância até o alvo
