@@ -30,6 +30,7 @@
 ### 4. 📦 Sistema de Baús do Boss & Fragmentos
 - **Sorteio por Boss**: O sorteio de Baú do Boss é realizado ao término de cada batalha contra o Boss.
 - **Elegibilidade**: Participam do sorteio os sobreviventes registrados na equipe no início da batalha, conforme as regras de participação do Boss. Sobreviventes que entram como substitutos durante o evento não participam daquele sorteio.
+- **Chance-base e multiplicadores por raridade**: Comum **2%** (1×); Raro **2,2%** (1,1×); Épico **2,3333%** (1,1667×); Lendário **2,6667%** (1,3333×), por sobrevivente elegível.
 - **Teto de probabilidade**: A chance total por jogador é limitada a **40% por Boss**.
 - **Limite diário**: Máximo de **3 Baús do Boss por dia** por jogador, com renovação à meia-noite (horário de Brasília - America/Sao_Paulo).
 - **Recompensas**: O Baú do Boss contempla Fragmentos de Construção, poções e a possibilidade de obter um Baú de Herói. Quantidades, probabilidades e distribuição das recompensas ainda precisam ser consolidadas na regra específica.
