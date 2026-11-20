@@ -281,7 +281,7 @@ export default function MinerCatalogModal({ isOpen, onClose, onOpenMintModal }) 
                 )}
 
                 {/* Atributos Base */}
-                <div className="grid grid-cols-3 gap-3 mb-4">
+                <div className="grid grid-cols-2 gap-3 mb-4">
                   <div className="bg-slate-900/80 p-3 rounded-2xl border border-slate-800 text-center">
                     <span className="text-[11px] text-slate-400 font-tech flex items-center justify-center gap-1">
                       <Flame size={13} className="text-rose-400" /> FORÇA DO GOLPE
