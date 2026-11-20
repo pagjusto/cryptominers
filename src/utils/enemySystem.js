@@ -301,14 +301,26 @@ export function updateEnemies(enemies, state, dt, now, isCanyon = true) {
     const isBoss = enemy.type === 'boss';
     const ex = enemy.visualX ?? enemy.gx;
     const ey = enemy.visualY ?? enemy.gy;
-    const combatRange = isBoss ? 7.5 : 5.5;
 
-    // Procura primeiro quem está atirando neste zumbi (lock ativo), ou o herói ativo mais próximo
+    // REGRA OFICIAL DO USUÁRIO: "zumbis so atacam se estiverem muito perto do heroi"
+    // O Boss ataca à distância (7.5 tiles), mas zumbis comuns atacam APENAS se estiverem MUITO PERTO do herói (alcance curto de até 1.8 tiles)
+    const combatRange = isBoss ? 7.5 : 1.8;
+
+    // Procura herói alvo ESTRITAMENTE dentro do combatRange permitido
     const activeHeroes = state.miners?.filter(m => m.status === 'work' && (m.durability === undefined || m.durability > 0)) || [];
-    let targetHero = activeHeroes.find(m => (m.lockedEnemyId && m.lockedEnemyId === enemy.id) || (m.targetBlock && m.targetBlock.x === enemy.gx && m.targetBlock.y === enemy.gy));
+    let targetHero = null;
+    let closestDist = Infinity;
+
+    const lockedHero = activeHeroes.find(m => (m.lockedEnemyId && m.lockedEnemyId === enemy.id) || (m.targetBlock && m.targetBlock.x === enemy.gx && m.targetBlock.y === enemy.gy));
+    if (lockedHero) {
+      const d = Math.hypot(lockedHero.x - ex, lockedHero.y - ey);
+      if (d <= combatRange) {
+        targetHero = lockedHero;
+        closestDist = d;
+      }
+    }
     
     if (!targetHero && activeHeroes.length > 0) {
-      let closestDist = Infinity;
       activeHeroes.forEach(m => {
         const d = Math.hypot(m.x - ex, m.y - ey);
         if (d <= combatRange && d < closestDist) {
@@ -349,8 +361,8 @@ export function updateEnemies(enemies, state, dt, now, isCanyon = true) {
           targetY: targetPy,
           targetHeroId: targetHero.id,
           progress: 0,
-          speed: isBoss ? 1.4 : 1.9,
-          arcHeight: isBoss ? 35 : 22,
+          speed: isBoss ? 1.4 : 2.8,
+          arcHeight: isBoss ? 35 : 12,
           radius: isBoss ? 9 : 5,
           isBoss: isBoss,
           // REGRA OFICIAL DO USUÁRIO: "o boss deve tirar 20 de dano por hit", "coloque dano de zumis de 1 por hit"
