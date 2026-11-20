@@ -52,7 +52,6 @@ export default function GameBoard({
   onMinersChange, 
   onCollectBcoin, 
   onRescueMiner, 
-  onFindMysticChest,
   onMapCleared,
   onStatsUpdate,
   onDropGear,
@@ -98,7 +97,6 @@ export default function GameBoard({
     onDepositBroken,
     onCollectBcoin,
     onRescueMiner,
-    onFindMysticChest,
     onMapCleared,
     onStatsUpdate,
     onDropGear,
@@ -333,20 +331,14 @@ export default function GameBoard({
             if (isBoss) {
               sfx.playChestOpen?.();
               state.floatTexts.push({
-                text: '💀 BOSS MUTANTE DERROTADO! +BÔNUS',
+                text: '💀 BOSS MUTANTE DERROTADO!',
                 x: bx * TILE_SIZE + TILE_SIZE / 2,
                 y: by * TILE_SIZE - 12,
                 color: '#facc15',
                 opacity: 1.0,
                 vy: -25
               });
-              callbacksRef.current.onFindMysticChest?.({
-                x: bx,
-                y: by,
-                type: 'boss_defeat_reward',
-                rewardMnc: 25,
-                title: 'Abominação Mutante Derrotada'
-              });
+
             } else {
               // Abate do zumbi concluído: recompensa e texto flutuante
               state.floatTexts.push({
