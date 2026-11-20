@@ -65,7 +65,6 @@ export const RARITIES = {
     minPower: 1,
     maxPower: 2,
     speed: 1.2,
-    stamina: 60,
     bombCount: 1,
     bombRange: 1,
     chance: 0.80
@@ -78,7 +77,6 @@ export const RARITIES = {
     minPower: 3,
     maxPower: 5,
     speed: 1.6,
-    stamina: 100,
     bombCount: 2,
     bombRange: 2,
     chance: 0.14
@@ -91,7 +89,6 @@ export const RARITIES = {
     minPower: 6,
     maxPower: 8,
     speed: 2.0,
-    stamina: 150,
     bombCount: 3,
     bombRange: 3,
     chance: 0.04
@@ -104,7 +101,6 @@ export const RARITIES = {
     minPower: 9,
     maxPower: 12,
     speed: 2.4,
-    stamina: 200,
     bombCount: 4,
     bombRange: 4,
     chance: 0.015
@@ -117,7 +113,6 @@ export const RARITIES = {
     minPower: 15,
     maxPower: 20,
     speed: 2.8,
-    stamina: 300,
     bombCount: 5,
     bombRange: 5,
     chance: 0.005
@@ -136,8 +131,6 @@ export const INITIAL_HEROES = [
     rarity: 'common',
     power: 2,
     speed: 1.2,
-    maxStamina: 60,
-    currentStamina: 60,
     bombCount: 1,
     bombRange: 1,
     status: 'work', // 'work' | 'sleep'
@@ -152,8 +145,6 @@ export const INITIAL_HEROES = [
     rarity: 'rare',
     power: 4,
     speed: 1.6,
-    maxStamina: 100,
-    currentStamina: 100,
     bombCount: 2,
     bombRange: 2,
     status: 'work',
