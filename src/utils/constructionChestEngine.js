@@ -298,7 +298,7 @@ export function logConstructionAudit(action, details, adminName = 'Administrador
  * Aplica o teto de 40%, limite diário de 3 e considera somente participantes ativos.
  */
 export function executeConstructionBossRoll(miners = [], config = DEFAULT_CONSTRUCTION_CHEST_CONFIG, options = {}) {
-  const { isSimulated = false, forceSuccess = false } = options;
+  const { isSimulated = false, forceSuccess = false, bossId = null } = options;
 
   // 1. Verifica se o sistema está habilitado
   if (config.enabled === false && !isSimulated) {
@@ -330,6 +330,7 @@ export function executeConstructionBossRoll(miners = [], config = DEFAULT_CONSTR
       id: `EVT-${Date.now().toString(36).toUpperCase()}`,
       timestamp: getBrasiliaTimeString(),
       type: 'DAILY_LIMIT_REACHED',
+      bossId,
       chestsAwardedToday: dailyStats.chestsAwardedToday,
       dailyLimit,
       activeMinersCount: activeChance.activeMinersCount,
@@ -364,6 +365,7 @@ export function executeConstructionBossRoll(miners = [], config = DEFAULT_CONSTR
       description: 'Baú especial obtido durante a combate ativo. Contém exatamente 1 Fragmento de Construção para evolução de casas.',
       foundAt: getBrasiliaTimeString(),
       foundDateBrasilia: dailyStats.date,
+      bossId,
       rewardFragmentCount: 1,
       opened: false,
       activeMinersCount: activeChance.activeMinersCount,
@@ -385,6 +387,7 @@ export function executeConstructionBossRoll(miners = [], config = DEFAULT_CONSTR
         id: newChest.id,
         timestamp: newChest.foundAt,
         type: 'CHEST_FOUND',
+        bossId,
         activeMinersCount: activeChance.activeMinersCount,
         breakdownByRarity: activeChance.breakdownByRarity,
         chanceApplied: activeChance.finalChance,
@@ -417,6 +420,7 @@ export function executeConstructionBossRoll(miners = [], config = DEFAULT_CONSTR
         id: `TRY-${Date.now().toString(36).toUpperCase()}`,
         timestamp: getBrasiliaTimeString(),
         type: 'BOSS_CHEST_MISSED',
+        bossId,
         activeMinersCount: activeChance.activeMinersCount,
         breakdownByRarity: activeChance.breakdownByRarity,
         chanceApplied: activeChance.finalChance,
