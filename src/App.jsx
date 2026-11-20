@@ -429,6 +429,25 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('cryptozombies_rejuvenation_potions_v1', String(rejuvenationPotions));
   }, [rejuvenationPotions]);
+
+  // Integração do saldo empilhável com futuros eventos de concessão/consumo de poções.
+  useEffect(() => {
+    const handlePotionAwarded = (event) => {
+      const quantity = Number(event.detail?.quantity ?? 1);
+      if (Number.isInteger(quantity) && quantity > 0) {
+        setRejuvenationPotions(prev => prev + quantity);
+      }
+    };
+    const handlePotionConsumed = () => {
+      setRejuvenationPotions(prev => Math.max(0, prev - 1));
+    };
+    window.addEventListener('cryptozombies_rejuvenation_potion_awarded', handlePotionAwarded);
+    window.addEventListener('cryptozombies_rejuvenation_potion_consumed', handlePotionConsumed);
+    return () => {
+      window.removeEventListener('cryptozombies_rejuvenation_potion_awarded', handlePotionAwarded);
+      window.removeEventListener('cryptozombies_rejuvenation_potion_consumed', handlePotionConsumed);
+    };
+  }, []);
   const [constructionDailyStats, setConstructionDailyStats] = useState(() => getDailyConstructionStats());
   const [newlyFoundConstructionChest, setNewlyFoundConstructionChest] = useState(null);
 
