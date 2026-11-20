@@ -49,6 +49,7 @@ export default function GameBoard({
   miners, 
   playerId = 'player_default',
   onDepositBroken,
+  onBossDefeated,
   onMinersChange, 
   onCollectBcoin, 
   onRescueMiner, 
@@ -95,6 +96,7 @@ export default function GameBoard({
   callbacksRef.current = {
     playerId,
     onDepositBroken,
+    onBossDefeated,
     onCollectBcoin,
     onRescueMiner,
     onMapCleared,
@@ -112,6 +114,7 @@ export default function GameBoard({
     totalMapHp: Object.values(mapData.hpMap).reduce((a, b) => a + b, 0),
     minerStats: {},
     lastStatsEmit: 0,
+    bossBattleSessions: {},
     miners: miners,
     floatTexts: [],
     particles: [],
@@ -149,6 +152,7 @@ export default function GameBoard({
       gameStateRef.current.hpMap = { ...(mapData.hpMap || {}) };
       gameStateRef.current.totalMapHp = Object.values(mapData.hpMap || {}).reduce((a, b) => a + b, 0);
       gameStateRef.current.isMapClearing = false;
+      gameStateRef.current.bossBattleSessions = {};
       gameStateRef.current.enemies = syncEnemiesWithMap([], mapData, gameStateRef.current.grid, gameStateRef.current.hpMap);
     } else {
       // Sincroniza ativamente a horda de 20 zumbis: injeta no grid e no hpMap qualquer criatura nova da horda
@@ -274,6 +278,24 @@ export default function GameBoard({
           return true;
         });
         updateEnemies(state.enemies, state, dt, now, isCanyon);
+
+        // Registra uma única fotografia imutável da equipe que iniciou este Boss.
+        const activeBossForSession = state.enemies?.find(e => e.type === 'boss' && (e.hp === undefined || e.hp > 0));
+        if (activeBossForSession && !state.bossBattleSessions?.[activeBossForSession.id]) {
+          const initialParticipants = state.miners
+            .filter(m => {
+              const maxHealth = m.maxHealth || 100;
+              const currentHealth = m.currentHealth ?? maxHealth;
+              return m.status === 'work' && (currentHealth / maxHealth) * 100 > 5;
+            })
+            .map(m => ({ ...m }));
+          state.bossBattleSessions = state.bossBattleSessions || {};
+          state.bossBattleSessions[activeBossForSession.id] = {
+            bossId: activeBossForSession.id,
+            startedAt: new Date().toISOString(),
+            participants: initialParticipants
+          };
+        }
       }
 
       // 1. ATUALIZAR MINERADORES
@@ -330,6 +352,35 @@ export default function GameBoard({
             // Efeito limpo de abate (removidas as partículas verdes artificiais antigas)
             if (isBoss) {
               sfx.playChestOpen?.();
+
+              // O sorteio usa somente os participantes registrados no início e vivos na derrota.
+              const battleSession = state.bossBattleSessions?.[defeated.id];
+              if (battleSession) {
+                const currentMinersById = new Map(state.miners.map(m => [m.id, m]));
+                const survivingInitialParticipants = battleSession.participants
+                  .map(initialMiner => {
+                    const currentMiner = currentMinersById.get(initialMiner.id);
+                    if (!currentMiner) return null;
+                    const currentHealth = currentMiner.currentHealth ?? currentMiner.maxHealth ?? initialMiner.currentHealth ?? initialMiner.maxHealth ?? 100;
+                    if (currentHealth <= 0) return null;
+                    return {
+                      ...initialMiner,
+                      currentHealth,
+                      status: 'work',
+                      bossSnapshotParticipant: true,
+                      isAliveAtBossEnd: true
+                    };
+                  })
+                  .filter(Boolean);
+
+                callbacksRef.current.onBossDefeated?.({
+                  bossId: defeated.id,
+                  startedAt: battleSession.startedAt,
+                  participants: survivingInitialParticipants
+                });
+                delete state.bossBattleSessions[defeated.id];
+              }
+
               state.floatTexts.push({
                 text: '💀 BOSS MUTANTE DERROTADO!',
                 x: bx * TILE_SIZE + TILE_SIZE / 2,
