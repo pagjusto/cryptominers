@@ -1,4 +1,4 @@
-// CRIPTO MYNERS — BAÚ DO BOSS
+// CRYPTOZOMBIES — BAÚ DO BOSS
 // - Um sorteio individual por jogador a cada Boss derrotado
 // - Chances diretas por raridade: Comum 2%, Raro 2,2%, Super Raro 2,3%, Épico 2,4%, Lendário 2,6667%, Super Lendário 3%
 // - Chances por raridade: Comum 2%, Raro 2,2%, Super Raro 2,3%, Épico 2,4%, Lendário 2,6667%, Super Lendário 3%
