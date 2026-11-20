@@ -10,7 +10,7 @@ Este documento registra as regras de gameplay aprovadas para o sistema de sobrev
 
 ## Ferimentos e resgate
 
-- Ao atingir 5% de vida ou menos, o sobrevivente fica ferido: deixa imediatamente de atacar e não pode mais ser atacado pelo Boss.
+- Ao atingir 5% de vida ou menos, o sobrevivente fica ferido: deixa imediatamente de atacar e não pode mais receber ataques de nenhuma unidade inimiga, incluindo o Boss e os zumbis.
 - Enquanto estiver ferido e aguardando resgate, também deixa de minerar MNC.
 - **Sem médico contratado:** o sobrevivente deita e permanece parado no mapa, fora do combate e sem minerar, até o jogador selecioná-lo e ordenar manualmente seu envio ao ambulatório.
 - O jogador pode enviar manualmente vários sobreviventes feridos, um por vez, inclusive durante uma batalha contra o Boss.
