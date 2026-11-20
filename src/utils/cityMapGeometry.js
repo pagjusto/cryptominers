@@ -70,9 +70,8 @@ export function isCityObstacle(c, r) {
   // Circulado pelo usuário: barricadas noroeste e nordeste na estrada norte
   if ((c === 5 || c === 6 || c === 8 || c === 9) && r === 2) return true;
 
-  // 5. CAIXA D'ÁGUA / GERADOR OESTE (Estrutura de concreto na grama à esquerda)
-  // Circulado pelo usuário: estrutura em (1, 4)
-  if (c === 1 && r === 4) return true;
+  // 5. VIA OESTE & GRAMADO LIVRE (Conecta o noroeste à avenida principal)
+  // Deixado 100% livre em (1, 4) e (2, 4) para permitir fluxo contínuo de heróis e zumbis
 
   // 6. CARROS ABANDONADOS NO ASFALTO (Oeste e Leste)
   // Circulado pelo usuário: veículos parados nas avenidas asfaltadas
@@ -82,13 +81,13 @@ export function isCityObstacle(c, r) {
   // 7. CERCAS DE ARAME, BARRICADAS E ESCOMBROS OESTE
   // Circulado pelo usuário: cercas e barricadas que contornam a via oeste
   if (c === 3 && r === 3) return true; // Cerca e caixotes noroeste
-  if ((c === 2 || c === 3) && r === 4) return true; // Barricada e cerca da guarita oeste
-  if ((c === 2 || c === 3) && r === 6) return true; // Cerca longa de arame sudoeste
+  if (c === 3 && r === 4) return true; // Barricada e cerca da guarita oeste
+  if (c === 3 && r === 6) return true; // Cerca longa de arame sudoeste (c=2 é via aberta)
   if (c === 3 && r === 7) return true; // Canto inferior da cerca sudoeste
 
   // 7.1. TORRE DE SIRENE E ALARME DE VIGIA (Local exato demarcado em vermelho)
   // Regra Oficial do Usuário: "os zumbies e herois nao podem passar por cima dela"
-  if (c === 2 && (r === 3 || r === 4)) return true;
+  if (c === 2 && r === 3) return true;
 
   // 8. BASE MILITAR FORTIFICADA & COMPLEXO HOSPITALAR (Santuário Central)
   // Circulado pelo usuário: todo o complexo murado, pátio, ambulância, hangar e hospital

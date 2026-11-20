@@ -394,7 +394,7 @@ export function resetPlayerMap(playerId = DEFAULT_PLAYER_ID) {
  * Registra dano ou eliminação de inimigo/jazida no mapa individual do jogador.
  * Ao eliminar todas as entidades restantes, finaliza o ciclo e renova o mapa automaticamente.
  */
-export function recordDepositDamage(playerId = DEFAULT_PLAYER_ID, c, r, damage = 0) {
+export function recordDepositDamage(playerId = DEFAULT_PLAYER_ID, c, r, damage = 0, heroTiles = []) {
   const mapState = getPlayerMap(playerId);
   if (!mapState || !mapState.deposits) return null;
 
@@ -418,30 +418,66 @@ export function recordDepositDamage(playerId = DEFAULT_PLAYER_ID, c, r, damage =
     mapState.grid[r][c] = BLOCK_EMPTY;
     isNowBroken = true;
 
+    if (deposit.type === 'boss') {
+      mapState.lastBossPos = { c, r };
+    }
+
     // Registra estatísticas individuais do jogador e contagem da rodada
     incrementPlayerMiningStats(playerId, deposit.type);
     mapState.zombiesKilledInCycle = (mapState.zombiesKilledInCycle || 0) + 1;
 
-    // REGRA OFICIAL DO USUÁRIO: "os zumbis nascem nos cantos do mapa e caminham para as areas definidas proporcionalmente distribuidos"
+    // REGRA OFICIAL DO USUÁRIO: "QUANDO ISSO ACONTECER DEVE REESPAUNAR EM OUTRO LOCAL LIVRE"
+    // "os zumbis nascem nos cantos do mapa e caminham para as areas definidas proporcionalmente distribuidos"
     // Gera imediatamente um substituto ativo nascendo nos cantos do mapa e mirando a zona com menos criaturas
     const validCells = getValidDepositCells(GRID_COLS, GRID_ROWS);
     const activeKeys = new Set(
       mapState.deposits.filter(d => !d.isCompleted).map(d => `${d.c},${d.r}`)
     );
-    const openCells = validCells.filter(pos => 
-      !activeKeys.has(`${pos.c},${pos.r}`) && (pos.c !== c || pos.r !== r)
-    );
+    const heroSet = new Set((heroTiles || []).map(h => `${h.c},${h.r}`));
+
+    const isBossType = deposit.type === 'boss';
+    const minDistance = isBossType ? 5 : 4;
 
     const cornerPoints = CORNER_SPAWN_POINTS;
+    const distantCorners = cornerPoints.filter(pos => 
+      !activeKeys.has(`${pos.c},${pos.r}`) && 
+      !heroSet.has(`${pos.c},${pos.r}`) &&
+      !isCityBuilding(pos.c, pos.r) && 
+      !isBaseCompound(pos.c, pos.r) &&
+      (pos.c !== c || pos.r !== r) &&
+      Math.hypot(pos.c - c, pos.r - r) >= minDistance
+    );
+
     const openCorners = cornerPoints.filter(pos => 
       !activeKeys.has(`${pos.c},${pos.r}`) && 
       !isCityBuilding(pos.c, pos.r) && 
-      !isBaseCompound(pos.c, pos.r)
+      !isBaseCompound(pos.c, pos.r) &&
+      (pos.c !== c || pos.r !== r)
     );
 
-    const newPos = openCorners.length > 0 
-      ? openCorners[Math.floor(Math.random() * openCorners.length)]
-      : (openCells.length > 0 ? openCells[Math.floor(Math.random() * openCells.length)] : { c: 1, r: 1 });
+    const distantOpenCells = validCells.filter(pos => 
+      !activeKeys.has(`${pos.c},${pos.r}`) &&
+      !heroSet.has(`${pos.c},${pos.r}`) &&
+      !isCityBuilding(pos.c, pos.r) &&
+      !isBaseCompound(pos.c, pos.r) &&
+      (pos.c !== c || pos.r !== r) &&
+      Math.hypot(pos.c - c, pos.r - r) >= minDistance
+    );
+
+    const openCells = validCells.filter(pos => 
+      !activeKeys.has(`${pos.c},${pos.r}`) && 
+      !isCityBuilding(pos.c, pos.r) &&
+      !isBaseCompound(pos.c, pos.r) &&
+      (pos.c !== c || pos.r !== r)
+    );
+
+    const newPos = distantCorners.length > 0 
+      ? distantCorners[Math.floor(Math.random() * distantCorners.length)]
+      : (distantOpenCells.length > 0 
+          ? distantOpenCells[Math.floor(Math.random() * distantOpenCells.length)]
+          : (openCorners.length > 0 
+              ? openCorners[Math.floor(Math.random() * openCorners.length)]
+              : (openCells.length > 0 ? openCells[Math.floor(Math.random() * openCells.length)] : { c: 13, r: 1 })));
 
     // Determina a zona tática com menor quantidade de zumbis para manter proporção rigorosa
     const zoneCounts = TACTICAL_ZONES.map(z => ({
@@ -457,7 +493,6 @@ export function recordDepositDamage(playerId = DEFAULT_PLAYER_ID, c, r, damage =
     if (newPos) {
       const spawnC = newPos.c !== undefined ? newPos.c : newPos.x;
       const spawnR = newPos.r !== undefined ? newPos.r : newPos.y;
-      const isBossType = deposit.type === 'boss';
       respawnedDeposit = {
         id: `dep_horde_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
         c: spawnC,
@@ -538,22 +573,57 @@ export function removeBossFromPlayerMap(playerId = DEFAULT_PLAYER_ID) {
     bossDeposit.isCompleted = true;
     mapState.grid[bossDeposit.r][bossDeposit.c] = BLOCK_EMPTY;
     delete mapState.hpMap[`${bossDeposit.c},${bossDeposit.r}`];
+    mapState.lastBossPos = { c: bossDeposit.c, r: bossDeposit.r };
   }
   mapState.deposits = mapState.deposits.filter(d => !(d.type === 'boss' || d.blockId === BLOCK_BOSS));
   savePlayerMap(playerId, mapState);
   return mapState;
 }
 
-export function spawnBossInPlayerMap(playerId = DEFAULT_PLAYER_ID) {
+export function spawnBossInPlayerMap(playerId = DEFAULT_PLAYER_ID, options = {}) {
   const mapState = getPlayerMap(playerId);
+  const lastPos = mapState.lastBossPos || options.avoidPos || null;
+
   // Remove qualquer boss anterior
   mapState.deposits = mapState.deposits.filter(d => !(d.type === 'boss' || d.blockId === BLOCK_BOSS));
   
   const validCells = getValidDepositCells();
   const occupiedSet = new Set(mapState.deposits.map(d => `${d.c},${d.r}`));
-  const freeCells = validCells.filter(c => !occupiedSet.has(`${c.c},${c.r}`));
+  const heroSet = new Set((options.heroTiles || []).map(h => `${h.c},${h.r}`));
   
-  const chosenPos = freeCells[Math.floor(Math.random() * freeCells.length)] || { c: 7, r: 2 };
+  // REGRA OFICIAL DO USUÁRIO: "QUANDO ISSO ACONTECER DEVE REESPAUNAR EM OUTRO LOCAL LIVRE"
+  // Prioriza cantos distantes e livres de colisão/jogadores
+  const cornerCandidates = CORNER_SPAWN_POINTS.filter(pos => 
+    !occupiedSet.has(`${pos.c},${pos.r}`) &&
+    !heroSet.has(`${pos.c},${pos.r}`) &&
+    !isCityBuilding(pos.c, pos.r) &&
+    !isBaseCompound(pos.c, pos.r) &&
+    (!lastPos || Math.hypot(pos.c - lastPos.c, pos.r - lastPos.r) >= 5)
+  );
+
+  const distantCells = validCells.filter(pos => 
+    !occupiedSet.has(`${pos.c},${pos.r}`) &&
+    !heroSet.has(`${pos.c},${pos.r}`) &&
+    !isCityBuilding(pos.c, pos.r) &&
+    !isBaseCompound(pos.c, pos.r) &&
+    (!lastPos || Math.hypot(pos.c - lastPos.c, pos.r - lastPos.r) >= 5)
+  );
+
+  const freeCells = validCells.filter(pos => 
+    !occupiedSet.has(`${pos.c},${pos.r}`) && 
+    !heroSet.has(`${pos.c},${pos.r}`) &&
+    !isCityBuilding(pos.c, pos.r) &&
+    !isBaseCompound(pos.c, pos.r)
+  );
+  
+  const chosenPos = (cornerCandidates.length > 0 
+    ? cornerCandidates[Math.floor(Math.random() * cornerCandidates.length)]
+    : (distantCells.length > 0 
+        ? distantCells[Math.floor(Math.random() * distantCells.length)]
+        : (freeCells.length > 0 ? freeCells[Math.floor(Math.random() * freeCells.length)] : { c: 13, r: 1 })));
+
+  mapState.lastBossPos = { c: chosenPos.c, r: chosenPos.r };
+
   const bossObj = {
     id: `boss_${Date.now()}_test`,
     c: chosenPos.c,

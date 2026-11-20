@@ -30,6 +30,64 @@ let cityBgImg = null;
 let cityBgLoaded = false;
 let billboardImg = null;
 let billboardLoaded = false;
+let billboardShadowCanvas = null;
+
+export const DEFAULT_BILLBOARD_CONFIG = {
+  // Posição e dimensões do outdoor no gramado norte
+  x: 512,
+  y: 32,
+  width: 216,
+  height: 122,
+
+  // Sombra Projetada no Solo (Reflete fielmente o formato retangular do outdoor)
+  // REGRA OFICIAL DO USUÁRIO: "sombra do outdor esta redondaa quando deveria refletir a forma do outdor retangular"
+  shadowSkewX: -0.80,        // Inclinação lateral da sombra (sol do Noroeste)
+  shadowSkewY: -0.18,        // Perspectiva no solo
+  shadowScaleX: 1.05,        // Largura da sombra
+  shadowScaleY: 0.42,        // Achatamento no solo (projeção no plano do chão)
+  shadowRotDeg: -12,         // Rotação da sombra
+  shadowOffsetX: 26,         // Deslocamento X da projeção
+  shadowOffsetY: 82,         // Deslocamento Y da projeção (ancorada no solo sob o outdoor)
+  shadowOpacity: 0.60,       // Opacidade da sombra do painel retangular
+  shadowBlur: 2,             // Suavidade / difusão da sombra
+  
+  // Sombra de contato nos pés metálicos
+  footShadowOpacity: 0.85
+};
+
+export const billboardConfig = { ...DEFAULT_BILLBOARD_CONFIG };
+
+if (typeof window !== 'undefined') {
+  try {
+    const saved = localStorage.getItem('crypto_zombies_billboard_calibration');
+    if (saved) {
+      Object.assign(billboardConfig, JSON.parse(saved));
+    }
+  } catch (e) {}
+  window.billboardConfig = billboardConfig;
+
+  window.saveBillboardConfig = (cfg) => {
+    Object.assign(window.billboardConfig, cfg);
+    try {
+      localStorage.setItem('crypto_zombies_billboard_calibration', JSON.stringify(window.billboardConfig));
+    } catch (e) {}
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('cryptozombies_billboard_config_updated', { detail: window.billboardConfig }));
+    }
+    return window.billboardConfig;
+  };
+
+  window.resetBillboardConfig = () => {
+    Object.assign(window.billboardConfig, DEFAULT_BILLBOARD_CONFIG);
+    try {
+      localStorage.removeItem('crypto_zombies_billboard_calibration');
+    } catch (e) {}
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('cryptozombies_billboard_config_updated', { detail: window.billboardConfig }));
+    }
+    return window.billboardConfig;
+  };
+}
 let canyonBgImg = null;
 let canyonBgLoaded = false;
 let userFogImg = null;
@@ -64,6 +122,24 @@ export function initBillboard(onLoaded) {
   img.onload = () => {
     billboardImg = img;
     billboardLoaded = true;
+
+    // Pré-renderiza a silhueta retangular oficial do outdoor para projeção fiel da sombra no gramado
+    try {
+      const sCanvas = document.createElement('canvas');
+      const w = img.naturalWidth || 633;
+      const h = img.naturalHeight || 534;
+      sCanvas.width = w;
+      sCanvas.height = h;
+      const sCtx = sCanvas.getContext('2d');
+      if (sCtx) {
+        sCtx.drawImage(img, 0, 0);
+        sCtx.globalCompositeOperation = 'source-in';
+        sCtx.fillStyle = 'rgba(6, 20, 8, 0.72)';
+        sCtx.fillRect(0, 0, w, h);
+        billboardShadowCanvas = sCanvas;
+      }
+    } catch (e) {}
+
     if (onLoaded) onLoaded();
   };
   img.onerror = () => {
@@ -237,54 +313,8 @@ export function drawContinuousCaveFloor(ctx, width, height, mine, now, isBossAli
   if (cityBgLoaded && cityBgImg) {
     ctx.drawImage(cityBgImg, 0, 0, width, height);
 
-    // 1.1 OUTDOOR / BILLBOARD VETORIZADO "CRYPTOZOMBIES" (Versão exata que ficou perfeita: 180x101, frontal/lateral no gramado)
-    if (!billboardImg && typeof window !== 'undefined') {
-      initBillboard();
-    }
-    if (billboardLoaded && billboardImg) {
-      // Dimensões do outdoor aumentadas conforme solicitação (~20% maior: 216x122)
-      const bW = 216;
-      const bH = 122;
-      // Posicionado no gramado norte (Cols 7 e 8, Rows 0 e 1)
-      const bX = 512;
-      const bY = 32;
-
-      // Sombras realistas de contato e projeção solar no gramado (Sol vindo do noroeste)
-      ctx.save();
-      
-      // 1. Sombra suave e difusa projetada pelo painel no gramado (diagonal para sudeste)
-      ctx.fillStyle = 'rgba(5, 20, 5, 0.40)';
-      ctx.beginPath();
-      ctx.ellipse(bX + bW * 0.58, bY + bH * 0.93, bW * 0.46, 17, 0.10, 0, Math.PI * 2);
-      ctx.fill();
-
-      // 2. Sombra de oclusão de ambiente sob a base da estrutura
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.28)';
-      ctx.beginPath();
-      ctx.ellipse(bX + bW * 0.50, bY + bH * 0.88, bW * 0.42, 20, 0.05, 0, Math.PI * 2);
-      ctx.fill();
-
-      // 3. Sombra profunda de contato no pé esquerdo (apoio traseiro no gramado)
-      const leftFootX = bX + bW * 0.28;
-      const leftFootY = bY + bH * 0.89;
-      ctx.fillStyle = 'rgba(0, 10, 0, 0.85)';
-      ctx.beginPath();
-      ctx.ellipse(leftFootX, leftFootY, 13, 5.2, 0.12, 0, Math.PI * 2);
-      ctx.fill();
-
-      // 4. Sombra profunda de contato no pé direito (apoio frontal no gramado)
-      const rightFootX = bX + bW * 0.72;
-      const rightFootY = bY + bH * 0.98;
-      ctx.fillStyle = 'rgba(0, 10, 0, 0.88)';
-      ctx.beginPath();
-      ctx.ellipse(rightFootX, rightFootY, 15, 6.2, 0.12, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.restore();
-
-      // Renderiza o outdoor vetorizado com proporções perfeitas e alta nitidez
-      ctx.drawImage(billboardImg, bX, bY, bW, bH);
-    }
+    // 1.1 OUTDOOR / BILLBOARD VETORIZADO "CRYPTOZOMBIES" & SOMBRA RETANGULAR PROJETADA
+    drawBillboard(ctx, now);
 
     // 1.2 TORRE DE VIGIA E ALARME DE SIRENE ("exatamente nesse local coloque essa torre , sem que ela fique sobre o muro")
     drawSirenTower(ctx, now, isBossAlive);
@@ -826,6 +856,81 @@ export function drawBossGreenFog(ctx, width, height, opacity, now, bossEnemy) {
   ctx.restore();
 
   ctx.restore();
+}
+
+/**
+ * Renderiza o Outdoor / Billboard "CryptoZombies" com sua sombra retangular realista no solo.
+ * 
+ * Regra Oficial do Usuário:
+ * "sombra do outdor esta redondaa quando deveria refletir a forma do outdor retangular"
+ */
+export function drawBillboard(ctx, now) {
+  if (!billboardImg && typeof window !== 'undefined') {
+    initBillboard();
+  }
+  if (!billboardLoaded || !billboardImg) return;
+
+  const cfg = (typeof window !== 'undefined' && window.billboardConfig) || billboardConfig;
+  const bX = cfg.x ?? 512;
+  const bY = cfg.y ?? 32;
+  const bW = cfg.width ?? 216;
+  const bH = cfg.height ?? 122;
+
+  // 1. SOMBRA RETANGULAR PROJETADA NO GRAMADO (Reflete o formato retangular do painel)
+  ctx.save();
+
+  const sX = bX + (cfg.shadowOffsetX ?? 26);
+  const sY = bY + (cfg.shadowOffsetY ?? 82);
+  const sScaleX = cfg.shadowScaleX ?? 1.05;
+  const sScaleY = cfg.shadowScaleY ?? 0.42;
+  const sSkewX = cfg.shadowSkewX ?? -0.80;
+  const sSkewY = cfg.shadowSkewY ?? -0.18;
+  const sRotRad = ((cfg.shadowRotDeg ?? -12) * Math.PI) / 180;
+  const sOpacity = cfg.shadowOpacity ?? 0.60;
+  const sBlur = cfg.shadowBlur ?? 2;
+
+  ctx.save();
+  ctx.translate(sX, sY);
+  ctx.rotate(sRotRad);
+  ctx.transform(sScaleX, sSkewY, sSkewX, sScaleY, 0, 0);
+
+  if (sBlur > 0 && ctx.filter !== undefined) {
+    ctx.filter = `blur(${sBlur}px)`;
+  }
+  ctx.globalAlpha = sOpacity;
+
+  if (billboardShadowCanvas) {
+    // Projeta no chão a silhueta recortada exata da placa retangular e das pernas metálicas
+    ctx.drawImage(billboardShadowCanvas, -bW * 0.08, -bH * 0.65, bW, bH);
+  } else {
+    // Projeção retangular procedural geométrica
+    ctx.fillStyle = 'rgba(6, 20, 8, 0.90)';
+    ctx.fillRect(0, -bH * 0.70, bW * 0.92, bH * 0.62);
+    ctx.fillRect(bW * 0.22, -bH * 0.12, 12, bH * 0.22);
+    ctx.fillRect(bW * 0.70, -bH * 0.12, 12, bH * 0.22);
+  }
+  ctx.restore();
+
+  // 2. Sombras de contato profundo nos apoios metálicos de sustentação no gramado
+  const leftFootX = bX + bW * 0.28;
+  const leftFootY = bY + bH * 0.89;
+  const rightFootX = bX + bW * 0.72;
+  const rightFootY = bY + bH * 0.98;
+  const footOpacity = cfg.footShadowOpacity ?? 0.85;
+
+  ctx.fillStyle = `rgba(0, 10, 0, ${footOpacity})`;
+  ctx.beginPath();
+  ctx.ellipse(leftFootX, leftFootY, 13, 5.2, 0.12, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.ellipse(rightFootX, rightFootY, 15, 6.2, 0.12, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.restore();
+
+  // 3. Renderiza o outdoor vetorizado com proporções perfeitas e alta nitidez
+  ctx.drawImage(billboardImg, bX, bY, bW, bH);
 }
 
 /**

@@ -35,6 +35,7 @@ import { sfx } from '../utils/sfx';
 import { 
   isCityBuilding, 
   getSafeHeroSpawn, 
+  SAFE_HERO_SPAWN_POINTS,
   isCanyonTrackOrTunnel, 
   isBaseCompound,
   TACTICAL_ZONES,
@@ -414,7 +415,11 @@ export default function GameBoard({
 
         // Registra a destruição da jazida no motor de mapas individuais (Lógica Estritamente Visual)
         const pId = callbacksRef.current.playerId || 'player_default';
-        const mapDamageResult = recordDepositDamage(pId, bx, by, 999999);
+        const heroTiles = (state.miners || []).filter(m => m.status === 'work').map(m => ({
+          c: Math.round(m.x),
+          r: Math.round(m.y)
+        }));
+        const mapDamageResult = recordDepositDamage(pId, bx, by, 999999, heroTiles);
         if (mapDamageResult?.deposit) {
           callbacksRef.current.onDepositBroken?.(mapDamageResult);
           // Remove imediatamente a entidade abatida da memória de inimigos ativos
@@ -448,24 +453,34 @@ export default function GameBoard({
       };
 
       // REGRA OFICIAL DO USUÁRIO: "Anti-Stacking de personagens tbm"
-      // Passo 1: Nenhum herói pode ocupar a mesma célula de grid (x, y) de outro herói
+      // Passo 1: Nenhum herói pode ocupar a mesma célula de grid (x, y) de outro herói, nem ficar dentro de obstáculos
       const occupiedHeroTiles = new Map();
       state.miners.forEach(m => {
         if (m.status !== 'work') return;
         const hx = Math.round(m.x);
         const hy = Math.round(m.y);
         const key = `${hx},${hy}`;
-        if (!occupiedHeroTiles.has(key)) {
+        const isInsideObstacle = isCityBuilding(hx, hy) || isBaseCompound(hx, hy);
+
+        if (!occupiedHeroTiles.has(key) && !isInsideObstacle) {
           occupiedHeroTiles.set(key, m);
         } else {
-          // Conflito! Já existe outro herói nesta célula exata. Reloca para a célula livre adjacente mais próxima
+          // Conflito ou preso dentro de obstáculo! Reloca para a célula livre adjacente mais próxima ou ponto seguro
           const freeCell = findNearestFreeHeroCell(hx, hy, m.id, state.miners, state.grid, isCanyon, state.enemies);
-          if (freeCell) {
-            m.x = freeCell.x;
-            m.y = freeCell.y;
-            m.visualX = freeCell.x;
-            m.visualY = freeCell.y;
-            occupiedHeroTiles.set(`${freeCell.x},${freeCell.y}`, m);
+          const fallbackCell = SAFE_HERO_SPAWN_POINTS.find(p => 
+            !isCityBuilding(p.x, p.y) && 
+            !isBaseCompound(p.x, p.y) && 
+            !occupiedHeroTiles.has(`${p.x},${p.y}`)
+          ) || { x: 2, y: 5 };
+          const target = freeCell || fallbackCell;
+
+          if (target) {
+            m.x = target.x;
+            m.y = target.y;
+            m.visualX = target.x;
+            m.visualY = target.y;
+            m.stuckTimer = 0;
+            occupiedHeroTiles.set(`${target.x},${target.y}`, m);
           }
         }
       });
@@ -1001,6 +1016,56 @@ export default function GameBoard({
         // Navegação e marcha inteligente em direção à próxima jazida/zumbi do mapa
         // ESTE BLOCO SÓ EXECUTA SE O HERÓI NÃO ESTIVER EM COMBATE ATACANDO UM ZUMBI
         miner.moveCooldown = (miner.moveCooldown || 0) - dt * (miner.speed || 1);
+
+        // REGRA OFICIAL DO USUÁRIO: "QUANDO ISSO ACONTECER DEVE REESPAUNAR EM OUTRO LOCAL LIVRE"
+        // Detecção de travamento (Stuck Detection): se o herói está tentando andar mas não progride suas coordenadas
+        const currentVx = miner.visualX ?? miner.x;
+        const currentVy = miner.visualY ?? miner.y;
+        const lastVx = miner.lastTrackedVx ?? currentVx;
+        const lastVy = miner.lastTrackedVy ?? currentVy;
+        const distMoved = Math.hypot(currentVx - lastVx, currentVy - lastVy);
+
+        miner.lastTrackedVx = currentVx;
+        miner.lastTrackedVy = currentVy;
+
+        if (!miner.isMining && distMoved < 0.02) {
+          miner.stuckTimer = (miner.stuckTimer || 0) + dt;
+        } else {
+          miner.stuckTimer = 0;
+        }
+
+        // Se o herói ficou travado tentando andar sem sair do lugar por mais de 2.0 segundos:
+        if (miner.stuckTimer > 2.0) {
+          const curX = Math.round(miner.x);
+          const curY = Math.round(miner.y);
+          const freeCell = findNearestFreeHeroCell(curX, curY, miner.id, state.miners, state.grid, isCanyon, state.enemies);
+          const fallbackCell = SAFE_HERO_SPAWN_POINTS.find(p => 
+            !isCityBuilding(p.x, p.y) && 
+            !isBaseCompound(p.x, p.y) && 
+            !state.miners.some(o => o.id !== miner.id && Math.round(o.x) === p.x && Math.round(o.y) === p.y)
+          ) || { x: 2, y: 5 };
+
+          const targetSpawn = freeCell || fallbackCell;
+          miner.x = targetSpawn.x;
+          miner.y = targetSpawn.y;
+          miner.visualX = targetSpawn.x;
+          miner.visualY = targetSpawn.y;
+          miner.lastTrackedVx = targetSpawn.x;
+          miner.lastTrackedVy = targetSpawn.y;
+          miner.stuckTimer = 0;
+          miner.moveCooldown = 0.2;
+          miner.isMining = false;
+          miner.lockedEnemyId = null;
+
+          state.floatTexts.push({
+            text: '📍 Reespawn Livre',
+            x: targetSpawn.x * TILE_SIZE + TILE_SIZE / 2,
+            y: targetSpawn.y * TILE_SIZE,
+            color: '#38bdf8',
+            opacity: 0.9,
+            vy: -18
+          });
+        }
 
         if (miner.moveCooldown <= 0) {
           miner.moveCooldown = 0.35; // Passo dinâmico calibrado pela velocidade

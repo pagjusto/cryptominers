@@ -54,6 +54,7 @@ import RoiSimulatorModal from './components/RoiSimulatorModal';
 import AdminConfigModal from './components/AdminConfigModal';
 import StatisticsModal from './components/StatisticsModal';
 import TowerCalibrationModal from './components/TowerCalibrationModal';
+import BillboardCalibrationModal from './components/BillboardCalibrationModal';
 import { getCryptoZombiesConfig } from './data/cryptoZombiesConfig';
 import { 
   DEFAULT_CONSTRUCTION_CHEST_CONFIG,
@@ -488,7 +489,8 @@ export default function App() {
       const updated = removeBossFromPlayerMap(activePlayerId);
       setMapData(updated);
     } else {
-      const updated = spawnBossInPlayerMap(activePlayerId);
+      const heroTiles = (miners || []).filter(m => m.status === 'work').map(m => ({ c: Math.round(m.x), r: Math.round(m.y) }));
+      const updated = spawnBossInPlayerMap(activePlayerId, { heroTiles });
       setMapData(updated);
     }
   };
@@ -498,9 +500,10 @@ export default function App() {
     const withoutBoss = removeBossFromPlayerMap(activePlayerId);
     setMapData(withoutBoss);
 
-    // 2. Após o delay, reinsere o boss
+    // 2. Após o delay, reinsere o boss em outro local livre e distante dos heróis
     setTimeout(() => {
-      const withBoss = spawnBossInPlayerMap(activePlayerId);
+      const heroTiles = (miners || []).filter(m => m.status === 'work').map(m => ({ c: Math.round(m.x), r: Math.round(m.y) }));
+      const withBoss = spawnBossInPlayerMap(activePlayerId, { heroTiles });
       setMapData(withBoss);
     }, delayMs);
   };
@@ -512,7 +515,8 @@ export default function App() {
       return '💀 Boss removido! A torre de sirene e a névoa verde estão se desativando...';
     };
     window.spawnBoss = () => {
-      const m = spawnBossInPlayerMap(activePlayerId);
+      const heroTiles = (miners || []).filter(m => m.status === 'work').map(m => ({ c: Math.round(m.x), r: Math.round(m.y) }));
+      const m = spawnBossInPlayerMap(activePlayerId, { heroTiles });
       setMapData(m);
       return '⚠️ Boss inserido! O ALERTA BOSS começará a piscar 4 vezes, a sirene tocará e a névoa retornará.';
     };
@@ -520,7 +524,7 @@ export default function App() {
       handleTestBossCycle(delayMs);
       return `🔄 Ciclo iniciado: Boss removido agora e retornará em ${delayMs}ms com alerta e torre.`;
     };
-  }, [activePlayerId]);
+  }, [activePlayerId, miners]);
 
   // Executa o sorteio oficial quando o Boss é derrotado.
   // A lista recebida já contém apenas sobreviventes da equipe registrada no início da batalha.
@@ -612,6 +616,7 @@ export default function App() {
   // Painel de Inteligência & Estatísticas da Mineração (Dashboard & Previsão de Tempo)
   const [isStatsModalOpen, setIsStatsModalOpen] = useState(false);
   const [isTowerModalOpen, setIsTowerModalOpen] = useState(false);
+  const [isBillboardModalOpen, setIsBillboardModalOpen] = useState(false);
   const [statsData, setStatsData] = useState({
     remainingHp: 2800,
     totalHp: 3200,
@@ -1727,6 +1732,14 @@ export default function App() {
                 >
                   🗼 Torre & Sombra
                 </button>
+
+                <button
+                  onClick={() => setIsBillboardModalOpen(prev => !prev)}
+                  className="text-[11px] bg-emerald-950/90 hover:bg-emerald-900 border border-emerald-500/60 text-emerald-200 hover:text-white px-2 py-0.5 rounded-md cursor-pointer transition-all active:scale-95 flex items-center gap-1 font-bold shadow"
+                  title="Abrir Calibrador da Sombra Retangular do Outdoor"
+                >
+                  🪧 Sombra Outdoor
+                </button>
               </div>
 
               <GameBoard
@@ -1991,6 +2004,12 @@ export default function App() {
       <TowerCalibrationModal
         isOpen={isTowerModalOpen}
         onClose={() => setIsTowerModalOpen(false)}
+      />
+
+      {/* PAINEL DE CALIBRAÇÃO MANUAL DA SOMBRA DO OUTDOOR */}
+      <BillboardCalibrationModal
+        isOpen={isBillboardModalOpen}
+        onClose={() => setIsBillboardModalOpen(false)}
       />
 
       {/* MODAL DE FUSÃO & QUEIMA DE HERÓIS (ESTRELAS & PODER) */}
