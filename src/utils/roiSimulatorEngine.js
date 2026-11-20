@@ -1,4 +1,4 @@
-// CRIPTO MYNERS — MOTOR MATEMÁTICO DO SIMULADOR DE ROI
+// CRYPTOZOMBIES — MOTOR MATEMÁTICO DO SIMULADOR DE ROI
 // Modela a produção efetiva considerando limite de 15 vagas, ciclos de trabalho, descanso na casa e revezamento automático.
 
 export function calculateRoiScenario({
