@@ -113,7 +113,11 @@ O usuário aprovou manter os valores da tabela de referência para eficiência-b
 | 240 | 73,33 anos | 30% | 30% | Ativo |
 | 270 | 80 anos | 0% | 0% | Aposentado |
 
-Os valores acima estão aprovados como pontos de referência. A regra matemática de transição/interpolação entre os marcos ainda não foi especificada; não presumir uma interpolação linear sem decisão explícita. Aos 270 dias, o herói chega a 80 anos, tem eficiência-base 0%, HP 0% e se aposenta.
+Os valores acima estão aprovados como pontos de referência. **A transição entre cada marco é gradual e linear**, tanto para a eficiência-base quanto para o HP. Os valores diminuem continuamente e proporcionalmente ao longo dos dias entre dois marcos consecutivos, sem saltos ou períodos de estabilidade. O cálculo deve considerar frações de dia quando aplicável.
+
+Para cada intervalo entre dois marcos consecutivos, calcular a queda proporcional entre o valor inicial e o valor final daquele intervalo. Essa interpolação é aplicada separadamente aos valores de eficiência-base e HP, que neste modelo compartilham os mesmos marcos.
+
+Aos 270 dias, o herói chega a 80 anos, tem eficiência-base 0%, HP 0% e se aposenta.
 
 ## Observações de balanceamento
 
