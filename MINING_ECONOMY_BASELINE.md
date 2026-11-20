@@ -70,29 +70,36 @@ Exemplo: um herói de 60 anos cuja eficiência-base seja 50%, com três estrelas
 
 O bônus das estrelas não elimina nem reverte a penalidade de envelhecimento. O bônus máximo é de +15% em ★★★.
 
-## Envelhecimento — tabela de referência e média diária aprovada
+## Envelhecimento — modelo contínuo aprovado
 
-A tabela de marcos registrada no planejamento foi:
+**Decisão aprovada: Opção A — envelhecimento contínuo de 0,222222... ano de idade por dia real.** Esta regra substitui os valores antigos de idade intermediária que não eram compatíveis com uma taxa uniforme.
 
-| Dias de vida | Idade indicada | Eficiência-base | HP |
-|---:|---:|---:|---:|
-| 0 | 20 anos | 100% | 100% |
-| 90 | 30 anos | 90% | 90% |
-| 120 | 40 anos | 80% | 80% |
-| 150 | 50 anos | 70% | 70% |
-| 180 | 60 anos | 50% | 50% |
-| 240 | 70 anos | 30% | 30% |
-| 270 | 80 anos | 0% | Aposentado |
-
-Regra de envelhecimento médio aprovada:
-
-- O ciclo vai dos 20 aos 80 anos: **60 anos de idade em 270 dias reais**.
-- Média de envelhecimento: **60 ÷ 270 = 0,222222... ano de idade por dia real**.
+- Idade inicial: **20 anos**.
+- Idade final: **80 anos**.
+- Duração do ciclo: **270 dias reais**.
+- Envelhecimento total: **60 anos em 270 dias**.
+- Taxa: **60 ÷ 270 = 0,222222... ano de idade por dia real**.
 - Equivalência aproximada: **2,67 meses de idade por dia real**.
-- O envelhecimento deve ser calculado continuamente, inclusive em frações de dia.
-- Aos 80 anos / 270 dias, o herói se aposenta.
+- O cálculo é contínuo, incluindo frações de dia.
+- Aos 80 anos, após 270 dias, o herói se aposenta.
 
-**Nota de consistência pendente:** os marcos de idade da tabela acima não seguem uma taxa uniforme de 0,222222 ano/dia entre cada intervalo. A média diária foi aprovada como taxa contínua geral do ciclo; antes de implementar, é necessário confirmar se os valores de idade intermediários da tabela devem ser substituídos pela idade calculada continuamente. Os marcos de eficiência-base e HP também devem ser preservados até que sua interpolação seja confirmada.
+Fórmula da idade:
+
+    idade = 20 + (dias_de_vida × 60 ÷ 270)
+
+### Idades calculadas nos marcos de referência
+
+| Dias de vida | Idade pela regra contínua |
+|---:|---:|
+| 0 | 20 anos |
+| 90 | 40 anos |
+| 120 | 46,67 anos |
+| 150 | 53,33 anos |
+| 180 | 60 anos |
+| 240 | 73,33 anos |
+| 270 | 80 anos — aposentadoria |
+
+**Importante:** os valores antigos de idade (30 anos no dia 90, 40 no dia 120, etc.) foram substituídos por esta progressão contínua. A tabela antiga também continha marcos de eficiência-base e HP (100%, 90%, 80%, 70%, 50%, 30% e aposentadoria). Esses valores de eficiência e HP ficam registrados como referências históricas, mas sua relação exata com a nova idade contínua e a regra de interpolação ainda precisa ser definida antes da implementação. Não presumir que eficiência e HP diminuem linearmente com a idade sem aprovação.
 
 ## Observações de balanceamento
 
