@@ -79,21 +79,21 @@ export function normalizeHeroRarity(hero) {
 
 /**
  * Calcula a chance aditiva do Baú do Boss.
- * No sorteio real, aceita participantes marcados pelo snapshot inicial que estejam vivos ao fim,
- * independentemente de estarem em combate, no ambulatório ou aguardando atendimento.
- * Simulações administrativas sem snapshot continuam considerando apenas combatentes ativos.
+ * A elegibilidade oficial exige snapshot da equipe inicial e sobrevivência no encerramento.
+ * A visualização/teste administrativo pode solicitar explicitamente uma prévia dos trabalhadores atuais.
  */
-export function calculateActiveMinersChance(miners = [], config = DEFAULT_CONSTRUCTION_CHEST_CONFIG) {
+export function calculateActiveMinersChance(miners = [], config = DEFAULT_CONSTRUCTION_CHEST_CONFIG, options = {}) {
+  const { allowWorkforcePreview = false } = options;
   const chances = config.chanceByRarityPct || DEFAULT_CONSTRUCTION_CHEST_CONFIG.chanceByRarityPct;
   const maxCap = config.maxAccountChanceCapPct ?? DEFAULT_CONSTRUCTION_CHEST_CONFIG.maxAccountChanceCapPct;
 
-  // Participantes do snapshot do Boss são elegíveis se ainda estiverem vivos no encerramento.
-  // Fora desse fluxo, mantém-se o filtro tradicional de combatentes ativos para simulações.
+  // Sorteio oficial: somente participantes do snapshot inicial ainda vivos ao final.
+  // A condição work só é usada em prévias/simulações administrativas explicitamente solicitadas.
   const activeMiners = miners.filter(m => {
     if (m.bossSnapshotParticipant === true) {
       return m.isAliveAtBossEnd === true && (m.currentHealth ?? 100) > 0;
     }
-    return m.status === 'work' && (m.currentHealth ?? 100) > 5;
+    return allowWorkforcePreview === true && m.status === 'work' && (m.currentHealth ?? 100) > 5;
   });
 
   const breakdownByRarity = {
@@ -312,7 +312,7 @@ export function executeConstructionBossRoll(miners = [], config = DEFAULT_CONSTR
   }
 
   // 2. Calcula probabilidade dos heróis ativos
-  const activeChance = calculateActiveMinersChance(miners, config);
+  const activeChance = calculateActiveMinersChance(miners, config, { allowWorkforcePreview: isSimulated });
 
   if (activeChance.activeMinersCount === 0) {
     return {
