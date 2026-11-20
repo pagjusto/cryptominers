@@ -262,10 +262,18 @@ export default function App() {
             const currentHealth = Number.isFinite(Number(m.currentHealth)) ? Number(m.currentHealth) : maxHealth;
             return m.status === 'injured' || m.injuredAwaitingRescue || (currentHealth / maxHealth) * 100 <= 5;
           };
-          const workHeroes = parsed.filter(m => m.status === 'work' && !isWounded(m));
+          // Migra antigos estados de descanso por estamina para reserva.
+          // Mantém house/waiting_house apenas para feridos em tratamento ou aguardando leito.
+          const normalizedStatuses = parsed.map(m => {
+            if ((m.status === 'house' || m.status === 'waiting_house') && !isWounded(m)) {
+              return { ...m, status: 'reserve' };
+            }
+            return m;
+          });
+          const workHeroes = normalizedStatuses.filter(m => m.status === 'work' && !isWounded(m));
           if (workHeroes.length < 15) {
             let activeCount = 0;
-            const restored = parsed.map(m => {
+            const restored = normalizedStatuses.map(m => {
               if (isWounded(m)) return m;
               if (activeCount < 15) {
                 activeCount++;
@@ -280,6 +288,10 @@ export default function App() {
             return restored;
           }
 
+          if (normalizedStatuses.some((m, i) => m !== parsed[i])) {
+            localStorage.setItem('crypto_miners_team', JSON.stringify(normalizedStatuses));
+            return normalizedStatuses;
+          }
           return parsed;
         }
       } catch (e) {}
