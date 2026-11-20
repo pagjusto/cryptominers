@@ -1,4 +1,4 @@
-// CRIPTO MYNERS — MOTOR MATEMÁTICO DO SIMULADOR DE UPGRADES
+// CRYPTOZOMBIES — MOTOR MATEMÁTICO DO SIMULADOR DE UPGRADES
 // Simula a operação real da conta do jogador (heróis reais, casa atual, ciclos de mineração, descanso e 15 vagas)
 // e projeta o impacto sistêmico de melhorias de Casas, Energia e Nível dos Heróis.
 
