@@ -1473,22 +1473,25 @@ export default function GameBoard({
         onClick={handleCanvasClick}
       />
 
-      {/* REGRA OFICIAL DO USUÁRIO: "jogue o alerta pro meio do mapa", "remova os pontos vermelhos deixe so o do perigo", "ALERTA BOSS PISCANDO UMAS 4 VEZES" */}
+      {/* REGRA OFICIAL DO USUÁRIO: "ALERTA DE BOSS", "jogue o alerta pro meio do mapa", "poem uma sombra vermelha", "PISCANDO UMAS 4 VEZES" */}
       {bossAlert && (
         <div 
           key={bossAlertKey}
-          className="boss-alert-flashing absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40 pointer-events-none select-none flex items-center justify-center"
+          className="boss-alert-flashing absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40 pointer-events-none select-none flex flex-col items-center justify-center"
           onAnimationEnd={() => setBossAlert(false)}
         >
-          <div className="relative px-7 py-3 rounded-2xl border-2 border-red-500 bg-gradient-to-r from-red-950/95 via-red-900/95 to-red-950/95 shadow-[0_0_50px_rgba(239,68,68,0.95),inset_0_0_20px_rgba(239,68,68,0.6)] flex items-center gap-3 backdrop-blur-md">
-            <span className="text-2xl md:text-3xl font-black tracking-widest text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] uppercase font-mono flex items-center gap-3">
-              <span className="text-amber-400 text-2xl md:text-3xl animate-pulse select-none">⚠️</span>
-              <span className="text-transparent bg-clip-text bg-gradient-to-b from-white via-red-100 to-red-400 font-extrabold tracking-wider">
-                ALERTA BOSS
-              </span>
-              <span className="text-amber-400 text-2xl md:text-3xl animate-pulse select-none">⚠️</span>
-            </span>
-          </div>
+          {/* Brilho e sombra ambiental vermelha profunda no fundo */}
+          <div className="absolute w-[85%] h-[65%] rounded-full bg-red-600/35 blur-3xl pointer-events-none" />
+
+          {/* Emblema Oficial com Sombra Vermelha Intensa */}
+          <img 
+            src="/enemies/boss_alert.png" 
+            alt="Alerta de Boss" 
+            className="relative w-[340px] md:w-[420px] max-w-[85vw] h-auto object-contain select-none pointer-events-none"
+            style={{
+              filter: 'drop-shadow(0 0 25px rgba(239, 68, 68, 0.95)) drop-shadow(0 0 55px rgba(220, 38, 38, 0.85)) drop-shadow(0 12px 24px rgba(153, 27, 27, 0.9))'
+            }}
+          />
         </div>
       )}
     </div>
