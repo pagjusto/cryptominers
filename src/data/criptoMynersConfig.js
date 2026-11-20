@@ -287,12 +287,13 @@ export const DEFAULT_CRIPTO_MYNERS_CONFIG = {
   // 6. SISTEMA DE BAÚS DE CONSTRUÇÃO (SORTEIO POR BOSS DERROTADO)
   constructionChestConfig: {
     enabled: true,
-    baseRateCommonPct: 2, // Comum: 2% por sobrevivente
-    rarityMultipliers: {
-      common: 1.0,              // 2,00% por sobrevivente
-      rare: 1.1,                // 2,20% por sobrevivente
-      epic: 1.1666666666666667, // 2,333333...% por sobrevivente
-      legendary: 1.3333333333333333 // 2,666666...% por sobrevivente
+    chanceByRarityPct: {
+      common: 2.0,
+      rare: 2.2,
+      superRare: 2.3,
+      epic: 2.4,
+      legendary: 2.6667,
+      superLegendary: 3.0
     },
     maxAccountChanceCapPct: 40.0, // Teto absoluto de 40% por Boss e por jogador
     cycleDurationSeconds: 0,      // Sem ciclo horário; sorteio a cada Boss derrotado
@@ -326,10 +327,7 @@ export function getCriptoMynersConfig() {
       constructionChestConfig: {
         ...DEFAULT_CRIPTO_MYNERS_CONFIG.constructionChestConfig,
         ...(parsed.constructionChestConfig || {}),
-        rarityMultipliers: DEFAULT_CRIPTO_MYNERS_CONFIG.constructionChestConfig.rarityMultipliers,
-        baseRateCommonPct: [0.5, 15].includes(parsed.constructionChestConfig?.baseRateCommonPct)
-          ? 2
-          : (parsed.constructionChestConfig?.baseRateCommonPct ?? DEFAULT_CRIPTO_MYNERS_CONFIG.constructionChestConfig.baseRateCommonPct),
+        chanceByRarityPct: DEFAULT_CRIPTO_MYNERS_CONFIG.constructionChestConfig.chanceByRarityPct,
         maxAccountChanceCapPct: parsed.constructionChestConfig?.maxAccountChanceCapPct === 10
           ? 40
           : (parsed.constructionChestConfig?.maxAccountChanceCapPct ?? DEFAULT_CRIPTO_MYNERS_CONFIG.constructionChestConfig.maxAccountChanceCapPct),
