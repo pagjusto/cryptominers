@@ -78,10 +78,10 @@
 
 ```bash
 # 1. Clonar o repositório
-git clone https://github.com/SEU_USUARIO/cripto-myners.git
+git clone https://github.com/pagjusto/cryptominers.git
 
 # 2. Entrar na pasta do projeto
-cd cripto-myners
+cd cryptominers
 
 # 3. Instalar as dependências
 npm install
