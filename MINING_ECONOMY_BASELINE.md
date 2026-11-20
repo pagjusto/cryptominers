@@ -50,9 +50,30 @@ A composição de referência representa 23 unidades ponderadas de mineração:
 
 A taxa individual diária de referência é: 20,88 × multiplicador da raridade.
 
+## Eficiência por envelhecimento e estrelas
+
+A eficiência final combina a eficiência-base determinada pela idade do herói com o bônus total correspondente à sua evolução em estrelas.
+
+| Evolução | Bônus de eficiência |
+|---|---:|
+| ★ | +5% |
+| ★★ | +10% |
+| ★★★ | +15% |
+
+Fórmula aprovada:
+
+    eficiência_final = eficiência_base_por_idade × (1 + bônus_de_estrelas)
+
+Exemplo: um herói de 60 anos cuja eficiência-base seja 50%, com três estrelas (+15%), terá:
+
+    50% × 1,15 = 57,5% de eficiência final
+
+O bônus das estrelas não elimina nem reverte a penalidade de envelhecimento. O bônus máximo é de +15% em ★★★.
+
 ## Observações de balanceamento
 
 - Estes números representam a base do cenário mediano com mineração válida durante 24 horas.
 - Atributos individuais dos heróis e multiplicadores de casa podem ajustar a produção efetiva conforme as regras do jogo.
 - O valor de 480,24 MNC/dia é a referência total da equipe mediana, não uma recompensa por Boss.
+- Os valores de eficiência por idade e o bônus por estrelas são fatores distintos, combinados pela fórmula acima.
 - Não alterar esta base sem uma nova decisão explícita de balanceamento.
