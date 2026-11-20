@@ -12,7 +12,6 @@ export const HOUSE_TIERS = [
     icon: '⛺',
     slots: 0,
     recoverySpeedPct: 50,
-    staminaPerSec: 1.5,
     costUsdt: 0,
     costBcoin: 0,
     color: '#64748b',
@@ -24,7 +23,6 @@ export const HOUSE_TIERS = [
     icon: '🛖',
     slots: 5,
     recoverySpeedPct: 100,
-    staminaPerSec: 5.0, // 100% velocidade base
     costUsdt: 25,
     costBcoin: 25,
     color: '#38bdf8',
@@ -36,7 +34,6 @@ export const HOUSE_TIERS = [
     icon: '🏡',
     slots: 10,
     recoverySpeedPct: 125,
-    staminaPerSec: 6.25, // 125% (+25% mais rápida)
     costUsdt: 50,
     costBcoin: 50,
     color: '#22c55e',
@@ -48,7 +45,6 @@ export const HOUSE_TIERS = [
     icon: '🏠',
     slots: 15,
     recoverySpeedPct: 150,
-    staminaPerSec: 7.5, // 150% (+50% mais rápida)
     costUsdt: 85,
     costBcoin: 85,
     popular: true,
@@ -61,7 +57,6 @@ export const HOUSE_TIERS = [
     icon: '🏰',
     slots: 20,
     recoverySpeedPct: 200,
-    staminaPerSec: 10.0, // 200% (dobro da velocidade)
     costUsdt: 135,
     costBcoin: 135,
     badge: 'MÁXIMO (2.0x)',
