@@ -951,22 +951,6 @@ export function drawSirenTower(ctx, now, isBossAlive = false) {
     drawHelicopterBeam(sirenAngle, beamLength, 0.85);
     drawHelicopterBeam(sirenAngle + Math.PI, beamLength, 0.85);
 
-    // 3.2. Reflexos gêmeos no solo do gramado acompanhando a rotação horizontal
-    const groundReflectY = footCenterY + 4;
-    const drawGroundReflection = (ang) => {
-      const gx = beaconX + Math.cos(ang) * 70;
-      const gy = groundReflectY + Math.sin(ang) * 18 + Math.cos(ang) * 5.6;
-      const gGrad = ctx.createRadialGradient(gx, gy, 2, gx, gy, 38);
-      gGrad.addColorStop(0, 'rgba(239, 68, 68, 0.28)');
-      gGrad.addColorStop(1, 'rgba(239, 68, 68, 0)');
-      ctx.fillStyle = gGrad;
-      ctx.beginPath();
-      ctx.ellipse(gx, gy, 38, 12, 0.08, 0, Math.PI * 2);
-      ctx.fill();
-    };
-    drawGroundReflection(sirenAngle);
-    drawGroundReflection(sirenAngle + Math.PI);
-
     // 3.3. Cúpula da Sirene com Brilho Incandescente
     const pulse = 1.0 + Math.sin(now * 0.015) * 0.15;
     const beaconGlow = ctx.createRadialGradient(beaconX, beaconY, 1, beaconX, beaconY, 16 * pulse);
