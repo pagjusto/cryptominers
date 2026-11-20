@@ -27,8 +27,6 @@ export const MINER_CLASSES = {
     color: '#38bdf8',
     basePower: 2,
     baseSpeed: 1.3,
-    baseStamina: 100,
-    specialty: 'Resistência Elétrica: 35% menos estamina por golpe',
     description: 'Robô com armadura industrial, olhos de LED ciano e martelete demolidor operado na horizontal.',
     chance: 0.60
   },
@@ -40,7 +38,6 @@ export const MINER_CLASSES = {
     color: '#f97316',
     basePower: 6,
     baseSpeed: 0.95,
-    baseStamina: 140,
     specialty: 'Golpe Demolidor: 28% de Crítico Duplo com tremor',
     description: 'Anão guerreiro com elmo de chifres, trança ruiva e machado duplo de batalha.',
     chance: 0.25
@@ -53,7 +50,6 @@ export const MINER_CLASSES = {
     color: '#22c55e',
     basePower: 3,
     baseSpeed: 2.1,
-    baseStamina: 90,
     specialty: 'Arremesso de Kunai: crítico ácido veloz e +50% bônus em BCOIN',
     description: 'O ninja clássico do CryptoZombies! Sapinho anfíbio veloz com bandana preta que arremessa velozes Kunais de veneno ácido cortante com impacto perfurante.',
     chance: 0.10
@@ -66,7 +62,6 @@ export const MINER_CLASSES = {
     color: '#9333ea',
     basePower: 5,
     baseSpeed: 1.5,
-    baseStamina: 120,
     specialty: 'Bola de Fogo Demolidora: explosão ígnea e dano em área',
     description: 'Poderoso mago com chapéu pontudo torto e manto roxo estrelado. Conjura esferas de fogo incandescentes pelo seu cajado de cristal.',
     chance: 0.035
@@ -79,7 +74,6 @@ export const MINER_CLASSES = {
     color: '#a855f7',
     basePower: 4,
     baseSpeed: 1.6,
-    baseStamina: 130,
     specialty: 'Colheita Carmesim: golpe ceifador de foice e +35% de BCOIN',
     description: 'Nobre gótico com sobretudo carmesim de gola alta, presas afiadas e a lendária Foice Noturna de Sangue.',
     chance: 0.012
@@ -92,7 +86,6 @@ export const MINER_CLASSES = {
     color: '#eab308',
     basePower: 10,
     baseSpeed: 2.2,
-    baseStamina: 200,
     specialty: 'Golpe de Picareta: Crítico mineral duplo e +50% de BCOIN ao quebrar rochas',
     description: 'O minerador lendário pioneiro com capacete amarelo de segurança, lanterna de foco frontal e picareta pesada de aço temperado.',
     chance: 0.003
@@ -105,7 +98,6 @@ export const MINER_CLASSES = {
     color: '#ef4444',
     basePower: 5,
     baseSpeed: 1.4,
-    baseStamina: 130,
     specialty: 'Saque Corsário: +40% de chance de dobrar drops de baús',
     description: 'Corsário com chapéu tricórnio de caveira, tapa-olho e autêntico bacamarte de pólvora negra com tiro explosivo.',
     chance: 0.05
@@ -118,7 +110,6 @@ export const MINER_CLASSES = {
     color: '#f59e0b',
     basePower: 4,
     baseSpeed: 1.8,
-    baseStamina: 110,
     specialty: 'Saque Rápido: 35% de chance de disparo duplo instantâneo com rajada de Colt',
     description: 'Pistoleiro clássico com chapéu Stetson, estrela dourada de xerife e o lendário revólver Colt .45 de saque relâmpago.',
     chance: 0.08
@@ -131,7 +122,6 @@ export const MINER_CLASSES = {
     color: '#f472b6',
     basePower: 4,
     baseSpeed: 2.3,
-    baseStamina: 105,
     specialty: 'Pó de Fada Estelar: voa suavemente com asas reluzentes e dispara feixes cósmicos',
     description: 'Fada encantada com asas translúcidas reluzentes que batem ao voar e a lendária Varinha Estelar de Ouro que dispara feixes cósmicos.',
     chance: 0.06
@@ -144,7 +134,6 @@ export const MINER_CLASSES = {
     color: '#f472b6',
     basePower: 4,
     baseSpeed: 2.3,
-    baseStamina: 105,
     specialty: 'Pó de Fada Estelar: voa suavemente com asas reluzentes e dispara feixes cósmicos',
     description: 'Fada encantada com asas translúcidas reluzentes que batem ao voar e a lendária Varinha Estelar de Ouro que dispara feixes cósmicos.',
     chance: 0.06
@@ -157,7 +146,6 @@ export const MINER_CLASSES = {
     color: '#3b82f6',
     basePower: 5,
     baseSpeed: 2.0,
-    baseStamina: 125,
     specialty: 'Sentido Aranha: golpes velozes reforçados com teia de aço',
     description: 'Herói com traje clássico vermelho e azul com teias, olhos brancos reflexivos e picareta de teia.',
     chance: 0.04
@@ -170,7 +158,6 @@ export const MINER_CLASSES = {
     color: '#1e3a8a',
     basePower: 7,
     baseSpeed: 1.6,
-    baseStamina: 160,
     specialty: 'Chuva de Dinheiro: Arremessa maços maciços de dólares voadores',
     description: 'Bilionário magnata de terno azul marinho e gravata vermelha que destrói blocos arremessando pilhas maciças de dinheiro.',
     chance: 0.02
@@ -186,7 +173,6 @@ export const MINER_CLASSES = {
     rarity: 'super_rare',
     basePower: 5,
     baseSpeed: 1.6,
-    baseStamina: 120,
     specialty: 'Reconhecimento & Mobilidade Ágil com Rifle de Assalto',
     description: 'Explorador tático com camuflagem de sobrevivência e rifle de assalto de tiro rápido.',
     chance: 0.20
@@ -199,7 +185,6 @@ export const MINER_CLASSES = {
     color: '#fbbf24',
     basePower: 7,
     baseSpeed: 0.9,
-    baseStamina: 160,
     specialty: 'Absorção de Dano & Fogo Pesado com Metralhadora',
     description: 'Tanque pesado lendário equipado com blindagem reforçada e metralhadora giratória.',
     chance: 0.05
@@ -212,7 +197,6 @@ export const MINER_CLASSES = {
     color: '#38bdf8',
     basePower: 5,
     baseSpeed: 1.4,
-    baseStamina: 120,
     specialty: 'Canhão de Energia & Disparos Contínuos de Plasma',
     description: 'Combatente tático com exoesqueleto avançado e canhão de feixe de plasma.',
     chance: 0.20
@@ -225,7 +209,6 @@ export const MINER_CLASSES = {
     color: '#f87171',
     basePower: 6,
     baseSpeed: 1.3,
-    baseStamina: 110,
     specialty: 'Lança-chamas & Rajadas Incendiárias em Área',
     description: 'Tropa de assalto com projéteis incendiários e alta taxa de supressão.',
     chance: 0.15
@@ -238,7 +221,6 @@ export const MINER_CLASSES = {
     color: '#c084fc',
     basePower: 4,
     baseSpeed: 1.5,
-    baseStamina: 110,
     specialty: 'Kit Médico & Suporte a Sobreviventes Feridos',
     description: 'Especialista de suporte médico de emergência com kit de bio-energia de campo.',
     chance: 0.10
@@ -252,7 +234,6 @@ export const MINER_CLASSES = {
     rarity: 'super_rare',
     basePower: 6,
     baseSpeed: 1.3,
-    baseStamina: 140,
     specialty: 'Escopeta & Impacto Devastador a Curta Distância',
     description: 'Sobrevivente endurecido com bandagens de proteção e escopeta de cano duplo.',
     chance: 0.20
@@ -266,7 +247,6 @@ export const MINER_CLASSES = {
     rarity: 'rare',
     basePower: 5,
     baseSpeed: 1.6,
-    baseStamina: 115,
     specialty: 'Rifle Compacto & Disparos de Precisão Cirúrgica',
     description: 'Atirador de elite treinado em climas extremos armado com rifle tático compacto.',
     chance: 0.18
@@ -280,7 +260,6 @@ export const MINER_CLASSES = {
     rarity: 'rare',
     basePower: 5,
     baseSpeed: 1.8,
-    baseStamina: 105,
     specialty: 'Ataques Silenciosos & Tiroteio de Precisão',
     description: 'Agente camuflado de infiltração armada para eliminação rápida de alvos.',
     chance: 0.15
@@ -293,7 +272,6 @@ export const MINER_CLASSES = {
     color: '#a855f7',
     basePower: 6,
     baseSpeed: 1.1,
-    baseStamina: 140,
     specialty: 'Granadas Explosivas & Controle de Multidão',
     description: 'Blindado pesado especialista em artilharia portátil de granadas de concussão.',
     chance: 0.12
@@ -306,7 +284,6 @@ export const MINER_CLASSES = {
     color: '#eab308',
     basePower: 8,
     baseSpeed: 1.0,
-    baseStamina: 180,
     specialty: 'Lança-Foguetes & Explosão de Alto Impacto',
     description: 'A vanguarda destrutiva armada com lançador de foguetes teleguiados pesados.',
     chance: 0.05
@@ -320,7 +297,6 @@ export const MINER_CLASSES = {
     rarity: 'common',
     basePower: 3,
     baseSpeed: 1.4,
-    baseStamina: 100,
     specialty: 'Carbina Tática & Tiroteio em Rajadas',
     description: 'Soldado veterano barbudo com capacete balístico, óculos táticos e carbina com miras holográficas.',
     chance: 0.35
@@ -334,7 +310,6 @@ export const MINER_CLASSES = {
     rarity: 'common',
     basePower: 3,
     baseSpeed: 1.6,
-    baseStamina: 95,
     specialty: 'Pistola Pesada & Manobras de Resgate',
     description: 'Combatente tática de rabo de cavalo ruivo e boné militar armada com pistola pesada de alta cadência.',
     chance: 0.35
@@ -477,8 +452,6 @@ export const INITIAL_MINERS = [
     rarityName: 'Super Raro',
     power: 3,
     speed: 1.4,
-    maxStamina: 120,
-    currentStamina: 120,
     status: 'work',
     x: 1,
     y: 1,
@@ -497,8 +470,6 @@ export const INITIAL_MINERS = [
     rarityName: 'Lendário',
     power: 6,
     speed: 0.95,
-    maxStamina: 140,
-    currentStamina: 140,
     status: 'work',
     x: 1,
     y: 9,
@@ -517,8 +488,6 @@ export const INITIAL_MINERS = [
     rarityName: 'Raro',
     power: 3,
     speed: 2.1,
-    maxStamina: 90,
-    currentStamina: 90,
     status: 'work',
     x: 13,
     y: 1,
@@ -537,8 +506,6 @@ export const INITIAL_MINERS = [
     rarityName: 'Comum',
     power: 3,
     speed: 1.4,
-    maxStamina: 100,
-    currentStamina: 100,
     status: 'work',
     x: 7,
     y: 7,
@@ -557,8 +524,6 @@ export const INITIAL_MINERS = [
     rarityName: 'Comum',
     power: 3.2,
     speed: 1.6,
-    maxStamina: 95,
-    currentStamina: 95,
     status: 'work',
     x: 8,
     y: 7,
