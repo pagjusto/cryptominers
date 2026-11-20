@@ -1,7 +1,7 @@
 {
   "name": "cripto-myners",
   "version": "1.0.0",
-  "description": "Cripto Myners - Web3 Mining Idle Game",
+  "description": "CryptoZombies - Web3 Survival Strategy Game",
   "private": true,
   "type": "module",
   "scripts": {
