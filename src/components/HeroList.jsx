@@ -20,8 +20,6 @@ export default function HeroList({
   onUpgradeMiner, 
   onToggleStatus, 
   onAllWork, 
-  onOpenEnergyBoostAd,
-  onOpenEnergyRecoveryModal,
   onRepairMiner,
   onDiversifyTeam
 }) {
@@ -159,7 +157,7 @@ export default function HeroList({
           const rarityConfig = getRarityConfig(rosterHero.rarity);
           const classInfo = MINER_CLASSES[miner.classId] || MINER_CLASSES.miner;
           const isWorking = miner.status === 'work';
-          const staminaPct = Math.round(((miner.currentHealth ?? miner.maxHealth ?? 100) / (miner.maxHealth || 100)) * 100);
+          const healthPct = Math.round(((miner.currentHealth ?? miner.maxHealth ?? 100) / (miner.maxHealth || 100)) * 100);
           const durability = miner.durability !== undefined ? Math.round(miner.durability) : 100;
           const isBroken = durability <= 0;
           const isDull = durability < 50;
@@ -348,9 +346,9 @@ export default function HeroList({
                   </div>
 
                   <span className={`text-[10px] font-bold font-mono ${
-                    staminaPct > 40 ? 'text-emerald-400' : (staminaPct > 15 ? 'text-amber-400' : 'text-rose-400')
+                    healthPct > 40 ? 'text-emerald-400' : (healthPct > 15 ? 'text-amber-400' : 'text-rose-400')
                   }`}>
-                    {staminaPct}% VIDA
+                    {healthPct}% VIDA
                   </span>
                 </div>
 
@@ -364,7 +362,7 @@ export default function HeroList({
                             ? 'bg-gradient-to-r from-amber-500 to-amber-400' 
                             : 'bg-gradient-to-r from-rose-600 to-rose-500')
                     }`}
-                    style={{ width: `${staminaPct}%` }}
+                    style={{ width: `${healthPct}%` }}
                   />
                 </div>
 
