@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Flame, Zap, Battery, Sparkles, Shield, ChevronRight, Crosshair, Target } from 'lucide-react';
+import { X, Flame, Zap, Sparkles, Shield, ChevronRight, Crosshair, Target } from 'lucide-react';
 import { MINER_ROSTER } from '../data/minersCatalog';
 import { WEAPON_CATALOG, getWeaponById, HERO_ROSTER } from '../data/heroRoster';
 
@@ -300,14 +300,6 @@ export default function MinerCatalogModal({ isOpen, onClose, onOpenMintModal }) 
                     </span>
                   </div>
 
-                  <div className="bg-slate-900/80 p-3 rounded-2xl border border-slate-800 text-center">
-                    <span className="text-[11px] text-slate-400 font-tech flex items-center justify-center gap-1">
-                      <Battery size={13} className="text-sky-400" /> ESTAMINA
-                    </span>
-                    <span className="font-arcade text-lg text-white font-bold block mt-1">
-                      {selectedMiner.baseStamina}
-                    </span>
-                  </div>
                 </div>
 
                 {/* Habilidade Passiva Exclusiva (Trait) */}
