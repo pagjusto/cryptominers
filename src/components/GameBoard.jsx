@@ -62,6 +62,8 @@ export default function GameBoard({
   gameSpeed = 1 
 }) {
   const canvasRef = useRef(null);
+  const mapDataRef = useRef(mapData);
+  mapDataRef.current = mapData;
   const [spritesReady, setSpritesReady] = useState(false);
   
   // REGRA OFICIAL DO USUÁRIO: "quando aparecer o boss coloca um aviso na tela dizendo ALERTA BOSS PISCANDO UMAS 4 VEZES"
@@ -263,8 +265,9 @@ export default function GameBoard({
       const isCanyon = (mine?.id === 'canyon' || !mine?.id);
 
       // Atualiza movimentação de caminhada e combate dos Zumbis e Boss
-      if (mapData) {
-        state.enemies = syncEnemiesWithMap(state.enemies || [], mapData, state.grid, state.hpMap);
+      const currentMapData = mapDataRef.current;
+      if (currentMapData) {
+        state.enemies = syncEnemiesWithMap(state.enemies || [], currentMapData, state.grid, state.hpMap);
         // Regra Oficial do Usuário: Zumbis NUNCA podem invadir ou permanecer na área da base militar
         state.enemies = state.enemies.filter(e => {
           if (isBaseCompound(Math.round(e.gx), Math.round(e.gy))) {
