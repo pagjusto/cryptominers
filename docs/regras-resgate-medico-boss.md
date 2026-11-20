@@ -85,7 +85,7 @@ Este documento registra as regras de gameplay aprovadas para o sistema de sobrev
 - Limite diário: **4 poções por jogador**, com renovação à meia-noite no horário de Brasília (America/Sao_Paulo).
 - A elegibilidade considera a equipe registrada no início da batalha, conforme as regras de participação do Boss; substitutos que entram durante o evento não participam do sorteio daquele Boss.
 - Cada sorteio de poção bem-sucedido concede **exatamente 1 poção** ao jogador.
-- A distribuição por tipo de poção permanece pendente de definição.
+- A poção concedida nesse sorteio é a **Poção do Rejuvenecimento**.
 
 
 ## Chances por raridade — Baú do Boss e poções
