@@ -54,13 +54,13 @@ export default function AdminConstructionChestsTab({
     setTimeout(() => setAuditMessage(''), 3000);
   };
 
-  const handleUpdateMultiplier = (rarity, value) => {
-    const num = Math.max(0.1, parseFloat(value) || 1.0);
-    const updatedMultipliers = {
-      ...(currentChestConfig.rarityMultipliers || DEFAULT_CONSTRUCTION_CHEST_CONFIG.rarityMultipliers),
+  const handleUpdateRarityChance = (rarity, value) => {
+    const num = Math.max(0, parseFloat(value) || 0);
+    const updatedChances = {
+      ...(currentChestConfig.chanceByRarityPct || DEFAULT_CONSTRUCTION_CHEST_CONFIG.chanceByRarityPct),
       [rarity]: num
     };
-    handleUpdateParam('rarityMultipliers', updatedMultipliers);
+    handleUpdateParam('chanceByRarityPct', updatedChances);
   };
 
   // Teste de Sorteio por Boss (Simulado)
@@ -208,26 +208,6 @@ export default function AdminConstructionChestsTab({
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           
-          {/* Taxa-Base Comum */}
-          <div className="space-y-1.5 bg-slate-900 p-3.5 rounded-xl border border-slate-800">
-            <div className="flex justify-between items-center text-xs">
-              <label className="text-slate-300 font-bold">Taxa-Base (Herói Comum)</label>
-              <span className="font-mono text-amber-400 font-bold">{currentChestConfig.baseRateCommonPct}%</span>
-            </div>
-            <input 
-              type="number"
-              step="0.05"
-              min="0.01"
-              max="15.0"
-              value={currentChestConfig.baseRateCommonPct}
-              onChange={e => handleUpdateParam('baseRateCommonPct', parseFloat(e.target.value) || 15)}
-              className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-amber-300 font-mono focus:outline-none focus:border-amber-400"
-            />
-            <p className="text-[10px] text-slate-500 leading-tight">
-              Chance-base por sobrevivente comum participante de cada Boss derrotado.
-            </p>
-          </div>
-
           {/* Teto Máximo por Boss */}
           <div className="space-y-1.5 bg-slate-900 p-3.5 rounded-xl border border-slate-800">
             <div className="flex justify-between items-center text-xs">
@@ -270,51 +250,49 @@ export default function AdminConstructionChestsTab({
         </div>
       </div>
 
-      {/* SEÇÃO 2: TABELA DE MULTIPLICADORES POR RARIDADE */}
+      {/* SEÇÃO 2: CHANCES DIRETAS POR RARIDADE */}
       <div className="bg-slate-950/80 border border-slate-800 rounded-2xl p-5 space-y-4">
         <div className="flex items-center justify-between border-b border-slate-800 pb-2">
           <div className="flex items-center gap-2">
             <Layers size={16} className="text-purple-400" />
             <h4 className="font-bold text-sm text-slate-200 uppercase tracking-wider">
-              2. Multiplicadores Individuais por Raridade
+              2. Chances Individuais por Raridade
             </h4>
           </div>
           <span className="text-xs text-slate-400">
-            Taxa Individual = Taxa-Base × Multiplicador
+            Chance direta por sobrevivente elegível
           </span>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {[
-            { key: 'common', name: 'Comum', mult: currentChestConfig.rarityMultipliers?.common ?? 1.0, color: 'text-slate-300', border: 'border-slate-700' },
-            { key: 'rare', name: 'Raro', mult: currentChestConfig.rarityMultipliers?.rare ?? 1.5, color: 'text-blue-400', border: 'border-blue-500/40' },
-            { key: 'epic', name: 'Épico', mult: currentChestConfig.rarityMultipliers?.epic ?? 2.0, color: 'text-purple-400', border: 'border-purple-500/40' },
-            { key: 'legendary', name: 'Lendário', mult: currentChestConfig.rarityMultipliers?.legendary ?? 3.0, color: 'text-amber-400', border: 'border-amber-500/40' }
+            { key: 'common', name: 'Comum', color: 'text-slate-300', border: 'border-slate-700' },
+            { key: 'rare', name: 'Raro', color: 'text-blue-400', border: 'border-blue-500/40' },
+            { key: 'superRare', name: 'Super Raro', color: 'text-cyan-400', border: 'border-cyan-500/40' },
+            { key: 'epic', name: 'Épico', color: 'text-purple-400', border: 'border-purple-500/40' },
+            { key: 'legendary', name: 'Lendário', color: 'text-amber-400', border: 'border-amber-500/40' },
+            { key: 'superLegendary', name: 'Super Lendário', color: 'text-rose-400', border: 'border-rose-500/40' }
           ].map(r => {
-            const calculatedPct = ((currentChestConfig.baseRateCommonPct || 0.5) * r.mult).toFixed(3);
+            const chance = currentChestConfig.chanceByRarityPct?.[r.key] ?? DEFAULT_CONSTRUCTION_CHEST_CONFIG.chanceByRarityPct[r.key];
             return (
               <div key={r.key} className={`bg-slate-900 p-3.5 rounded-xl border ${r.border} space-y-2`}>
                 <div className="flex justify-between items-center">
                   <span className={`font-bold text-xs uppercase ${r.color}`}>{r.name}</span>
                   <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-950 border border-slate-800 text-slate-300">
-                    {r.mult}×
+                    {chance}%
                   </span>
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[10px] text-slate-500 block">Multiplicador:</label>
-                  <input 
+                  <label className="text-[10px] text-slate-500 block">Chance por sobrevivente:</label>
+                  <input
                     type="number"
-                    step="0.1"
-                    min="0.5"
-                    max="10.0"
-                    value={r.mult}
-                    onChange={e => handleUpdateMultiplier(r.key, e.target.value)}
+                    step="0.0001"
+                    min="0"
+                    max="40"
+                    value={chance}
+                    onChange={e => handleUpdateRarityChance(r.key, e.target.value)}
                     className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1 text-xs font-mono text-slate-200 text-center focus:outline-none"
                   />
-                </div>
-                <div className="pt-1 border-t border-slate-800/80 flex justify-between text-[11px] font-mono">
-                  <span className="text-slate-400">Taxa individual:</span>
-                  <span className="text-emerald-400 font-bold">{calculatedPct}%</span>
                 </div>
               </div>
             );
