@@ -1,5 +1,5 @@
 // Tabela de Recompensas e HP Calibrada para o Modelo Oficial CryptoZombies (~5 Horas por Mapa)
-// O ciclo de ~5 horas por mapa combina escavação ativa + ciclos de descanso/recuperação de estamina
+// A mineração não consome estamina; o tempo de mapa é independente de descanso energético.
 
 export const CRYPTO_ZOMBIES_REWARDS = {
   // Rocha Básica de Passagem (~2.800 HP)
