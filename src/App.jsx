@@ -89,7 +89,7 @@ export default function App() {
     return saved !== null ? parseFloat(saved) : 50.000;
   });
 
-  // Total BCOIN Investido (para cálculo do ROI do Bomb Crypto)
+  // Total BCOIN Investido (para cálculo do ROI do CryptoZombies)
   const [totalInvested, setTotalInvested] = useState(() => {
     const saved = localStorage.getItem('crypto_miners_invested');
     return saved !== null ? parseFloat(saved) : 30.000;
@@ -118,7 +118,7 @@ export default function App() {
   const [boardMode, setBoardMode] = useState('canyon'); // 'canyon' (Canvas HD com Zumbis e Boss) | 'tactical' (Grid Tático)
   const [currentMine, setCurrentMine] = useState(MINES[0]);
   const [mapStage, setMapStage] = useState(1);
-  const [mapClearNotice, setMapClearNotice] = useState(null); // Notificação de vitória do Bomb Crypto
+  const [mapClearNotice, setMapClearNotice] = useState(null); // Notificação de vitória do CryptoZombies
   const [mapData, setMapData] = useState(() => {
     const savedWallet = getSavedWalletState();
     const pId = savedWallet?.address || DEFAULT_PLAYER_ID;
@@ -281,7 +281,7 @@ export default function App() {
     return INITIAL_MINERS;
   });
 
-  // Casa dos mineradores (House System - Estilo Bomb Crypto)
+  // Casa dos mineradores (House System - sistema próprio de mineração e abrigos)
   const [currentHouseId, setCurrentHouseId] = useState(() => {
     return localStorage.getItem('crypto_miners_house') || 'tiny';
   });
@@ -1431,7 +1431,7 @@ export default function App() {
         title="Passe o mouse ou clique no topo para abrir o Menu"
       >
         <span className="text-[11px] animate-pulse">🧟</span>
-        <span className="font-arcade text-[9px] text-amber-400">CRIPTO MYNERS</span>
+        <span className="font-arcade text-[9px] text-amber-400">CRYPTOZOMBIES</span>
         <span className="text-slate-600">|</span>
         <span className="font-mono text-emerald-400 text-xs font-bold">🪙 {bcoin.toFixed(2)} MNC</span>
         <span className="text-slate-600">|</span>
@@ -1748,7 +1748,7 @@ export default function App() {
         studioRevenue={studioRevenue}
       />
 
-      {/* MODAL DE INVESTIMENTO & ROI DO BOMBCRYPTO */}
+      {/* MODAL DE INVESTIMENTO & ROI DO CRYPTOZOMBIES */}
       <InvestmentModal
         isOpen={isInvestmentOpen}
         onClose={() => setIsInvestmentOpen(false)}
@@ -1812,7 +1812,7 @@ export default function App() {
         constructionChests={constructionChests}
       />
 
-      {/* NOVO MENU: ESTATÍSTICAS & SIMULADOR DE UPGRADES — CRIPTO MYNERS */}
+      {/* NOVO MENU: ESTATÍSTICAS & SIMULADOR DE UPGRADES — CRYPTOZOMBIES */}
       <StatisticsModal
         isOpen={isStatisticsOpen}
         onClose={() => setIsStatisticsOpen(false)}
@@ -1829,7 +1829,7 @@ export default function App() {
         onUpgradeMiner={handleUpgradeMiner}
       />
 
-      {/* PAINEL ADMINISTRATIVO — CRIPTO MYNERS */}
+      {/* PAINEL ADMINISTRATIVO — CRYPTOZOMBIES */}
       <AdminConfigModal
         isOpen={isAdminConfigOpen}
         onClose={() => {
@@ -1849,7 +1849,7 @@ export default function App() {
         onOpenMintModal={() => setIsSummonOpen(true)}
       />
 
-      {/* MODAL DO MAPA DE FASES (TRILHA DA MINA / SAGA BOMBCRYPTO) */}
+      {/* MODAL DO MAPA DE FASES (TRILHA DA MINA / SAGA CRYPTOZOMBIES) */}
       <CampaignMapModal
         isOpen={isCampaignMapOpen}
         onClose={() => setIsCampaignMapOpen(false)}
