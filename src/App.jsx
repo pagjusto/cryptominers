@@ -33,7 +33,7 @@ import { ENTRY_PACKAGES, calculateWithdrawalTax } from './data/investmentData';
 import { INITIAL_MARKET_LISTINGS, MARKETPLACE_FEE_PCT, FEE_SPLIT } from './data/marketplaceData';
 import { MINER_ROSTER } from './data/minersCatalog';
 import { generateMineMap } from './utils/mapGenerator';
-import { getPlayerMap, generatePlayerMap, DEFAULT_PLAYER_ID } from './utils/individualMapEngine';
+import { getPlayerMap, generatePlayerMap, DEFAULT_PLAYER_ID, removeBossFromPlayerMap, spawnBossInPlayerMap } from './utils/individualMapEngine';
 import { sfx } from './utils/sfx';
 import { isSupabaseConfigured } from './lib/supabaseClient';
 import { 
@@ -434,6 +434,47 @@ export default function App() {
     window.addEventListener('cripto_myners_construction_chest_awarded', handleChestAwarded);
     return () => window.removeEventListener('cripto_myners_construction_chest_awarded', handleChestAwarded);
   }, []);
+
+  // Funções de Teste Oficial: Remoção e Inserção Dinâmica do Boss
+  const handleToggleBoss = () => {
+    const isBossActive = mapData?.deposits?.some(d => (d.type === 'boss' || d.blockId === 10) && !d.isCompleted);
+    if (isBossActive) {
+      const updated = removeBossFromPlayerMap(activePlayerId);
+      setMapData(updated);
+    } else {
+      const updated = spawnBossInPlayerMap(activePlayerId);
+      setMapData(updated);
+    }
+  };
+
+  const handleTestBossCycle = (delayMs = 3500) => {
+    // 1. Remove o boss imediatamente
+    const withoutBoss = removeBossFromPlayerMap(activePlayerId);
+    setMapData(withoutBoss);
+
+    // 2. Após o delay, reinsere o boss
+    setTimeout(() => {
+      const withBoss = spawnBossInPlayerMap(activePlayerId);
+      setMapData(withBoss);
+    }, delayMs);
+  };
+
+  useEffect(() => {
+    window.removeBoss = () => {
+      const m = removeBossFromPlayerMap(activePlayerId);
+      setMapData(m);
+      return '💀 Boss removido! A torre de sirene e a névoa verde estão se desativando...';
+    };
+    window.spawnBoss = () => {
+      const m = spawnBossInPlayerMap(activePlayerId);
+      setMapData(m);
+      return '⚠️ Boss inserido! O ALERTA BOSS começará a piscar 4 vezes, a sirene tocará e a névoa retornará.';
+    };
+    window.testBossCycle = (delayMs = 3500) => {
+      handleTestBossCycle(delayMs);
+      return `🔄 Ciclo iniciado: Boss removido agora e retornará em ${delayMs}ms com alerta e torre.`;
+    };
+  }, [activePlayerId]);
 
   // Abrir Baú de Construção do Inventário (Idempotente & +1 Fragmento)
   const handleOpenConstructionChest = (chestId) => {
@@ -1601,17 +1642,32 @@ export default function App() {
               {/* STATUS DO MAPA INTERMITENTE NO CANTO SUPERIOR ESQUERDO DO MAPA */}
               <div 
                 title="Batalha Intermitente & Status dos Zumbis"
-                className="absolute top-2.5 left-3 z-30 flex items-center gap-1.5 bg-slate-950/85 backdrop-blur-md px-2.5 py-1.5 rounded-xl border border-slate-700/80 shadow-2xl pointer-events-none select-none"
+                className="absolute top-2.5 left-3 z-30 flex items-center gap-1.5 bg-slate-950/85 backdrop-blur-md px-2.5 py-1.5 rounded-xl border border-slate-700/80 shadow-2xl select-none"
               >
                 <span className="flex items-center gap-1 text-xs bg-lime-950/80 text-lime-300 px-2 py-0.5 rounded-md border border-lime-500/50 font-bold shadow-sm" title="Status dos Zumbis">
                   🧟 <b className="text-white">{mapData?.deposits?.filter(d => d.type === 'zombie' && !d.isCompleted).length ?? 30}</b>/30 Zumbis
                 </span>
 
-                <span className="flex items-center gap-1 text-xs bg-red-950/80 text-red-300 px-2 py-0.5 rounded-md border border-red-500/50 font-bold shadow-sm" title="Status do Boss Mutante">
-                  💀 Boss: <b className={mapData?.deposits?.some(d => d.type === 'boss' && !d.isCompleted) ? 'text-amber-300' : 'text-emerald-400'}>
-                    {mapData?.deposits?.some(d => d.type === 'boss' && !d.isCompleted) ? 'Ativo' : 'Morto'}
+                <button 
+                  onClick={handleToggleBoss}
+                  className="flex items-center gap-1 text-xs bg-red-950/80 hover:bg-red-900 text-red-300 hover:text-white px-2 py-0.5 rounded-md border border-red-500/50 hover:border-red-400 font-bold shadow-sm cursor-pointer transition-all active:scale-95" 
+                  title="Clique para alternar (Remover ou Inserir o Boss)"
+                >
+                  💀 Boss: <b className={mapData?.deposits?.some(d => (d.type === 'boss' || d.blockId === 10) && !d.isCompleted) ? 'text-amber-300' : 'text-emerald-400'}>
+                    {mapData?.deposits?.some(d => (d.type === 'boss' || d.blockId === 10) && !d.isCompleted) ? 'Ativo' : 'Morto'}
                   </b>
-                </span>
+                  <span className="text-[10px] text-amber-300 underline ml-0.5 font-normal">
+                    {mapData?.deposits?.some(d => (d.type === 'boss' || d.blockId === 10) && !d.isCompleted) ? '(Remover)' : '(Inserir)'}
+                  </span>
+                </button>
+
+                <button
+                  onClick={() => handleTestBossCycle(3500)}
+                  className="text-[11px] bg-amber-600/30 hover:bg-amber-600/60 text-amber-200 border border-amber-500/40 px-2 py-0.5 rounded-md cursor-pointer transition-all active:scale-95 flex items-center gap-1 font-semibold"
+                  title="Testar Ciclo: Remove o Boss agora e Reinsere automaticamente após 3.5s"
+                >
+                  🔄 Testar
+                </button>
               </div>
 
               <GameBoard

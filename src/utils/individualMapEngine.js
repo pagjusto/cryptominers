@@ -529,6 +529,56 @@ export function recordDepositDamage(playerId = DEFAULT_PLAYER_ID, c, r, damage =
 }
 
 /**
+ * Utilitários para teste oficial de entrada e saída do Boss Mutante
+ */
+export function removeBossFromPlayerMap(playerId = DEFAULT_PLAYER_ID) {
+  const mapState = getPlayerMap(playerId);
+  const bossDeposit = mapState.deposits.find(d => (d.type === 'boss' || d.blockId === BLOCK_BOSS) && !d.isCompleted);
+  if (bossDeposit) {
+    bossDeposit.isCompleted = true;
+    mapState.grid[bossDeposit.r][bossDeposit.c] = BLOCK_EMPTY;
+    delete mapState.hpMap[`${bossDeposit.c},${bossDeposit.r}`];
+  }
+  mapState.deposits = mapState.deposits.filter(d => !(d.type === 'boss' || d.blockId === BLOCK_BOSS));
+  savePlayerMap(playerId, mapState);
+  return mapState;
+}
+
+export function spawnBossInPlayerMap(playerId = DEFAULT_PLAYER_ID) {
+  const mapState = getPlayerMap(playerId);
+  // Remove qualquer boss anterior
+  mapState.deposits = mapState.deposits.filter(d => !(d.type === 'boss' || d.blockId === BLOCK_BOSS));
+  
+  const validCells = getValidDepositCells();
+  const occupiedSet = new Set(mapState.deposits.map(d => `${d.c},${d.r}`));
+  const freeCells = validCells.filter(c => !occupiedSet.has(`${c.c},${c.r}`));
+  
+  const chosenPos = freeCells[Math.floor(Math.random() * freeCells.length)] || { c: 7, r: 2 };
+  const bossObj = {
+    id: `boss_${Date.now()}_test`,
+    c: chosenPos.c,
+    r: chosenPos.r,
+    targetZone: { x: chosenPos.c, y: chosenPos.r },
+    type: 'boss',
+    typeName: 'Boss Abominação Mutante',
+    color: '#ef4444',
+    icon: '💀',
+    blockId: BLOCK_BOSS,
+    sprite: '/enemies/boss_clean.png',
+    maxHp: 30,
+    currentHp: 30,
+    isCompleted: false,
+    yieldRate: 0.25
+  };
+  
+  mapState.deposits.push(bossObj);
+  mapState.grid[chosenPos.r][chosenPos.c] = BLOCK_BOSS;
+  mapState.hpMap[`${chosenPos.c},${chosenPos.r}`] = 30;
+  savePlayerMap(playerId, mapState);
+  return mapState;
+}
+
+/**
  * Estatísticas acumuladas de inimigos derrotados por jogador
  */
 export function getPlayerMiningStats(playerId = DEFAULT_PLAYER_ID) {
