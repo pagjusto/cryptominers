@@ -504,13 +504,34 @@ export default function App() {
     };
   }, [activePlayerId]);
 
-  // Abrir Baú de Construção do Inventário (Idempotente & +1 Fragmento)
+  // Abrir Baú do Boss e integrar todas as recompensas ao inventário persistente.
   const handleOpenConstructionChest = (chestId) => {
     const result = openConstructionChestById(chestId);
-    if (result.success) {
-      setConstructionChests(result.updatedChests);
-      setConstructionFragments(result.totalFragments);
+    if (!result.success) return result;
+
+    setConstructionChests(result.updatedChests);
+    if (result.fragmentGranted) setConstructionFragments(result.totalFragments);
+    if (result.potionGranted) setRejuvenationPotions(prev => prev + 1);
+
+    if (result.heroChestGranted) {
+      setPurchasedChests(prev => {
+        const rewardChest = {
+          instanceId: 'boss-reward-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8),
+          id: 'boss-hero-reward',
+          name: 'Baú de Herói',
+          icon: '🎁',
+          heroesCount: 1,
+          currency: 'RECOMPENSA',
+          source: 'boss_reward',
+          purchasedAt: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+        };
+        const next = [rewardChest, ...prev];
+        localStorage.setItem('crypto_miners_purchased_chests', JSON.stringify(next));
+        return next;
+      });
     }
+
+    return result;
   };
 
   // Evoluir Casa usando Fragmentos de Construção
