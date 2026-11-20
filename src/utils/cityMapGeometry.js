@@ -1,5 +1,5 @@
 /**
- * CRIPTO MYNERS — GEOMETRIA & COLISÕES DO MAPA DA CIDADE DE SOBREVIVÊNCIA
+ * CRYPTOZOMBIES — GEOMETRIA & COLISÕES DO MAPA DA CIDADE DE SOBREVIVÊNCIA
  * 
  * Regra Oficial do Usuário:
  * "herois e zombies na podem passar por cima ou pisar em cima de muros e cercas tambem e carros"
