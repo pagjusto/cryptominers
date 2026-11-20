@@ -73,6 +73,7 @@ export function initBillboard(onLoaded) {
 
 let sirenTowerImg = null;
 let sirenTowerLoaded = false;
+let sirenTowerShadowCanvas = null;
 
 export function initSirenTower(onLoaded) {
   if (sirenTowerLoaded && sirenTowerImg) {
@@ -85,6 +86,22 @@ export function initSirenTower(onLoaded) {
   img.onload = () => {
     sirenTowerImg = img;
     sirenTowerLoaded = true;
+
+    // Pré-renderiza a silhueta da torre inteira com a tonalidade exata da sombra projetada no solo
+    try {
+      const sCanvas = document.createElement('canvas');
+      sCanvas.width = img.naturalWidth || 158;
+      sCanvas.height = img.naturalHeight || 371;
+      const sCtx = sCanvas.getContext('2d');
+      if (sCtx) {
+        sCtx.drawImage(img, 0, 0);
+        sCtx.globalCompositeOperation = 'source-in';
+        sCtx.fillStyle = 'rgba(5, 20, 5, 0.44)';
+        sCtx.fillRect(0, 0, sCanvas.width, sCanvas.height);
+        sirenTowerShadowCanvas = sCanvas;
+      }
+    } catch (e) {}
+
     if (onLoaded) onLoaded();
   };
   img.onerror = () => {
@@ -771,23 +788,51 @@ export function drawSirenTower(ctx, now, isBossAlive = false) {
   const footBackX = tX + tW * (92 / 158);       // ~185.1
   const footBackY = tY + tH * (336 / 371);      // ~326.3
 
-  // 1. Sombras realistas de contato direto e ancoragem física no solo (elimina qualquer efeito de flutuação)
+  // 1. Sombras realistas da torre (corpo projetado no gramado + oclusão de contato nas 4 sapatas)
   ctx.save();
   
-  // 1.1. Sombra suave difusa projetada para sudeste (alinhada à iluminação do sol no gramado)
-  ctx.fillStyle = 'rgba(5, 20, 5, 0.35)';
+  // 1.0. SOMBRA DIRECIONAL COMPLETA DA ESTRUTURA DA TORRE NO SOLO (Sol vindo do Noroeste, sombra para Sudeste)
+  if (sirenTowerShadowCanvas) {
+    ctx.save();
+    // Ponto de fixação no pé central da torre
+    ctx.translate(footCenterX, footCenterY);
+    // Cisalhamento e achatamento isométrico:
+    // a=1.0, b=0.0 (mantém escala X)
+    // c=-0.72 (projeta a sombra para leste/sudeste à direita)
+    // d=-0.30 (achata no plano do gramado em perspectiva 2.5D)
+    ctx.transform(1.0, 0.0, -0.72, -0.30, 0, 0);
+    ctx.drawImage(sirenTowerShadowCanvas, -tW * (73 / 158), -tH, tW, tH);
+    ctx.restore();
+  } else {
+    // Fallback: projeção trapezoidal translúcida no solo
+    ctx.save();
+    ctx.fillStyle = 'rgba(5, 20, 5, 0.38)';
+    ctx.beginPath();
+    ctx.moveTo(footLeftX, footLeftY);
+    ctx.lineTo(footRightX, footRightY);
+    const topProjX = footCenterX + tH * 0.72;
+    const topProjY = footCenterY + tH * 0.30;
+    ctx.lineTo(topProjX + 16, topProjY + 5);
+    ctx.lineTo(topProjX - 16, topProjY - 5);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // 1.1. Sombra suave difusa conectando a base da estrutura
+  ctx.fillStyle = 'rgba(5, 20, 5, 0.38)';
   ctx.beginPath();
   ctx.ellipse(tX + tW * 0.52, tY + tH * 0.955, tW * 0.48, 6.5, 0.08, 0, Math.PI * 2);
   ctx.fill();
 
   // 1.2. Oclusão de ambiente escura no solo sob a base da estrutura
-  ctx.fillStyle = 'rgba(0, 10, 0, 0.45)';
+  ctx.fillStyle = 'rgba(0, 10, 0, 0.48)';
   ctx.beginPath();
   ctx.ellipse(tX + tW * 0.48, tY + tH * 0.945, tW * 0.38, 5.0, 0.05, 0, Math.PI * 2);
   ctx.fill();
 
   // 1.3. Sombras de oclusão de contato direto sob as 4 sapatas (ancoragem física precisa sem folga)
-  ctx.fillStyle = 'rgba(0, 8, 0, 0.92)';
+  ctx.fillStyle = 'rgba(0, 8, 0, 0.94)';
 
   // Sapata traseira
   ctx.beginPath();
@@ -814,7 +859,17 @@ export function drawSirenTower(ctx, now, isBossAlive = false) {
   // 2. Desenho da Torre em Alta Resolução (pés ancorados exatamente sobre suas sombras)
   ctx.drawImage(sirenTowerImg, tX, tY, tW, tH);
 
-  // 2.1. Oclusão de contato na quina frontal da sapata central para perfeita ancoragem no solo
+  // 2.1. SOMBRA PRÓPRIA VOLUMÉTRICA NA ESTRUTURA DA TORRE (Lado sudeste/direito sombreado pelo Sol do noroeste)
+  ctx.save();
+  const towerShade = ctx.createLinearGradient(tX, tY, tX + tW, tY);
+  towerShade.addColorStop(0, 'rgba(255, 255, 255, 0.08)'); // Realce suave na face iluminada pelo sol
+  towerShade.addColorStop(0.35, 'rgba(0, 0, 0, 0)');
+  towerShade.addColorStop(1, 'rgba(0, 10, 0, 0.28)'); // Sombra volumétrica no lado oposto ao sol
+  ctx.fillStyle = towerShade;
+  ctx.fillRect(tX, tY, tW, tH);
+  ctx.restore();
+
+  // 2.2. Oclusão de contato na quina frontal da sapata central para perfeita ancoragem no solo
   ctx.save();
   ctx.fillStyle = 'rgba(0, 10, 0, 0.60)';
   ctx.beginPath();

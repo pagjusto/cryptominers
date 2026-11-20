@@ -100,7 +100,8 @@ export default function MinerCatalogModal({ isOpen, onClose, onOpenMintModal }) 
                         : 'border-slate-800 bg-slate-950/60 hover:border-slate-700'
                     }`}
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      {/* Avatar do Herói */}
                       <div 
                         className="w-12 h-12 rounded-xl border-2 flex items-center justify-center text-2xl shadow-inner overflow-hidden relative shrink-0"
                         style={{ 
@@ -119,13 +120,37 @@ export default function MinerCatalogModal({ isOpen, onClose, onOpenMintModal }) 
                           m.avatar
                         )}
                       </div>
-                      <div>
-                        <h4 className="font-tech font-bold text-sm text-white flex items-center gap-1.5">
+
+                      {/* Thumbnail da Arma Dedicada do Personagem (com borda branca, idêntica ao painel de combate) */}
+                      <div 
+                        className="w-11 h-11 rounded-xl border-2 bg-slate-950 flex flex-col items-center justify-center shrink-0 shadow-md overflow-hidden"
+                        title={`${heroWeapon?.name || m.equipment} (${heroWeapon?.category || 'Arma'})`}
+                        style={{
+                          borderColor: '#ffffff',
+                          boxShadow: '0 0 8px rgba(255, 255, 255, 0.30)'
+                        }}
+                      >
+                        <div 
+                          className="w-[44px] h-[25px] bg-no-repeat"
+                          style={{
+                            backgroundImage: 'url(/assets/weapon-roster.png?v=4)',
+                            backgroundRepeat: 'no-repeat',
+                            backgroundSize: '572px 25px',
+                            backgroundPosition: `-${(heroWeapon?.sourceIndex ?? 0) * 44}px center`,
+                            transform: 'scaleX(-1) scale(1.4)',
+                            imageRendering: 'pixelated',
+                            filter: 'drop-shadow(0 0 1px rgba(255, 255, 255, 0.7))'
+                          }} 
+                        />
+                      </div>
+
+                      <div className="min-w-0 flex-1">
+                        <h4 className="font-tech font-bold text-sm text-white flex items-center gap-1.5 truncate">
                           {m.name}
                         </h4>
-                        <div className="flex items-center gap-1.5 mt-0.5">
+                        <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
                           <span 
-                            className="text-[9px] font-bold font-tech uppercase tracking-wider px-1.5 py-0.2 rounded border"
+                            className="text-[9px] font-bold font-tech uppercase tracking-wider px-1.5 py-0.2 rounded border shrink-0"
                             style={{ 
                               color: m.color,
                               borderColor: `${m.color}60`,
@@ -134,7 +159,7 @@ export default function MinerCatalogModal({ isOpen, onClose, onOpenMintModal }) 
                           >
                             {m.badge}
                           </span>
-                          <span className="text-[10px] text-slate-400 font-mono truncate max-w-[90px]">
+                          <span className="text-[10px] text-slate-400 font-mono truncate max-w-[85px]" title={heroWeapon?.name || m.equipment}>
                             {heroWeapon?.name || m.equipment}
                           </span>
                         </div>
@@ -204,15 +229,15 @@ export default function MinerCatalogModal({ isOpen, onClose, onOpenMintModal }) 
                   </div>
                 </div>
 
-                {/* ARMA EQUIPADA DO HERÓI (NOVO: DESTAQUE VISUAL COM SPRITE) */}
+                {/* ARMA EQUIPADA DO HERÓI (DESTAQUE VISUAL COM SPRITE) */}
                 {equippedWeapon && (
                   <div className="p-3.5 rounded-2xl border-2 border-white/20 bg-slate-900/90 shadow-md flex items-center justify-between gap-3 mb-4">
                     <div className="flex items-center gap-3">
                       <div 
-                        className="w-14 h-14 rounded-xl border-2 bg-slate-950 flex flex-col items-center justify-center shrink-0 shadow-inner overflow-hidden"
+                        className="w-16 h-16 rounded-2xl border-2 bg-slate-950 flex flex-col items-center justify-center shrink-0 shadow-lg overflow-hidden"
                         style={{
                           borderColor: '#ffffff',
-                          boxShadow: '0 0 10px rgba(255, 255, 255, 0.25)'
+                          boxShadow: '0 0 10px rgba(255, 255, 255, 0.35)'
                         }}
                       >
                         <div 
@@ -222,13 +247,15 @@ export default function MinerCatalogModal({ isOpen, onClose, onOpenMintModal }) 
                             backgroundRepeat: 'no-repeat',
                             backgroundSize: '572px 25px',
                             backgroundPosition: `-${(equippedWeapon.sourceIndex ?? 0) * 44}px center`,
-                            imageRendering: 'auto'
+                            transform: 'scaleX(-1) scale(1.65)',
+                            imageRendering: 'pixelated',
+                            filter: 'drop-shadow(0 0 1px rgba(255, 255, 255, 0.7))'
                           }} 
                         />
                       </div>
                       <div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">ARMA EQUIPADA:</span>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-[10px] text-amber-400 font-bold uppercase tracking-wider font-mono">ARMA EQUIPADA:</span>
                           <h4 className="font-tech font-bold text-sm text-white">
                             {equippedWeapon.name}
                           </h4>
@@ -356,7 +383,9 @@ export default function MinerCatalogModal({ isOpen, onClose, onOpenMintModal }) 
                             backgroundRepeat: 'no-repeat',
                             backgroundSize: '572px 25px',
                             backgroundPosition: `-${(w.sourceIndex ?? 0) * 44}px center`,
-                            imageRendering: 'auto'
+                            transform: 'scaleX(-1) scale(1.45)',
+                            imageRendering: 'pixelated',
+                            filter: 'drop-shadow(0 0 1px rgba(255, 255, 255, 0.7))'
                           }} 
                         />
                       </div>
@@ -408,7 +437,8 @@ export default function MinerCatalogModal({ isOpen, onClose, onOpenMintModal }) 
                       backgroundRepeat: 'no-repeat',
                       backgroundSize: '1144px 50px',
                       backgroundPosition: `-${(selectedWeapon.sourceIndex ?? 0) * 88}px center`,
-                      imageRendering: 'auto',
+                      transform: 'scaleX(-1) scale(1.35)',
+                      imageRendering: 'pixelated',
                       filter: 'drop-shadow(0 0 12px rgba(255, 255, 255, 0.45))'
                     }} 
                   />
