@@ -10,10 +10,11 @@ Este documento registra as regras de gameplay aprovadas para o sistema de sobrev
 
 ## Ferimentos e resgate
 
-- Ao atingir 5% de vida, o sobrevivente fica ferido e deixa de combater.
-- **Sem médico contratado:** o sobrevivente fica parado no mapa até o jogador selecioná-lo e ordenar o envio ao ambulatório.
+- Ao atingir 5% de vida ou menos, o sobrevivente fica ferido: deixa imediatamente de atacar e não pode mais ser atacado pelo Boss.
+- Enquanto estiver ferido e aguardando resgate, também deixa de minerar MNC.
+- **Sem médico contratado:** o sobrevivente deita e permanece parado no mapa, fora do combate e sem minerar, até o jogador selecioná-lo e ordenar manualmente seu envio ao ambulatório.
 - O jogador pode enviar manualmente vários sobreviventes feridos, um por vez, inclusive durante uma batalha contra o Boss.
-- **Com médico contratado:** o médico identifica e resgata automaticamente todos os sobreviventes feridos, sem limite de quantidade, encaminhando-os ao ambulatório.
+- **Com médico contratado:** o médico identifica e resgata automaticamente todos os sobreviventes feridos, sem limite de quantidade, encaminhando-os ao ambulatório. O resgate automático acontece ao atingir o limite de ferimento, sem exigir ação do jogador.
 - O médico automatiza o resgate; não aumenta a capacidade dos leitos nem a velocidade de recuperação.
 
 ## Substituição de combatentes
