@@ -76,15 +76,17 @@ export function initBillboard(onLoaded) {
 export const DEFAULT_TOWER_CONFIG = {
   // Parâmetros da Torre
   scaleX: 1.0,
+  scaleY: 0.96,
   skewY: 0.05,
   skewX: 0.04,
-  scaleY: 0.96,
   rotDeg: 0,
+  yawDeg: 0,          // Rotação Horizontal Tridimensional (Giro Yaw 3D no eixo Y: -180° a +180°)
   offsetX: 0,
   offsetY: 0,
 
   // Parâmetros da Sombra
   shadowRotDeg: 0,
+  shadowYawDeg: 0,    // Rotação Horizontal da Sombra (-180° a +180°)
   shadowSkewX: -0.75,
   shadowSkewY: -0.26,
   shadowLength: 1.0,
@@ -870,6 +872,16 @@ export function drawSirenTower(ctx, now, isBossAlive = false) {
   const cfg = (typeof window !== 'undefined' && window.towerTiltConfig) || towerTiltConfig;
   const towerDrawable = sirenTowerShadedCanvas || sirenTowerImg;
 
+  // Rotação horizontal tridimensional (Giro no eixo Y / Yaw)
+  const yawRad = ((cfg.yawDeg || 0) * Math.PI) / 180;
+  const horizScale = (cfg.scaleX ?? 1.0) * Math.cos(yawRad);
+  const horizSkewY = (cfg.skewY ?? 0) - Math.sin(yawRad) * 0.10;
+  const vertScale = cfg.scaleY ?? 1.0;
+  const vertSkewX = cfg.skewX ?? 0;
+  const rotRad = ((cfg.rotDeg || 0) * Math.PI) / 180;
+  const cosR = Math.cos(rotRad);
+  const sinR = Math.sin(rotRad);
+
   // 1.0. SOMBRA DIRECIONAL DA ESTRUTURA DA TORRE NO SOLO (Controlada por cfg)
   if (sirenTowerShadowCanvas) {
     ctx.save();
@@ -884,11 +896,12 @@ export function drawSirenTower(ctx, now, isBossAlive = false) {
       ctx.rotate((cfg.shadowRotDeg * Math.PI) / 180);
     }
 
+    const shadowYawRad = ((cfg.shadowYawDeg || 0) * Math.PI) / 180;
     const sLength = cfg.shadowLength ?? 1.0;
     const sSkewX = (cfg.shadowSkewX ?? -0.75) * sLength;
     const sSkewY = (cfg.shadowSkewY ?? -0.26) * sLength;
-    const sScaleX = cfg.shadowScaleX ?? 1.0;
-    const sScaleY = cfg.shadowScaleY ?? 1.0;
+    const sScaleX = (cfg.shadowScaleX ?? 1.0) * Math.cos(shadowYawRad);
+    const sScaleY = (cfg.shadowScaleY ?? 1.0);
 
     ctx.transform(sScaleX, 0.0, sSkewX, sSkewY * sScaleY, 0, 0);
     ctx.drawImage(sirenTowerShadowCanvas, -tW * (73 / 158), -tH, tW, tH);
@@ -912,42 +925,60 @@ export function drawSirenTower(ctx, now, isBossAlive = false) {
   // 1.1. Sombra suave difusa conectando a base da estrutura (deslocada suavemente para sudeste)
   ctx.fillStyle = 'rgba(6, 20, 8, 0.45)';
   ctx.beginPath();
-  ctx.ellipse(tX + tW * 0.52 + (cfg.offsetX || 0), tY + tH * 0.955 + (cfg.offsetY || 0), tW * 0.46, 6.5, 0.08, 0, Math.PI * 2);
+  ctx.ellipse(tX + tW * 0.52 + (cfg.offsetX || 0), tY + tH * 0.955 + (cfg.offsetY || 0), tW * 0.46 * Math.abs(horizScale), 6.5, 0.08, 0, Math.PI * 2);
   ctx.fill();
 
   // 1.2. Oclusão de ambiente escura no solo sob a base da estrutura
   ctx.fillStyle = 'rgba(0, 10, 0, 0.58)';
   ctx.beginPath();
-  ctx.ellipse(tX + tW * 0.50 + (cfg.offsetX || 0), tY + tH * 0.950 + (cfg.offsetY || 0), tW * 0.36, 5.0, 0.05, 0, Math.PI * 2);
+  ctx.ellipse(tX + tW * 0.50 + (cfg.offsetX || 0), tY + tH * 0.950 + (cfg.offsetY || 0), tW * 0.36 * Math.abs(horizScale), 5.0, 0.05, 0, Math.PI * 2);
   ctx.fill();
 
-  // 1.3. Sombras de oclusão de contato direto sob as 4 sapatas (ancoragem física precisa e aprumada)
+  // 1.3. Sombras de oclusão de contato direto sob as 4 sapatas (acompanham a rotação e inclinação)
   ctx.fillStyle = 'rgba(0, 8, 0, 0.94)';
+
+  const getTransformedFoot = (rawX, rawY) => {
+    const dx = rawX - footCenterX;
+    const dy = rawY - footCenterY;
+    const tx = horizScale * dx + vertSkewX * dy;
+    const ty = horizSkewY * dx + vertScale * dy;
+    const rx = tx * cosR - ty * sinR;
+    const ry = tx * sinR + ty * cosR;
+    return {
+      x: footCenterX + (cfg.offsetX || 0) + rx,
+      y: footCenterY + (cfg.offsetY || 0) + ry
+    };
+  };
+
+  const tFootBack = getTransformedFoot(footBackX, footBackY);
+  const tFootLeft = getTransformedFoot(footLeftX, footLeftY);
+  const tFootRight = getTransformedFoot(footRightX, footRightY);
+  const tFootCenter = getTransformedFoot(footCenterX, footCenterY);
 
   // Sapata traseira
   ctx.beginPath();
-  ctx.ellipse(footBackX + (cfg.offsetX || 0), footBackY + 0.5 + (cfg.offsetY || 0), 6.5, 2.5, 0, 0, Math.PI * 2);
+  ctx.ellipse(tFootBack.x, tFootBack.y + 0.5, 6.5 * Math.max(0.3, Math.abs(horizScale)), 2.5, 0, 0, Math.PI * 2);
   ctx.fill();
 
   // Sapata frontal esquerda
   ctx.beginPath();
-  ctx.ellipse(footLeftX + (cfg.offsetX || 0), footLeftY + 0.5 + (cfg.offsetY || 0), 8.0, 3.0, 0, 0, Math.PI * 2);
+  ctx.ellipse(tFootLeft.x, tFootLeft.y + 0.5, 8.0 * Math.max(0.3, Math.abs(horizScale)), 3.0, 0, 0, Math.PI * 2);
   ctx.fill();
 
   // Sapata frontal direita
   ctx.beginPath();
-  ctx.ellipse(footRightX + (cfg.offsetX || 0), footRightY + 0.5 + (cfg.offsetY || 0), 8.5, 3.2, 0, 0, Math.PI * 2);
+  ctx.ellipse(tFootRight.x, tFootRight.y + 0.5, 8.5 * Math.max(0.3, Math.abs(horizScale)), 3.2, 0, 0, Math.PI * 2);
   ctx.fill();
 
   // Sapata frontal centro (pivô principal)
   ctx.beginPath();
-  ctx.ellipse(footCenterX + (cfg.offsetX || 0), footCenterY + 0.5 + (cfg.offsetY || 0), 9.5, 3.5, 0, 0, Math.PI * 2);
+  ctx.ellipse(tFootCenter.x, tFootCenter.y + 0.5, 9.5 * Math.max(0.3, Math.abs(horizScale)), 3.5, 0, 0, Math.PI * 2);
   ctx.fill();
 
   ctx.restore();
 
-  // 2. Desenho da Torre em Alta Resolução inclinada no sentido da perna do meio
-  // REGRA OFICIAL DO USUÁRIO: "ainda esta pendida a frente dela deve descer uns graus para alinhar", "penda pro sentido da perna do meio"
+  // 2. Desenho da Torre em Alta Resolução inclinada e rotacionada horizontalmente
+  // REGRA OFICIAL DO USUÁRIO: "permitir no modal eu poder girar ela horizontalmente tambem"
   ctx.save();
   ctx.translate(footCenterX + (cfg.offsetX || 0), footCenterY + (cfg.offsetY || 0));
   
@@ -955,8 +986,8 @@ export function drawSirenTower(ctx, now, isBossAlive = false) {
     ctx.rotate((cfg.rotDeg * Math.PI) / 180);
   }
 
-  // Ancorado na perna do meio (sapata frontal): pende suavemente no sentido da perna do meio e desce a frente
-  ctx.transform(cfg.scaleX ?? 1.0, cfg.skewY ?? 0, cfg.skewX ?? 0, cfg.scaleY ?? 1.0, 0, 0);
+  // Ancorado na perna do meio (sapata frontal): rotação horizontal 3D (Yaw) + inclinação
+  ctx.transform(horizScale, horizSkewY, vertSkewX, vertScale, 0, 0);
   ctx.drawImage(towerDrawable, -tW * (73 / 158), -tH * (370 / 371), tW, tH);
   ctx.restore();
 
@@ -964,21 +995,18 @@ export function drawSirenTower(ctx, now, isBossAlive = false) {
   ctx.save();
   ctx.fillStyle = 'rgba(0, 10, 0, 0.65)';
   ctx.beginPath();
-  ctx.ellipse(footCenterX + (cfg.offsetX || 0), footCenterY + (cfg.offsetY || 0), 7.5, 1.8, 0, 0, Math.PI * 2);
+  ctx.ellipse(tFootCenter.x, tFootCenter.y, 7.5 * Math.max(0.3, Math.abs(horizScale)), 1.8, 0, 0, Math.PI * 2);
   ctx.fill();
   ctx.restore();
 
   // 3. Efeito da Sirene e Luz Giratória Vermelha no Topo da Torre
-  // Posição exata do bulbo vermelho da sirene acompanhando com precisão a inclinação da torre:
+  // Posição exata do bulbo vermelho da sirene acompanhando com precisão a rotação horizontal e inclinação da torre:
   const localBeaconX = tW * (70 / 158) - tW * (73 / 158);
   const localBeaconY = -tH * (350 / 371);
-  const rotRad = ((cfg.rotDeg || 0) * Math.PI) / 180;
   
-  const transBeaconX = (cfg.scaleX ?? 1.0) * localBeaconX + (cfg.skewX ?? 0) * localBeaconY;
-  const transBeaconY = (cfg.skewY ?? 0) * localBeaconX + (cfg.scaleY ?? 1.0) * localBeaconY;
+  const transBeaconX = horizScale * localBeaconX + vertSkewX * localBeaconY;
+  const transBeaconY = horizSkewY * localBeaconX + vertScale * localBeaconY;
   
-  const cosR = Math.cos(rotRad);
-  const sinR = Math.sin(rotRad);
   const rotatedBeaconX = transBeaconX * cosR - transBeaconY * sinR;
   const rotatedBeaconY = transBeaconX * sinR + transBeaconY * cosR;
 
