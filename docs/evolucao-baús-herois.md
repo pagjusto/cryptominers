@@ -1,4 +1,4 @@
-# Cripto Myners — Evolução de heróis e recompensas
+# CryptoZombies — Evolução de heróis e recompensas
 
 Status: **versão mais recente aprovada pelo usuário em 20/11/2026**.
 
