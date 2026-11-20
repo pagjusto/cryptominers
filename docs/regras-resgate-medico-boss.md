@@ -80,11 +80,29 @@ Este documento registra as regras de gameplay aprovadas para o sistema de sobrev
 
 ## Sorteio de poções por Boss
 
-- O sorteio de poções segue a mesma chance-base e os mesmos multiplicadores por raridade definidos para o Baú do Boss.
-- Chance-base Comum: **2% por sobrevivente elegível**.
-- Multiplicadores: Comum **1×**, Raro **1,1×**, Épico **1,1667×** e Lendário **1,3333×**.
-- Chances resultantes por sobrevivente: Comum **2%**, Raro **2,2%**, Épico **2,3333%** e Lendário **2,6667%**.
+- O sorteio de poções usa as mesmas chances individuais por raridade definidas para o Baú do Boss: Comum **2%**, Raro **2,2%**, Super Raro **2,3%**, Épico **2,4%**, Lendário **2,6667%** e Super Lendário **3%** por sobrevivente elegível.
+- Multiplicadores sobre a chance-base de 2%: Comum **1×**, Raro **1,1×**, Super Raro **1,15×**, Épico **1,2×**, Lendário **1,3333×** e Super Lendário **1,5×**.
 - A soma das contribuições dos sobreviventes elegíveis fica limitada a **40% por jogador em cada Boss**.
 - Limite diário: **4 poções por jogador**, com renovação à meia-noite no horário de Brasília (America/Sao_Paulo).
 - A elegibilidade considera a equipe registrada no início da batalha, conforme as regras de participação do Boss; substitutos que entram durante o evento não participam do sorteio daquele Boss.
 - As quantidades concedidas por ocorrência e a distribuição por tipo de poção permanecem pendentes de definição.
+
+
+## Chances por raridade — Baú do Boss e poções
+
+As mesmas chances individuais por raridade são aplicadas aos sorteios de Baú do Boss e de poções:
+
+| Raridade | Chance por sobrevivente elegível | Multiplicador sobre a chance-base de 2% |
+|---|---:|---:|
+| Comum | 2% | 1× |
+| Raro | 2,2% | 1,1× |
+| Super Raro | 2,3% | 1,15× |
+| Épico | 2,4% | 1,2× |
+| Lendário | 2,6667% | 1,3333× |
+| Super Lendário | 3% | 1,5× |
+
+- A chance-base permanece em **2%**.
+- A soma das contribuições dos sobreviventes elegíveis é limitada a **40% por jogador em cada Boss**, separadamente para cada tipo de sorteio.
+- Para poções, permanece o limite de **4 por jogador por dia**, renovado à meia-noite de Brasília.
+- Para Baús do Boss, permanece o limite de **3 por jogador por dia**, renovado à meia-noite de Brasília.
+- A elegibilidade continua vinculada à equipe registrada no início da batalha; substitutos não participam do sorteio daquele evento.
