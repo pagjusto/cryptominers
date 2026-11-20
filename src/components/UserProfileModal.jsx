@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { sfx } from '../utils/sfx';
-import { getCriptoMynersConfig } from '../data/criptoMynersConfig';
+import { getCryptoZombiesConfig } from '../data/cryptoZombiesConfig';
 
 // Avatares temáticos disponíveis para o jogador
 export const PLAYER_AVATARS = [
@@ -70,7 +70,7 @@ export default function UserProfileModal({
     }
   });
 
-  const config = useMemo(() => getCriptoMynersConfig(), []);
+  const config = useMemo(() => getCryptoZombiesConfig(), []);
   const minerRate = config?.minerCoinUsdtRate || 0.01;
 
   // Atualiza a aba inicial sempre que o modal abre
