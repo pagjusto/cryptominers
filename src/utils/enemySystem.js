@@ -655,23 +655,23 @@ export function drawEnemyCharacter(ctx, enemy, now) {
   ctx.restore();
 
   // AURA OFICIAL DO BOSS (Desenha ATRÁS do corpo do Boss, emanando do tronco)
-  // REGRA OFICIAL DO USUÁRIO: "aura do zumbi tem que ser menor, nao por aura na sombra e ficar atras dele invez de em cima"
+  // REGRA OFICIAL DO USUÁRIO: "aumente a aura do boz um pouco, quase nao se percebe"
   if (isBoss) {
     ctx.save();
     ctx.translate(px + lungeX * 0.35, py);
-    const auraPulse = 0.95 + Math.sin(now * 0.005) * 0.08;
-    const auraRx = 24 * auraPulse;
-    const auraRy = 18 * auraPulse;
+    const auraPulse = 0.96 + Math.sin(now * 0.005) * 0.08;
+    const auraRx = 33 * auraPulse;
+    const auraRy = 26 * auraPulse;
 
-    // Centrada no torso (y = -4), emanando estritamente por TRÁS do sprite opaco do Boss
-    const bodyAura = ctx.createRadialGradient(0, -4, 3, 0, -4, auraRx);
-    bodyAura.addColorStop(0, 'rgba(88, 28, 135, 0.40)');
-    bodyAura.addColorStop(0.40, 'rgba(147, 51, 234, 0.28)');
-    bodyAura.addColorStop(0.75, 'rgba(34, 197, 94, 0.18)');
+    // Centrada no torso (y = -3), emanando estritamente por TRÁS do sprite opaco do Boss
+    const bodyAura = ctx.createRadialGradient(0, -3, 4, 0, -3, auraRx);
+    bodyAura.addColorStop(0, 'rgba(126, 34, 206, 0.55)');
+    bodyAura.addColorStop(0.38, 'rgba(147, 51, 234, 0.38)');
+    bodyAura.addColorStop(0.72, 'rgba(34, 197, 94, 0.25)');
     bodyAura.addColorStop(1, 'rgba(21, 128, 61, 0)');
     ctx.fillStyle = bodyAura;
     ctx.beginPath();
-    ctx.ellipse(0, -4, auraRx, auraRy, 0, 0, Math.PI * 2);
+    ctx.ellipse(0, -3, auraRx, auraRy, 0, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
   }
