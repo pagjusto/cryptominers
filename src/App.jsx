@@ -514,17 +514,17 @@ export default function App() {
     if (result.potionGranted) setRejuvenationPotions(prev => prev + 1);
 
     if (result.heroChestGranted) {
+      const rewardChest = {
+        instanceId: 'boss-reward-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8),
+        id: 'boss-hero-reward',
+        name: 'Baú de Herói',
+        icon: '🎁',
+        heroesCount: 1,
+        currency: 'RECOMPENSA',
+        source: 'boss_reward',
+        purchasedAt: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+      };
       setPurchasedChests(prev => {
-        const rewardChest = {
-          instanceId: 'boss-reward-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8),
-          id: 'boss-hero-reward',
-          name: 'Baú de Herói',
-          icon: '🎁',
-          heroesCount: 1,
-          currency: 'RECOMPENSA',
-          source: 'boss_reward',
-          purchasedAt: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-        };
         const next = [rewardChest, ...prev];
         localStorage.setItem('crypto_miners_purchased_chests', JSON.stringify(next));
         return next;
