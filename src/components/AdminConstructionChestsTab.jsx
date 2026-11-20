@@ -34,7 +34,7 @@ export default function AdminConstructionChestsTab({
   }, [currentChestConfig]);
 
   // Cálculo ao vivo com os heróis atuais
-  const liveChance = calculateActiveMinersChance(miners, currentChestConfig);
+  const liveChance = calculateActiveMinersChance(miners, currentChestConfig, { allowWorkforcePreview: true });
 
   // Alteração de parâmetros
   const handleUpdateParam = (field, value) => {
