@@ -99,7 +99,21 @@ Fórmula da idade:
 | 240 | 73,33 anos |
 | 270 | 80 anos — aposentadoria |
 
-**Importante:** os valores antigos de idade (30 anos no dia 90, 40 no dia 120, etc.) foram substituídos por esta progressão contínua. A tabela antiga também continha marcos de eficiência-base e HP (100%, 90%, 80%, 70%, 50%, 30% e aposentadoria). Esses valores de eficiência e HP ficam registrados como referências históricas, mas sua relação exata com a nova idade contínua e a regra de interpolação ainda precisa ser definida antes da implementação. Não presumir que eficiência e HP diminuem linearmente com a idade sem aprovação.
+### Marcos aprovados de eficiência-base e HP
+
+O usuário aprovou manter os valores da tabela de referência para eficiência-base e HP, associados aos respectivos dias de vida. Eles ficam definidos como os marcos oficiais do envelhecimento:
+
+| Dias de vida | Idade pela regra contínua | Eficiência-base | HP | Situação |
+|---:|---:|---:|---:|---|
+| 0 | 20 anos | 100% | 100% | Ativo |
+| 90 | 40 anos | 90% | 90% | Ativo |
+| 120 | 46,67 anos | 80% | 80% | Ativo |
+| 150 | 53,33 anos | 70% | 70% | Ativo |
+| 180 | 60 anos | 50% | 50% | Ativo |
+| 240 | 73,33 anos | 30% | 30% | Ativo |
+| 270 | 80 anos | 0% | 0% | Aposentado |
+
+Os valores acima estão aprovados como pontos de referência. A regra matemática de transição/interpolação entre os marcos ainda não foi especificada; não presumir uma interpolação linear sem decisão explícita. Aos 270 dias, o herói chega a 80 anos, tem eficiência-base 0%, HP 0% e se aposenta.
 
 ## Observações de balanceamento
 
