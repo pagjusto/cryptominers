@@ -264,10 +264,11 @@ export default function InventoryModal({
                     🎉
                   </div>
                   <h4 className="font-arcade text-xs text-emerald-300">
-                    +1 FRAGMENTO DE CONSTRUÇÃO ADICIONADO!
+                    BAÚ DO BOSS ABERTO!
                   </h4>
                   <p className="text-[11px] text-slate-300">
-                    O <b>{justOpenedChest.id}</b> foi aberto com sucesso. Agora você possui <b>{constructionFragments} fragmentos</b> no total.
+                    Recompensas: <b>{justOpenedChest.openingResult?.rewardParts?.join(' + ') || 'Nenhuma recompensa registrada'}</b>.
+                    {justOpenedChest.openingResult?.fragmentGranted ? <> Agora você possui <b>{constructionFragments} fragmentos</b>.</> : null}
                   </p>
                   <button
                     onClick={() => setJustOpenedChest(null)}
@@ -311,7 +312,7 @@ export default function InventoryModal({
                         </div>
 
                         <span className="text-[11px] text-slate-300 block mt-0.5">
-                          Recompensa garantida: <b className="text-emerald-400 font-mono">Exatamente 1 Fragmento de Construção</b>
+                          Recompensas ao abrir: <b className="text-emerald-400 font-mono">45% Fragmento · 45% Poção · 10% ambos</b> + 5% Baú de Herói
                         </span>
 
                         <span className="text-[10px] text-slate-500 block">
@@ -323,9 +324,9 @@ export default function InventoryModal({
                     <button
                       onClick={() => {
                         if (onOpenConstructionChest) {
-                          onOpenConstructionChest(chest.id);
+                          const result = onOpenConstructionChest(chest.id);
+                          if (result?.success) setJustOpenedChest({ ...chest, openingResult: result });
                         }
-                        setJustOpenedChest(chest);
                         sfx.playLevelUp();
                         confetti({
                           particleCount: 110,
@@ -337,7 +338,7 @@ export default function InventoryModal({
                       className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 text-slate-950 font-arcade text-xs font-bold transition shadow-md flex items-center gap-1.5 shrink-0 cursor-pointer active:scale-95"
                     >
                       <Sparkles size={13} />
-                      <span>ABRIR (+1 FRAG)</span>
+                      <span>ABRIR BAÚ</span>
                     </button>
                   </div>
                 ))
