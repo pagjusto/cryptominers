@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { sfx } from '../utils/sfx';
-import { getCriptoMynersConfig } from '../data/criptoMynersConfig';
+import { getCryptoZombiesConfig } from '../data/cryptoZombiesConfig';
 import { MINER_ROSTER } from '../data/minersCatalog';
 import { rollHeroRarity, recordAdTransaction } from '../utils/adRewardService';
 import RewardedAdModal from './RewardedAdModal';
@@ -34,7 +34,7 @@ export default function ChestOpeningModal({
   const [revealedHeroes, setRevealedHeroes] = useState(null);
   const [usedAdBonus, setUsedAdBonus] = useState(false);
 
-  const config = getCriptoMynersConfig();
+  const config = getCryptoZombiesConfig();
   const chestConfig = config.chests[chest.id] || config.chests.miner;
   const heroesToMint = chestConfig.heroesCount || chest.heroesCount || 1;
 
