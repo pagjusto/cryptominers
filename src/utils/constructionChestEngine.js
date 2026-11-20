@@ -1,6 +1,6 @@
 // CRIPTO MYNERS — BAÚ DO BOSS
 // - Um sorteio individual por jogador a cada Boss derrotado
-// - Chance-base Comum: 2% por sobrevivente elegível
+// - Chances diretas por raridade: Comum 2%, Raro 2,2%, Super Raro 2,3%, Épico 2,4%, Lendário 2,6667%, Super Lendário 3%
 // - Chances por raridade: Comum 2%, Raro 2,2%, Super Raro 2,3%, Épico 2,4%, Lendário 2,6667%, Super Lendário 3%
 // - Soma das contribuições limitada ao teto máximo de 40% por Boss e por jogador
 // - Limite diário por jogador de no máximo 3 Baús do Boss por dia
@@ -11,14 +11,13 @@
 
 export const DEFAULT_CONSTRUCTION_CHEST_CONFIG = {
   enabled: true,
-  baseRateCommonPct: 2, // Comum: 2% por sobrevivente; demais raridades usam multiplicadores oficiais
-  rarityMultipliers: {
-    common: 1.0,              // 2,00% por sobrevivente
-    rare: 1.1,                // 2,20% por sobrevivente
-    superRare: 1.15,          // 2,30% por sobrevivente
-    epic: 1.2,                // 2,40% por sobrevivente
-    legendary: 1.3333333333333333, // 2,6667% por sobrevivente
-    superLegendary: 1.5       // 3,00% por sobrevivente
+  chanceByRarityPct: {
+    common: 2.0,
+    rare: 2.2,
+    superRare: 2.3,
+    epic: 2.4,
+    legendary: 2.6667,
+    superLegendary: 3.0
   },
   maxAccountChanceCapPct: 40.0, // Teto absoluto de 40% por Boss e por jogador
   cycleDurationSeconds: 0,      // Sem ciclo horário; sorteio a cada Boss derrotado
@@ -83,8 +82,7 @@ export function normalizeHeroRarity(hero) {
  * Sobreviventes feridos, em tratamento, na fila ou na reserva NÃO participam do cálculo
  */
 export function calculateActiveMinersChance(miners = [], config = DEFAULT_CONSTRUCTION_CHEST_CONFIG) {
-  const baseRate = typeof config.baseRateCommonPct === 'number' ? config.baseRateCommonPct : DEFAULT_CONSTRUCTION_CHEST_CONFIG.baseRateCommonPct;
-  const multipliers = config.rarityMultipliers || DEFAULT_CONSTRUCTION_CHEST_CONFIG.rarityMultipliers;
+  const chances = config.chanceByRarityPct || DEFAULT_CONSTRUCTION_CHEST_CONFIG.chanceByRarityPct;
   const maxCap = config.maxAccountChanceCapPct ?? DEFAULT_CONSTRUCTION_CHEST_CONFIG.maxAccountChanceCapPct;
 
   // Somente sobreviventes realmente em combate participam do cálculo.
@@ -103,13 +101,11 @@ export function calculateActiveMinersChance(miners = [], config = DEFAULT_CONSTR
   const contributions = activeMiners.map(m => {
     const rarity = normalizeHeroRarity(m);
     breakdownByRarity[rarity] = (breakdownByRarity[rarity] || 0) + 1;
-    const mult = multipliers[rarity] || 1.0;
-    const individualChance = baseRate * mult;
+    const individualChance = chances[rarity] ?? DEFAULT_CONSTRUCTION_CHEST_CONFIG.chanceByRarityPct[rarity];
     return {
       heroId: m.id,
       name: m.name,
       rarity,
-      mult,
       chance: individualChance
     };
   });
@@ -123,7 +119,7 @@ export function calculateActiveMinersChance(miners = [], config = DEFAULT_CONSTR
     activeMiners,
     contributions,
     breakdownByRarity,
-    baseRateCommonPct: baseRate,
+    chanceByRarityPct: chances,
     rawTotalChance,
     finalChance,
     isCapped,
@@ -500,8 +496,7 @@ export function getConstructionAdminSummary(config = DEFAULT_CONSTRUCTION_CHEST_
 
   return {
     enabled: config.enabled !== false,
-    baseRateCommonPct: config.baseRateCommonPct ?? 15,
-    rarityMultipliers: config.rarityMultipliers || DEFAULT_CONSTRUCTION_CHEST_CONFIG.rarityMultipliers,
+    chanceByRarityPct: config.chanceByRarityPct || DEFAULT_CONSTRUCTION_CHEST_CONFIG.chanceByRarityPct,
     maxCapPct: config.maxAccountChanceCapPct ?? 40.0,
     cycleDurationSeconds: config.cycleDurationSeconds ?? 0,
     dailyLimit: config.dailyLimitPerPlayer || 3,
