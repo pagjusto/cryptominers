@@ -30,8 +30,8 @@ export default function ConstructionChestFoundModal({
 
         {/* Ícone Animado */}
         <div className="relative w-20 h-20 mx-auto mb-4">
-          <div className="w-20 h-20 rounded-3xl bg-amber-500/20 border-2 border-amber-400 text-4xl flex items-center justify-center shadow-lg shadow-amber-950/60 animate-bounce">
-            🧱
+          <div className="w-20 h-20 rounded-3xl bg-amber-500/10 border-2 border-amber-400 p-2 flex items-center justify-center shadow-lg shadow-amber-950/60 animate-bounce">
+            <img src="/items/construction_fragment.png" alt="Fragmento de Construção" className="w-full h-full object-contain filter drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)]" />
           </div>
           <span className="absolute -top-1 -right-1 text-sm bg-amber-500 text-slate-950 font-bold px-1.5 py-0.5 rounded-full border border-amber-300">
             ★

@@ -72,29 +72,29 @@ export function initBillboard(onLoaded) {
 }
 
 // Configuração Oficial da Torre de Vigia e de sua Sombra Projetada
-// Permite ajuste interativo em tempo real via painel HUD
+// REGRA OFICIAL DO USUÁRIO: A FRENTE DA TORRE É A PERNA DO MEIO (e deve deitar sentido a frente / Sul).
 export const DEFAULT_TOWER_CONFIG = {
-  // Parâmetros da Torre
-  scaleX: 1.0,
-  scaleY: 0.96,
-  skewY: 0.05,
-  skewX: 0.04,
-  rotDeg: 0,
-  yawDeg: 0,          // Rotação Horizontal Tridimensional (Giro Yaw 3D no eixo Y: -180° a +180°)
-  offsetX: 0,
-  offsetY: 0,
+  // Parâmetros de Deitar a Torre Sentido a Frente
+  topDeltaX: -5,             // Deslocamento horizontal do topo da torre (-50px a +50px)
+  topDeltaY: 32,             // Deitar para a Frente / Perna do Meio (Sul: desce o topo em px, 0 a 80px)
+  scaleX: 0.90,              // Largura / Escala Horizontal calibrada
+  scaleY: 1.0,               // Altura / Escala Vertical
+  rotDeg: 0,                 // Rotação no plano
+  yawDeg: 0,                 // Rotação horizontal Yaw 3D (-180° a +180°)
+  offsetX: -7,               // Posição calibrada no solo X
+  offsetY: -12,              // Posição calibrada no solo Y
 
-  // Parâmetros da Sombra
-  shadowRotDeg: 0,
-  shadowYawDeg: 0,    // Rotação Horizontal da Sombra (-180° a +180°)
-  shadowSkewX: -0.75,
-  shadowSkewY: -0.26,
+  // Parâmetros da Sombra Calibrados Oficialmente pelo Usuário
+  shadowRotDeg: -35.5,
+  shadowYawDeg: 0,
+  shadowSkewX: -0.80,
+  shadowSkewY: -0.43,
   shadowLength: 1.0,
   shadowScaleX: 1.0,
   shadowScaleY: 1.0,
   shadowOpacity: 0.85,
-  shadowOffsetX: 0,
-  shadowOffsetY: 0
+  shadowOffsetX: -8,
+  shadowOffsetY: -6
 };
 
 export const towerTiltConfig = { ...DEFAULT_TOWER_CONFIG };
@@ -872,13 +872,25 @@ export function drawSirenTower(ctx, now, isBossAlive = false) {
   const cfg = (typeof window !== 'undefined' && window.towerTiltConfig) || towerTiltConfig;
   const towerDrawable = sirenTowerShadedCanvas || sirenTowerImg;
 
+  // REGRA OFICIAL DO USUÁRIO: A FRENTE DA TORRE É A PERNA DO MEIO (e deve deitar sentido a frente).
+  // "veja que invez de pender para frente ele encolhe ou alonga , ela tinha que deitar sentido a frente"
+  const topDeltaX = cfg.topDeltaX ?? (cfg.leanSides ? cfg.leanSides * tH : 0);
+  const topDeltaY = cfg.topDeltaY ?? (cfg.leanSouth ? cfg.leanSouth * 45 : (cfg.leanFront ? cfg.leanFront * 45 : 32));
+  const levelSidesVal = cfg.levelSides ?? cfg.skewY ?? 0;
+
+  // Matriz de inclinação ancorada na perna do meio (0, 0):
+  // O ponto do topo (0, -tH) deita exatamente para (topDeltaX, -tH + topDeltaY)
+  const shearX = -topDeltaX / tH;
+  const scaleYFactor = Math.max(0.2, (tH - topDeltaY) / tH) * (cfg.scaleY ?? 1.0);
+
   // Rotação horizontal tridimensional (Giro no eixo Y / Yaw)
   const yawRad = ((cfg.yawDeg || 0) * Math.PI) / 180;
-  const horizScale = (cfg.scaleX ?? 1.0) * Math.cos(yawRad);
-  const horizSkewY = (cfg.skewY ?? 0) - Math.sin(yawRad) * 0.10;
-  const vertScale = cfg.scaleY ?? 1.0;
-  const vertSkewX = cfg.skewX ?? 0;
-  const rotRad = ((cfg.rotDeg || 0) * Math.PI) / 180;
+  const horizScale = (cfg.scaleX ?? 0.90) * Math.cos(yawRad);
+
+  // Nivelamento entre os lados esquerdo e direito (escada) com rotação Yaw
+  const horizSkewY = levelSidesVal - Math.sin(yawRad) * 0.10;
+
+  const rotRad = ((cfg.rotDeg ?? 0) * Math.PI) / 180;
   const cosR = Math.cos(rotRad);
   const sinR = Math.sin(rotRad);
 
@@ -977,8 +989,8 @@ export function drawSirenTower(ctx, now, isBossAlive = false) {
 
   ctx.restore();
 
-  // 2. Desenho da Torre em Alta Resolução inclinada e rotacionada horizontalmente
-  // REGRA OFICIAL DO USUÁRIO: "permitir no modal eu poder girar ela horizontalmente tambem"
+  // 2. Desenho da Torre em Alta Resolução deitando no sentido da frente (perna do meio)
+  // REGRA OFICIAL DO USUÁRIO: "ela tinha que deitar sentido a frente"
   ctx.save();
   ctx.translate(footCenterX + (cfg.offsetX || 0), footCenterY + (cfg.offsetY || 0));
   
@@ -986,8 +998,8 @@ export function drawSirenTower(ctx, now, isBossAlive = false) {
     ctx.rotate((cfg.rotDeg * Math.PI) / 180);
   }
 
-  // Ancorado na perna do meio (sapata frontal): rotação horizontal 3D (Yaw) + inclinação
-  ctx.transform(horizScale, horizSkewY, vertSkewX, vertScale, 0, 0);
+  // Ancorado na perna do meio (sapata frontal): deita o topo para frente
+  ctx.transform(horizScale, horizSkewY, shearX, scaleYFactor, 0, 0);
   ctx.drawImage(towerDrawable, -tW * (73 / 158), -tH * (370 / 371), tW, tH);
   ctx.restore();
 
@@ -1000,18 +1012,68 @@ export function drawSirenTower(ctx, now, isBossAlive = false) {
   ctx.restore();
 
   // 3. Efeito da Sirene e Luz Giratória Vermelha no Topo da Torre
-  // Posição exata do bulbo vermelho da sirene acompanhando com precisão a rotação horizontal e inclinação da torre:
+  // Posição exata do bulbo vermelho da sirene acompanhando o topo deitado da torre:
   const localBeaconX = tW * (70 / 158) - tW * (73 / 158);
   const localBeaconY = -tH * (350 / 371);
   
-  const transBeaconX = horizScale * localBeaconX + vertSkewX * localBeaconY;
-  const transBeaconY = horizSkewY * localBeaconX + vertScale * localBeaconY;
+  const transBeaconX = horizScale * localBeaconX + shearX * localBeaconY;
+  const transBeaconY = horizSkewY * localBeaconX + scaleYFactor * localBeaconY;
   
   const rotatedBeaconX = transBeaconX * cosR - transBeaconY * sinR;
   const rotatedBeaconY = transBeaconX * sinR + transBeaconY * cosR;
 
   const beaconX = footCenterX + (cfg.offsetX || 0) + rotatedBeaconX;
   const beaconY = footCenterY + (cfg.offsetY || 0) + rotatedBeaconY;
+
+  // Exporta coordenadas em tempo real para controle direto por arrasto do mouse
+  if (typeof window !== 'undefined') {
+    window.sirenTowerCoordinates = {
+      baseX: footCenterX + (cfg.offsetX || 0),
+      baseY: footCenterY + (cfg.offsetY || 0),
+      topX: beaconX,
+      topY: beaconY,
+      tW,
+      tH,
+      topDeltaX,
+      topDeltaY
+    };
+  }
+
+  // Desenha alça visual interativa quando o painel de calibrador estiver aberto ou arrastando
+  if (typeof window !== 'undefined' && (window.isTowerCalibrating || window.isDraggingTowerTop)) {
+    ctx.save();
+    // Linha guia conectando a base da perna do meio ao topo da sirene
+    ctx.strokeStyle = 'rgba(245, 158, 11, 0.7)';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([3, 3]);
+    ctx.beginPath();
+    ctx.moveTo(footCenterX + (cfg.offsetX || 0), footCenterY + (cfg.offsetY || 0));
+    ctx.lineTo(beaconX, beaconY);
+    ctx.stroke();
+
+    // Alça de arraste no topo da sirene
+    ctx.setLineDash([]);
+    ctx.strokeStyle = '#fbbf24';
+    ctx.lineWidth = 2;
+    ctx.fillStyle = window.isDraggingTowerTop ? 'rgba(245, 158, 11, 0.6)' : 'rgba(245, 158, 11, 0.25)';
+    ctx.beginPath();
+    ctx.arc(beaconX, beaconY, 16, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // Ponto central
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(beaconX, beaconY, 3.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Rótulo discreto
+    ctx.font = 'bold 9px monospace';
+    ctx.fillStyle = '#fde68a';
+    ctx.textAlign = 'center';
+    ctx.fillText('🖱️ Arraste p/ Sul', beaconX, beaconY - 20);
+    ctx.restore();
+  }
 
   if (isBossAlive) {
     ctx.save();

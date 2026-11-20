@@ -91,7 +91,7 @@ export default function InventoryModal({
                 : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
             }`}
           >
-            <span>🧱</span>
+            <img src="/items/construction_fragment.png" alt="Construção" className="w-3.5 h-3.5 object-contain" />
             <span>Construção ({constructionChests.length})</span>
           </button>
           <button
@@ -218,8 +218,12 @@ export default function InventoryModal({
               {/* Banner de Saldo de Fragmentos de Construção */}
               <div className="bg-gradient-to-r from-amber-500/20 via-slate-950 to-purple-500/20 border border-amber-500/40 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-11 h-11 rounded-xl bg-amber-500/20 border border-amber-400 text-amber-300 flex items-center justify-center text-2xl shrink-0">
-                    🧱
+                  <div className="w-12 h-12 rounded-xl bg-amber-950/40 border border-amber-500/50 flex items-center justify-center p-1.5 shrink-0 shadow-inner">
+                    <img 
+                      src="/items/construction_fragment.png" 
+                      alt="Fragmento de Construção" 
+                      className="w-full h-full object-contain filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]" 
+                    />
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
@@ -247,11 +251,17 @@ export default function InventoryModal({
                 )}
               </div>
 
-              <div className="bg-gradient-to-r from-fuchsia-500/15 via-slate-950 to-purple-500/15 border border-fuchsia-500/30 rounded-2xl p-4 flex items-center justify-between gap-3">
+              <div className="bg-gradient-to-r from-emerald-500/15 via-slate-950 to-teal-500/15 border border-emerald-500/30 rounded-2xl p-4 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-11 h-11 rounded-xl bg-fuchsia-500/15 border border-fuchsia-400/40 text-fuchsia-300 flex items-center justify-center text-2xl shrink-0">🧪</div>
+                  <div className="w-12 h-12 rounded-xl bg-emerald-950/40 border border-emerald-500/50 flex items-center justify-center p-1.5 shrink-0 shadow-inner">
+                    <img 
+                      src="/items/rejuvenation_potion.png" 
+                      alt="Poção do Rejuvenescimento" 
+                      className="w-full h-full object-contain filter drop-shadow-[0_2px_6px_rgba(16,185,129,0.5)]" 
+                    />
+                  </div>
                   <div>
-                    <span className="font-arcade text-sm text-fuchsia-300">{rejuvenationPotions} POÇÃO{rejuvenationPotions === 1 ? '' : 'ÕES'} DO REJUVENESCIMENTO</span>
+                    <span className="font-arcade text-sm text-emerald-300">{rejuvenationPotions} POÇÃO{rejuvenationPotions === 1 ? '' : 'ÕES'} DO REJUVENESCIMENTO</span>
                     <p className="text-[11px] text-slate-400">Itens acumulados em um único slot do inventário.</p>
                   </div>
                 </div>
@@ -298,8 +308,8 @@ export default function InventoryModal({
                     className="p-3.5 rounded-2xl bg-slate-950/80 border border-amber-500/30 hover:border-amber-400 transition flex items-center justify-between group"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/40 text-2xl flex items-center justify-center shrink-0 group-hover:scale-105 transition shadow-inner">
-                        🧱
+                      <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/40 p-2 flex items-center justify-center shrink-0 group-hover:scale-105 transition shadow-inner">
+                        <img src="/items/construction_fragment.png" alt="Fragmento" className="w-full h-full object-contain filter drop-shadow" />
                       </div>
                       <div>
                         <div className="flex items-center gap-1.5">

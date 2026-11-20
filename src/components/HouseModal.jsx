@@ -263,7 +263,9 @@ export default function HouseModal({
             {/* Banner de Fragmentos de Construção */}
             <div className="p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/20 via-slate-950 to-purple-500/20 border border-amber-500/40 flex items-center justify-between gap-3 text-xs">
               <div className="flex items-center gap-2.5">
-                <span className="text-2xl">🧱</span>
+                <div className="w-10 h-10 rounded-xl bg-amber-950/40 border border-amber-500/50 p-1 flex items-center justify-center shrink-0 shadow-inner">
+                  <img src="/items/construction_fragment.png" alt="Fragmentos" className="w-full h-full object-contain filter drop-shadow" />
+                </div>
                 <div>
                   <span className="font-arcade text-xs text-amber-300 block">
                     {constructionFragments} FRAGMENTO{constructionFragments === 1 ? '' : 'S'} DE CONSTRUÇÃO DISPONÍVEIS

@@ -1566,6 +1566,148 @@ export default function GameBoard({
     };
   }, [mine?.id, gameSpeed, spritesReady]);
 
+  // CONTROLE DIRETO POR ARRASTO DO MOUSE NA TORRE DE VIGIA (REGRA: "me permita arrastar com o mouse para ajustar o angulo")
+  const dragStartRef = useRef(null);
+
+  const getCanvasCoords = (clientX, clientY) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return { x: 0, y: 0 };
+    const rect = canvas.getBoundingClientRect();
+    const logicalWidth = 15 * 48; // 720 (coordenadas lógicas do jogo)
+    const logicalHeight = 11 * 48; // 528
+    return {
+      x: ((clientX - rect.left) / rect.width) * logicalWidth,
+      y: ((clientY - rect.top) / rect.height) * logicalHeight
+    };
+  };
+
+  const handleCanvasMouseDown = (e) => {
+    if (typeof window === 'undefined') return;
+    const coords = getCanvasCoords(e.clientX, e.clientY);
+    const towerCoords = window.sirenTowerCoordinates || {
+      baseX: 170,
+      baseY: 328,
+      topX: 170,
+      topY: 210
+    };
+
+    const cfg = window.towerTiltConfig || {};
+
+    // Distância até o topo da torre (sirene)
+    const distTop = Math.hypot(coords.x - towerCoords.topX, coords.y - towerCoords.topY);
+    // Distância até a base (perna do meio)
+    const distBase = Math.hypot(coords.x - towerCoords.baseX, coords.y - towerCoords.baseY);
+
+    // Hitbox ampla cobrindo a torre inteira (fácil de clicar e arrastar com o mouse)
+    const isInsideTower = (
+      coords.x >= (towerCoords.baseX - 60) &&
+      coords.x <= (towerCoords.baseX + 60) &&
+      coords.y >= (towerCoords.topY - 40) &&
+      coords.y <= (towerCoords.baseY + 30)
+    );
+
+    if (distTop < 60 || (isInsideTower && coords.y < (towerCoords.baseY - 25))) {
+      // Arrastar para DEITAR a torre sentido a frente (Sul) ou levantar (Norte)
+      dragStartRef.current = {
+        mode: 'lean',
+        startMouseX: coords.x,
+        startMouseY: coords.y,
+        startTopDeltaX: cfg.topDeltaX ?? 0,
+        startTopDeltaY: cfg.topDeltaY ?? 32
+      };
+      window.isDraggingTowerTop = true;
+      if (canvasRef.current) canvasRef.current.style.cursor = 'grabbing';
+      e.preventDefault();
+    } else if (distBase < 45 || isInsideTower) {
+      // Arrastar a base da torre no solo (Pos X e Pos Y)
+      dragStartRef.current = {
+        mode: 'pos',
+        startMouseX: coords.x,
+        startMouseY: coords.y,
+        startOffsetX: cfg.offsetX || 0,
+        startOffsetY: cfg.offsetY || 0
+      };
+      if (canvasRef.current) canvasRef.current.style.cursor = 'grabbing';
+      e.preventDefault();
+    }
+  };
+
+  useEffect(() => {
+    const handleGlobalMouseMove = (e) => {
+      if (typeof window === 'undefined') return;
+      const coords = getCanvasCoords(e.clientX, e.clientY);
+      const towerCoords = window.sirenTowerCoordinates;
+
+      // Feedback do cursor sobre a torre
+      if (!dragStartRef.current && towerCoords && canvasRef.current) {
+        const isNearTower = (
+          coords.x >= (towerCoords.baseX - 55) &&
+          coords.x <= (towerCoords.baseX + 55) &&
+          coords.y >= (towerCoords.topY - 35) &&
+          coords.y <= (towerCoords.baseY + 25)
+        );
+        if (isNearTower) {
+          canvasRef.current.style.cursor = 'grab';
+        } else if (canvasRef.current.style.cursor === 'grab') {
+          canvasRef.current.style.cursor = 'default';
+        }
+      }
+
+      if (!dragStartRef.current) return;
+      const { mode, startMouseX, startMouseY, startTopDeltaX, startTopDeltaY, startOffsetX, startOffsetY } = dragStartRef.current;
+      const deltaX = coords.x - startMouseX;
+      const deltaY = coords.y - startMouseY;
+
+      if (mode === 'lean') {
+        // Arrastar para baixo (+deltaY) = DEITAR para a FRENTE (perna do meio / Sul)
+        // Arrastar para cima (-deltaY) = LEVANTAR / pender para trás (Norte)
+        const nextTopDeltaX = Math.round(startTopDeltaX + deltaX);
+        const nextTopDeltaY = Math.max(-50, Math.min(100, Math.round(startTopDeltaY + deltaY)));
+
+        const updated = {
+          ...(window.towerTiltConfig || {}),
+          topDeltaX: nextTopDeltaX,
+          topDeltaY: nextTopDeltaY
+        };
+
+        if (window.saveTowerConfig) {
+          window.saveTowerConfig(updated);
+        }
+        window.dispatchEvent(new CustomEvent('cryptozombies_tower_config_updated', { detail: updated }));
+      } else if (mode === 'pos') {
+        const updated = {
+          ...(window.towerTiltConfig || {}),
+          offsetX: Math.round(startOffsetX + deltaX),
+          offsetY: Math.round(startOffsetY + deltaY)
+        };
+
+        if (window.saveTowerConfig) {
+          window.saveTowerConfig(updated);
+        }
+        window.dispatchEvent(new CustomEvent('cryptozombies_tower_config_updated', { detail: updated }));
+      }
+    };
+
+    const handleGlobalMouseUp = () => {
+      if (dragStartRef.current) {
+        dragStartRef.current = null;
+        if (typeof window !== 'undefined') {
+          window.isDraggingTowerTop = false;
+        }
+        if (canvasRef.current && canvasRef.current.style.cursor === 'grabbing') {
+          canvasRef.current.style.cursor = 'grab';
+        }
+      }
+    };
+
+    window.addEventListener('mousemove', handleGlobalMouseMove);
+    window.addEventListener('mouseup', handleGlobalMouseUp);
+    return () => {
+      window.removeEventListener('mousemove', handleGlobalMouseMove);
+      window.removeEventListener('mouseup', handleGlobalMouseUp);
+    };
+  }, []);
+
   const handleCanvasClick = (e) => {
     // Carrinho roda exclusivamente pelos trilhos sem conceder bônus (conforme solicitado)
   };
@@ -1574,8 +1716,9 @@ export default function GameBoard({
     <div className="relative inline-flex items-center justify-center border-4 border-amber-950/60 rounded-3xl overflow-hidden shadow-[0_0_90px_rgba(0,0,0,0.95)] bg-slate-950 ring-2 ring-amber-500/20 max-h-[calc(100vh-16px)] max-w-full">
       <canvas 
         ref={canvasRef} 
-        className="block cursor-pointer max-w-full max-h-[calc(100vh-24px)] w-auto h-auto object-contain"
+        className="block max-w-full max-h-[calc(100vh-24px)] w-auto h-auto object-contain select-none"
         onClick={handleCanvasClick}
+        onMouseDown={handleCanvasMouseDown}
       />
 
       {/* REGRA OFICIAL DO USUÁRIO: "ALERTA DE BOSS", "jogue o alerta pro meio do mapa", "poem uma sombra vermelha", "PISCANDO UMAS 4 VEZES" */}
