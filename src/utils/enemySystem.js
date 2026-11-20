@@ -74,11 +74,70 @@ class EnemySpriteManager {
 export const enemySpriteManager = new EnemySpriteManager();
 
 /**
+ * Localiza a célula livre transitável mais próxima para evitar qualquer sobreposição de zumbis
+ */
+export function findNearestFreeCell(gx, gy, enemies, grid, miners = []) {
+  const GRID_COLS = grid[0]?.length || 15;
+  const GRID_ROWS = grid.length || 11;
+  const visited = new Set([`${gx},${gy}`]);
+  const queue = [{ x: gx, y: gy, dist: 0 }];
+
+  while (queue.length > 0) {
+    const cur = queue.shift();
+    if (cur.dist > 8) break;
+
+    const neighbors = [
+      { x: cur.x + 1, y: cur.y },
+      { x: cur.x - 1, y: cur.y },
+      { x: cur.x, y: cur.y + 1 },
+      { x: cur.x, y: cur.y - 1 }
+    ];
+
+    for (const nb of neighbors) {
+      const key = `${nb.x},${nb.y}`;
+      if (visited.has(key)) continue;
+      visited.add(key);
+
+      if (nb.x <= 0 || nb.x >= GRID_COLS - 1 || nb.y <= 0 || nb.y >= GRID_ROWS - 1) continue;
+      if (isCityBuilding(nb.x, nb.y) || isBaseCompound(nb.x, nb.y)) continue;
+      if (grid[nb.y] && grid[nb.y][nb.x] !== BLOCK_EMPTY && grid[nb.y][nb.x] !== BLOCK_ZOMBIE) continue;
+
+      // REGRA OFICIAL DO USUÁRIO: "zumbis nunca devem ocupar o mesmo local"
+      // Nenhum outro zumbi pode estar nessa célula, nem ter essa célula como destino, nem estar visualmente próximo
+      const isOccupiedByEnemy = enemies.some(other => {
+        if (other.hp <= 0) return false;
+        if (other.gx === nb.x && other.gy === nb.y) return true;
+        if (other.targetGx === nb.x && other.targetGy === nb.y) return true;
+        const ovx = other.visualX ?? other.gx;
+        const ovy = other.visualY ?? other.gy;
+        return Math.hypot(ovx - nb.x, ovy - nb.y) < 0.95;
+      });
+      if (isOccupiedByEnemy) {
+        queue.push({ x: nb.x, y: nb.y, dist: cur.dist + 1 });
+        continue;
+      }
+
+      // Nenhum minerador pode estar nessa célula
+      const hasHero = miners.some(m => Math.round(m.x) === nb.x && Math.round(m.y) === nb.y);
+      if (hasHero) {
+        queue.push({ x: nb.x, y: nb.y, dist: cur.dist + 1 });
+        continue;
+      }
+
+      return nb;
+    }
+  }
+
+  return null;
+}
+
+/**
  * Cria ou sincroniza as entidades de inimigos com o estado do grid e dos depósitos
  */
 export function syncEnemiesWithMap(existingEnemies = [], mapData, grid, hpMap) {
   const result = [];
   const enemyMap = new Map();
+  const occupiedTiles = new Set();
 
   existingEnemies.forEach(e => {
     enemyMap.set(e.id, e);
@@ -138,17 +197,29 @@ export function syncEnemiesWithMap(existingEnemies = [], mapData, grid, hpMap) {
       }
     }
 
-    result.push(entity);
-  });
-
-  // Inclui também quaisquer zumbis respawnados ativos que ainda não foram sincronizados no mapData
-  existingEnemies.forEach(e => {
-    if (e.hp > 0 && !result.some(r => r.id === e.id)) {
-      result.push(e);
+    // REGRA OFICIAL DO USUÁRIO: "zumbis nunca devem ocupar o mesmo local"
+    const tileKey = `${entity.gx},${entity.gy}`;
+    if (!occupiedTiles.has(tileKey)) {
+      occupiedTiles.add(tileKey);
+      result.push(entity);
+    } else {
+      // Reloca para célula livre adjacente
+      const freeCell = findNearestFreeCell(entity.gx, entity.gy, result, grid, []);
+      if (freeCell) {
+        entity.gx = freeCell.x;
+        entity.gy = freeCell.y;
+        entity.visualX = freeCell.x;
+        entity.visualY = freeCell.y;
+        entity.targetGx = freeCell.x;
+        entity.targetGy = freeCell.y;
+        occupiedTiles.add(`${freeCell.x},${freeCell.y}`);
+        result.push(entity);
+      }
     }
   });
 
-  return result;
+  // Limite rígido oficial: máximo 20 criaturas (19 zumbis + 1 boss)
+  return result.slice(0, 20);
 }
 
 /**
@@ -159,6 +230,40 @@ export function updateEnemies(enemies, state, dt, now, isCanyon = true) {
 
   const GRID_COLS = state.grid[0]?.length || 15;
   const GRID_ROWS = state.grid.length || 11;
+
+  // REGRA OFICIAL DO USUÁRIO: "zumbis nunca devem ocupar o mesmo local"
+  // 0. DESEMPILHAMENTO E SEPARAÇÃO RÍGIDA DE POSIÇÕES
+  // Garante que nenhum zumbi compartilhe a mesma célula no grid nem fique sobreposto a outro
+  const occupiedTiles = new Map();
+  enemies.forEach(enemy => {
+    if (enemy.hp <= 0) return;
+    const key = `${enemy.gx},${enemy.gy}`;
+    if (!occupiedTiles.has(key)) {
+      occupiedTiles.set(key, enemy);
+    } else {
+      // Conflito de ocupação! Dois zumbis na mesma célula. Reloca o duplicado imediatamente
+      const freeCell = findNearestFreeCell(enemy.gx, enemy.gy, enemies, state.grid, state.miners);
+      if (freeCell) {
+        const oldKey = `${enemy.gx},${enemy.gy}`;
+        const newKey = `${freeCell.x},${freeCell.y}`;
+        if (state.hpMap[oldKey] !== undefined && !occupiedTiles.has(oldKey)) {
+          delete state.hpMap[oldKey];
+        }
+        state.hpMap[newKey] = enemy.hp || 2;
+        if (state.grid[freeCell.y]) {
+          state.grid[freeCell.y][freeCell.x] = enemy.blockId;
+        }
+        enemy.gx = freeCell.x;
+        enemy.gy = freeCell.y;
+        enemy.visualX = freeCell.x;
+        enemy.visualY = freeCell.y;
+        enemy.targetGx = freeCell.x;
+        enemy.targetGy = freeCell.y;
+        enemy.isWalking = false;
+        occupiedTiles.set(newKey, enemy);
+      }
+    }
+  });
 
   enemies.forEach(enemy => {
     // REGRA OFICIAL DO USUÁRIO: "onde foi selecionado em hiotese alguma zumbis e herois podem pizar em cima ou passar ali"
@@ -360,7 +465,20 @@ export function updateEnemies(enemies, state, dt, now, isCanyon = true) {
         ].filter(pos => {
           if (pos.x <= 0 || pos.x >= GRID_COLS - 1 || pos.y <= 0 || pos.y >= GRID_ROWS - 1) return false;
           if (isCityBuilding(pos.x, pos.y) || isBaseCompound(pos.x, pos.y)) return false; // Bloqueia prédios e toda a área da base militar
-          if (state.grid[pos.y] && state.grid[pos.y][pos.x] !== BLOCK_EMPTY) return false; // Bloqueado por rocha/outro
+          if (state.grid[pos.y] && state.grid[pos.y][pos.x] !== BLOCK_EMPTY && state.grid[pos.y][pos.x] !== enemy.blockId) return false; // Bloqueado por rocha/outro
+
+          // REGRA OFICIAL DO USUÁRIO: "zumbis nunca devem ocupar o mesmo local"
+          // Não pode se mover para célula que já contenha outro zumbi ou que seja o destino de outro zumbi
+          const hasOtherEnemy = enemies.some(other => {
+            if (other.id === enemy.id || other.hp <= 0) return false;
+            if (other.gx === pos.x && other.gy === pos.y) return true;
+            if (other.targetGx === pos.x && other.targetGy === pos.y) return true;
+            const ovx = other.visualX ?? other.gx;
+            const ovy = other.visualY ?? other.gy;
+            if (Math.hypot(ovx - pos.x, ovy - pos.y) < 0.95) return true;
+            return false;
+          });
+          if (hasOtherEnemy) return false;
 
           // Não anda em cima de outro minerador
           const hasHero = state.miners?.some(m => Math.round(m.x) === pos.x && Math.round(m.y) === pos.y);
@@ -418,6 +536,43 @@ export function updateEnemies(enemies, state, dt, now, isCanyon = true) {
       }
     }
   });
+
+  // REGRA OFICIAL DO USUÁRIO: "zumbis nunca devem ocupar o mesmo local"
+  // Força contínua de repulsão suave para manter distância visual mínima (0.92 tiles) enquanto caminham
+  for (let i = 0; i < enemies.length; i++) {
+    const e1 = enemies[i];
+    if (e1.hp <= 0) continue;
+    for (let j = i + 1; j < enemies.length; j++) {
+      const e2 = enemies[j];
+      if (e2.hp <= 0) continue;
+      const v1x = e1.visualX ?? e1.gx;
+      const v1y = e1.visualY ?? e1.gy;
+      const v2x = e2.visualX ?? e2.gx;
+      const v2y = e2.visualY ?? e2.gy;
+      const dx = v1x - v2x;
+      const dy = v1y - v2y;
+      const dist = Math.hypot(dx, dy);
+      if (dist < 0.92 && dist > 0.0001) {
+        const overlap = 0.92 - dist;
+        const pushFactor = (overlap / dist) * 0.45;
+        const px = dx * pushFactor;
+        const py = dy * pushFactor;
+
+        const n1x = v1x + px;
+        const n1y = v1y + py;
+        if (!isCityBuilding(n1x, n1y) && !isBaseCompound(n1x, n1y)) {
+          e1.visualX = n1x;
+          e1.visualY = n1y;
+        }
+        const n2x = v2x - px;
+        const n2y = v2y - py;
+        if (!isCityBuilding(n2x, n2y) && !isBaseCompound(n2x, n2y)) {
+          e2.visualX = n2x;
+          e2.visualY = n2y;
+        }
+      }
+    }
+  }
 }
 
 /**
@@ -476,12 +631,13 @@ export function drawEnemyCharacter(ctx, enemy, now) {
     : groundY - Math.round(drawH * (536 / 640));
   const dx = -drawW / 2;
 
-  // 3. Sombra de Contato Realista no Solo (ancorada exatamente na sola das botas)
+  // 3. Sombra de Contato Realista no Solo (ancorada exatamente na sola das botas, sem aura no chão)
   ctx.save();
   ctx.translate(px + lungeX * 0.35, py);
   const shadowY = groundY;
-  const shadowRx = isBoss ? 27 : 18.5;
-  const shadowRy = isBoss ? 7.6 : 5.0;
+  // Sombra compacta ajustada à largura das botas do zumbi (não parece poça nem aura)
+  const shadowRx = isBoss ? 20.0 : 11.0;
+  const shadowRy = isBoss ? 5.8 : 3.6;
 
   // Camada 1: Penumbra difusa suave
   ctx.beginPath();
@@ -492,48 +648,29 @@ export function drawEnemyCharacter(ctx, enemy, now) {
   // Camada 2: Núcleo de oclusão de contato direto (bem escuro e rente ao solo)
   ctx.beginPath();
   ctx.fillStyle = isBoss ? 'rgba(0, 0, 0, 0.50)' : 'rgba(0, 0, 0, 0.44)';
-  ctx.ellipse(0, shadowY, shadowRx * 0.82, shadowRy * 0.72, 0, 0, Math.PI * 2);
+  ctx.ellipse(0, shadowY, shadowRx * 0.78, shadowRy * 0.70, 0, 0, Math.PI * 2);
   ctx.fill();
   ctx.restore();
 
-  // AURA OFICIAL DO BOSS: Mesclada de Preto com Roxo e Verde
+  // AURA OFICIAL DO BOSS / ZUMBI MUTANTE:
+  // REGRA OFICIAL DO USUÁRIO: "aura do zumbi tem que ser menor e nao por aura na sombra dele"
+  // 1. NUNCA desenhar aura no chão ou sobre a sombra.
+  // 2. A aura do corpo é mantida compacta e sutil apenas ao redor do tronco do Boss.
   if (isBoss) {
     ctx.save();
-    ctx.translate(px + lungeX * 0.35, py + groundY);
-    const auraPulse = 1.0 + Math.sin(now * 0.005) * 0.12;
-    const auraRx = 44 * auraPulse;
-    const auraRy = 18 * auraPulse;
+    ctx.translate(px + lungeX * 0.35, py);
+    const auraPulse = 0.95 + Math.sin(now * 0.005) * 0.08;
+    const auraRadius = 20 * auraPulse; // Reduzida de 48px para 20px (mais de 50% menor)
 
-    // 1. Halo no solo: Núcleo Preto Profundo -> Roxo Abissal -> Verde Tóxico Radioativo
-    const bossAuraGrad = ctx.createRadialGradient(0, 0, 4, 0, 0, auraRx);
-    bossAuraGrad.addColorStop(0, 'rgba(0, 0, 0, 0.88)'); // Preto profundo
-    bossAuraGrad.addColorStop(0.35, 'rgba(88, 28, 135, 0.70)'); // Roxo escuro
-    bossAuraGrad.addColorStop(0.65, 'rgba(168, 85, 247, 0.50)'); // Roxo vibrante
-    bossAuraGrad.addColorStop(0.85, 'rgba(34, 197, 94, 0.45)'); // Verde tóxico
-    bossAuraGrad.addColorStop(1, 'rgba(132, 204, 22, 0)');
-    ctx.fillStyle = bossAuraGrad;
-    ctx.beginPath();
-    ctx.ellipse(0, 0, auraRx, auraRy, 0, 0, Math.PI * 2);
-    ctx.fill();
-
-    // 2. Anel de energia mística roxo-esmeralda cintilante no chão
-    ctx.strokeStyle = '#c084fc';
-    ctx.lineWidth = 1.5;
-    ctx.globalAlpha = 0.55 * auraPulse;
-    ctx.beginPath();
-    ctx.ellipse(0, 0, auraRx * 0.78, auraRy * 0.78, 0, 0, Math.PI * 2);
-    ctx.stroke();
-
-    // 3. Brilho esférico sombrio ascendente ao redor do corpo (Preto + Roxo + Verde)
-    ctx.globalAlpha = 1.0;
-    const bodyAura = ctx.createRadialGradient(0, -groundY - 14, 8, 0, -groundY - 14, 48 * auraPulse);
-    bodyAura.addColorStop(0, 'rgba(0, 0, 0, 0.65)');
-    bodyAura.addColorStop(0.38, 'rgba(147, 51, 234, 0.40)');
-    bodyAura.addColorStop(0.75, 'rgba(34, 197, 94, 0.30)');
+    // Brilho esférico sutil apenas ao redor do torso (sem tocar o chão nem a sombra)
+    const bodyAura = ctx.createRadialGradient(0, -groundY - 12, 4, 0, -groundY - 12, auraRadius);
+    bodyAura.addColorStop(0, 'rgba(0, 0, 0, 0.45)');
+    bodyAura.addColorStop(0.35, 'rgba(147, 51, 234, 0.30)');
+    bodyAura.addColorStop(0.70, 'rgba(34, 197, 94, 0.22)');
     bodyAura.addColorStop(1, 'rgba(21, 128, 61, 0)');
     ctx.fillStyle = bodyAura;
     ctx.beginPath();
-    ctx.arc(0, -groundY - 14, 48 * auraPulse, 0, Math.PI * 2);
+    ctx.arc(0, -groundY - 12, auraRadius, 0, Math.PI * 2);
     ctx.fill();
 
     ctx.restore();

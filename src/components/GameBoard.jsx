@@ -304,87 +304,18 @@ export default function GameBoard({
                 title: 'Abominação Mutante Derrotada'
               });
             } else {
-              // Zumbi derrotado: "os zumbis nascem nos cantos do mapa e caminham para as areas definidas proporcionalmente distribuidos"
-              const validCells = getValidDepositCells(GRID_COLS, GRID_ROWS);
-              const openCells = validCells.filter(pos => {
-                if (pos.c === bx && pos.r === by) return false;
-                if (state.grid[pos.r][pos.c] !== BLOCK_EMPTY) return false;
-                const hasMiner = state.miners?.some(m => Math.round(m.x) === pos.c && Math.round(m.y) === pos.r);
-                if (hasMiner) return false;
-                const hasEnemy = state.enemies?.some(e => e.gx === pos.c && e.gy === pos.r);
-                if (hasEnemy) return false;
-                return true;
+              // Abate do zumbi concluído: recompensa e texto flutuante
+              state.floatTexts.push({
+                text: '🧟 +HORDA (+0.05 MNC)',
+                x: bx * TILE_SIZE + TILE_SIZE / 2,
+                y: by * TILE_SIZE - 8,
+                color: '#a3e635',
+                opacity: 0.95,
+                vy: -22
               });
 
-              // Filtra cantos e bordas abertos
-              const openCorners = CORNER_SPAWN_POINTS.filter(pos => {
-                if (state.grid[pos.r] && state.grid[pos.r][pos.c] !== BLOCK_EMPTY) return false;
-                if (isCityBuilding(pos.c, pos.r) || isBaseCompound(pos.c, pos.r)) return false;
-                const hasMiner = state.miners?.some(m => Math.round(m.x) === pos.c && Math.round(m.y) === pos.r);
-                if (hasMiner) return false;
-                const hasEnemy = state.enemies?.some(e => e.gx === pos.c && e.gy === pos.r);
-                if (hasEnemy) return false;
-                return true;
-              });
-
-              const spawnPos = openCorners.length > 0 
-                ? openCorners[Math.floor(Math.random() * openCorners.length)]
-                : (openCells.length > 0 ? openCells[Math.floor(Math.random() * openCells.length)] : null);
-
-              // Atribui à zona tática com menor quantidade de zumbis para manter distribuição proporcional
-              const zoneCounts = TACTICAL_ZONES.map(z => ({
-                center: z.center,
-                count: (state.enemies || []).filter(e => {
-                  const tx = e.targetZone?.x ?? e.targetZone?.c;
-                  const ty = e.targetZone?.y ?? e.targetZone?.r;
-                  return tx === z.center.x && ty === z.center.y;
-                }).length
-              }));
-              zoneCounts.sort((a, b) => a.count - b.count);
-              const assignedZone = zoneCounts[0]?.center || TACTICAL_ZONES[0].center;
-
-              if (spawnPos) {
-                const spawnKey = `${spawnPos.c},${spawnPos.r}`;
-                state.grid[spawnPos.r][spawnPos.c] = BLOCK_ZOMBIE;
-                state.hpMap[spawnKey] = 2; // Morre com exatamente 2 tiros
-
-                const respawnedZombie = {
-                  id: `zombie_horde_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
-                  type: 'zombie',
-                  name: 'Zumbi Andarilho',
-                  gx: spawnPos.c,
-                  gy: spawnPos.r,
-                  targetZone: assignedZone,
-                  visualX: spawnPos.c,
-                  visualY: spawnPos.r,
-                  facingDir: Math.random() > 0.5 ? 1 : -1,
-                  isWalking: false,
-                  attackedTimer: 0,
-                  isUnderAttack: false,
-                  walkTimer: 0,
-                  targetGx: spawnPos.c,
-                  targetGy: spawnPos.r,
-                  isAttacking: false,
-                  attackProgress: 0,
-                  attackCooldown: 0,
-                  hitFlash: 0,
-                  hp: 2,
-                  maxHp: 2
-                };
-                state.enemies.push(respawnedZombie);
-
-                state.floatTexts.push({
-                  text: '🧟 +HORDA (+0.05 MNC)',
-                  x: spawnPos.c * TILE_SIZE + TILE_SIZE / 2,
-                  y: spawnPos.r * TILE_SIZE - 8,
-                  color: '#a3e635',
-                  opacity: 0.95,
-                  vy: -22
-                });
-
-                // Concede recompensa econômica direta de MNC pelo abate do zumbi
-                callbacksRef.current.onCollectBcoin?.(0.05);
-              }
+              // Concede recompensa econômica direta de MNC pelo abate do zumbi
+              callbacksRef.current.onCollectBcoin?.(0.05);
             }
           }
         }
@@ -403,6 +334,11 @@ export default function GameBoard({
         const mapDamageResult = recordDepositDamage(pId, bx, by, 999999);
         if (mapDamageResult?.deposit) {
           callbacksRef.current.onDepositBroken?.(mapDamageResult);
+          // Remove imediatamente a entidade abatida da memória de inimigos ativos
+          state.enemies = (state.enemies || []).filter(e => e.id !== mapDamageResult.deposit.id && !(e.gx === bx && e.gy === by));
+          if (mapDamageResult.currentMap) {
+            state.enemies = syncEnemiesWithMap(state.enemies, mapDamageResult.currentMap, state.grid, state.hpMap);
+          }
         }
 
         // Verificação se todas as 20 jazidas foram destruídas (Renovação de Ciclo do Mapa Individual)
