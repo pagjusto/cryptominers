@@ -356,9 +356,9 @@ export default function HeroList({
                 <div className="w-full bg-slate-800/90 rounded-full h-2 overflow-hidden shadow-inner">
                   <div 
                     className={`h-full rounded-full transition-all duration-300 ${
-                      staminaPct > 40 
+                      healthPct > 40 
                         ? 'bg-gradient-to-r from-emerald-500 to-emerald-400' 
-                        : (staminaPct > 15 
+                        : (healthPct > 15 
                             ? 'bg-gradient-to-r from-amber-500 to-amber-400' 
                             : 'bg-gradient-to-r from-rose-600 to-rose-500')
                     }`}
