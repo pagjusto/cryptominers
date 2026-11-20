@@ -1,5 +1,5 @@
 // Configuração Oficial de Investimento e Economia Sustentável de 3 Meses (~90 dias de ROI)
-// No Bomb Crypto original: 1 Herói = 10 BCOIN, Full Team = 15 Heróis (150 BCOIN).
+// No modelo original de mineração Web3: 1 Herói = 10 BCOIN, Full Team = 15 Heróis (150 BCOIN).
 
 export const ENTRY_PACKAGES = [
   {
@@ -42,7 +42,7 @@ export const ENTRY_PACKAGES = [
   {
     id: 'full_team',
     name: 'Time Completo "Full Team"',
-    tagline: 'Meta Clássica do Bomb Crypto',
+    tagline: 'Referência clássica de equipe completa',
     heroesCount: 15,
     costBcoin: 150,
     icon: '👑',
@@ -51,7 +51,7 @@ export const ENTRY_PACKAGES = [
     estimatedDailyBcoin: 1.780,
     estimatedRoiDays: 84,
     activeRoiDays: 50,
-    description: '15 Mineradores (o limite máximo de heróis no mapa simultaneamente no Bomb Crypto).',
+    description: '15 Mineradores (o limite máximo de heróis no mapa simultaneamente).',
     features: [
       '15 Caixas de Recrutamento (150 BCOIN)',
       'Capacidade máxima de mineração do mapa',
@@ -92,7 +92,7 @@ export const ROI_PROFILES = [
   }
 ];
 
-// Regras Oficiais de Saque e Taxas Regressivas por ROI — Cripto Myners
+// Regras Oficiais de Saque e Taxas Regressivas por ROI — CryptoZombies
 export const WITHDRAWAL_RULES = {
   minWithdrawUsd: 50, // Saque mínimo oficial: US$ 50
   getMinWithdrawMnc: (rate = 0.01) => Math.ceil(50 / (rate || 0.01)),
