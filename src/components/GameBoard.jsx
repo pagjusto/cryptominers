@@ -376,26 +376,22 @@ export default function GameBoard({
               const battleSession = state.bossBattleSessions?.[defeated.id];
               if (battleSession) {
                 const currentMinersById = new Map(state.miners.map(m => [m.id, m]));
-                const survivingInitialParticipants = battleSession.participants
-                  .map(initialMiner => {
-                    const currentMiner = currentMinersById.get(initialMiner.id);
-                    if (!currentMiner) return null;
-                    const currentHealth = currentMiner.currentHealth ?? currentMiner.maxHealth ?? initialMiner.currentHealth ?? initialMiner.maxHealth ?? 100;
-                    if (currentHealth <= 0) return null;
-                    return {
-                      ...initialMiner,
-                      currentHealth,
-                      status: 'work',
-                      bossSnapshotParticipant: true,
-                      isAliveAtBossEnd: true
-                    };
-                  })
-                  .filter(Boolean);
+                // Heróis não morrem: todos os integrantes do snapshot inicial participam,
+                // mesmo feridos, no ambulatório ou ausentes da formação atual após substituição.
+                const eligibleInitialParticipants = battleSession.participants.map(initialMiner => {
+                  const currentMiner = currentMinersById.get(initialMiner.id);
+                  return {
+                    ...initialMiner,
+                    currentHealth: currentMiner?.currentHealth ?? initialMiner.currentHealth ?? initialMiner.maxHealth ?? 100,
+                    status: currentMiner?.status ?? initialMiner.status,
+                    bossSnapshotParticipant: true
+                  };
+                });
 
                 callbacksRef.current.onBossDefeated?.({
                   bossId: defeated.id,
                   startedAt: battleSession.startedAt,
-                  participants: survivingInitialParticipants
+                  participants: eligibleInitialParticipants
                 });
                 try {
                   if (battleSession.sessionKey) localStorage.removeItem(battleSession.sessionKey);
