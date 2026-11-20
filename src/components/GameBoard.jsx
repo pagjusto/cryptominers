@@ -282,19 +282,35 @@ export default function GameBoard({
         // Registra uma única fotografia imutável da equipe que iniciou este Boss.
         const activeBossForSession = state.enemies?.find(e => e.type === 'boss' && (e.hp === undefined || e.hp > 0));
         if (activeBossForSession && !state.bossBattleSessions?.[activeBossForSession.id]) {
-          const initialParticipants = state.miners
-            .filter(m => {
-              const maxHealth = m.maxHealth || 100;
-              const currentHealth = m.currentHealth ?? maxHealth;
-              return m.status === 'work' && (currentHealth / maxHealth) * 100 > 5;
-            })
-            .map(m => ({ ...m }));
+          const sessionKey = `cryptozombies_boss_snapshot_${callbacksRef.current.playerId || 'player_default'}_${activeBossForSession.id}`;
+          let savedSession = null;
+          try {
+            const rawSession = localStorage.getItem(sessionKey);
+            if (rawSession) savedSession = JSON.parse(rawSession);
+          } catch (e) {}
+
+          const initialParticipants = Array.isArray(savedSession?.participants)
+            ? savedSession.participants
+            : state.miners
+                .filter(m => {
+                  const maxHealth = m.maxHealth || 100;
+                  const currentHealth = m.currentHealth ?? maxHealth;
+                  return m.status === 'work' && (currentHealth / maxHealth) * 100 > 5;
+                })
+                .map(m => ({ ...m }));
+          const startedAt = savedSession?.startedAt || new Date().toISOString();
           state.bossBattleSessions = state.bossBattleSessions || {};
           state.bossBattleSessions[activeBossForSession.id] = {
             bossId: activeBossForSession.id,
-            startedAt: new Date().toISOString(),
+            sessionKey,
+            startedAt,
             participants: initialParticipants
           };
+          if (!savedSession) {
+            try {
+              localStorage.setItem(sessionKey, JSON.stringify({ bossId: activeBossForSession.id, startedAt, participants: initialParticipants }));
+            } catch (e) {}
+          }
         }
       }
 
@@ -378,6 +394,9 @@ export default function GameBoard({
                   startedAt: battleSession.startedAt,
                   participants: survivingInitialParticipants
                 });
+                try {
+                  if (battleSession.sessionKey) localStorage.removeItem(battleSession.sessionKey);
+                } catch (e) {}
                 delete state.bossBattleSessions[defeated.id];
               }
 
