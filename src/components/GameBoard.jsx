@@ -18,7 +18,7 @@ import {
 } from '../data/minersData';
 import { recordDepositDamage, getValidDepositCells } from '../utils/individualMapEngine';
 import { syncEnemiesWithMap, updateEnemies, drawEnemyCharacter } from '../utils/enemySystem';
-import { BOMB_CRYPTO_REWARDS } from '../data/bombCryptoEconomy';
+import { CRYPTO_ZOMBIES_REWARDS } from '../data/cryptoZombiesEconomy';
 import { 
   drawContinuousCaveFloor, 
   drawVectorCartoonRock, 
