@@ -1,5 +1,5 @@
 // ============================================================================
-// CRIPTO MYNERS — CATÁLOGO OFICIAL DE INIMIGOS
+// CRYPTOZOMBIES — CATÁLOGO OFICIAL DE INIMIGOS
 //
 // 1. O ZUMBI substitui as antigas jazidas com movimentação de caminhada e ataque.
 // 2. O BOSS substitui o antigo baú com passos pesados e ataques sísmicos.
