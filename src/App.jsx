@@ -258,10 +258,16 @@ export default function App() {
           }
 
           // Garante que a equipe ativa tenha 15 heróis prontos para combate com estamina
-          const workHeroes = parsed.filter(m => m.status === 'work' && (m.currentStamina || 0) > 5);
+          const isWounded = m => {
+            const maxHealth = Number(m.maxHealth) > 0 ? Number(m.maxHealth) : 100;
+            const currentHealth = Number.isFinite(Number(m.currentHealth)) ? Number(m.currentHealth) : maxHealth;
+            return m.status === 'injured' || m.injuredAwaitingRescue || (currentHealth / maxHealth) * 100 <= 5;
+          };
+          const workHeroes = parsed.filter(m => m.status === 'work' && !isWounded(m) && (m.currentStamina || 0) > 5);
           if (workHeroes.length < 15) {
             let activeCount = 0;
             const restored = parsed.map(m => {
+              if (isWounded(m)) return m;
               if (activeCount < 15) {
                 activeCount++;
                 return {
