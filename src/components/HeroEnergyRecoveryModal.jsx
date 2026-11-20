@@ -17,7 +17,7 @@ import {
   canWatchEnergyAdToday, 
   recordAdTransaction 
 } from '../utils/adRewardService';
-import { getCriptoMynersConfig } from '../data/criptoMynersConfig';
+import { getCryptoZombiesConfig } from '../data/cryptoZombiesConfig';
 import { MINER_CLASSES } from '../data/minersData';
 import RewardedAdModal from './RewardedAdModal';
 
@@ -30,7 +30,7 @@ export default function HeroEnergyRecoveryModal({
 }) {
   if (!isOpen) return null;
 
-  const config = getCriptoMynersConfig();
+  const config = getCryptoZombiesConfig();
   const dailyLimit = config?.adsConfig?.dailyEnergyLimit || 5;
   const usedToday = getDailyEnergyAdsCountToday();
   const remainingToday = Math.max(0, dailyLimit - usedToday);
