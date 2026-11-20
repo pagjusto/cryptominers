@@ -1,5 +1,5 @@
 // ============================================================================
-// CRIPTO MYNERS — SISTEMA DE INIMIGOS: ZUMBIS E BOSS
+// CRYPTOZOMBIES — SISTEMA DE INIMIGOS: ZUMBIS E BOSS
 //
 // Substitui as antigas jazidas e baús por Zumbis e Boss Mutante com:
 // 1. Caminhada fluida (patrulha autônoma pelos túneis, passos, bobbing e inclinação)
