@@ -1019,7 +1019,7 @@ export default function StatisticsModal({
                     <div>
                       <div className="flex items-center gap-2">
                         <h3 className="font-arcade text-base sm:text-lg text-amber-400 tracking-wider">
-                          SIMULADOR DE ROI — CRIPTO MYNERS
+                          SIMULADOR DE ROI — CRYPTOZOMBIES
                         </h3>
                         <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 font-mono">
                           MODELO MATEMÁTICO REAL
@@ -1443,7 +1443,7 @@ export default function StatisticsModal({
               <div className="p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800 flex items-start gap-2.5 text-slate-400 text-[11px] font-tech">
                 <Info size={16} className="text-amber-400 shrink-0 mt-0.5" />
                 <p>
-                  <b>Transparência Cripto Myners:</b> Os cálculos acima são estimativas matemáticas calculadas estritamente com base nos parâmetros configurados de probabilidade, produção média, consumo de estamina e cotação oficial configurada de 1 MINER = ${(config.minerCoinUsdtRate || 1.0).toFixed(2)} USDT (não é 1:1 fixo). O simulador considera o funcionamento real da mina (limite de 15 mineradores ativos simultâneos e descansos periódicos na casa) e não constitui garantia de retorno financeiro.
+                  <b>Transparência CryptoZombies:</b> Os cálculos acima são estimativas matemáticas calculadas estritamente com base nos parâmetros configurados de probabilidade, produção média, consumo de estamina e cotação oficial configurada de 1 MINER = ${(config.minerCoinUsdtRate || 1.0).toFixed(2)} USDT (não é 1:1 fixo). O simulador considera o funcionamento real da mina (limite de 15 mineradores ativos simultâneos e descansos periódicos na casa) e não constitui garantia de retorno financeiro.
                 </p>
               </div>
 
