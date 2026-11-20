@@ -38,7 +38,7 @@ import {
   calculateUpgradeRoi 
 } from '../utils/upgradeSimulatorEngine';
 import { calculateRoiScenario } from '../utils/roiSimulatorEngine';
-import { getCriptoMynersConfig } from '../data/criptoMynersConfig';
+import { getCryptoZombiesConfig } from '../data/cryptoZombiesConfig';
 import { MINER_CLASSES } from '../data/minersData';
 
 export default function StatisticsModal({
@@ -60,7 +60,7 @@ export default function StatisticsModal({
   if (!isOpen) return null;
 
   const [activeTab, setActiveTab] = useState(initialTab || 'overview');
-  const config = useMemo(() => getCriptoMynersConfig(), []);
+  const config = useMemo(() => getCryptoZombiesConfig(), []);
 
   // Sincroniza aba inicial quando abre
   React.useEffect(() => {
