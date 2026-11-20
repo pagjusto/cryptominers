@@ -1,4 +1,4 @@
-// CRIPTO MYNERS — MOTOR DE REVEZAMENTO AUTOMÁTICO E RECUPERAÇÃO OFFLINE
+// CRYPTOZOMBIES — MOTOR DE REVEZAMENTO AUTOMÁTICO E RECUPERAÇÃO OFFLINE
 // Regra Oficial 3.1: NÃO existe mineração offline. Sem conexão ativa, a produção de MNC para.
 // Apenas a recuperação de energia dos personagens na casa continua offline.
 
