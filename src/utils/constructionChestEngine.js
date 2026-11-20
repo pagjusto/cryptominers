@@ -1,8 +1,7 @@
 // CRIPTO MYNERS — BAÚ DO BOSS
 // - Um sorteio individual por jogador a cada Boss derrotado
 // - Chance-base Comum: 2% por sobrevivente elegível
-// - Multiplicadores oficiais: Comum 1x, Raro 1,1x, Épico 1,1667x, Lendário 1,3333x
-// - Chances individuais resultantes: Comum 2%, Raro 2,2%, Épico 2,3333%, Lendário 2,6667%
+// - Chances por raridade: Comum 2%, Raro 2,2%, Super Raro 2,3%, Épico 2,4%, Lendário 2,6667%, Super Lendário 3%
 // - Soma das contribuições limitada ao teto máximo de 40% por Boss e por jogador
 // - Limite diário por jogador de no máximo 3 Baús do Boss por dia
 // - Renovação diária à meia-noite no horário de Brasília (America/Sao_Paulo)
@@ -16,8 +15,10 @@ export const DEFAULT_CONSTRUCTION_CHEST_CONFIG = {
   rarityMultipliers: {
     common: 1.0,              // 2,00% por sobrevivente
     rare: 1.1,                // 2,20% por sobrevivente
-    epic: 1.1666666666666667, // 2,333333...% por sobrevivente
-    legendary: 1.3333333333333333 // 2,666666...% por sobrevivente
+    superRare: 1.15,          // 2,30% por sobrevivente
+    epic: 1.2,                // 2,40% por sobrevivente
+    legendary: 1.3333333333333333, // 2,6667% por sobrevivente
+    superLegendary: 1.5       // 3,00% por sobrevivente
   },
   maxAccountChanceCapPct: 40.0, // Teto absoluto de 40% por Boss e por jogador
   cycleDurationSeconds: 0,      // Sem ciclo horário; sorteio a cada Boss derrotado
@@ -65,13 +66,15 @@ export function getBrasiliaTimeString(date = new Date()) {
 }
 
 /**
- * Normaliza a raridade de um herói para as 4 oficiais: common, rare, epic, legendary
+ * Normaliza as seis raridades oficiais para as chaves de probabilidade.
  */
 export function normalizeHeroRarity(hero) {
-  const r = (hero.rarity || hero.classInfo?.rarity || 'common').toLowerCase();
+  const r = String(hero.rarity || hero.classInfo?.rarity || 'common').toLowerCase();
+  if (r.includes('super') && (r.includes('legendary') || r.includes('lend'))) return 'superLegendary';
+  if (r.includes('super') && (r.includes('rare') || r.includes('raro'))) return 'superRare';
   if (r.includes('legendary') || r.includes('lend')) return 'legendary';
   if (r.includes('epic') || r.includes('épico') || r.includes('epico')) return 'epic';
-  if (r.includes('super') || r.includes('rare') || r.includes('raro')) return 'rare';
+  if (r.includes('rare') || r.includes('raro')) return 'rare';
   return 'common';
 }
 
@@ -91,8 +94,10 @@ export function calculateActiveMinersChance(miners = [], config = DEFAULT_CONSTR
   const breakdownByRarity = {
     common: 0,
     rare: 0,
+    superRare: 0,
     epic: 0,
-    legendary: 0
+    legendary: 0,
+    superLegendary: 0
   };
 
   const contributions = activeMiners.map(m => {
