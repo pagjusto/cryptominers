@@ -1,4 +1,4 @@
-# Cripto Myners — Base econômica da mineração
+# CryptoZombies — Base econômica da mineração
 
 Status: configuração aprovada como referência do cenário mediano.
 
