@@ -75,7 +75,6 @@ import InventoryModal from './components/InventoryModal';
 import PlayableChestModal from './components/PlayableChestModal';
 import RewardedAdModal from './components/RewardedAdModal';
 import ChestOpeningModal from './components/ChestOpeningModal';
-import HeroEnergyRecoveryModal from './components/HeroEnergyRecoveryModal';
 import HouseModal from './components/HouseModal';
 import InvestmentModal from './components/InvestmentModal';
 import MarketplaceModal from './components/MarketplaceModal';
@@ -257,13 +256,13 @@ export default function App() {
             return updated;
           }
 
-          // Garante que a equipe ativa tenha 15 heróis prontos para combate com estamina
+          // Garante que a equipe ativa tenha 15 heróis saudáveis prontos para combate
           const isWounded = m => {
             const maxHealth = Number(m.maxHealth) > 0 ? Number(m.maxHealth) : 100;
             const currentHealth = Number.isFinite(Number(m.currentHealth)) ? Number(m.currentHealth) : maxHealth;
             return m.status === 'injured' || m.injuredAwaitingRescue || (currentHealth / maxHealth) * 100 <= 5;
           };
-          const workHeroes = parsed.filter(m => m.status === 'work' && !isWounded(m) && (m.currentStamina || 0) > 5);
+          const workHeroes = parsed.filter(m => m.status === 'work' && !isWounded(m));
           if (workHeroes.length < 15) {
             let activeCount = 0;
             const restored = parsed.map(m => {
@@ -272,8 +271,7 @@ export default function App() {
                 activeCount++;
                 return {
                   ...m,
-                  status: 'work',
-                  currentStamina: Math.max(m.currentStamina || 0, 95)
+                  status: 'work'
                 };
               }
               return m;
@@ -597,8 +595,6 @@ export default function App() {
   // Modais de Anúncios Recompensados: Abertura de Baús com Bônus & Recuperação 100% de Energia
   const [isChestOpeningOpen, setIsChestOpeningOpen] = useState(false);
   const [activeChestToOpen, setActiveChestToOpen] = useState(null);
-  const [isEnergyRecoveryOpen, setIsEnergyRecoveryOpen] = useState(false);
-  const [preselectedHeroForEnergy, setPreselectedHeroForEnergy] = useState(null);
 
   // Painel de Inteligência & Estatísticas da Mineração (Dashboard & Previsão de Tempo)
   const [isStatsModalOpen, setIsStatsModalOpen] = useState(false);
@@ -663,19 +659,17 @@ export default function App() {
   });
 
   // 🧬 FUSÃO DE HERÓIS: Queima 2 heróis da mesma raridade para elevar estrelas (★) e Poder
-  const handleFuseHeroes = ({ targetId, sacrificeIds, newStars, newPower, newMaxStamina }) => {
+  const handleFuseHeroes = ({ targetId, sacrificeIds, newStars, newPower }) => {
     setMiners(prev => {
       // 1. Remove os 2 heróis sacrificados (queima permanente de NFTs)
       const afterBurn = prev.filter(m => !sacrificeIds.includes(m.id));
-      // 2. Eleva as estrelas, poder e estamina do herói alvo
+      // 2. Eleva as estrelas e o poder do herói alvo
       const updated = afterBurn.map(m => {
         if (m.id === targetId) {
           return {
             ...m,
             stars: newStars,
-            power: newPower,
-            maxStamina: newMaxStamina,
-            currentStamina: newMaxStamina
+            power: newPower
           };
         }
         return m;
@@ -753,7 +747,7 @@ export default function App() {
     ['weapon', 'helmet', 'amulet'].forEach(type => {
       const available = gearStash.filter(g => g.type === type);
       if (available.length > 0) {
-        available.sort((a, b) => (b.powerBonus || b.doubleBcoinChance || b.staminaDiscount || 0) - (a.powerBonus || a.doubleBcoinChance || a.staminaDiscount || 0));
+        available.sort((a, b) => (b.powerBonus || b.doubleBcoinChance || 0) - (a.powerBonus || a.doubleBcoinChance || 0));
         handleEquipGear(minerId, available[0]);
       }
     });
@@ -1005,8 +999,6 @@ export default function App() {
         level: 1,
         power: picked.basePower,
         speed: picked.baseSpeed,
-        maxStamina: picked.baseStamina,
-        currentStamina: picked.baseStamina,
         durability: 100,
         status: 'work',
         x: Math.floor(Math.random() * 3 + 1),
@@ -1234,29 +1226,6 @@ export default function App() {
     });
   };
 
-  // 5. RECUPERAÇÃO 100% DE ENERGIA DO HERÓI VIA ANÚNCIO PATROCINADO
-  const handleOpenEnergyRecovery = (heroId = null) => {
-    setPreselectedHeroForEnergy(heroId);
-    setIsEnergyRecoveryOpen(true);
-  };
-
-  const handleHeroEnergyRestored = (heroId) => {
-    setMiners(prev => {
-      const updated = prev.map(m => {
-        if (m.id === heroId) {
-          return {
-            ...m,
-            currentStamina: m.maxStamina,
-            status: m.status === 'house' || m.status === 'waiting_house' ? 'work' : m.status
-          };
-        }
-        return m;
-      });
-      localStorage.setItem('crypto_miners_team', JSON.stringify(updated));
-      return updated;
-    });
-  };
-
   // Alocar minerador na cama da Casa para descanso acelerado
   const handleToggleHouseRest = (minerId) => {
     setMiners(prev => prev.map(m => {
@@ -1271,24 +1240,6 @@ export default function App() {
     if (bcoin < cost) return;
     setBcoin(prev => parseFloat((prev - cost).toFixed(3)));
     setCurrentHouseId(newHouseId);
-  };
-
-  // Anúncio Patrocinado: Energia Turbo para toda a equipe
-  const handleEnergyBoost = () => {
-    setAdModalConfig({
-      isOpen: true,
-      title: 'Recuperar 100% da Estamina de Toda a Equipe',
-      icon: '☕',
-      onGranted: () => {
-        setMiners(prev => prev.map(m => {
-          const maxHealth = Number(m.maxHealth) > 0 ? Number(m.maxHealth) : 100;
-          const currentHealth = Number.isFinite(Number(m.currentHealth)) ? Number(m.currentHealth) : maxHealth;
-          if (m.status === 'injured' || m.injuredAwaitingRescue || (currentHealth / maxHealth) * 100 <= 5) return m;
-          return { ...m, currentStamina: m.maxStamina, status: 'work' };
-        }));
-        sfx.playLevelUp();
-      }
-    });
   };
 
   // Anúncio Patrocinado: Consertar arma / Restaurar durabilidade
@@ -1341,8 +1292,6 @@ export default function App() {
       level: 1,
       power: cInfo.basePower,
       speed: cInfo.baseSpeed,
-      maxStamina: cInfo.baseStamina,
-      currentStamina: cInfo.baseStamina,
       durability: 100,
       status: 'work',
       x: 7,
@@ -1366,8 +1315,6 @@ export default function App() {
           level: m.level + 1,
           power: m.power + 2,
           speed: parseFloat((m.speed + 0.15).toFixed(2)),
-          maxStamina: m.maxStamina + 25,
-          currentStamina: m.maxStamina + 25,
           durability: 100
         };
       }
@@ -1401,7 +1348,7 @@ export default function App() {
         const currentHealth = Number.isFinite(Number(m.currentHealth)) ? Number(m.currentHealth) : maxHealth;
         if (m.status === 'injured' || m.injuredAwaitingRescue || (currentHealth / maxHealth) * 100 <= 5) return m;
         if (top15Ids.has(m.id)) {
-          return { ...m, status: 'work', currentStamina: Math.max(m.currentStamina || 0, 80) };
+          return { ...m, status: 'work' };
         }
         return { ...m, status: 'reserve' };
       });
@@ -1792,7 +1739,6 @@ export default function App() {
                 onStatsUpdate={setStatsData}
                 onDropGear={handleDropGear}
                 statsResetTrigger={statsResetTrigger}
-                houseStaminaRate={currentHouse.staminaPerSec}
                 houseSlots={currentHouse.slots}
                 gameSpeed={gameSpeed}
               />
@@ -1825,8 +1771,6 @@ export default function App() {
             onUpgradeMiner={handleUpgradeMiner}
             onToggleStatus={handleToggleStatus}
             onAllWork={handleAllWork}
-            onOpenEnergyBoostAd={() => handleOpenEnergyRecovery(null)}
-            onOpenEnergyRecoveryModal={handleOpenEnergyRecovery}
             onRepairMiner={handleRepairMiner}
             onDiversifyTeam={handleDiversifyTeam}
           />
@@ -2071,18 +2015,6 @@ export default function App() {
         }}
       />
 
-      {/* MODAL DE RECUPERAÇÃO DE 100% DE ENERGIA DO HERÓI (COM LIMITE DIÁRIO AUDITADO) */}
-      <HeroEnergyRecoveryModal
-        isOpen={isEnergyRecoveryOpen}
-        onClose={() => {
-          setIsEnergyRecoveryOpen(false);
-          setPreselectedHeroForEnergy(null);
-        }}
-        miners={miners}
-        preselectedHeroId={preselectedHeroForEnergy}
-        onEnergyRestored={handleHeroEnergyRestored}
-      />
-
       {/* JANELA FLUTUANTE LATERAL DA EQUIPE DE HERÓIS */}
       {isTeamDrawerOpen && (
         <div className="fixed inset-0 z-50 flex justify-end">
@@ -2122,8 +2054,6 @@ export default function App() {
                 onUpgradeMiner={handleUpgradeMiner}
                 onToggleStatus={handleToggleStatus}
                 onAllWork={handleAllWork}
-                onOpenEnergyBoostAd={() => handleOpenEnergyRecovery(null)}
-                onOpenEnergyRecoveryModal={handleOpenEnergyRecovery}
                 onRepairMiner={handleRepairMiner}
                 onDiversifyTeam={handleDiversifyTeam}
               />
