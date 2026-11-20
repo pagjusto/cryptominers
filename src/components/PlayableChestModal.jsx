@@ -114,7 +114,7 @@ export default function PlayableChestModal({ isOpen, onClose, chest, onChestOpen
             {/* Baú Clicável com Feedback de Impacto */}
             <div 
               onClick={handleStrike}
-              className={`w-36 h-36 mx-auto rounded-3xl border-3 flex flex-col items-center justify-center cursor-pointer transition-all duration-150 active:scale-90 shadow-2xl ${
+              className={`w-40 h-40 mx-auto rounded-3xl border-3 flex flex-col items-center justify-center p-2 cursor-pointer transition-all duration-150 active:scale-90 shadow-2xl relative ${
                 isExploding 
                   ? 'scale-125 bg-amber-500 border-white animate-ping' 
                   : 'bg-slate-950/90 border-amber-500/50 hover:border-amber-400 hover:scale-105'
@@ -123,10 +123,12 @@ export default function PlayableChestModal({ isOpen, onClose, chest, onChestOpen
                 boxShadow: `0 0 30px ${sponsor.color}30`
               }}
             >
-              <span className={`text-6xl ${isExploding ? 'animate-spin' : ''}`}>
-                {isExploding ? '💥' : (clicksRemaining === 3 ? '🔒' : (clicksRemaining === 2 ? '🧨' : '⚡'))}
-              </span>
-              <span className="text-[11px] font-arcade text-amber-300 mt-2 font-bold">
+              <img 
+                src="/items/hero_chest.png" 
+                alt="Baú de Herói" 
+                className={`w-24 h-24 object-contain filter drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)] ${isExploding ? 'animate-bounce' : ''}`}
+              />
+              <span className="text-[11px] font-arcade text-amber-300 mt-1 font-bold">
                 {clicksRemaining > 0 ? `GOLPEAR! (${clicksRemaining})` : 'DETONANDO!'}
               </span>
             </div>

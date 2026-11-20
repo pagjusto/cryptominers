@@ -29,9 +29,9 @@ export default function ConstructionChestFoundModal({
         </button>
 
         {/* Ícone Animado */}
-        <div className="relative w-20 h-20 mx-auto mb-4">
-          <div className="w-20 h-20 rounded-3xl bg-amber-500/10 border-2 border-amber-400 p-2 flex items-center justify-center shadow-lg shadow-amber-950/60 animate-bounce">
-            <img src="/items/construction_fragment.png" alt="Fragmento de Construção" className="w-full h-full object-contain filter drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)]" />
+        <div className="relative w-24 h-24 mx-auto mb-4">
+          <div className="w-24 h-24 rounded-3xl bg-amber-500/10 border-2 border-amber-400 p-2 flex items-center justify-center shadow-lg shadow-amber-950/60 animate-bounce">
+            <img src="/items/boss_chest.png" alt="Baú do Boss" className="w-full h-full object-contain filter drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)]" />
           </div>
           <span className="absolute -top-1 -right-1 text-sm bg-amber-500 text-slate-950 font-bold px-1.5 py-0.5 rounded-full border border-amber-300">
             ★
@@ -40,10 +40,10 @@ export default function ConstructionChestFoundModal({
 
         {/* Título e Mensagem */}
         <h2 className="font-arcade text-base text-amber-400 mb-1">
-          BAÚ DE CONSTRUÇÃO ENCONTRADO!
+          BAÚ DO BOSS ENCONTRADO!
         </h2>
         <p className="text-xs text-slate-300 max-w-xs mx-auto leading-relaxed mb-4">
-          Seus heróis minerando ativamente encontraram um <b>Baú de Construção</b> raro durante o ciclo de mineração!
+          O Boss Mutante foi derrotado e dropou este <b>Baú do Boss</b> exclusivo com fragmentos, poções e chances de herói!
         </p>
 
         {/* Quadro Informativo do Baú */}

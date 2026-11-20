@@ -166,8 +166,12 @@ export default function InventoryModal({
                       className="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800 hover:border-amber-500/50 transition flex items-center justify-between group shadow-sm"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-2xl flex items-center justify-center shrink-0 group-hover:scale-105 transition">
-                          {chestIcon}
+                        <div className="w-12 h-12 rounded-2xl bg-amber-500/15 border border-amber-500/30 p-1 flex items-center justify-center shrink-0 group-hover:scale-105 transition shadow-inner">
+                          <img 
+                            src={chest.image || '/items/hero_chest.png'} 
+                            alt="Baú de Herói" 
+                            className="w-full h-full object-contain filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]" 
+                          />
                         </div>
                         <div>
                           <div className="flex items-center gap-1.5">
@@ -308,8 +312,8 @@ export default function InventoryModal({
                     className="p-3.5 rounded-2xl bg-slate-950/80 border border-amber-500/30 hover:border-amber-400 transition flex items-center justify-between group"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/40 p-2 flex items-center justify-center shrink-0 group-hover:scale-105 transition shadow-inner">
-                        <img src="/items/construction_fragment.png" alt="Fragmento" className="w-full h-full object-contain filter drop-shadow" />
+                      <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/40 p-1 flex items-center justify-center shrink-0 group-hover:scale-105 transition shadow-inner">
+                        <img src="/items/boss_chest.png" alt="Baú do Boss" className="w-full h-full object-contain filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]" />
                       </div>
                       <div>
                         <div className="flex items-center gap-1.5">

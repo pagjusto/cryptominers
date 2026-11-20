@@ -259,10 +259,10 @@ export default function ChestOpeningModal({
               {/* Topo do Baú */}
               <div className="flex items-center gap-3.5 pb-4 border-b border-slate-800">
                 <div 
-                  className="w-16 h-16 rounded-2xl border-2 flex items-center justify-center text-4xl shadow-inner shrink-0"
+                  className="w-16 h-16 rounded-2xl border-2 flex items-center justify-center p-2 shadow-inner shrink-0"
                   style={{ borderColor: chestConfig.color, backgroundColor: `${chestConfig.color}15` }}
                 >
-                  {chestConfig.icon || '📦'}
+                  <img src={chestConfig.image || '/items/hero_chest.png'} alt="Baú de Herói" className="w-full h-full object-contain filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">

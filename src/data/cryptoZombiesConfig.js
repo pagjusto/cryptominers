@@ -20,6 +20,7 @@ export const DEFAULT_CRYPTO_ZOMBIES_CONFIG = {
       heroesCount: 1,
       costUsdt: 10,
       icon: '⛏️',
+      image: '/items/hero_chest.png',
       color: '#38bdf8',
       description: 'Entrega 1 herói minerador. Ideal para iniciar sua jornada na mina subterrânea.',
       normalProbabilities: {
@@ -48,6 +49,7 @@ export const DEFAULT_CRYPTO_ZOMBIES_CONFIG = {
       heroesCount: 5,
       costUsdt: 50,
       icon: '🗺️',
+      image: '/items/hero_chest.png',
       color: '#22c55e',
       popular: true,
       description: 'Entrega 5 heróis mineradores com chances elevadas de heróis Raros e Épicos.',
@@ -77,6 +79,7 @@ export const DEFAULT_CRYPTO_ZOMBIES_CONFIG = {
       heroesCount: 10,
       costUsdt: 95,
       icon: '🛡️',
+      image: '/items/hero_chest.png',
       color: '#a855f7',
       description: 'Entrega 10 heróis mineradores. Probabilidade expressiva de Épicos e Lendários com desconto no pacote.',
       normalProbabilities: {
@@ -105,6 +108,7 @@ export const DEFAULT_CRYPTO_ZOMBIES_CONFIG = {
       heroesCount: 15,
       costUsdt: 140,
       icon: '👑',
+      image: '/items/hero_chest.png',
       color: '#f59e0b',
       badge: 'TIME COMPLETO (15)',
       description: 'Entrega 15 heróis mineradores (capacidade máxima de trabalho simultâneo). Maior chance de Lendários do jogo!',

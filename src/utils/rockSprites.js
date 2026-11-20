@@ -90,17 +90,18 @@ class RockSpriteManager {
     this.sprites.bedrock = commonRock;
 
     // 2. Carrega as jazidas enviadas pelo usuário com cache busting explícito
-    const [goldNuggets, diamondBlue, emeraldUser] = await Promise.all([
+    const [goldNuggets, diamondBlue, emeraldUser, heroChestImg] = await Promise.all([
       this.loadCroppedPng(`/deposits/deposit_gold_nuggets.png?v=${v}`),          // Pepitas de Ouro amareladas
       this.loadBlueDiamondImage(`/deposits/deposit_diamond_source.png?v=${v}`), // Cristais em Diamante Azul
-      this.loadCroppedPng(`/deposits/deposit_emerald_user.png?v=${v}`)          // Cristais de Esmeralda Verde
+      this.loadCroppedPng(`/deposits/deposit_emerald_user.png?v=${v}`),         // Cristais de Esmeralda Verde
+      this.loadCroppedPng(`/items/hero_chest.png?v=${v}`)                      // Baú de Herói Oficial
     ]);
 
     this.sprites.gold = goldNuggets;
     this.sprites.common = null;      // Cobre/Bronze 100% REMOVIDO do jogo
     this.sprites.crystal = diamondBlue;  // Diamante Azul Safira
     this.sprites.emerald = emeraldUser || diamondBlue; // Esmeralda Verde
-    this.sprites.chest = this.createMysticChestSprite(); // Baú Místico Oficial
+    this.sprites.chest = heroChestImg || this.createMysticChestSprite(); // Baú Místico Oficial
   }
 
   // Gera sprite vetorial nítido de Baú Místico de Tesouro
