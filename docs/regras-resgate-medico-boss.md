@@ -27,12 +27,12 @@ Este documento registra as regras de gameplay aprovadas para o sistema de sobrev
 
 - No início de cada batalha, registrar uma lista imutável dos sobreviventes que compõem a equipe participante.
 - A elegibilidade ao sorteio pertence aos sobreviventes registrados no início, e não à formação que termina a batalha.
-- Um sobrevivente da equipe inicial que ficar ferido e for enviado ao ambulatório continua contando uma única vez no sorteio, desde que esteja vivo ao término dos 5 minutos.
+- Todos os sobreviventes registrados na equipe inicial contam uma única vez no sorteio, independentemente de ferimentos, HP ou status ao término dos 5 minutos. Os heróis não morrem.
 - Ser resgatado, estar no ambulatório ou ser substituído não remove a participação do sobrevivente inicial.
 - Sobreviventes que entram como substitutos depois do início do Boss não recebem participação naquele sorteio.
 - Retornar ao combate durante o mesmo evento não gera participação adicional.
 - Cada sobrevivente inicial pode contar no máximo uma vez.
-- Validação obrigatória na engine: o sorteio real aceita exclusivamente sobreviventes identificados no snapshot imutável da equipe inicial (bossSnapshotParticipant) e confirmados vivos no encerramento (isAliveAtBossEnd e vida maior que zero). O status atual — combate, ambulatório, fila ou reserva — não altera essa elegibilidade. Sobreviventes sem snapshot, inclusive substitutos, são excluídos.
+- Validação obrigatória na engine: o sorteio real aceita exclusivamente sobreviventes identificados no snapshot imutável da equipe inicial (bossSnapshotParticipant). Como os heróis não morrem, não há verificação de HP, sobrevivência ou status no encerramento. Sobreviventes sem snapshot, inclusive substitutos, são excluídos.
 - Trabalhadores atuais sem snapshot só podem aparecer em prévias e simulações administrativas explicitamente marcadas como simulação; esse caminho não é usado no sorteio real.
 
 ## Bloqueios enquanto o Boss estiver vivo
