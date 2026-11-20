@@ -74,6 +74,7 @@ export function initBillboard(onLoaded) {
 let sirenTowerImg = null;
 let sirenTowerLoaded = false;
 let sirenTowerShadowCanvas = null;
+let sirenTowerShadedCanvas = null;
 
 export function initSirenTower(onLoaded) {
   if (sirenTowerLoaded && sirenTowerImg) {
@@ -87,18 +88,41 @@ export function initSirenTower(onLoaded) {
     sirenTowerImg = img;
     sirenTowerLoaded = true;
 
-    // Pré-renderiza a silhueta da torre inteira com a tonalidade exata da sombra projetada no solo
+    const w = img.naturalWidth || 158;
+    const h = img.naturalHeight || 371;
+
+    // 1. Pré-renderiza a silhueta da torre inteira para a sombra projetada no solo
     try {
       const sCanvas = document.createElement('canvas');
-      sCanvas.width = img.naturalWidth || 158;
-      sCanvas.height = img.naturalHeight || 371;
+      sCanvas.width = w;
+      sCanvas.height = h;
       const sCtx = sCanvas.getContext('2d');
       if (sCtx) {
         sCtx.drawImage(img, 0, 0);
         sCtx.globalCompositeOperation = 'source-in';
-        sCtx.fillStyle = 'rgba(5, 20, 5, 0.44)';
-        sCtx.fillRect(0, 0, sCanvas.width, sCanvas.height);
+        sCtx.fillStyle = 'rgba(6, 20, 8, 0.68)';
+        sCtx.fillRect(0, 0, w, h);
         sirenTowerShadowCanvas = sCanvas;
+      }
+    } catch (e) {}
+
+    // 2. Pré-renderiza a torre com iluminação volumétrica própria (Sol no Sudeste, sombra no Noroeste/face esquerda)
+    try {
+      const shCanvas = document.createElement('canvas');
+      shCanvas.width = w;
+      shCanvas.height = h;
+      const shCtx = shCanvas.getContext('2d');
+      if (shCtx) {
+        shCtx.drawImage(img, 0, 0);
+        shCtx.globalCompositeOperation = 'source-atop'; // Aplica iluminação estritamente nos pixels da torre
+        const grad = shCtx.createLinearGradient(0, 0, w, 0);
+        grad.addColorStop(0, 'rgba(0, 15, 0, 0.32)'); // Sombra volumétrica na face oeste/noroeste
+        grad.addColorStop(0.35, 'rgba(0, 10, 0, 0.14)');
+        grad.addColorStop(0.70, 'rgba(0, 0, 0, 0)');
+        grad.addColorStop(1.0, 'rgba(255, 255, 255, 0.12)'); // Face sudeste/direita iluminada pelo sol
+        shCtx.fillStyle = grad;
+        shCtx.fillRect(0, 0, w, h);
+        sirenTowerShadedCanvas = shCanvas;
       }
     } catch (e) {}
 
@@ -797,20 +821,20 @@ export function drawSirenTower(ctx, now, isBossAlive = false) {
     // Ponto de fixação no pé central da torre
     ctx.translate(footCenterX, footCenterY);
     // Cisalhamento e achatamento isométrico projetando para Noroeste (acompanha as sombras da base militar e ruínas):
-    // c = +0.62 (projeta a sombra para a esquerda/noroeste à medida que sobe)
-    // d = +0.32 (projeta a sombra para trás/cima na perspectiva isométrica 2.5D)
-    ctx.transform(1.0, 0.0, 0.62, 0.32, 0, 0);
+    // c = +0.70 (projeta a sombra para a esquerda/oeste à medida que sobe)
+    // d = +0.35 (projeta a sombra para trás/cima na perspectiva isométrica 2.5D)
+    ctx.transform(1.0, 0.0, 0.70, 0.35, 0, 0);
     ctx.drawImage(sirenTowerShadowCanvas, -tW * (73 / 158), -tH, tW, tH);
     ctx.restore();
   } else {
     // Fallback: projeção trapezoidal translúcida no solo para Noroeste
     ctx.save();
-    ctx.fillStyle = 'rgba(5, 20, 5, 0.38)';
+    ctx.fillStyle = 'rgba(6, 20, 8, 0.55)';
     ctx.beginPath();
     ctx.moveTo(footLeftX, footLeftY);
     ctx.lineTo(footRightX, footRightY);
-    const topProjX = footCenterX - tH * 0.62;
-    const topProjY = footCenterY - tH * 0.32;
+    const topProjX = footCenterX - tH * 0.70;
+    const topProjY = footCenterY - tH * 0.35;
     ctx.lineTo(topProjX - 16, topProjY - 5);
     ctx.lineTo(topProjX + 16, topProjY + 5);
     ctx.closePath();
@@ -818,16 +842,16 @@ export function drawSirenTower(ctx, now, isBossAlive = false) {
     ctx.restore();
   }
 
-  // 1.1. Sombra suave difusa conectando a base da estrutura
-  ctx.fillStyle = 'rgba(5, 20, 5, 0.38)';
+  // 1.1. Sombra suave difusa conectando a base da estrutura (deslocada suavemente para noroeste)
+  ctx.fillStyle = 'rgba(6, 20, 8, 0.45)';
   ctx.beginPath();
-  ctx.ellipse(tX + tW * 0.52, tY + tH * 0.955, tW * 0.48, 6.5, 0.08, 0, Math.PI * 2);
+  ctx.ellipse(tX + tW * 0.46, tY + tH * 0.940, tW * 0.46, 6.5, -0.08, 0, Math.PI * 2);
   ctx.fill();
 
   // 1.2. Oclusão de ambiente escura no solo sob a base da estrutura
-  ctx.fillStyle = 'rgba(0, 10, 0, 0.48)';
+  ctx.fillStyle = 'rgba(0, 10, 0, 0.58)';
   ctx.beginPath();
-  ctx.ellipse(tX + tW * 0.48, tY + tH * 0.945, tW * 0.38, 5.0, 0.05, 0, Math.PI * 2);
+  ctx.ellipse(tX + tW * 0.46, tY + tH * 0.945, tW * 0.36, 5.0, -0.05, 0, Math.PI * 2);
   ctx.fill();
 
   // 1.3. Sombras de oclusão de contato direto sob as 4 sapatas (ancoragem física precisa sem folga)
@@ -835,12 +859,12 @@ export function drawSirenTower(ctx, now, isBossAlive = false) {
 
   // Sapata traseira
   ctx.beginPath();
-  ctx.ellipse(footBackX, footBackY + 0.5, 5.5, 2.2, 0, 0, Math.PI * 2);
+  ctx.ellipse(footBackX, footBackY + 0.5, 6.5, 2.5, -0.05, 0, Math.PI * 2);
   ctx.fill();
 
   // Sapata frontal esquerda
   ctx.beginPath();
-  ctx.ellipse(footLeftX, footLeftY + 0.5, 8.0, 3.0, 0.05, 0, Math.PI * 2);
+  ctx.ellipse(footLeftX, footLeftY + 0.5, 8.0, 3.0, -0.05, 0, Math.PI * 2);
   ctx.fill();
 
   // Sapata frontal direita
@@ -855,23 +879,13 @@ export function drawSirenTower(ctx, now, isBossAlive = false) {
 
   ctx.restore();
 
-  // 2. Desenho da Torre em Alta Resolução (pés ancorados exatamente sobre suas sombras)
-  ctx.drawImage(sirenTowerImg, tX, tY, tW, tH);
+  // 2. Desenho da Torre em Alta Resolução (com iluminação e sombreamento volumétrico já aplicados aos seus pixels)
+  const towerDrawable = sirenTowerShadedCanvas || sirenTowerImg;
+  ctx.drawImage(towerDrawable, tX, tY, tW, tH);
 
-  // 2.1. SOMBRA PRÓPRIA VOLUMÉTRICA NA ESTRUTURA DA TORRE (Sol vindo do Sudeste/Sul, lado Noroeste/esquerdo sombreado)
+  // 2.1. Oclusão de contato na quina frontal da sapata central para perfeita ancoragem no solo
   ctx.save();
-  const towerShade = ctx.createLinearGradient(tX, tY, tX + tW, tY);
-  towerShade.addColorStop(0, 'rgba(0, 10, 0, 0.28)'); // Sombra volumétrica no lado noroeste/esquerdo
-  towerShade.addColorStop(0.35, 'rgba(0, 8, 0, 0.14)');
-  towerShade.addColorStop(0.70, 'rgba(0, 0, 0, 0)');
-  towerShade.addColorStop(1, 'rgba(255, 255, 255, 0.08)'); // Face sudeste/direita iluminada pelo sol
-  ctx.fillStyle = towerShade;
-  ctx.fillRect(tX, tY, tW, tH);
-  ctx.restore();
-
-  // 2.2. Oclusão de contato na quina frontal da sapata central para perfeita ancoragem no solo
-  ctx.save();
-  ctx.fillStyle = 'rgba(0, 10, 0, 0.60)';
+  ctx.fillStyle = 'rgba(0, 10, 0, 0.65)';
   ctx.beginPath();
   ctx.ellipse(footCenterX, footCenterY, 7.5, 1.8, 0, 0, Math.PI * 2);
   ctx.fill();
