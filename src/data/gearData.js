@@ -1,5 +1,5 @@
 // ============================================================================
-// GEARS & RELICS SYSTEM (BOMBCRYPTO RPG EXPANSION)
+// GEARS & RELICS SYSTEM (CRYPTOZOMBIES RPG EXPANSION)
 // Slots:
 // 1. ⛏️ Arma/Picareta: Aumenta Poder e Chance Crítica
 // 2. 🪖 Capacete: Reduz em 20% a 30% o consumo de estamina
