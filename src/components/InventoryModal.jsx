@@ -35,7 +35,7 @@ export default function InventoryModal({
   });
   const [justOpenedChest, setJustOpenedChest] = useState(null);
   const groupedPurchasedChests = groupInventoryItems(purchasedChests, chest => chest.id);
-  const groupedConstructionChests = groupInventoryItems(constructionChests, chest => chest.type || chest.name || 'boss-chest');
+  const groupedConstructionChests = groupInventoryItems(constructionChests, chest => chest.type || chest.kind || 'boss-chest');
   const groupedMineChests = groupInventoryItems(chests, chest => chest.type || chest.title || 'mystic-chest');
 
   if (!isOpen) return null;
