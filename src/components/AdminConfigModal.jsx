@@ -154,7 +154,7 @@ export default function AdminConfigModal({
                   PAINEL ADMINISTRATIVO & BALANCEAMENTO
                 </h2>
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40">
-                  CRIPTO MYNERS
+                  CRYPTOZOMBIES
                 </span>
               </div>
               <p className="text-xs text-slate-400">
@@ -472,7 +472,7 @@ export default function AdminConfigModal({
           {/* ABA 4: GERAL & COTAÇÃO */}
           {activeTab === 'general' && (
             <div className="bg-slate-950/80 p-4 rounded-2xl border border-slate-800 space-y-4">
-              <h4 className="font-bold text-sm text-white">Parâmetros Globais do Cripto Myners</h4>
+              <h4 className="font-bold text-sm text-white">Parâmetros Globais do CryptoZombies</h4>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                 <div>
