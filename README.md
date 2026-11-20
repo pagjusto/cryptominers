@@ -34,7 +34,7 @@
 - **Teto de probabilidade**: A chance total por jogador é limitada a **40% por Boss**.
 - **Limite diário de Baús do Boss**: Máximo de **3 por dia** por jogador, com renovação à meia-noite (horário de Brasília - America/Sao_Paulo).
 - **Poções**: O sorteio de poções usa diretamente as mesmas chances fixas por raridade: Comum **2%**; Raro **2,2%**; Super Raro **2,3%**; Épico **2,4%**; Lendário **2,6667%**; Super Lendário **3%**, por sobrevivente elegível, sem multiplicadores. A chance total por jogador também tem teto de **40% por Boss**. Limite de **4 poções por dia** por jogador, com renovação à meia-noite de Brasília.
-- **Recompensas**: O Baú do Boss contempla Fragmentos de Construção e a possibilidade de obter um Baú de Herói. A distribuição e as quantidades dos fragmentos, poções e a chance específica de Baú de Herói ainda precisam ser consolidadas na regra específica.
+- **Recompensas**: Após a derrota do Boss, o jogador pode receber um Baú do Boss no inventário. Ao abrir o baú, pode receber Fragmentos de Construção, Poção do Rejuvenecimento e, com chance, um Baú de Herói. Quantidades e probabilidades das recompensas ainda serão definidas.
 
 ### 5. 🏡 Casas de Repouso
 - Aceleração da recuperação de energia dos heróis.
