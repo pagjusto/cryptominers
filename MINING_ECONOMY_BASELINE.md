@@ -119,6 +119,14 @@ Para cada intervalo entre dois marcos consecutivos, calcular a queda proporciona
 
 Aos 270 dias, o herói chega a 80 anos, tem eficiência-base 0%, HP 0% e se aposenta.
 
+## Dano em batalha e encaminhamento ao ambulatório
+
+- Durante a partida, os danos causados pelos Bosses reduzem o HP do personagem.
+- Quando o HP do personagem chega a **5%**, ele é retirado da partida e encaminhado ao **ambulatório** para recuperação.
+- O personagem não continua lutando depois de atingir esse limite.
+- Esta regra de combate é distinta da redução gradual do HP máximo causada pelo envelhecimento.
+- O método, a duração e o custo da recuperação no ambulatório ainda não foram definidos.
+
 ## Observações de balanceamento
 
 - Estes números representam a base do cenário mediano com mineração válida durante 24 horas.
