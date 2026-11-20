@@ -57,7 +57,6 @@ export default function GameBoard({
   onStatsUpdate,
   onDropGear,
   statsResetTrigger = 0,
-  houseStaminaRate = 2.5,
   houseSlots = 5,
   gameSpeed = 1 
 }) {
@@ -107,8 +106,8 @@ export default function GameBoard({
     onMinersChange
   };
 
-  const houseConfigRef = useRef({ houseSlots, houseStaminaRate });
-  houseConfigRef.current = { houseSlots, houseStaminaRate };
+  const houseConfigRef = useRef({ houseSlots });
+  houseConfigRef.current = { houseSlots };
 
   const gameStateRef = useRef({
     grid: mapData.grid,
@@ -318,27 +317,6 @@ export default function GameBoard({
       }
 
       // 1. ATUALIZAR MINERADORES
-      // Aura de Regeneração do Guardião Ancestral
-      const hasWorkingLegendary = state.miners.some(m => m.classId === 'legendary' && m.status === 'work');
-      if (hasWorkingLegendary) {
-        state.legendaryAuraTimer = (state.legendaryAuraTimer || 0) + dt;
-        if (state.legendaryAuraTimer >= 1.6) {
-          state.legendaryAuraTimer = 0;
-          state.miners.forEach(other => {
-            if (other.status === 'work' && other.classId !== 'legendary' && other.currentStamina < other.maxStamina) {
-              other.currentStamina = Math.min(other.maxStamina, other.currentStamina + 1.2);
-              state.floatTexts.push({
-                text: `+STA ⚡`,
-                x: Math.round(other.x) * TILE_SIZE + TILE_SIZE / 2,
-                y: Math.round(other.y) * TILE_SIZE - 8,
-                color: '#34d399',
-                opacity: 0.9,
-                vy: -22
-              });
-            }
-          });
-        }
-      }
 
       // Função auxiliar para quebrar bloco e conceder recompensa BCOIN
       const breakBlockAt = (bx, by, bType, hitter) => {
@@ -509,18 +487,10 @@ export default function GameBoard({
           return;
         }
 
-        // 1. Descanso na Casa (Recuperação rápida e transição para reserva quando 100%)
+        // Heróis no abrigo ou na fila ficam fora do combate enquanto aguardam tratamento.
         if (miner.status === 'house') {
           miner.isMining = false;
           miner.targetBlock = null;
-          if (miner.currentStamina < miner.maxStamina) {
-            const staminaRate = houseConfigRef.current?.houseStaminaRate || 2.5;
-            miner.currentStamina = Math.min(miner.maxStamina, miner.currentStamina + dt * (staminaRate * 0.25));
-          }
-          if (miner.currentStamina >= miner.maxStamina) {
-            miner.currentStamina = miner.maxStamina;
-            miner.status = 'reserve'; // 100% recuperado: vai para a fila de reservas da mina
-          }
           return;
         }
 
@@ -531,38 +501,19 @@ export default function GameBoard({
           return;
         }
 
-        // 3. Reserva (descanso natural leve)
+        // 3. Reserva: herói inativo, sem consumo ou recuperação de energia.
         if (miner.status === 'reserve') {
           miner.isMining = false;
           miner.targetBlock = null;
-          if (miner.currentStamina < miner.maxStamina) {
-            miner.currentStamina = Math.min(miner.maxStamina, miner.currentStamina + dt * 0.02);
-          }
           return;
         }
 
-        // 4. Descanso no Chão da Mina (Lento: modelo de ~5h por mapa)
+        // 4. Herói em espera no mapa: permanece inativo até ser convocado.
         if (miner.status === 'sleep') {
           if (isCanyon && isCanyonTrackOrTunnel(Math.round(miner.x), Math.round(miner.y), GRID_COLS, GRID_ROWS)) {
             miner.x = 2;
             miner.y = 8;
           }
-          miner.isMining = false;
-          miner.targetBlock = null;
-          if (miner.currentStamina < miner.maxStamina) {
-            miner.currentStamina = Math.min(miner.maxStamina, miner.currentStamina + dt * 0.035);
-          }
-          if (miner.currentStamina >= miner.maxStamina) {
-            miner.currentStamina = miner.maxStamina;
-            miner.status = 'reserve';
-          }
-          return;
-        }
-
-        // 5. Energia esgotada na mineração ativa: sai da mina e vai para a fila da casa
-        if (miner.currentStamina <= 0) {
-          miner.currentStamina = 0;
-          miner.status = 'waiting_house';
           miner.isMining = false;
           miner.targetBlock = null;
           return;
@@ -738,13 +689,6 @@ export default function GameBoard({
 
             if (blockType !== BLOCK_EMPTY && blockType !== BLOCK_BEDROCK) {
               const cid = miner.classId;
-
-              // Regra Oficial 4.0: Consumo de estamina de 12 por hora de trabalho ativo (0.20/min)
-              let staminaCost = parseFloat(((12 / 3600) * 0.85).toFixed(4));
-              if (miner.equippedGear?.helmet?.staminaDiscount) {
-                staminaCost *= (1 - miner.equippedGear.helmet.staminaDiscount);
-              }
-              miner.currentStamina = Math.max(0, miner.currentStamina - staminaCost);
 
               // Regra Oficial 3.1 & 7.0: Produção econômica de MNC contínua por tempo de trabalho ativo dos heróis
               const strikeCoins = parseFloat((((miner.coinsPerHour || 1.40) / 3600) * 0.85).toFixed(4));
@@ -1502,12 +1446,8 @@ export default function GameBoard({
         const slotsNeeded = Math.max(0, 15 - workingCount);
         if (slotsNeeded > 0) {
           const readyCandidates = state.miners
-            .filter(m => (m.status === 'reserve' || m.status === 'sleep') && m.currentStamina >= (m.maxStamina * 0.25))
-            .sort((a, b) => {
-              const effB = (b.power * 1.5 + b.speed * 10) * (b.currentStamina / b.maxStamina);
-              const effA = (a.power * 1.5 + a.speed * 10) * (a.currentStamina / a.maxStamina);
-              return effB - effA;
-            });
+            .filter(m => m.status === 'reserve' || m.status === 'sleep')
+            .sort((a, b) => (b.power * 1.5 + b.speed * 10) - (a.power * 1.5 + a.speed * 10));
 
           for (let i = 0; i < Math.min(slotsNeeded, readyCandidates.length); i++) {
             const recruit = readyCandidates[i];
@@ -1529,7 +1469,7 @@ export default function GameBoard({
 
         let activeDps = 0;
         state.miners.forEach(m => {
-          if (m.status === 'work' && m.currentStamina > 0) {
+          if (m.status === 'work') {
             const swingPerSec = (m.speed * 0.9) / 0.85;
             const critMult = m.classId === 'brute' ? 1.28 : 1.0;
             const weaponPower = m.equippedGear?.weapon?.powerBonus || 0;
