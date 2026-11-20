@@ -1,5 +1,5 @@
 // ============================================================================
-// CRIPTO MYNERS — SERVIÇO DE SINCRONIZAÇÃO EM NUVEM (SUPABASE)
+// CRYPTOZOMBIES — SERVIÇO DE SINCRONIZAÇÃO EM NUVEM (SUPABASE)
 // ============================================================================
 
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
