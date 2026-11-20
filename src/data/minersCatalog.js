@@ -1,4 +1,4 @@
-// Catálogo Completo dos Novos Combatentes Sobreviventes de CryptoZombies / Cripto Myners
+// Catálogo Completo dos Novos Combatentes Sobreviventes de CryptoZombies
 // Inclui atributos base, armas oficiais, raridades, passivas exclusivas (Traits) e lore de cada personagem
 
 export const MINER_ROSTER = [
