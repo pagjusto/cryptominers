@@ -1,4 +1,4 @@
-// CRIPTO MYNERS — elenco oficial de heróis, raridades e equipamentos
+// CRYPTOZOMBIES — elenco oficial de heróis, raridades e equipamentos
 // Catálogo de dados: personagens e armas são entidades separadas.
 
 export const RARITY_CONFIG = {
