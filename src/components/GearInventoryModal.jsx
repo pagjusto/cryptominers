@@ -67,7 +67,7 @@ export default function GearInventoryModal({
                 </span>
               </div>
               <p className="text-xs text-slate-400">
-                Armas (+Dano/Crítico), Elmos (-20% Estamina) e Amuletos (Chance de 2x BCOIN)
+                Armas (+Dano/Crítico), Elmos visuais e Amuletos (Chance de 2x BCOIN)
               </p>
             </div>
           </div>
@@ -262,8 +262,6 @@ export default function GearInventoryModal({
                 {/* Resumo de Atributos com Equipamentos */}
                 <div className="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800/80 text-[11px] text-slate-400 font-mono flex items-center justify-between">
                   <span>Poder Total: <b className="text-amber-400">{selectedMiner.power + (minerGear.weapon?.powerBonus || 0)}</b></span>
-                  <span>Estamina: <b className="text-blue-400">{selectedMiner.maxStamina}</b></span>
-                  <span>Econ. Estamina: <b className="text-emerald-400">-{minerGear.helmet ? Math.round(minerGear.helmet.staminaDiscount * 100) : 0}%</b></span>
                   <span>2x BCOIN: <b className="text-purple-400">+{minerGear.amulet ? Math.round(minerGear.amulet.doubleBcoinChance * 100) : 0}%</b></span>
                 </div>
 
