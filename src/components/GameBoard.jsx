@@ -1473,30 +1473,20 @@ export default function GameBoard({
         onClick={handleCanvasClick}
       />
 
-      {/* REGRA OFICIAL DO USUÁRIO: "quando aparecer o boss coloca um aviso na tela dizendo ALERTA BOSS PISCANDO UMAS 4 VEZES" */}
+      {/* REGRA OFICIAL DO USUÁRIO: "jogue o alerta pro meio do mapa", "remova os pontos vermelhos deixe so o do perigo", "ALERTA BOSS PISCANDO UMAS 4 VEZES" */}
       {bossAlert && (
         <div 
           key={bossAlertKey}
-          className="boss-alert-flashing absolute top-6 left-1/2 -translate-x-1/2 z-40 pointer-events-none select-none flex items-center justify-center"
+          className="boss-alert-flashing absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40 pointer-events-none select-none flex items-center justify-center"
           onAnimationEnd={() => setBossAlert(false)}
         >
-          <div className="relative px-6 py-2.5 rounded-xl border-2 border-red-500 bg-gradient-to-r from-red-950/95 via-red-900/95 to-red-950/95 shadow-[0_0_40px_rgba(239,68,68,0.9),inset_0_0_15px_rgba(239,68,68,0.5)] flex items-center gap-3 backdrop-blur-md">
-            <span className="flex h-3.5 w-3.5 relative">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-red-500"></span>
-            </span>
-
-            <span className="text-xl md:text-2xl font-black tracking-widest text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] uppercase font-mono flex items-center gap-2">
-              <span className="text-amber-400 animate-pulse">⚠️</span>
+          <div className="relative px-7 py-3 rounded-2xl border-2 border-red-500 bg-gradient-to-r from-red-950/95 via-red-900/95 to-red-950/95 shadow-[0_0_50px_rgba(239,68,68,0.95),inset_0_0_20px_rgba(239,68,68,0.6)] flex items-center gap-3 backdrop-blur-md">
+            <span className="text-2xl md:text-3xl font-black tracking-widest text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] uppercase font-mono flex items-center gap-3">
+              <span className="text-amber-400 text-2xl md:text-3xl animate-pulse select-none">⚠️</span>
               <span className="text-transparent bg-clip-text bg-gradient-to-b from-white via-red-100 to-red-400 font-extrabold tracking-wider">
                 ALERTA BOSS
               </span>
-              <span className="text-amber-400 animate-pulse">⚠️</span>
-            </span>
-
-            <span className="flex h-3.5 w-3.5 relative">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-red-500"></span>
+              <span className="text-amber-400 text-2xl md:text-3xl animate-pulse select-none">⚠️</span>
             </span>
           </div>
         </div>

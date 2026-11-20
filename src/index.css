@@ -49,17 +49,17 @@ canvas.pixelated {
   animation: slideInRight 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Alerta Oficial de Boss Mutante (Pisca 4 vezes com pulso estroboscópico de emergência) */
+/* Alerta Oficial de Boss Mutante (Centralizado no meio do mapa, pisca 4 vezes com pulso estroboscópico de emergência) */
 @keyframes bossFlashCycle {
   0%, 100% {
     opacity: 0;
-    transform: translate(-50%, 0) scale(0.92);
+    transform: translate(-50%, -50%) scale(0.90);
     filter: drop-shadow(0 0 0 rgba(239, 68, 68, 0));
   }
   18%, 82% {
     opacity: 1;
-    transform: translate(-50%, 0) scale(1.04);
-    filter: drop-shadow(0 0 30px rgba(239, 68, 68, 0.95)) drop-shadow(0 0 60px rgba(220, 38, 38, 0.8));
+    transform: translate(-50%, -50%) scale(1.08);
+    filter: drop-shadow(0 0 45px rgba(239, 68, 68, 0.95)) drop-shadow(0 0 90px rgba(220, 38, 38, 0.85));
   }
 }
 
