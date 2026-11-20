@@ -1,5 +1,5 @@
 // ============================================================================
-// CRIPTO MYNERS — SISTEMA DE NAVEGAÇÃO E COMBATE INTELIGENTE DOS HERÓIS (BFS)
+// CRYPTOZOMBIES — SISTEMA DE NAVEGAÇÃO E COMBATE INTELIGENTE DOS HERÓIS (BFS)
 // 
 // Garante que nenhum herói fique "bobo" ou preso ao combater zumbis e o boss.
 // 1. Raio de Combate Tático: Heróis com armas de fogo engajam a até 2 blocos de distância.
