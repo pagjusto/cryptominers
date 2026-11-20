@@ -1,14 +1,14 @@
 import { calculateRoiScenario } from './src/utils/roiSimulatorEngine.js';
 import { calculateRealAccountStats, calculateUpgradeRoi } from './src/utils/upgradeSimulatorEngine.js';
 import { calculateWithdrawalTax } from './src/data/investmentData.js';
-import { DEFAULT_CRIPTO_MYNERS_CONFIG } from './src/data/criptoMynersConfig.js';
+import { DEFAULT_CRYPTO_ZOMBIES_CONFIG } from './src/data/cryptoZombiesConfig.js';
 
 console.log('--- TESTE DA COTAÇÃO OFICIAL 1 MNC = US$ 0,01 ---');
 
 // 1. Confirma default_config
-console.log(`Default minerCoinUsdtRate: ${DEFAULT_CRIPTO_MYNERS_CONFIG.minerCoinUsdtRate}`);
-if (DEFAULT_CRIPTO_MYNERS_CONFIG.minerCoinUsdtRate !== 0.01) {
-  throw new Error(`Esperado 0.01, obtido: ${DEFAULT_CRIPTO_MYNERS_CONFIG.minerCoinUsdtRate}`);
+console.log(`Default minerCoinUsdtRate: ${DEFAULT_CRYPTO_ZOMBIES_CONFIG.minerCoinUsdtRate}`);
+if (DEFAULT_CRYPTO_ZOMBIES_CONFIG.minerCoinUsdtRate !== 0.01) {
+  throw new Error(`Esperado 0.01, obtido: ${DEFAULT_CRYPTO_ZOMBIES_CONFIG.minerCoinUsdtRate}`);
 }
 
 // 2. Simulação de ROI com a taxa de 0.01
@@ -17,7 +17,7 @@ const roiExpected = calculateRoiScenario({
   chestQuantity: 1,
   houseId: 'basic',          // Casa Básica = $25 USDT
   scenario: 'expected',
-  config: DEFAULT_CRIPTO_MYNERS_CONFIG
+  config: DEFAULT_CRYPTO_ZOMBIES_CONFIG
 });
 
 console.log(`Investimento Total: $${roiExpected.totalInvestment} USDT`);

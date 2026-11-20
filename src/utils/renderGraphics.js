@@ -823,8 +823,8 @@ export function drawSirenTower(ctx, now, isBossAlive = false) {
     // Cisalhamento e achatamento isométrico projetando para Sudeste (190° em relação ao Noroeste):
     // c = -0.75 (projeta a sombra para a direita/leste à medida que desce/afasta)
     // d = -0.26 (projeta a sombra para a frente/sudeste na perspectiva isométrica)
-    ctx.transform(1.0, 0.08, -0.75, -0.26, 0, 0);
-    ctx.drawImage(sirenTowerShadowCanvas, -tW * (73 / 158), -tH * (362 / 371), tW, tH);
+    ctx.transform(1.0, 0.0, -0.75, -0.26, 0, 0);
+    ctx.drawImage(sirenTowerShadowCanvas, -tW * (73 / 158), -tH, tW, tH);
     ctx.restore();
   } else {
     // Fallback: projeção trapezoidal translúcida no solo para Sudeste
@@ -854,22 +854,22 @@ export function drawSirenTower(ctx, now, isBossAlive = false) {
   ctx.ellipse(tX + tW * 0.50, tY + tH * 0.950, tW * 0.36, 5.0, 0.05, 0, Math.PI * 2);
   ctx.fill();
 
-  // 1.3. Sombras de oclusão de contato direto sob as 4 sapatas ajustadas à inclinação
+  // 1.3. Sombras de oclusão de contato direto sob as 4 sapatas (ancoragem física precisa e aprumada)
   ctx.fillStyle = 'rgba(0, 8, 0, 0.94)';
 
   // Sapata traseira
   ctx.beginPath();
-  ctx.ellipse(footBackX, footBackY + 0.5, 6.5, 2.5, -0.05, 0, Math.PI * 2);
+  ctx.ellipse(footBackX, footBackY + 0.5, 6.5, 2.5, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // Sapata frontal esquerda (subida de 1.4px pelo tilt de 0.08)
+  // Sapata frontal esquerda
   ctx.beginPath();
-  ctx.ellipse(footLeftX, footLeftY - 1.0, 8.0, 3.0, -0.05, 0, Math.PI * 2);
+  ctx.ellipse(footLeftX, footLeftY + 0.5, 8.0, 3.0, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // Sapata frontal direita (descida de 1.7px pelo tilt de 0.08)
+  // Sapata frontal direita
   ctx.beginPath();
-  ctx.ellipse(footRightX, footRightY + 1.8, 8.5, 3.2, 0.05, 0, Math.PI * 2);
+  ctx.ellipse(footRightX, footRightY + 0.5, 8.5, 3.2, 0, 0, Math.PI * 2);
   ctx.fill();
 
   // Sapata frontal centro (pivô principal)
@@ -879,15 +879,11 @@ export function drawSirenTower(ctx, now, isBossAlive = false) {
 
   ctx.restore();
 
-  // 2. Desenho da Torre em Alta Resolução com inclinação idêntica à torre do canto direito do mapa
-  // REGRA OFICIAL DO USUÁRIO: "ajuste agora a nossa torre para ficar exatamente no mesmo grau e inclinação da outra torre que temos no canto direito"
+  // 2. Desenho da Torre em Alta Resolução aprumada perfeitamente na vertical
+  // REGRA OFICIAL DO USUÁRIO: "a nossa torre parece q esta pendida para traz ,corrija"
+  // Corrigido: Torre 100% vertical e aprumada, sem inclinação/cisalhamento artificial para trás
   const towerDrawable = sirenTowerShadedCanvas || sirenTowerImg;
-  ctx.save();
-  ctx.translate(footCenterX, footCenterY);
-  // Transformação isométrica que alinha perfeitamente as vigas horizontais (slope +0.08) e colunas (-0.025) à torre do canto direito
-  ctx.transform(1.0, 0.08, -0.025, 1.0, 0, 0);
-  ctx.drawImage(towerDrawable, -tW * (73 / 158), -tH * (362 / 371), tW, tH);
-  ctx.restore();
+  ctx.drawImage(towerDrawable, tX, tY, tW, tH);
 
   // 2.1. Oclusão de contato na quina frontal da sapata central para perfeita ancoragem no solo
   ctx.save();
@@ -898,11 +894,9 @@ export function drawSirenTower(ctx, now, isBossAlive = false) {
   ctx.restore();
 
   // 3. Efeito da Sirene e Luz Giratória Vermelha no Topo da Torre
-  // Posição exata do bulbo vermelho da sirene no topo após a transformação de inclinação da torre:
-  const localBeaconX = tW * (6 / 158);
-  const localBeaconY = -tH * (349 / 371);
-  const beaconX = footCenterX + localBeaconX - 0.025 * localBeaconY;
-  const beaconY = footCenterY + 0.08 * localBeaconX + localBeaconY;
+  // Posição exata do bulbo vermelho da sirene centralizado no topo da cabine:
+  const beaconX = tX + tW * 0.50;
+  const beaconY = tY + tH * 0.040;
 
   if (isBossAlive) {
     ctx.save();
@@ -918,10 +912,9 @@ export function drawSirenTower(ctx, now, isBossAlive = false) {
     const drawHelicopterBeam = (angle, len, alpha) => {
       ctx.save();
       ctx.translate(beaconX, beaconY);
-      // Plano horizontal 2.5D:
-      // scale Y (0.28) achata a rotação no plano do solo/plataforma
-      // shear (0.08) acompanha o grau e a inclinação da torre
-      ctx.transform(1.0, 0.08, 0.0, 0.28, 0, 0);
+      // Plano horizontal 2.5D perfeitamente nivelado:
+      // scale Y (0.28) achata a rotação no plano horizontal do topo da torre como hélice de helicóptero
+      ctx.transform(1.0, 0.0, 0.0, 0.28, 0, 0);
 
       ctx.beginPath();
       ctx.moveTo(0, 0);
