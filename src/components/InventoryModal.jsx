@@ -158,6 +158,7 @@ export default function InventoryModal({
                   const heroesCount = chest.heroesCount || 1;
                   const currency = chest.currency || 'USDT';
                   const isMiner = currency.toUpperCase() === 'MINER';
+                  const isBossReward = chest.source === 'boss_reward';
 
                   return (
                     <div 
@@ -181,9 +182,9 @@ export default function InventoryModal({
 
                           <div className="flex items-center gap-2 text-[11px] text-slate-400 mt-0.5">
                             <span className={`font-mono font-bold px-1.5 py-0.2 rounded text-[10px] ${
-                              isMiner ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                              isBossReward ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' : (isMiner ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30')
                             }`}>
-                              {isMiner ? '🪙 MINERCOIN' : '💳 USDT'} {chest.cost ? `(${chest.cost})` : ''}
+                              {isBossReward ? '🎁 RECOMPENSA DO BOSS' : (isMiner ? '🪙 MINERCOIN' : '💳 USDT')} {chest.cost ? `(${chest.cost})` : ''}
                             </span>
                             {chest.purchasedAt && (
                               <span className="text-[10px] text-slate-500">
