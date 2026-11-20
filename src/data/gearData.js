@@ -2,7 +2,7 @@
 // GEARS & RELICS SYSTEM (CRYPTOZOMBIES RPG EXPANSION)
 // Slots:
 // 1. ⛏️ Arma/Picareta: Aumenta Poder e Chance Crítica
-// 2. 🪖 Capacete: Reduz em 20% a 30% o consumo de estamina
+// 2. 🪖 Capacete: item visual; bônus temporariamente desativado
 // 3. 💍 Amuleto Místico: Concede chance de dobrar o BCOIN minerado (2x Lucky Drop)
 // ============================================================================
 
@@ -19,7 +19,7 @@ export const GEAR_TYPES = {
     name: 'Capacete / Elmo',
     icon: '🪖',
     slotLabel: 'Capacete',
-    desc: 'Reduz o consumo de estamina ao minerar e caminhar'
+    desc: 'Bônus temporariamente desativado enquanto a estamina estiver fora do jogo'
   },
   amulet: {
     id: 'amulet',
@@ -111,8 +111,7 @@ export const GEAR_CATALOG = [
     rarity: 'common',
     name: 'Capacete de Couro Reforçado',
     icon: '🪖',
-    staminaDiscount: 0.20, // -20% consumo de estamina
-    desc: '-20% Consumo de Estamina'
+    desc: 'Bônus temporariamente desativado'
   },
   {
     id: 'gear_h2',
@@ -120,9 +119,7 @@ export const GEAR_CATALOG = [
     rarity: 'rare',
     name: 'Elmo de Bronze com Lanterna',
     icon: '🏮',
-    staminaDiscount: 0.22,
-    regenBonus: 0.5, // +0.5 estamina extra/segundo
-    desc: '-22% Consumo Estamina • +0.5 Regen/s'
+    desc: 'Bônus temporariamente desativado'
   },
   {
     id: 'gear_h3',
@@ -130,9 +127,7 @@ export const GEAR_CATALOG = [
     rarity: 'epic',
     name: 'Elmo de Titânio Blindado',
     icon: '🛡️',
-    staminaDiscount: 0.25,
-    regenBonus: 1.0,
-    desc: '-25% Consumo Estamina • +1.0 Regen/s'
+    desc: 'Bônus temporariamente desativado'
   },
   {
     id: 'gear_h4',
@@ -140,9 +135,7 @@ export const GEAR_CATALOG = [
     rarity: 'legendary',
     name: 'Coroa Dracônica Ancestral',
     icon: '👑',
-    staminaDiscount: 0.30,
-    regenBonus: 2.0,
-    desc: '-30% Consumo Estamina • +2.0 Regen/s'
+    desc: 'Bônus temporariamente desativado'
   },
 
   // 💍 AMULETOS MÍSTICOS
