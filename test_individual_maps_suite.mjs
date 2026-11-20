@@ -40,8 +40,8 @@ recordDepositDamage(player1, targetDepP1.c, targetDepP1.r, targetDepP1.maxHp + 1
 const map1Updated = getPlayerMap(player1);
 const map2Unchanged = getPlayerMap(player2);
 
-if (map1Updated.remainingDeposits === 20 && map2Unchanged.remainingDeposits === initialRemainingP2) {
-  console.log(`✅ TESTE 2 APROVADO: Jogador 1 eliminou o zumbi e recebeu respawn imediato (mantendo ${map1Updated.remainingDeposits}/20) enquanto Jogador 2 permaneceu isolado em ${map2Unchanged.remainingDeposits}/20.`);
+if (map1Updated.remainingDeposits === MAX_DEPOSITS_PER_MAP && map2Unchanged.remainingDeposits === initialRemainingP2) {
+  console.log(`✅ TESTE 2 APROVADO: Jogador 1 eliminou o zumbi e recebeu respawn imediato (mantendo ${map1Updated.remainingDeposits}/${MAX_DEPOSITS_PER_MAP}) enquanto Jogador 2 permaneceu isolado em ${map2Unchanged.remainingDeposits}/${MAX_DEPOSITS_PER_MAP}.`);
   passedTests++;
 } else {
   console.error('❌ TESTE 2 FALHOU');
@@ -131,10 +131,10 @@ recordDepositDamage(reconnectPlayer, initialMapState.deposits[2].c, initialMapSt
 const restoredMap = getPlayerMap(reconnectPlayer);
 if (
   restoredMap.mapId === initialMapState.mapId &&
-  restoredMap.remainingDeposits === 20 &&
+  restoredMap.remainingDeposits === MAX_DEPOSITS_PER_MAP &&
   restoredMap.cycleNumber === 1
 ) {
-  console.log('✅ TESTE 7 APROVADO: Reconexão recuperou fielmente o mapa ativo mantendo a horda de 20 zumbis e mesmo MapId.');
+  console.log(`✅ TESTE 7 APROVADO: Reconexão recuperou fielmente o mapa ativo mantendo a horda de ${MAX_DEPOSITS_PER_MAP} zumbis e mesmo MapId.`);
   passedTests++;
 } else {
   console.error('❌ TESTE 7 FALHOU');
@@ -144,8 +144,8 @@ if (
 console.log('\nTESTE 8: Compatibilidade com 15 heróis minerando simultaneamente...');
 // Verifica se o mapa possui células suficientes e não bloqueia 15 heróis
 const validGridCells = sampleMap.deposits.length;
-if (validGridCells === 20 && sampleMap.grid.length === 11 && sampleMap.grid[0].length === 15) {
-  console.log('✅ TESTE 8 APROVADO: Grid 15x11 e 20 jazidas distribuídas comportam 15 heróis em escavação simultânea.');
+if (validGridCells === MAX_DEPOSITS_PER_MAP && sampleMap.grid.length === 11 && sampleMap.grid[0].length === 15) {
+  console.log(`✅ TESTE 8 APROVADO: Grid 15x11 e ${MAX_DEPOSITS_PER_MAP} jazidas distribuídas comportam 15 heróis em escavação simultânea.`);
   passedTests++;
 } else {
   console.error('❌ TESTE 8 FALHOU');

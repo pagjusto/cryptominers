@@ -218,8 +218,9 @@ export function syncEnemiesWithMap(existingEnemies = [], mapData, grid, hpMap) {
     }
   });
 
-  // Limite rígido oficial: máximo 20 criaturas (19 zumbis + 1 boss)
-  return result.slice(0, 20);
+  // REGRA OFICIAL DO USUÁRIO: "mantenha a logica dos zumbis , morre 1 nasce outro"
+  // Limite rígido oficial: máximo 31 criaturas (30 zumbis + 1 boss)
+  return result.slice(0, 31);
 }
 
 /**

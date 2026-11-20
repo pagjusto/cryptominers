@@ -76,7 +76,9 @@ export const DEPOSIT_TYPES = {
   }
 };
 
-export const MAX_DEPOSITS_PER_MAP = 20;
+// REGRA OFICIAL DO USUÁRIO: "mantenha a logica dos zumbis , morre 1 nasce outro"
+// Capacidade total: 30 zumbis simultâneos ativos + 1 Boss mutante
+export const MAX_DEPOSITS_PER_MAP = 31;
 export const DEFAULT_PLAYER_ID = 'player_default';
 
 const MAP_STORAGE_PREFIX = 'cripto_myners_player_map_';
@@ -338,14 +340,14 @@ export function getPlayerMap(playerId = DEFAULT_PLAYER_ID) {
       return generatePlayerMap(playerId, parsed.cycleNumber || 1);
     }
 
-    // REGRA OFICIAL DO USUÁRIO: Garante SEMPRE 20 zumbis ativos no mapa
+    // REGRA OFICIAL DO USUÁRIO: Garante SEMPRE 30 zumbis ativos no mapa (morre 1 nasce outro)
     const activeDeposits = parsed.deposits.filter(d => !d.isCompleted);
-    if (activeDeposits.length < 20) {
+    if (activeDeposits.length < MAX_DEPOSITS_PER_MAP) {
       const validCells = getValidDepositCells(GRID_COLS, GRID_ROWS);
       const activeKeys = new Set(activeDeposits.map(d => `${d.c},${d.r}`));
       const openCells = validCells.filter(pos => !activeKeys.has(`${pos.c},${pos.r}`));
 
-      const needed = 20 - activeDeposits.length;
+      const needed = MAX_DEPOSITS_PER_MAP - activeDeposits.length;
       for (let i = 0; i < needed && openCells.length > 0; i++) {
         const randIdx = Math.floor(Math.random() * openCells.length);
         const newPos = openCells.splice(randIdx, 1)[0];
@@ -370,7 +372,7 @@ export function getPlayerMap(playerId = DEFAULT_PLAYER_ID) {
           parsed.hpMap[`${newPos.c},${newPos.r}`] = 2;
         }
       }
-      parsed.remainingDeposits = 20;
+      parsed.remainingDeposits = MAX_DEPOSITS_PER_MAP;
       savePlayerMap(playerId, parsed);
     }
 
@@ -475,12 +477,13 @@ export function recordDepositDamage(playerId = DEFAULT_PLAYER_ID, c, r, damage =
       mapState.hpMap[`${spawnC},${spawnR}`] = respawnedDeposit.currentHp;
     }
 
-    // Mantém sempre 20 criaturas ativas no mapa
+    // REGRA OFICIAL DO USUÁRIO: "mantenha a logica dos zumbis , morre 1 nasce outro"
+    // Mantém sempre 31 criaturas ativas no mapa (30 zumbis + 1 boss)
     const activeCount = mapState.deposits.filter(d => !d.isCompleted).length;
-    mapState.remainingDeposits = Math.max(20, activeCount);
+    mapState.remainingDeposits = Math.max(MAX_DEPOSITS_PER_MAP, activeCount);
 
-    // Conclusão de ciclo a cada 20 zumbis eliminados pela equipe
-    if (mapState.zombiesKilledInCycle >= 20) {
+    // Conclusão de ciclo a cada 30 zumbis eliminados pela equipe
+    if (mapState.zombiesKilledInCycle >= 30) {
       cycleCompleted = true;
       mapState.zombiesKilledInCycle = 0;
       mapState.completedAt = new Date().toISOString();
@@ -508,7 +511,7 @@ export function recordDepositDamage(playerId = DEFAULT_PLAYER_ID, c, r, damage =
         cycleCompleted: true,
         oldCycle: nextCycle - 1,
         nextCycle,
-        remainingDeposits: 20,
+        remainingDeposits: MAX_DEPOSITS_PER_MAP,
         currentMap: mapState
       };
     }
