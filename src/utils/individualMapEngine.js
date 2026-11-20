@@ -1,5 +1,5 @@
 // ============================================================================
-// CRIPTO MYNERS — SISTEMA DE MAPAS INDIVIDUAIS, ZUMBIS E BOSS
+// CRYPTOZOMBIES — SISTEMA DE MAPAS INDIVIDUAIS, ZUMBIS E BOSS
 // 
 // REGRAS OBRIGATÓRIAS:
 // 1. Mapas Individuais e Independentes: Cada jogador possui seu próprio mapa exclusivo,
