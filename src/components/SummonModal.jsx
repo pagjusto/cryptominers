@@ -17,7 +17,7 @@ import {
   Gift
 } from 'lucide-react';
 import { MINER_ROSTER, MINT_CHEST_TYPES } from '../data/minersCatalog';
-import { getCriptoMynersConfig } from '../data/criptoMynersConfig';
+import { getCryptoZombiesConfig } from '../data/cryptoZombiesConfig';
 import { sfx } from '../utils/sfx';
 
 export default function SummonModal({
@@ -41,7 +41,7 @@ export default function SummonModal({
 
   if (!isOpen) return null;
 
-  const config = getCriptoMynersConfig();
+  const config = getCryptoZombiesConfig();
   const rate = config?.minerCoinUsdtRate || 1.0;
   const currentChest = MINT_CHEST_TYPES.find(c => c.id === selectedChestType) || MINT_CHEST_TYPES[0];
   const chestCostUsdt = currentChest.costUsdt || currentChest.costBcoin || 10;
