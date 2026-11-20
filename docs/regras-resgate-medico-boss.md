@@ -76,3 +76,15 @@ Este documento registra as regras de gameplay aprovadas para o sistema de sobrev
 - Cada batalha dura 5 minutos.
 - O Boss é encerrado automaticamente ao fim dos 5 minutos.
 - A regra de participação acima é aplicada ao sorteio de Baú do Boss do evento.
+
+
+## Sorteio de poções por Boss
+
+- O sorteio de poções segue a mesma chance-base e os mesmos multiplicadores por raridade definidos para o Baú do Boss.
+- Chance-base Comum: **2% por sobrevivente elegível**.
+- Multiplicadores: Comum **1×**, Raro **1,1×**, Épico **1,1667×** e Lendário **1,3333×**.
+- Chances resultantes por sobrevivente: Comum **2%**, Raro **2,2%**, Épico **2,3333%** e Lendário **2,6667%**.
+- A soma das contribuições dos sobreviventes elegíveis fica limitada a **40% por jogador em cada Boss**.
+- Limite diário: **4 poções por jogador**, com renovação à meia-noite no horário de Brasília (America/Sao_Paulo).
+- A elegibilidade considera a equipe registrada no início da batalha, conforme as regras de participação do Boss; substitutos que entram durante o evento não participam do sorteio daquele Boss.
+- As quantidades concedidas por ocorrência e a distribuição por tipo de poção permanecem pendentes de definição.
