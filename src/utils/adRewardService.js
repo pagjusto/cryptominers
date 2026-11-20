@@ -1,4 +1,4 @@
-// CRIPTO MYNERS — SERVIÇO DE ANÚNCIOS RECOMPENSADOS & FUNDO DE SUSTENTABILIDADE
+// CRYPTOZOMBIES — SERVIÇO DE ANÚNCIOS RECOMPENSADOS & FUNDO DE SUSTENTABILIDADE
 // Gerencia eventos de anúncios, integridade de recompensas, limites diários,
 // sorteios com bônus e contabilidade do Fundo de Sustentabilidade Publicitário.
 
