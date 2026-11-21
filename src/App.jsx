@@ -26,12 +26,12 @@ import {
   ChevronDown
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { MINES, INITIAL_MINERS, MINER_CLASSES } from './data/minersData';
+import { MINES, INITIAL_CoinsS, Coins_CLASSES } from './data/minersData';
 import { HERO_ROSTER, WEAPON_CATALOG, getHeroById, getWeaponById } from './data/heroRoster';
 import { resolveHouseTier } from './data/housesData';
 import { ENTRY_PACKAGES, calculateWithdrawalTax } from './data/investmentData';
 import { INITIAL_MARKET_LISTINGS, MARKETPLACE_FEE_PCT, FEE_SPLIT } from './data/marketplaceData';
-import { MINER_ROSTER } from './data/minersCatalog';
+import { Coins_ROSTER } from './data/minersCatalog';
 import { generateMineMap } from './utils/mapGenerator';
 import { getPlayerMap, generatePlayerMap, DEFAULT_PLAYER_ID, removeBossFromPlayerMap, spawnBossInPlayerMap } from './utils/individualMapEngine';
 import { evaluateBossSchedule, recordBossDefeatInSchedule, forceBossInvasionNow } from './utils/bossScheduleManager';
@@ -145,7 +145,7 @@ export default function App() {
           let migrated = parsed.map(m => {
             if (m.classId === 'ballerina') {
               hasBallerina = true;
-              const fInfo = MINER_CLASSES.fairy;
+              const fInfo = Coins_CLASSES.fairy;
               return {
                 ...m,
                 classId: 'fairy',
@@ -167,7 +167,7 @@ export default function App() {
             const classPool = ['miner', 'brute', 'goblin', 'engineer', 'mage', 'legendary', 'pirate', 'cowboy', 'fairy', 'spiderman', 'batman'];
             const balanced = parsed.map((m, idx) => {
               const newClassId = classPool[idx % classPool.length];
-              const cInfo = MINER_CLASSES[newClassId] || MINER_CLASSES.miner;
+              const cInfo = Coins_CLASSES[newClassId] || Coins_CLASSES.miner;
               return {
                 ...m,
                 classId: newClassId,
@@ -229,7 +229,7 @@ export default function App() {
           if (needsRosterSync) {
             const synced = parsed.map((m, idx) => {
               const rosterHero = HERO_ROSTER.find(h => h.id === m.heroId) || HERO_ROSTER[idx % HERO_ROSTER.length];
-              const cInfo = MINER_CLASSES[rosterHero.classId] || MINER_CLASSES.miner;
+              const cInfo = Coins_CLASSES[rosterHero.classId] || Coins_CLASSES.miner;
               return {
                 ...m,
                 heroId: rosterHero.id,
@@ -253,11 +253,11 @@ export default function App() {
           if (!parsed.some(m => m.heroId === 'hunter') || !parsed.some(m => m.heroId === 'scarlet')) {
             const updated = [...parsed];
             if (!updated.some(m => m.heroId === 'hunter') && updated.length < 15) {
-              const hunter = INITIAL_MINERS.find(m => m.heroId === 'hunter');
+              const hunter = INITIAL_CoinsS.find(m => m.heroId === 'hunter');
               if (hunter) updated.push({ ...hunter, id: 'miner-' + Date.now() + '-hunter' });
             }
             if (!updated.some(m => m.heroId === 'scarlet') && updated.length < 15) {
-              const scarlet = INITIAL_MINERS.find(m => m.heroId === 'scarlet');
+              const scarlet = INITIAL_CoinsS.find(m => m.heroId === 'scarlet');
               if (scarlet) updated.push({ ...scarlet, id: 'miner-' + Date.now() + '-scarlet' });
             }
             localStorage.setItem('crypto_miners_team', JSON.stringify(updated));
@@ -304,7 +304,7 @@ export default function App() {
         }
       } catch (e) {}
     }
-    return INITIAL_MINERS;
+    return INITIAL_CoinsS;
   });
 
   // Aplica a tabela única de HP por raridade a toda a equipe, inclusive heróis já salvos e recém-adquiridos.
@@ -631,7 +631,7 @@ export default function App() {
     return result;
   };
 
-  // Evolução permanente e sequencial da base: fragmentos + MNC.
+  // Evolução permanente e sequencial da base: fragmentos + Coins.
   const handleUpgradeHouseWithFragments = (targetHouseId, fragmentsCost, mncCost) => {
     const currentTier = resolveHouseTier(localStorage.getItem('crypto_miners_house') || currentHouseId);
     const targetTier = resolveHouseTier(targetHouseId);
@@ -833,7 +833,7 @@ export default function App() {
     });
   };
 
-  // 🛡️ DROP DE EQUIPAMENTO OBTIDO NA MINERAÇÃO
+  // 🛡️ DROP DE EQUIPAMENTO OBTIDO NA CoinsAÇÃO
   const handleDropGear = (newGear) => {
     setGearStash(prev => {
       const next = [newGear, ...prev];
@@ -1014,7 +1014,7 @@ export default function App() {
   };
 
   // MECÂNICA DE RENOVAÇÃO DO MAPA INDIVIDUAL: AO ELIMINAR AS 20 JAZIDAS, RENOVA O CICLO!
-  // Regra 7.0: A renovação do mapa visual NÃO concede bônus financeiro aleatório de MNC.
+  // Regra 7.0: A renovação do mapa visual NÃO concede bônus financeiro aleatório de Coins.
   const handleMapCleared = (newMapParam) => {
     sfx.playLevelUp();
 
@@ -1070,8 +1070,8 @@ export default function App() {
       else if (rand < 0.99) rarity = 'epic';
       else rarity = 'legendary';
 
-      let matching = MINER_ROSTER.filter(m => m.rarity === rarity);
-      if (matching.length === 0) matching = MINER_ROSTER;
+      let matching = Coins_ROSTER.filter(m => m.rarity === rarity);
+      if (matching.length === 0) matching = Coins_ROSTER;
       const picked = matching[Math.floor(Math.random() * matching.length)];
       const name = names[Math.floor(Math.random() * names.length)];
 
@@ -1129,7 +1129,7 @@ export default function App() {
     ]);
   };
 
-  // 2. ANUNCIAR MINERADOR NO MARKETPLACE
+  // 2. ANUNCIAR CoinsADOR NO MARKETPLACE
   const handleListMinerForSale = (miner, priceBcoin) => {
     // Remove o minerador da mina ativa
     setMiners(prev => prev.filter(m => m.id !== miner.id));
@@ -1189,7 +1189,7 @@ export default function App() {
     setIsChestOpeningOpen(true);
   };
 
-  // 2. COMPRAR E GUARDAR NO INVENTÁRIO DE BAÚS DE HERÓIS (USDT OU MINERCOIN CONFORME COTAÇÃO)
+  // 2. COMPRAR E GUARDAR NO INVENTÁRIO DE BAÚS DE HERÓIS (USDT OU CoinsCOIN CONFORME COTAÇÃO)
   const handleBuyAndStoreChest = (chest, currency = 'miner') => {
     const isMiner = currency.toLowerCase() === 'miner';
     const costUsdt = chest.costUsdt || chest.costBcoin || 10;
@@ -1198,10 +1198,10 @@ export default function App() {
 
     if (isMiner) {
       if (bcoin < costMiner) {
-        alert(`Saldo insuficiente de Minercoins. Necessário: ${costMiner} MINER (saldo atual: ${bcoin.toFixed(2)} MINER) na cotação atual de 1 MINER = $${currentMinerRate.toFixed(2)} USDT.`);
+        alert(`Saldo insuficiente de Coins. Necessário: ${costMiner} Coins (saldo atual: ${bcoin.toFixed(2)} Coins) na cotação atual de 1 Coins = $${currentMinerRate.toFixed(2)} USDT.`);
         return false;
       }
-      // Deduz Minercoin (saldo bcoin in-game)
+      // Deduz Coins (saldo bcoin in-game)
       setBcoin(prev => {
         const nextBalance = parseFloat(Math.max(0, prev - costMiner).toFixed(3));
         localStorage.setItem('crypto_miners_bcoin', nextBalance.toString());
@@ -1235,7 +1235,7 @@ export default function App() {
       image: chest.image || '/items/hero_chest.png',
       heroesCount: chest.heroesCount || 1,
       cost: finalCost,
-      currency: isMiner ? 'MINER' : 'USDT',
+      currency: isMiner ? 'Coins' : 'USDT',
       purchasedAt: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
     };
 
@@ -1335,7 +1335,7 @@ export default function App() {
 
     const classPool = ['miner', 'brute', 'goblin', 'engineer', 'mage', 'legendary', 'pirate', 'cowboy', 'fairy', 'spiderman', 'batman'];
     const chosenClass = classPool[Math.floor(Math.random() * classPool.length)];
-    const cInfo = MINER_CLASSES[chosenClass] || MINER_CLASSES.miner;
+    const cInfo = Coins_CLASSES[chosenClass] || Coins_CLASSES.miner;
 
     const newMiner = {
       id: 'miner-altar-' + Date.now(),
@@ -1462,7 +1462,7 @@ export default function App() {
     const classPool = ['miner', 'brute', 'goblin', 'engineer', 'mage', 'legendary', 'pirate', 'cowboy', 'fairy', 'spiderman', 'batman'];
     const updated = miners.map((m, idx) => {
       const newClassId = classPool[idx % classPool.length];
-      const cInfo = MINER_CLASSES[newClassId] || MINER_CLASSES.miner;
+      const cInfo = Coins_CLASSES[newClassId] || Coins_CLASSES.miner;
       return {
         ...m,
         classId: newClassId,
@@ -1489,14 +1489,14 @@ export default function App() {
         return nextState;
       });
     } else {
-      // Deduz Minercoin do saldo in-game
+      // Deduz Coins do saldo in-game
       setBcoin(prev => {
         const nextBalance = Math.max(0, parseFloat((prev - cost).toFixed(3)));
         localStorage.setItem('crypto_miners_bcoin', nextBalance.toString());
         return nextBalance;
       });
     }
-    // Registra investimento conforme a cotação oficial da Minercoin
+    // Registra investimento conforme a cotação oficial da Coins
     const costInUsdt = currency.toLowerCase() === 'usdt' ? cost : parseFloat((cost * currentMinerRate).toFixed(3));
     setTotalInvested(prev => parseFloat((prev + costInUsdt).toFixed(3)));
 
@@ -1525,14 +1525,14 @@ export default function App() {
         <span className="text-[11px] animate-pulse">🧟</span>
         <span className="font-arcade text-[9px] text-amber-400">CRYPTOZOMBIES</span>
         <span className="text-slate-600">|</span>
-        <span className="font-mono text-emerald-400 text-xs font-bold">🪙 {bcoin.toFixed(2)} MNC</span>
+        <span className="font-mono text-emerald-400 text-xs font-bold">🪙 {bcoin.toFixed(2)} Coins</span>
         <span className="text-slate-600">|</span>
         <span 
           className="flex items-center gap-1 text-[10px] text-amber-300 font-mono font-bold bg-amber-500/15 px-2 py-0.5 rounded border border-amber-500/30 cursor-pointer"
-          title={`Taxa atual de mineração: ${currentMncPerMinute.toFixed(4)} MNC/min (${currentMncPerHour.toFixed(2)} MNC/h) • ${activeWorkingMiners.length} herói(s) minerando`}
+          title={`Taxa atual de mineração: ${currentMncPerMinute.toFixed(4)} Coins/min (${currentMncPerHour.toFixed(2)} Coins/h) • ${activeWorkingMiners.length} herói(s) minerando`}
         >
           <Pickaxe size={11} className="text-amber-400" />
-          <span>{currentMncPerMinute.toFixed(3)} MNC/min</span>
+          <span>{currentMncPerMinute.toFixed(3)} Coins/min</span>
         </span>
         <span className="text-[10px] text-amber-400/80 bg-amber-500/15 px-1.5 py-0.2 rounded border border-amber-500/30 flex items-center gap-0.5">
           <span>MENU</span>
@@ -1549,10 +1549,10 @@ export default function App() {
         }`}
       >
         
-        {/* Saldo In-Game MNC (Clique abre Perfil, Carteira & Saques) */}
+        {/* Saldo In-Game Coins (Clique abre Perfil, Carteira & Saques) */}
         <button 
           onClick={() => handleOpenUserProfile('profile')}
-          title={`Saldo: ${bcoin.toFixed(2)} MNC ≈ US$ ${(bcoin * currentMinerRate).toFixed(2)} • Clique para abrir Perfil, Carteira e Saques (Claim)`}
+          title={`Saldo: ${bcoin.toFixed(2)} Coins ≈ US$ ${(bcoin * currentMinerRate).toFixed(2)} • Clique para abrir Perfil, Carteira e Saques (Claim)`}
           className="flex items-center gap-1.5 bg-slate-950 px-2.5 py-1 rounded-xl border border-amber-500/40 hover:border-amber-400 transition shadow-inner cursor-pointer group active:scale-95 shrink-0"
         >
           <div className="w-5 h-5 rounded-full bg-amber-500/20 border border-amber-400 flex items-center justify-center text-amber-300 font-bold font-arcade text-[10px] group-hover:scale-105 transition">
@@ -1560,7 +1560,7 @@ export default function App() {
           </div>
           <div className="flex flex-col leading-none text-left">
             <span className="text-[9px] uppercase text-slate-400 font-bold flex items-center gap-1">
-              <span>MNC</span>
+              <span>Coins</span>
               <span className="text-[8.5px] text-emerald-400 font-mono">
                 ({currentMinerRate === 0.01 ? '0,01' : `$${currentMinerRate}`})
               </span>
@@ -1614,7 +1614,7 @@ export default function App() {
             </span>
           </button>
 
-          {/* BOTÃO CATÁLOGO DE MINERADORES */}
+          {/* BOTÃO CATÁLOGO DE CoinsADORES */}
           <button
             onClick={() => setIsCatalogOpen(true)}
             className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-sky-300 font-tech text-xs font-bold border border-slate-700 transition cursor-pointer"
@@ -1678,10 +1678,10 @@ export default function App() {
           {/* Taxa de Mineração Atual da Equipe */}
           <div 
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-950/80 border border-amber-500/30 text-[11px] font-mono shrink-0 cursor-help"
-            title={`Taxa atual de mineração: ${currentMncPerMinute.toFixed(4)} MNC/min (${currentMncPerHour.toFixed(2)} MNC/h) • ${activeWorkingMiners.length} herói(s) minerando`}
+            title={`Taxa atual de mineração: ${currentMncPerMinute.toFixed(4)} Coins/min (${currentMncPerHour.toFixed(2)} Coins/h) • ${activeWorkingMiners.length} herói(s) minerando`}
           >
             <Pickaxe size={12} className="text-amber-400" />
-            <span className="text-amber-300 font-bold">{currentMncPerMinute.toFixed(3)} MNC/min</span>
+            <span className="text-amber-300 font-bold">{currentMncPerMinute.toFixed(3)} Coins/min</span>
             <span className="text-[9px] text-slate-400 hidden xl:inline">({activeWorkingMiners.length} ativos)</span>
           </div>
 
@@ -1850,7 +1850,7 @@ export default function App() {
                   </p>
                   <div className="flex items-center gap-2 bg-amber-500/20 text-amber-300 px-4 py-2 rounded-xl border border-amber-500/40 text-sm font-bold">
                     <span>🪙</span>
-                    <span>Bônus de Vitória: +{mapClearNotice.bonus} MNC</span>
+                    <span>Bônus de Vitória: +{mapClearNotice.bonus} Coins</span>
                   </div>
                 </div>
               )}
@@ -1897,7 +1897,7 @@ export default function App() {
         onBatchMintPackage={handleBatchMintPackage}
       />
 
-      {/* MODAL DA CASA DOS MINERADORES (HOUSE SYSTEM) */}
+      {/* MODAL DA CASA DOS CoinsADORES (HOUSE SYSTEM) */}
       <HouseModal
         isOpen={isHouseOpen}
         onClose={() => setIsHouseOpen(false)}
@@ -1978,7 +1978,7 @@ export default function App() {
         miners={miners}
       />
 
-      {/* MODAL DO CATÁLOGO DE MINERADORES */}
+      {/* MODAL DO CATÁLOGO DE CoinsADORES */}
       <MinerCatalogModal
         isOpen={isCatalogOpen}
         onClose={() => setIsCatalogOpen(false)}
@@ -2045,7 +2045,7 @@ export default function App() {
 
 
 
-      {/* MODAL DE INTELIGÊNCIA & DASHBOARD DE MINERAÇÃO */}
+      {/* MODAL DE INTELIGÊNCIA & DASHBOARD DE CoinsAÇÃO */}
       <MiningStatsModal
         isOpen={isStatsModalOpen}
         onClose={() => setIsStatsModalOpen(false)}
