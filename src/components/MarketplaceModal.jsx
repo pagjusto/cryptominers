@@ -387,8 +387,8 @@ export default function MarketplaceModal({
 
                       <div className="text-[10px] text-slate-400 font-tech space-y-0.5">
                         <span className="block text-slate-500">Regra Oficial do Marketplace:</span>
-                        <span className="block text-emerald-300">• 95% do valor creditado ao vendedor (+{sellerNetAmount.toFixed(3)} MNC)</span>
-                        <span className="block text-amber-300">• 5% de comissão retida pelo jogo (-{feeAmount.toFixed(3)} MNC)</span>
+                        <span className="block text-emerald-300">• 95% do valor creditado ao vendedor (+{sellerNetAmount.toFixed(3)} Coins)</span>
+                        <span className="block text-amber-300">• 5% de comissão retida pelo jogo (-{feeAmount.toFixed(3)} Coins)</span>
                         <span className="block text-slate-400">• Sem taxas adicionais ou escondidas</span>
                       </div>
                     </div>
