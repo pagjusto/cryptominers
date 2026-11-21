@@ -537,6 +537,13 @@ export default function App() {
     };
   }, [activePlayerId, miners]);
 
+  // Encerra o evento de Boss quando atingir o limite de 5 minutos, sem registrar derrota.
+  const handleBossExpired = ({ bossId }) => {
+    const updated = removeBossFromPlayerMap(activePlayerId);
+    setMapData(updated);
+    console.info('[CryptoZombies] Evento do Boss encerrado por tempo', { bossId });
+  };
+
   // Executa o sorteio oficial quando o Boss é derrotado.
   // A lista recebida já contém apenas sobreviventes da equipe registrada no início da batalha.
   const handleBossDefeated = ({ bossId, participants = [] }) => {
@@ -1776,6 +1783,7 @@ export default function App() {
                   }
                 }}
                 onBossDefeated={handleBossDefeated}
+                onBossExpired={handleBossExpired}
                 onMinersChange={setMiners}
                 onCollectBcoin={handleCollectBcoin}
                 onRescueMiner={handleRescueMiner}
