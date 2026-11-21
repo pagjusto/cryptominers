@@ -138,8 +138,8 @@ export default function BillboardCalibrationModal({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/60 backdrop-blur-sm select-none">
-      <div className="bg-slate-950 border-2 border-emerald-500/70 w-full max-w-md rounded-2xl p-4 shadow-2xl text-slate-100 flex flex-col max-h-[92vh] animate-in fade-in zoom-in-95 duration-150">
+    <div className="fixed top-12 right-3 z-50 w-88 max-w-[94vw] bg-slate-950/95 backdrop-blur-md border-2 border-emerald-500/70 rounded-2xl p-4 shadow-[0_0_50px_rgba(0,0,0,0.95)] text-slate-100 font-sans text-xs select-none max-h-[88vh] overflow-y-auto">
+      <div className="w-full flex flex-col">
         
         {/* CABEÇALHO */}
         <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-emerald-500/30">

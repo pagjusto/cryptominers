@@ -973,8 +973,8 @@ export function drawSirenTower(ctx, now, isBossAlive = false) {
   const footCenterY = tY + tH * (958 / 1024);    // ~334.6
   const footRightX = tX + tW * (458 / 682);      // ~193.5
   const footRightY = tY + tH * (895 / 1024);     // ~324.6
-  const footBackX = tX + tW * (322 / 682);       // ~172.0 (Sapata traseira)
-  const footBackY = tY + tH * (860 / 1024);      // ~319.1
+  const footBackX = tX + tW * (356 / 682);       // ~177.4 (Sapata traseira superior)
+  const footBackY = tY + tH * (831 / 1024);      // ~314.5
 
   // 1. Sombras realistas da torre (corpo projetado no gramado + oclusão de contato nas 4 sapatas)
   ctx.save();
@@ -1044,21 +1044,6 @@ export function drawSirenTower(ctx, now, isBossAlive = false) {
     ctx.restore();
   }
 
-  // 1.1. Sombra suave difusa conectando a base da estrutura (deslocada suavemente para sudeste)
-  ctx.fillStyle = 'rgba(6, 20, 8, 0.45)';
-  ctx.beginPath();
-  ctx.ellipse(tX + tW * 0.52 + (cfg.offsetX || 0), tY + tH * 0.955 + (cfg.offsetY || 0), tW * 0.46 * Math.abs(horizScale), 6.5, 0.08, 0, Math.PI * 2);
-  ctx.fill();
-
-  // 1.2. Oclusão de ambiente escura no solo sob a base da estrutura
-  ctx.fillStyle = 'rgba(0, 10, 0, 0.58)';
-  ctx.beginPath();
-  ctx.ellipse(tX + tW * 0.50 + (cfg.offsetX || 0), tY + tH * 0.950 + (cfg.offsetY || 0), tW * 0.36 * Math.abs(horizScale), 5.0, 0.05, 0, Math.PI * 2);
-  ctx.fill();
-
-  // 1.3. Sombras de oclusão de contato direto sob as 4 sapatas (acompanham a rotação e inclinação)
-  ctx.fillStyle = 'rgba(0, 8, 0, 0.94)';
-
   const getTransformedFoot = (rawX, rawY) => {
     const dx = rawX - footCenterX;
     const dy = rawY - footCenterY;
@@ -1077,25 +1062,30 @@ export function drawSirenTower(ctx, now, isBossAlive = false) {
   const tFootRight = getTransformedFoot(footRightX, footRightY);
   const tFootCenter = getTransformedFoot(footCenterX, footCenterY);
 
-  // Sapata traseira
+  // 1.1. Sombra poligonal firme conectando exatamente os 4 pés da torre no gramado (evita qualquer sensação de flutuação)
+  ctx.save();
+  ctx.fillStyle = 'rgba(4, 18, 6, 0.48)';
   ctx.beginPath();
-  ctx.ellipse(tFootBack.x, tFootBack.y + 0.5, 6.5 * Math.max(0.3, Math.abs(horizScale)), 2.5, 0, 0, Math.PI * 2);
+  ctx.moveTo(tFootCenter.x, tFootCenter.y);
+  ctx.lineTo(tFootRight.x, tFootRight.y);
+  ctx.lineTo(tFootBack.x, tFootBack.y);
+  ctx.lineTo(tFootLeft.x, tFootLeft.y);
+  ctx.closePath();
   ctx.fill();
 
-  // Sapata frontal esquerda
-  ctx.beginPath();
-  ctx.ellipse(tFootLeft.x, tFootLeft.y + 0.5, 8.0 * Math.max(0.3, Math.abs(horizScale)), 3.0, 0, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Sapata frontal direita
-  ctx.beginPath();
-  ctx.ellipse(tFootRight.x, tFootRight.y + 0.5, 8.5 * Math.max(0.3, Math.abs(horizScale)), 3.2, 0, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Sapata frontal centro (pivô principal)
-  ctx.beginPath();
-  ctx.ellipse(tFootCenter.x, tFootCenter.y + 0.5, 9.5 * Math.max(0.3, Math.abs(horizScale)), 3.5, 0, 0, Math.PI * 2);
-  ctx.fill();
+  // 1.2. Oclusão de contato profundo diretamente na base de cada pé (ancoragem física perfeita)
+  ctx.fillStyle = 'rgba(0, 8, 0, 0.92)';
+  [
+    { foot: tFootBack, rx: 6.5, ry: 2.6 },
+    { foot: tFootLeft, rx: 7.5, ry: 2.8 },
+    { foot: tFootRight, rx: 8.0, ry: 3.0 },
+    { foot: tFootCenter, rx: 9.0, ry: 3.2 }
+  ].forEach(({ foot, rx, ry }) => {
+    ctx.beginPath();
+    ctx.ellipse(foot.x, foot.y + 0.5, rx * Math.max(0.4, Math.abs(horizScale)), ry, 0, 0, Math.PI * 2);
+    ctx.fill();
+  });
+  ctx.restore();
 
   ctx.restore();
 
