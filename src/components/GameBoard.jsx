@@ -44,6 +44,151 @@ import {
 import { findNextHeroAction, findNearestFreeHeroCell, COMBAT_RANGE, hasClearLineOfSight } from '../utils/minerPathfinding';
 import { getHeroById, getWeaponById } from '../data/heroRoster';
 
+// Renderização top-down da base médica: leitos ocupados/vagos e pátio de reserva.
+function drawBaseShelterVisual(ctx, house, miners, now) {
+  if (!house || house.level < 1 || !house.slots) return;
+
+  // Limites internos fixos do complexo central: não invade estradas nem terreno adjacente.
+  const x = 4 * TILE_SIZE + 6;
+  const y = 4 * TILE_SIZE + 6;
+  const w = 7 * TILE_SIZE - 12;
+  const h = 4 * TILE_SIZE - 12;
+  const color = house.color || '#38bdf8';
+  const inBeds = miners.filter(m => m.status === 'house').slice(0, house.slots);
+  const waiting = miners.filter(m => m.status === 'waiting_house');
+  const resting = miners.filter(m => (m.status === 'reserve' || m.status === 'sleep') &&
+    m.status !== 'injured' && !m.injuredAwaitingRescue &&
+    (Number(m.currentHealth ?? m.maxHealth ?? 100) / Number(m.maxHealth || 100)) * 100 > 5).slice(0, 4);
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(x, y, w, h);
+  ctx.clip();
+
+  ctx.fillStyle = 'rgba(7, 16, 27, 0.94)';
+  ctx.fillRect(x, y, w, h);
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 3;
+  ctx.strokeRect(x + 1.5, y + 1.5, w - 3, h - 3);
+
+  const headerH = 28;
+  const header = ctx.createLinearGradient(x, y, x + w, y + headerH);
+  header.addColorStop(0, color + '55');
+  header.addColorStop(1, 'rgba(15, 23, 42, 0.95)');
+  ctx.fillStyle = header;
+  ctx.fillRect(x + 2, y + 2, w - 4, headerH);
+
+  ctx.font = 'bold 13px var(--font-tech)';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = '#f8fafc';
+  ctx.fillText('AMBULATÓRIO • NÍVEL ' + house.level, x + 10, y + 16);
+  ctx.textAlign = 'right';
+  ctx.fillStyle = color;
+  ctx.fillText(inBeds.length + '/' + house.slots + ' LEITOS', x + w - 10, y + 16);
+
+  // Ala de leitos: cinco por fileira; cada nível acrescenta fileiras reais e visíveis.
+  const bedStartX = x + 8;
+  const bedStartY = y + headerH + 8;
+  const bedW = 64;
+  const bedH = 52;
+  const gapX = 7;
+  const bedAreaW = 5 * bedW + 4 * gapX;
+  const rows = Math.ceil(house.slots / 5);
+  const bedAreaH = h - headerH - 16;
+  const rowStep = bedAreaH / rows;
+
+  for (let i = 0; i < house.slots; i++) {
+    const row = Math.floor(i / 5);
+    const col = i % 5;
+    const bx = bedStartX + col * (bedW + gapX);
+    const by = bedStartY + row * rowStep + (rowStep - bedH) / 2;
+    const patient = inBeds[i];
+
+    ctx.fillStyle = patient ? 'rgba(30, 64, 91, 0.95)' : 'rgba(15, 23, 42, 0.86)';
+    ctx.fillRect(bx, by, bedW, bedH);
+    ctx.strokeStyle = patient ? '#60a5fa' : 'rgba(148, 163, 184, 0.55)';
+    ctx.lineWidth = patient ? 2 : 1.2;
+    ctx.strokeRect(bx + 1, by + 1, bedW - 2, bedH - 2);
+
+    // Colchão e cabeceira
+    ctx.fillStyle = patient ? 'rgba(96, 165, 250, 0.25)' : 'rgba(148, 163, 184, 0.12)';
+    ctx.fillRect(bx + 5, by + 6, bedW - 10, bedH - 12);
+    ctx.fillStyle = patient ? '#e2e8f0' : '#94a3b8';
+    ctx.fillRect(bx + 7, by + 8, 13, 12);
+
+    if (patient) {
+      // Herói deitado: cabeça, corpo e cobertor, em vista superior.
+      const cy = by + bedH / 2 + 1;
+      ctx.fillStyle = '#f1c7a5';
+      ctx.beginPath();
+      ctx.ellipse(bx + 15, cy, 7, 8, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = patient.color || '#38bdf8';
+      ctx.fillRect(bx + 23, cy - 9, 12, 18);
+      ctx.fillStyle = '#2563eb';
+      ctx.fillRect(bx + 34, cy - 12, 23, 24);
+      ctx.fillStyle = 'rgba(226, 232, 240, 0.85)';
+      ctx.fillRect(bx + 37, cy - 9, 3, 18);
+      ctx.font = 'bold 8px var(--font-tech)';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillText('PV ' + Math.round((Number(patient.currentHealth || 5) / Number(patient.maxHealth || 100)) * 100) + '%', bx + 45, by + bedH - 4);
+    } else {
+      ctx.font = 'bold 8px var(--font-tech)';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#94a3b8';
+      ctx.fillText('LEITO LIVRE', bx + bedW / 2, by + bedH - 7);
+    }
+  }
+
+  // Pátio de descanso para sobreviventes saudáveis que não estão em combate.
+  const patioX = bedStartX + bedAreaW + 12;
+  const patioW = x + w - patioX - 8;
+  ctx.fillStyle = 'rgba(15, 23, 42, 0.62)';
+  ctx.fillRect(patioX, y + headerH + 6, patioW, h - headerH - 12);
+  ctx.strokeStyle = 'rgba(148, 163, 184, 0.35)';
+  ctx.strokeRect(patioX, y + headerH + 6, patioW, h - headerH - 12);
+  ctx.font = 'bold 10px var(--font-tech)';
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#cbd5e1';
+  ctx.fillText('PÁTIO', patioX + patioW / 2, y + headerH + 18);
+
+  resting.forEach((hero, index) => {
+    const col = index % 2;
+    const row = Math.floor(index / 2);
+    const px = patioX + 35 + col * 58;
+    const py = y + headerH + 50 + row * 62;
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+    ctx.beginPath();
+    ctx.ellipse(px, py + 18, 13, 5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#cbd5e1';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(px - 4, py + 8); ctx.lineTo(px - 7, py + 18);
+    ctx.moveTo(px + 4, py + 8); ctx.lineTo(px + 7, py + 18);
+    ctx.stroke();
+    ctx.fillStyle = hero.color || '#22c55e';
+    ctx.fillRect(px - 9, py - 8, 18, 18);
+    ctx.fillStyle = '#f1c7a5';
+    ctx.beginPath();
+    ctx.arc(px, py - 14, 7, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#f8fafc';
+    ctx.font = '8px var(--font-tech)';
+    ctx.fillText((hero.name || 'Herói').slice(0, 12), px, py + 29);
+  });
+
+  if (waiting.length > 0) {
+    ctx.fillStyle = '#fbbf24';
+    ctx.font = 'bold 10px var(--font-tech)';
+    ctx.textAlign = 'center';
+    ctx.fillText('FILA: ' + waiting.length, patioX + patioW / 2, y + h - 12);
+  }
+  ctx.restore();
+}
+
 export default function GameBoard({ 
   mine, 
   mapData, 
@@ -60,6 +205,7 @@ export default function GameBoard({
   statsResetTrigger = 0,
   houseSlots = 5,
   recoverySpeedPct = 100,
+  houseVisualTier = null,
   gameSpeed = 1 
 }) {
   const canvasRef = useRef(null);
@@ -110,6 +256,8 @@ export default function GameBoard({
 
   const houseConfigRef = useRef({ houseSlots, recoverySpeedPct });
   houseConfigRef.current = { houseSlots, recoverySpeedPct };
+  const houseVisualRef = useRef(houseVisualTier);
+  houseVisualRef.current = houseVisualTier;
 
   const gameStateRef = useRef({
     grid: mapData.grid,
@@ -536,10 +684,10 @@ export default function GameBoard({
           const healRatePerSec = (maxHealth * 0.075) * (recSpeedPct / 100); // ~13 segundos para regenerar de 5% a 100%
           miner.currentHealth = Math.min(maxHealth, (miner.currentHealth || (maxHealth * 0.05)) + healRatePerSec * dt);
 
-          // Quando atinge 100% de vida: alta médica e retorno automático ao combate!
+          // Quando atinge 100% de vida: alta médica e retorno à reserva.
           if (miner.currentHealth >= maxHealth) {
             miner.currentHealth = maxHealth;
-            miner.status = 'work';
+            miner.status = 'reserve';
             miner.injuredAwaitingRescue = false;
             miner.moveCooldown = 0.5;
 
@@ -1422,6 +1570,9 @@ export default function GameBoard({
 
       const railY = 5 * TILE_SIZE + 24;
       drawContinuousCaveFloor(ctx, logicalWidth, logicalHeight, mine, now, isBossAlive);
+      if (mine?.id === 'canyon') {
+        drawBaseShelterVisual(ctx, houseVisualRef.current, state.miners, now);
+      }
       if (mine?.id !== 'canyon') {
         drawTunnelPortals(ctx, logicalWidth, railY);
       }
