@@ -401,7 +401,7 @@ export default function App() {
     else setIsUserProfileOpen(false);
   };
 
-  const handleWithdrawClaim = (amount, netUsdt, taxPct) => {
+  const handleWithdrawClaim = (amount, netUsdt, taxPct, gasAccounting = {}) => {
     let nextBcoinBalance = bcoin;
     setBcoin(prev => {
       const nextBalance = parseFloat(Math.max(0, prev - amount).toFixed(3));
@@ -422,7 +422,15 @@ export default function App() {
         amountMnc: amount,
         netUsdt: netUsdt,
         taxPct: taxPct,
-        details: { mncRemaining: nextBcoinBalance }
+        details: {
+          mncRemaining: nextBcoinBalance,
+          gasPayer: gasAccounting.gasPayer || 'project',
+          gasNetwork: gasAccounting.gasNetwork || 'solana',
+          gasAsset: gasAccounting.gasAsset || 'SOL',
+          gasCostUsdt: gasAccounting.gasCostUsdt ?? null,
+          gasStatus: gasAccounting.gasStatus || 'pending_onchain_integration',
+          feeAccounting: 'gas_cost_deducted_from_project_share_of_withdrawal_fee'
+        }
       });
     }
   };
