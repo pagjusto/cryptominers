@@ -23,8 +23,9 @@ As velocidades existentes foram preservadas: Básico 100%, Reforçado 125% e Ava
 - Os leitos são mostrados em fileiras de cinco: 1 fileira no Básico, 2 no Reforçado e 3 no Avançado.
 - Cada leito mostra visualmente se está livre ou ocupado.
 - Sobreviventes em tratamento aparecem deitados nos leitos, com indicador de PV.
-- Sobreviventes saudáveis em reserva aparecem no pátio interno como personagens descansando.
-- A fila de espera é indicada visualmente e não ocupa leito até ser admitida.
+- Sobreviventes saudáveis em reserva aparecem em pé no pátio interno da base; a representação inclui todos, não apenas os primeiros quatro.
+- Feridos na fila de espera também aparecem em pé dentro do pátio, identificados separadamente como fila, sem ocupar leito nem aparecer deitados.
+- Quando um ferido é admitido, passa a aparecer deitado no leito correspondente; ao receber alta, sai do leito e retorna à reserva dentro da base.
 - A capacidade visual usa o mesmo valor de slots passado ao sistema de tratamento, para não divergir da capacidade real.
 
 ## Comportamento
