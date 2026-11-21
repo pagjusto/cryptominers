@@ -110,45 +110,6 @@ export default function HeroList({
         </button>
       </div>
 
-      {/* 3. MÉDICA ÍRIS: TRATAMENTO E RECUPERAÇÃO DO ABRIGO (NPC / NÃO JOGADOR) */}
-      <div 
-        className="mb-3.5 p-2.5 sm:p-3 rounded-2xl bg-gradient-to-r from-emerald-500/15 via-teal-500/15 to-emerald-500/15 border border-emerald-500/40 hover:border-emerald-400 transition flex items-center justify-between group shadow-sm shrink-0"
-      >
-        <div className="flex items-center gap-3">
-          {/* Avatar da Médica Íris (Borda Branca e Enquadramento Padrão Idêntico aos Combatentes) */}
-          <div 
-            className="w-[52px] h-[52px] rounded-2xl border-2 shadow-lg shrink-0 bg-slate-900/90 flex items-center justify-center overflow-hidden transition-all duration-300"
-            title="Dra. Íris (Médica do Abrigo)"
-            style={{
-              borderColor: '#ffffff',
-              boxShadow: '0 0 10px rgba(255, 255, 255, 0.45)',
-              backgroundImage: 'url(/assets/hero-avatars.png?v=4)',
-              backgroundRepeat: 'no-repeat',
-              backgroundSize: '676px 52px',
-              backgroundPosition: '-208px center',
-              imageRendering: 'auto'
-            }}
-          />
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-tech font-bold text-xs sm:text-sm text-emerald-300">
-                Dra. Íris • Médica do Abrigo
-              </span>
-              <span className="text-[9px] bg-emerald-400/20 text-emerald-300 px-1.5 py-0.2 rounded-full border border-emerald-400/40 font-bold font-mono">
-                ENFERMARIA
-              </span>
-            </div>
-            <span className="text-[11px] text-slate-400 font-tech block">
-              Cuidados médicos contínuos e recuperação de vida para os sobreviventes
-            </span>
-          </div>
-        </div>
-
-        <span className="px-2.5 py-1 rounded-xl bg-emerald-950/80 text-emerald-300 border border-emerald-500/40 font-mono font-bold text-[10px] shrink-0">
-          HOSPITAL ATIVO
-        </span>
-      </div>
-
       {/* 4. LISTA DE SOBREVIVENTES */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden space-y-2.5 pr-1.5 no-scrollbar">
         {miners.map((miner, index) => {
