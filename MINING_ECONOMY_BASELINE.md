@@ -14,17 +14,17 @@ Status: configuração aprovada como referência do cenário mediano.
 
 ## Produção de referência
 
-- Produção total da equipe: **480,24 MNC por dia**.
+- Produção total da equipe: **480,24 Coins por dia**.
 - Janela de referência: **24 horas de mineração válida**.
 - A produção é acumulada por segundo de mineração válido.
-- Taxa média da equipe completa: **0,0055583333 MNC por segundo**.
+- Taxa média da equipe completa: **0,0055583333 Coins por segundo**.
 - Não há divisão fixa de recompensa por Boss. O tempo válido de mineração é o que acumula a produção.
 
 ## Produção individual oficial por raridade
 
-Tabela de produção aprovada em 18/11/2026, com seis raridades. O herói Common é a referência-base de 20,88 MNC por dia; os demais valores são calculados pelos multiplicadores aprovados.
+Tabela de produção aprovada em 18/11/2026, com seis raridades. O herói Common é a referência-base de 20,88 Coins por dia; os demais valores são calculados pelos multiplicadores aprovados.
 
-| Raridade | Multiplicador | MNC por herói/dia | MNC por herói/hora | MNC por herói/segundo |
+| Raridade | Multiplicador | Coins por herói/dia | Coins por herói/hora | Coins por herói/segundo |
 |---|---:|---:|---:|---:|
 | Common | 1× | 20,88 | 0,8700 | 0,0002416667 |
 | Rare | 1,5× | 31,32 | 1,3050 | 0,0003625000 |
@@ -43,18 +43,18 @@ A produção é acumulada por segundo de mineração válida. As frações perma
 
 | Raridade | Heróis | Produção diária por raridade |
 |---|---:|---:|
-| Comum | 6 | 125,28 MNC |
-| Raro | 4 | 125,28 MNC |
-| Épico | 4 | 167,04 MNC |
-| Lendário | 1 | 62,64 MNC |
-| **Total** | **15** | **480,24 MNC** |
+| Comum | 6 | 125,28 Coins |
+| Raro | 4 | 125,28 Coins |
+| Épico | 4 | 167,04 Coins |
+| Lendário | 1 | 62,64 Coins |
+| **Total** | **15** | **480,24 Coins** |
 
 ## Fórmula-base
 
 A composição do cenário mediano representa 23 unidades ponderadas de mineração:
 
     (6 × 1) + (4 × 1,5) + (4 × 2) + (1 × 3) = 23
-    480,24 MNC ÷ 23 = 20,88 MNC por unidade 1× ao dia
+    480,24 Coins ÷ 23 = 20,88 Coins por unidade 1× ao dia
 
 A taxa individual diária é: 20,88 × multiplicador da raridade.
 
@@ -62,10 +62,10 @@ A tabela oficial contempla seis raridades, mas a composição de referência do 
 
 ### Taxas agregadas do cenário mediano
 
-- Produção diária: **480,24 MNC**.
-- Produção por hora: **20,01 MNC**.
-- Produção por minuto: **0,3335 MNC**.
-- Produção por segundo: **0,0055583333 MNC**.
+- Produção diária: **480,24 Coins**.
+- Produção por hora: **20,01 Coins**.
+- Produção por minuto: **0,3335 Coins**.
+- Produção por segundo: **0,0055583333 Coins**.
 
 Essas taxas representam a equipe completa durante 24 horas de mineração válida, antes dos ajustes de eficiência por envelhecimento e estrelas.
 
@@ -178,7 +178,7 @@ Aos 270 dias, o herói chega a 80 anos, tem eficiência-base 0%, HP 0% e se apos
 
 - Estes números representam a base do cenário mediano com mineração válida durante 24 horas.
 - Atributos individuais dos heróis e multiplicadores de casa podem ajustar a produção efetiva conforme as regras do jogo.
-- O valor de 480,24 MNC/dia é a referência total da equipe mediana, não uma recompensa por Boss.
+- O valor de 480,24 Coins/dia é a referência total da equipe mediana, não uma recompensa por Boss.
 - Os valores de eficiência por idade e o bônus por estrelas são fatores distintos, combinados pela fórmula acima.
 - Não alterar esta base sem uma nova decisão explícita de balanceamento.
 
