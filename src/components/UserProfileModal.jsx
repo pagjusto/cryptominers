@@ -1000,7 +1000,7 @@ export default function UserProfileModal({
                       <span>Como funciona a taxa de saque?</span>
                     </div>
                     <p>
-                      Inspirada no modelo econômico do CryptoZombies: jogadores com ROI inicial pagam taxa reduzida (10%); conforme o lucro acumulado ultrapassa 100%, 200% ou 300% do investimento inicial, a taxa escala progressivamente até 30%, alimentando o tesouro da mina e garantindo longevidade ao jogo.
+                      A taxa é calculada pelo ROI já recuperado em saques efetivamente recebidos, em relação ao investimento elegível: 15% para ROI de 0% a 49%; 10% de 50% a 99%; 5% de 100% a 149%; e 3% a partir de 150%. MHC minerada, mas ainda não sacada, não conta como valor recuperado.
                     </p>
                   </div>
 
