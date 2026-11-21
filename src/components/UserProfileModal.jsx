@@ -134,7 +134,7 @@ export default function UserProfileModal({
     }
   };
 
-  const minWithdrawUsd = 50;
+  const minWithdrawUsd = 40;
   const minWithdrawMnc = Math.ceil(minWithdrawUsd / (minerRate || 0.01));
 
   // Cálculo de Saque com Base na Cotação da Minercoin
@@ -166,6 +166,13 @@ export default function UserProfileModal({
       grossMiner: parsedWithdrawAmount,
       taxPct: currentWithdrawalTax,
       feeUsdt: withdrawFeeUsdt,
+      // O gas é pago pelo projeto com a taxa percentual; o valor real só existe após a transação on-chain.
+      gasPayer: 'project',
+      gasNetwork: 'solana',
+      gasAsset: 'SOL',
+      gasCostUsdt: null,
+      gasStatus: 'pending_onchain_integration',
+      projectFeeAfterGasUsdt: null,
       netUsdt: withdrawNetUsdt,
       walletAddress: address,
       walletType: walletType || 'metamask'
@@ -173,7 +180,7 @@ export default function UserProfileModal({
 
     // Callback para App.jsx deduzir bcoin e creditar usdt na carteira
     if (onWithdraw) {
-      onWithdraw(parsedWithdrawAmount, withdrawNetUsdt, currentWithdrawalTax);
+      onWithdraw(parsedWithdrawAmount, withdrawNetUsdt, currentWithdrawalTax, { gasPayer: 'project', gasNetwork: 'solana', gasAsset: 'SOL', gasCostUsdt: null, gasStatus: 'pending_onchain_integration' });
     }
 
     // Salvar no histórico
@@ -793,6 +800,14 @@ export default function UserProfileModal({
                     <div className="flex justify-between text-slate-400">
                       <span>Taxa de Saque ({withdrawSuccessReceipt.taxPct}%):</span>
                       <span className="text-rose-400">-${withdrawSuccessReceipt.feeUsdt.toFixed(2)} USDT</span>
+                    </div>
+                    <div className="flex justify-between text-slate-400">
+                      <span>Gas Solana (pago pelo projeto):</span>
+                      <span className="text-amber-300">{withdrawSuccessReceipt.gasCostUsdt == null ? 'A apurar na transação on-chain' : `${withdrawSuccessReceipt.gasCostUsdt.toFixed(4)} USDT`}</span>
+                    </div>
+                    <div className="flex justify-between text-slate-400">
+                      <span>Saldo da taxa após gas:</span>
+                      <span className="text-slate-200">{withdrawSuccessReceipt.projectFeeAfterGasUsdt == null ? 'Pendente do custo real do gas' : `${withdrawSuccessReceipt.projectFeeAfterGasUsdt.toFixed(4)} USDT`}</span>
                     </div>
                     <div className="flex justify-between text-emerald-400 font-bold border-t border-slate-800 pt-1.5">
                       <span>Crédito Líquido na Carteira:</span>
