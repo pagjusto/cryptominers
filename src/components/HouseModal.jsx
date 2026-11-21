@@ -27,7 +27,7 @@ export default function HouseModal({
     const fragCost = targetHouse.fragmentCost || 0;
     const mncCost = targetHouse.mncCost || 0;
     if (constructionFragments < fragCost || minerBalance < mncCost) {
-      alert(`Recursos insuficientes. Evolução exige ${fragCost} Fragmentos e ${mncCost.toLocaleString('pt-BR')} MNC. Saldo atual: ${constructionFragments} Fragmentos e ${minerBalance.toLocaleString('pt-BR')} MNC.`);
+      alert(`Recursos insuficientes. Evolução exige ${fragCost} Fragmentos e ${mncCost.toLocaleString('pt-BR')} Coins. Saldo atual: ${constructionFragments} Fragmentos e ${minerBalance.toLocaleString('pt-BR')} Coins.`);
       return;
     }
     if (onUpgradeWithFragments) {
@@ -347,8 +347,8 @@ export default function HouseModal({
                         <span className="font-mono text-emerald-400 font-bold">🧱 {fragCost}</span>
                       </div>
                       <div className="flex items-center justify-between text-xs">
-                        <span className="font-tech text-slate-400">Custo em MNC:</span>
-                        <span className="font-mono text-amber-300 font-bold">🪙 {mncCost.toLocaleString('pt-BR')} MNC</span>
+                        <span className="font-tech text-slate-400">Custo em Coins:</span>
+                        <span className="font-mono text-amber-300 font-bold">🪙 {mncCost.toLocaleString('pt-BR')} Coins</span>
                       </div>
 
                       {isOwned ? (
