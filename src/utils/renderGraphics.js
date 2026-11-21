@@ -276,9 +276,9 @@ export function initCityMap(onLoaded) {
   initSirenTower();
 
   const mapSources = {
-    1: `/city_map_lvl1.webp?v=2`,
-    2: `/city_map_lvl2.webp?v=2`,
-    3: `/city_map_lvl3.webp?v=2`
+    1: `/city_map_lvl1.webp?v=3`,
+    2: `/city_map_lvl2.webp?v=3`,
+    3: `/city_map_lvl3.webp?v=3`
   };
 
   [1, 2, 3].forEach((lvl) => {
@@ -302,7 +302,7 @@ export function initCityMap(onLoaded) {
         // Fallback para /city_map.webp
         const fallbackImg = new Image();
         fallbackImg.crossOrigin = 'anonymous';
-        fallbackImg.src = `/city_map.webp?v=2`;
+        fallbackImg.src = `/city_map.webp?v=3`;
         fallbackImg.onload = () => {
           cityMapImages[1] = fallbackImg;
           cityMapsLoaded[1] = true;

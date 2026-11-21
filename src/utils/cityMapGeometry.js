@@ -52,73 +52,39 @@ export function isCityObstacle(c, r) {
   // Limites exteriores do mapa (fora do grid de combate)
   if (c < 0 || c >= GRID_COLS || r < 0 || r >= GRID_ROWS) return true;
 
-  // 1. RUÍNA NOROESTE (Prédio de concreto destruído no topo esquerdo)
-  // Circulado pelo usuário: prédio principal e escombros adjacentes
+  // REGRA OFICIAL DO USUÁRIO:
+  // "agora sem as cercas e sacos de areia os zumbis e herois podem andar livremente sem ficar travados exeto nas contruçoes carros torre e outdoor"
+
+  // 1. CONSTRUÇÕES - RUÍNA NOROESTE (Prédio de concreto destruído no topo esquerdo)
   if (c >= 2 && c <= 4 && (r === 1 || r === 2)) return true;
-  if (c === 2 && r === 3) return true; // Escombros no gramado sul da ruína
 
   // 2. OUTDOOR / BILLBOARD "CRYPTOZOMBIES" (Norte no gramado)
-  // Circulado pelo usuário: painel e sapatas metálicas de sustentação
   if ((c === 7 || c === 8) && (r === 0 || r === 1)) return true;
 
   // 3. TORRE DE VIGIA NORTE (Madeira no topo direito)
-  // Circulado pelo usuário: torre elevada em (11, 0)
   if (c === 11 && r === 0) return true;
 
-  // 4. BARRICADAS DE SACOS DE AREIA NORTE (Acima da base militar)
-  // Deixa passagem livre nas colunas 6, 7 e 8 para evitar armadilha de 1 bloco sob o outdoor
-  if ((c === 5 || c === 9) && r === 2) return true;
-
-  // 5. VIA OESTE & GRAMADO LIVRE (Conecta o noroeste à avenida principal)
-  // Deixado 100% livre em (1, 4) e (2, 4) para permitir fluxo contínuo de heróis e zumbis
-
-  // 6. CARROS ABANDONADOS NO ASFALTO (Oeste e Leste)
-  // Circulado pelo usuário: veículos parados nas avenidas asfaltadas
+  // 4. CARROS ABANDONADOS NO ASFALTO (Oeste e Leste)
   if (c === 1 && r === 5) return true; // Carro na pista oeste
   if ((c === 13 || c === 14) && r === 5) return true; // Carro na pista leste
 
-  // 7. CERCAS DE ARAME, BARRICADAS E ESCOMBROS OESTE
-  // Circulado pelo usuário: cercas e barricadas que contornam a via oeste
-  if (c === 3 && r === 3) return true; // Cerca e caixotes noroeste
-  if (c === 3 && r === 4) return true; // Barricada e cerca da guarita oeste
-  if (c === 3 && r === 6) return true; // Cerca longa de arame sudoeste (c=2 é via aberta)
-  if (c === 3 && r === 7) return true; // Canto inferior da cerca sudoeste
-
-  // 7.1. TORRE DE SIRENE E ALARME DE VIGIA (Local exato demarcado em vermelho)
-  // Regra Oficial do Usuário: "os zumbies e herois nao podem passar por cima dela"
+  // 5. TORRE DE SIRENE E ALARME DE VIGIA OESTE
   if (c === 2 && r === 3) return true;
 
-  // 8. BASE MILITAR FORTIFICADA & COMPLEXO HOSPITALAR (Santuário Central)
-  // Circulado pelo usuário: todo o complexo murado, pátio, ambulância, hangar e hospital
+  // 6. CONSTRUÇÃO CENTRAL - BASE MILITAR & HOSPITAL DE SOBREVIVÊNCIA
+  // Todo o quadrado fortificado central (muros e interior com leitos e armaria)
   if (isBaseCompound(c, r)) return true;
 
-  // 9. BARRICADAS DE SACOS DE AREIA SUL (Abaixo da base militar)
-  // Circulado pelo usuário: sacos de areia sudoeste e sudeste do portão sul
-  if ((c === 5 || c === 6) && r === 8) return true; // Barricada sul-oeste
-  if ((c === 8 || c === 9) && r === 8) return true; // Barricada sul-leste
+  // 7. CONSTRUÇÕES - RUÍNA SUDESTE (Prédio de concreto destruído no canto inferior direito)
+  if (c >= 11 && c <= 13 && (r === 8 || r === 9)) return true;
 
-  // 10. CAIXOTE DE MADEIRA SUL (Gramado/estrada sul)
-  // Circulado pelo usuário: pequeno caixote em (8, 9)
-  if (c === 8 && r === 9) return true;
-
-  // 11. RUÍNA SUDESTE (Prédio de concreto destruído no canto inferior direito)
-  // Circulado pelo usuário: todo o perímetro da ruína, muros e escombros
-  if (c >= 10 && c <= 13 && (r === 8 || r === 9)) return true;
-  if ((c === 11 || c === 12) && r === 7) return true; // Escombros e cerca norte da ruína
-
-  // 12. CERCAS DE ARAME E BLOQUEIOS DE CONCRETO LESTE
-  // Circulado pelo usuário: cerca e barricada na via leste
-  if ((c === 11 || c === 12) && r === 6) return true; // Cerca leste
-  if (c === 13 && r === 6) return true; // Bloqueio de concreto no asfalto leste
-
-  // 13. SILO / RESERVATÓRIO METÁLICO DE COMBUSTÍVEL LESTE
-  // Circulado pelo usuário: tanque cilíndrico na colina leste
+  // 8. CONSTRUÇÕES - SILO / RESERVATÓRIO METÁLICO DE COMBUSTÍVEL LESTE
   if ((c === 13 || c === 14) && (r === 3 || r === 4)) return true;
 
-  // 14. GUARITA / TORRE DE VIGIA E CERCA LESTE
-  // Circulado pelo usuário: guarita elevada e cercas em (11..12, 3..4)
-  if ((c === 11 || c === 12) && (r === 3 || r === 4)) return true;
+  // 9. CONSTRUÇÕES - GUARITA ELEVADA LESTE
+  if (c === 11 && (r === 3 || r === 4)) return true;
 
+  // Todas as demais estradas, caminhos de terra batida e gramados estão 100% livres
   return false;
 }
 
