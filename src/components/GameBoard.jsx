@@ -78,7 +78,7 @@ function drawBaseShelterVisual(ctx, house, miners, now) {
   ctx.fillStyle = header;
   ctx.fillRect(x + 2, y + 2, w - 4, headerH);
 
-  ctx.font = 'bold 13px var(--font-tech)';
+  ctx.font = 'bold 13px monospace';
   ctx.textAlign = 'left';
   ctx.textBaseline = 'middle';
   ctx.fillStyle = '#f8fafc';
@@ -130,12 +130,12 @@ function drawBaseShelterVisual(ctx, house, miners, now) {
       ctx.fillRect(bx + 34, cy - 12, 23, 24);
       ctx.fillStyle = 'rgba(226, 232, 240, 0.85)';
       ctx.fillRect(bx + 37, cy - 9, 3, 18);
-      ctx.font = 'bold 8px var(--font-tech)';
+      ctx.font = 'bold 8px monospace';
       ctx.textAlign = 'center';
       ctx.fillStyle = '#f8fafc';
       ctx.fillText('PV ' + Math.round((Number(patient.currentHealth || 5) / Number(patient.maxHealth || 100)) * 100) + '%', bx + 45, by + bedH - 4);
     } else {
-      ctx.font = 'bold 8px var(--font-tech)';
+      ctx.font = 'bold 8px monospace';
       ctx.textAlign = 'center';
       ctx.fillStyle = '#94a3b8';
       ctx.fillText('LEITO LIVRE', bx + bedW / 2, by + bedH - 7);
@@ -149,7 +149,7 @@ function drawBaseShelterVisual(ctx, house, miners, now) {
   ctx.fillRect(patioX, y + headerH + 6, patioW, h - headerH - 12);
   ctx.strokeStyle = 'rgba(148, 163, 184, 0.35)';
   ctx.strokeRect(patioX, y + headerH + 6, patioW, h - headerH - 12);
-  ctx.font = 'bold 10px var(--font-tech)';
+  ctx.font = 'bold 10px monospace';
   ctx.textAlign = 'center';
   ctx.fillStyle = '#cbd5e1';
   ctx.fillText('PÁTIO', patioX + patioW / 2, y + headerH + 18);
@@ -176,13 +176,13 @@ function drawBaseShelterVisual(ctx, house, miners, now) {
     ctx.arc(px, py - 14, 7, 0, Math.PI * 2);
     ctx.fill();
     ctx.fillStyle = '#f8fafc';
-    ctx.font = '8px var(--font-tech)';
+    ctx.font = '8px monospace';
     ctx.fillText((hero.name || 'Herói').slice(0, 12), px, py + 29);
   });
 
   if (waiting.length > 0) {
     ctx.fillStyle = '#fbbf24';
-    ctx.font = 'bold 10px var(--font-tech)';
+    ctx.font = 'bold 10px monospace';
     ctx.textAlign = 'center';
     ctx.fillText('FILA: ' + waiting.length, patioX + patioW / 2, y + h - 12);
   }
@@ -1758,7 +1758,7 @@ export default function GameBoard({
 
       state.floatTexts.forEach(ft => {
         ctx.save();
-        ctx.font = 'bold 13px var(--font-tech)';
+        ctx.font = 'bold 13px monospace';
         ctx.fillStyle = ft.color;
         ctx.globalAlpha = Math.max(0, ft.opacity);
         ctx.textAlign = 'center';
