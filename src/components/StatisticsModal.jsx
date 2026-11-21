@@ -39,7 +39,7 @@ import {
 } from '../utils/upgradeSimulatorEngine';
 import { calculateRoiScenario } from '../utils/roiSimulatorEngine';
 import { getCryptoZombiesConfig } from '../data/cryptoZombiesConfig';
-import { MINER_CLASSES } from '../data/minersData';
+import { Coins_CLASSES } from '../data/minersData';
 
 export default function StatisticsModal({
   isOpen,
@@ -146,7 +146,7 @@ export default function StatisticsModal({
     const houseMultiplier = currentHouse?.recoverySpeedMultiplier || 1.0;
 
     return miners.map(m => {
-      const classInfo = MINER_CLASSES[m.classId] || MINER_CLASSES.miner;
+      const classInfo = Coins_CLASSES[m.classId] || Coins_CLASSES.miner;
       const power = m.power || 2;
       const speed = m.speed || 1;
       const maxEnergy = m.maxStamina || 100;
@@ -337,7 +337,7 @@ export default function StatisticsModal({
           </div>
 
           <div className="hidden md:flex items-center gap-2 text-xs font-mono text-slate-400">
-            <span>Saldo: <b className="text-amber-300">{bcoin.toFixed(3)} MINER</b></span>
+            <span>Saldo: <b className="text-amber-300">{bcoin.toFixed(3)} Coins</b></span>
             <span>•</span>
             <span>Casa: <b className="text-blue-300">{currentHouse.name}</b></span>
           </div>
@@ -361,7 +361,7 @@ export default function StatisticsModal({
                   </div>
                   <div className="my-1">
                     <span className="text-2xl font-arcade text-amber-300 font-bold">{realStats.currentHourlyProduction}</span>
-                    <span className="text-xs font-arcade text-amber-400/80 ml-1">MINER/h</span>
+                    <span className="text-xs font-arcade text-amber-400/80 ml-1">Coins/h</span>
                   </div>
                   <span className="text-xs text-slate-400 font-mono">
                     ≈ ${(realStats.currentHourlyProduction * (config.minerCoinUsdtRate || 1)).toFixed(2)} USDT por hora ativa
@@ -375,7 +375,7 @@ export default function StatisticsModal({
                   </div>
                   <div className="my-1">
                     <span className="text-2xl font-arcade text-emerald-400 font-bold">{realStats.effectiveDailyCoins}</span>
-                    <span className="text-xs font-arcade text-emerald-400/80 ml-1">MINER/dia</span>
+                    <span className="text-xs font-arcade text-emerald-400/80 ml-1">Coins/dia</span>
                   </div>
                   <span className="text-xs text-emerald-300/80 font-mono font-bold">
                     ≈ ${realStats.dailyUsd} USDT/dia (Ciclo real com descanso)
@@ -389,7 +389,7 @@ export default function StatisticsModal({
                   </div>
                   <div className="my-1">
                     <span className="text-2xl font-arcade text-sky-300 font-bold">{realStats.effectiveMonthlyCoins}</span>
-                    <span className="text-xs font-arcade text-sky-400/80 ml-1">MINER/mês</span>
+                    <span className="text-xs font-arcade text-sky-400/80 ml-1">Coins/mês</span>
                   </div>
                   <span className="text-xs text-sky-300 font-mono">
                     ≈ ${realStats.monthlyUsd} USDT/mês projetado
@@ -486,14 +486,14 @@ export default function StatisticsModal({
               {/* Informações Complementares da Conta */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800 text-xs font-tech">
-                  <span className="text-slate-400 block mb-1">Total de Minercoins Coletadas</span>
-                  <b className="text-base font-mono text-emerald-400">{totalMinedSession.toFixed(3)} MINER</b>
+                  <span className="text-slate-400 block mb-1">Total de Coins Coletadas</span>
+                  <b className="text-base font-mono text-emerald-400">{totalMinedSession.toFixed(3)} Coins</b>
                   <p className="text-[10px] text-slate-500 mt-0.5">Produção histórica e de sessão</p>
                 </div>
 
                 <div className="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800 text-xs font-tech">
                   <span className="text-slate-400 block mb-1">Produção Média por Herói</span>
-                  <b className="text-base font-mono text-amber-300">{realStats.avgProductionPerHero} MINER/dia</b>
+                  <b className="text-base font-mono text-amber-300">{realStats.avgProductionPerHero} Coins/dia</b>
                   <p className="text-[10px] text-slate-500 mt-0.5">Considerando {miners.length} heróis cadastrados</p>
                 </div>
 
@@ -605,7 +605,7 @@ export default function StatisticsModal({
                         <div>
                           {isWorking && (
                             <span className="px-2 py-0.5 rounded-full text-[9px] font-bold font-tech bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 animate-pulse">
-                              MINERANDO ⛏️
+                              CoinsANDO ⛏️
                             </span>
                           )}
                           {isInHouse && (
@@ -646,7 +646,7 @@ export default function StatisticsModal({
                       <div className="grid grid-cols-2 gap-2 text-[10px] font-tech text-slate-300 bg-slate-900/50 p-2 rounded-xl">
                         <div>
                           <span className="text-slate-500 block">Produção por Hora:</span>
-                          <b className="text-amber-300 font-mono text-xs">{hero.coinsPerHour} MINER/h</b>
+                          <b className="text-amber-300 font-mono text-xs">{hero.coinsPerHour} Coins/h</b>
                         </div>
                         <div>
                           <span className="text-slate-500 block">Eficiência Geral:</span>
@@ -865,11 +865,11 @@ export default function StatisticsModal({
                     </div>
                     <div className="flex justify-between text-slate-400">
                       <span>Custo Energia:</span>
-                      <span className="font-mono">{upgradeRoi.energyCostMiner} MINER</span>
+                      <span className="font-mono">{upgradeRoi.energyCostMiner} Coins</span>
                     </div>
                     <div className="flex justify-between text-slate-400">
                       <span>Custo Heróis:</span>
-                      <span className="font-mono">{upgradeRoi.heroLevelCostMiner.toFixed(1)} MINER</span>
+                      <span className="font-mono">{upgradeRoi.heroLevelCostMiner.toFixed(1)} Coins</span>
                     </div>
                     <div className="flex justify-between border-t border-slate-800 pt-1 font-bold text-amber-300">
                       <span>Total Investimento:</span>
@@ -905,26 +905,26 @@ export default function StatisticsModal({
                     <tbody className="divide-y divide-slate-800/60 font-mono text-[11px]">
                       <tr>
                         <td className="py-2.5 px-4 text-slate-300 font-tech">Produção Efetiva por Hora</td>
-                        <td className="py-2.5 px-4 text-slate-400">{realStats.currentHourlyProduction} MINER/h</td>
-                        <td className="py-2.5 px-4 text-amber-300 font-bold">{simStats.simHourlyProduction} MINER/h</td>
+                        <td className="py-2.5 px-4 text-slate-400">{realStats.currentHourlyProduction} Coins/h</td>
+                        <td className="py-2.5 px-4 text-amber-300 font-bold">{simStats.simHourlyProduction} Coins/h</td>
                         <td className="py-2.5 px-4 text-emerald-400 font-bold text-right">
-                          +{(simStats.simHourlyProduction - realStats.currentHourlyProduction).toFixed(3)} MINER/h
+                          +{(simStats.simHourlyProduction - realStats.currentHourlyProduction).toFixed(3)} Coins/h
                         </td>
                       </tr>
                       <tr>
                         <td className="py-2.5 px-4 text-slate-300 font-tech">Produção Diária (24h com revezamento)</td>
-                        <td className="py-2.5 px-4 text-slate-400">{realStats.effectiveDailyCoins} MINER/dia</td>
-                        <td className="py-2.5 px-4 text-amber-300 font-bold">{simStats.simDailyCoins} MINER/dia</td>
+                        <td className="py-2.5 px-4 text-slate-400">{realStats.effectiveDailyCoins} Coins/dia</td>
+                        <td className="py-2.5 px-4 text-amber-300 font-bold">{simStats.simDailyCoins} Coins/dia</td>
                         <td className="py-2.5 px-4 text-emerald-400 font-bold text-right">
-                          +{upgradeRoi.additionalDailyCoins} MINER/dia (+{upgradeRoi.improvementPct}%)
+                          +{upgradeRoi.additionalDailyCoins} Coins/dia (+{upgradeRoi.improvementPct}%)
                         </td>
                       </tr>
                       <tr>
                         <td className="py-2.5 px-4 text-slate-300 font-tech">Produção Mensal Estimada (30d)</td>
-                        <td className="py-2.5 px-4 text-slate-400">{realStats.effectiveMonthlyCoins} MINER/mês</td>
-                        <td className="py-2.5 px-4 text-amber-300 font-bold">{simStats.simMonthlyCoins} MINER/mês</td>
+                        <td className="py-2.5 px-4 text-slate-400">{realStats.effectiveMonthlyCoins} Coins/mês</td>
+                        <td className="py-2.5 px-4 text-amber-300 font-bold">{simStats.simMonthlyCoins} Coins/mês</td>
                         <td className="py-2.5 px-4 text-emerald-400 font-bold text-right">
-                          +{upgradeRoi.additionalMonthlyCoins} MINER/mês
+                          +{upgradeRoi.additionalMonthlyCoins} Coins/mês
                         </td>
                       </tr>
                       <tr>
@@ -1115,7 +1115,7 @@ export default function StatisticsModal({
                   </div>
                 </div>
 
-                {/* 2. SELETOR DA CASA DE MINERAÇÃO */}
+                {/* 2. SELETOR DA CASA DE CoinsAÇÃO */}
                 <div className="mt-4 bg-slate-950/80 p-4 rounded-2xl border border-slate-800 space-y-3 font-tech">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-slate-300 flex items-center gap-1.5 uppercase tracking-wider">
@@ -1225,7 +1225,7 @@ export default function StatisticsModal({
                     Produção Diária
                   </span>
                   <span className="font-arcade text-lg text-emerald-400 font-bold block">
-                    +{currentRoiData.effectiveCoinsPerDay} MINER
+                    +{currentRoiData.effectiveCoinsPerDay} Coins
                   </span>
                   <span className="text-[10px] text-slate-400 font-mono">
                     ≈ ${currentRoiData.dailyUsd} USD / dia
@@ -1240,7 +1240,7 @@ export default function StatisticsModal({
                     {currentRoiData.roiDailyPct}% / dia
                   </span>
                   <span className="text-[10px] text-slate-400 font-mono">
-                    {currentRoiData.effectiveCoinsPerMonth} MINER / mês
+                    {currentRoiData.effectiveCoinsPerMonth} Coins / mês
                   </span>
                 </div>
 
@@ -1328,7 +1328,7 @@ export default function StatisticsModal({
                     Retorno Acumulado Projetado (Bruto em USDT)
                   </span>
                   <span className="text-xs font-mono text-emerald-400 font-bold bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/30">
-                    1 MNC = US$ ${(config.minerCoinUsdtRate || 0.01).toFixed(2)}
+                    1 Coins = US$ ${(config.minerCoinUsdtRate || 0.01).toFixed(2)}
                   </span>
                 </div>
 
@@ -1400,15 +1400,15 @@ export default function StatisticsModal({
                     <tbody className="divide-y divide-slate-800/60 font-mono text-[11px]">
                       <tr>
                         <td className="py-2.5 px-4 text-slate-300 font-tech">Produção Diária Efetiva</td>
-                        <td className="py-2.5 px-4 text-rose-300">{conservativeData.effectiveCoinsPerDay} MINER/dia</td>
-                        <td className="py-2.5 px-4 text-amber-300 font-bold">{expectedData.effectiveCoinsPerDay} MINER/dia</td>
-                        <td className="py-2.5 px-4 text-emerald-400 font-bold text-right">{optimisticData.effectiveCoinsPerDay} MINER/dia</td>
+                        <td className="py-2.5 px-4 text-rose-300">{conservativeData.effectiveCoinsPerDay} Coins/dia</td>
+                        <td className="py-2.5 px-4 text-amber-300 font-bold">{expectedData.effectiveCoinsPerDay} Coins/dia</td>
+                        <td className="py-2.5 px-4 text-emerald-400 font-bold text-right">{optimisticData.effectiveCoinsPerDay} Coins/dia</td>
                       </tr>
                       <tr>
                         <td className="py-2.5 px-4 text-slate-300 font-tech">Produção Mensal (30 dias)</td>
-                        <td className="py-2.5 px-4 text-rose-300">{conservativeData.effectiveCoinsPerMonth} MINER</td>
-                        <td className="py-2.5 px-4 text-amber-300 font-bold">{expectedData.effectiveCoinsPerMonth} MINER</td>
-                        <td className="py-2.5 px-4 text-emerald-400 font-bold text-right">{optimisticData.effectiveCoinsPerMonth} MINER</td>
+                        <td className="py-2.5 px-4 text-rose-300">{conservativeData.effectiveCoinsPerMonth} Coins</td>
+                        <td className="py-2.5 px-4 text-amber-300 font-bold">{expectedData.effectiveCoinsPerMonth} Coins</td>
+                        <td className="py-2.5 px-4 text-emerald-400 font-bold text-right">{optimisticData.effectiveCoinsPerMonth} Coins</td>
                       </tr>
                       <tr>
                         <td className="py-2.5 px-4 text-slate-300 font-tech">ROI Diário Estimado</td>
@@ -1443,7 +1443,7 @@ export default function StatisticsModal({
               <div className="p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800 flex items-start gap-2.5 text-slate-400 text-[11px] font-tech">
                 <Info size={16} className="text-amber-400 shrink-0 mt-0.5" />
                 <p>
-                  <b>Transparência CryptoZombies:</b> Os cálculos acima são estimativas matemáticas calculadas estritamente com base nos parâmetros configurados de probabilidade, produção média, consumo de estamina e cotação oficial configurada de 1 MINER = ${(config.minerCoinUsdtRate || 1.0).toFixed(2)} USDT (não é 1:1 fixo). O simulador considera o funcionamento real da mina (limite de 15 mineradores ativos simultâneos e descansos periódicos na casa) e não constitui garantia de retorno financeiro.
+                  <b>Transparência CryptoZombies:</b> Os cálculos acima são estimativas matemáticas calculadas estritamente com base nos parâmetros configurados de probabilidade, produção média, consumo de estamina e cotação oficial configurada de 1 Coins = ${(config.minerCoinUsdtRate || 1.0).toFixed(2)} USDT (não é 1:1 fixo). O simulador considera o funcionamento real da mina (limite de 15 mineradores ativos simultâneos e descansos periódicos na casa) e não constitui garantia de retorno financeiro.
                 </p>
               </div>
 
@@ -1476,7 +1476,7 @@ export default function StatisticsModal({
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-slate-400 font-tech">Cotação:</span>
                     <span className="font-arcade text-xs font-bold px-2.5 py-1 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-                      1 MNC = US$ ${(config.minerCoinUsdtRate || 0.01).toFixed(2)}
+                      1 Coins = US$ ${(config.minerCoinUsdtRate || 0.01).toFixed(2)}
                     </span>
                     <span className="text-xs text-slate-400 font-tech ml-1">Taxa de Saque:</span>
                     <span className="font-arcade text-xs font-bold px-2.5 py-1 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/40">
@@ -1496,7 +1496,7 @@ export default function StatisticsModal({
                     <span className="text-[10px] text-slate-400 font-tech uppercase block mb-0.5">Total Minerado</span>
                     <b className="font-arcade text-lg text-amber-300">{totalMinedSession.toFixed(2)}</b>
                     <span className="text-[10px] text-slate-400 font-mono block">
-                      MNC (≈ US$ ${(totalMinedSession * (config.minerCoinUsdtRate || 0.01)).toFixed(2)})
+                      Coins (≈ US$ ${(totalMinedSession * (config.minerCoinUsdtRate || 0.01)).toFixed(2)})
                     </span>
                   </div>
 
@@ -1537,7 +1537,7 @@ export default function StatisticsModal({
                   </div>
                   <div className="flex justify-between text-[10px] text-slate-500 font-mono pt-0.5">
                     <span>US$ 0,00</span>
-                    <span>Breakeven: ${(totalInvested / (config.minerCoinUsdtRate || 0.01)).toLocaleString('pt-BR', { maximumFractionDigits: 0 })} MNC (US$ {totalInvested.toFixed(2)})</span>
+                    <span>Breakeven: ${(totalInvested / (config.minerCoinUsdtRate || 0.01)).toLocaleString('pt-BR', { maximumFractionDigits: 0 })} Coins (US$ {totalInvested.toFixed(2)})</span>
                     <span>Lucro: +US$ {Math.max(0, (totalMinedSession * (config.minerCoinUsdtRate || 0.01)) - totalInvested).toFixed(2)}</span>
                   </div>
                 </div>
@@ -1560,7 +1560,7 @@ export default function StatisticsModal({
                     <span className="text-xs text-slate-400 font-mono">USDT</span>
                   </div>
                   <span className="text-[10px] text-slate-500 font-mono">
-                    ≈ {upgradeRoi.totalUpgradeCostMiner} MINER
+                    ≈ {upgradeRoi.totalUpgradeCostMiner} Coins
                   </span>
                 </div>
 
@@ -1568,7 +1568,7 @@ export default function StatisticsModal({
                   <span className="text-[10px] text-emerald-400 font-tech uppercase block mb-1">Ganho Adicional Diário</span>
                   <div className="flex items-baseline gap-1">
                     <b className="text-xl font-arcade text-emerald-400">+{upgradeRoi.additionalDailyCoins}</b>
-                    <span className="text-xs text-emerald-400/80 font-arcade">MINER</span>
+                    <span className="text-xs text-emerald-400/80 font-arcade">Coins</span>
                   </div>
                   <span className="text-[10px] text-emerald-300 font-mono font-bold">
                     +${upgradeRoi.additionalDailyUsd} USDT/dia (+{upgradeRoi.improvementPct}%)
@@ -1634,7 +1634,7 @@ export default function StatisticsModal({
                         </span>
                       </div>
                     </div>
-                    <span className="text-[11px] font-tech text-slate-400 mt-2">Produção Diária (MINER/dia)</span>
+                    <span className="text-[11px] font-tech text-slate-400 mt-2">Produção Diária (Coins/dia)</span>
                   </div>
 
                   {/* Barra Mensal */}
@@ -1657,7 +1657,7 @@ export default function StatisticsModal({
                         </span>
                       </div>
                     </div>
-                    <span className="text-[11px] font-tech text-slate-400 mt-2">Produção Mensal (MINER/mês)</span>
+                    <span className="text-[11px] font-tech text-slate-400 mt-2">Produção Mensal (Coins/mês)</span>
                   </div>
                 </div>
               </div>
