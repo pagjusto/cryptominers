@@ -16,7 +16,7 @@ import {
   Calculator,
   Gift
 } from 'lucide-react';
-import { MINER_ROSTER, MINT_CHEST_TYPES } from '../data/minersCatalog';
+import { Coins_ROSTER, MINT_CHEST_TYPES } from '../data/minersCatalog';
 import { getCryptoZombiesConfig } from '../data/cryptoZombiesConfig';
 import { sfx } from '../utils/sfx';
 
@@ -61,7 +61,7 @@ export default function SummonModal({
     return names[Math.floor(Math.random() * names.length)];
   };
 
-  // 1. COMPRAR BAÚ E ENVIAR AO INVENTÁRIO (USDT OU MINERCOIN)
+  // 1. COMPRAR BAÚ E ENVIAR AO INVENTÁRIO (USDT OU Coins)
   const handleBuyChest = () => {
     if (paymentCurrency === 'usdt' && !walletState.isConnected) {
       if (onOpenWalletModal) onOpenWalletModal();
@@ -88,7 +88,7 @@ export default function SummonModal({
     }, 300);
   };
 
-  // 2. CONTRATAÇÃO DIRETA NO MERCADO (PAGO EM USDT OU MINERCOIN)
+  // 2. CONTRATAÇÃO DIRETA NO MERCADO (PAGO EM USDT OU Coins)
   const handleDirectHire = (rosterItem) => {
     const cost = rosterItem.directCostBcoin || 20;
 
@@ -103,7 +103,7 @@ export default function SummonModal({
       }
     } else {
       if (minerBalance < cost) {
-        alert(`Saldo insuficiente de Minercoins. Necessário: ${cost} MINER (saldo atual: ${minerBalance.toFixed(2)} MINER).`);
+        alert(`Saldo insuficiente de Coinss. Necessário: ${cost} Coins (saldo atual: ${minerBalance.toFixed(2)} Coins).`);
         return;
       }
     }
@@ -224,10 +224,10 @@ export default function SummonModal({
             </div>
           </div>
         ) : revealedMiner ? (
-          /* CASO: MINERADOR CONTRATADO NA TAVERNA */
+          /* CASO: CoinsADOR CONTRATADO NA TAVERNA */
           <div className="py-4 animate-scaleUp max-w-sm mx-auto">
             <span className="inline-block px-3 py-1 rounded-full text-xs font-bold font-arcade uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/40 mb-3">
-              ✦ NOVO MINERADOR CONTRATADO! ✦
+              ✦ NOVO CoinsADOR CONTRATADO! ✦
             </span>
 
             <div 
@@ -300,10 +300,10 @@ export default function SummonModal({
               <div>
                 <h3 className="font-arcade text-base text-amber-400 flex items-center gap-2">
                   <UserPlus size={18} />
-                  <span>AQUISIÇÃO DE MINERADORES</span>
+                  <span>AQUISIÇÃO DE CoinsADORES</span>
                 </h3>
                 <p className="text-xs text-slate-400 mt-0.5">
-                  Compre baús com <b>Minercoin</b> ou <b>USDT</b> e abra-os um por um no Inventário.
+                  Compre baús com <b>Coins</b> ou <b>USDT</b> e abra-os um por um no Inventário.
                 </p>
               </div>
 
@@ -334,7 +334,7 @@ export default function SummonModal({
               </div>
             </div>
 
-            {/* SELETOR DE MOEDA DE PAGAMENTO (MINERCOIN VS USDT) */}
+            {/* SELETOR DE MOEDA DE PAGAMENTO (Coins VS USDT) */}
             <div className="bg-slate-950/90 p-3 rounded-2xl border border-slate-800 mb-4 shrink-0">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
@@ -342,12 +342,12 @@ export default function SummonModal({
                   <span>FORMA DE PAGAMENTO:</span>
                 </span>
                 <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20 font-bold">
-                  Cotação Oficial: 1 MNC = US$ {rate.toFixed(2)}
+                  Cotação Oficial: 1 Coins = US$ {rate.toFixed(2)}
                 </span>
               </div>
 
               <div className="grid grid-cols-2 gap-2">
-                {/* OPÇÃO 1: MINERCOIN (SALDO IN-GAME) */}
+                {/* OPÇÃO 1: Coins (SALDO IN-GAME) */}
                 <button
                   onClick={() => setPaymentCurrency('miner')}
                   className={`p-2.5 rounded-xl border-2 transition text-left flex items-center justify-between cursor-pointer ${
@@ -360,13 +360,13 @@ export default function SummonModal({
                     <span className="text-xl">🪙</span>
                     <div>
                       <div className="flex items-center gap-1.5">
-                        <span className="font-tech font-bold text-xs text-white">MINERCOIN</span>
+                        <span className="font-tech font-bold text-xs text-white">Coins</span>
                         <span className="text-[9px] bg-amber-500/20 text-amber-300 px-1.5 py-0.2 rounded font-mono font-bold">
                           IN-GAME
                         </span>
                       </div>
                       <span className="text-[11px] text-slate-400 font-mono">
-                        Saldo: <b className="text-amber-300">{minerBalance.toFixed(2)} MINER</b>
+                        Saldo: <b className="text-amber-300">{minerBalance.toFixed(2)} Coins</b>
                       </span>
                     </div>
                   </div>
@@ -478,7 +478,7 @@ export default function SummonModal({
                           <div className="flex items-center justify-between mb-1.5">
                             <span className="text-2xl">{chest.icon}</span>
                             <span className="font-arcade text-xs font-bold px-2 py-0.5 rounded-md border text-emerald-300 bg-emerald-500/20 border-emerald-500/30">
-                              {paymentCurrency === 'miner' ? `${costMiner.toLocaleString('pt-BR')} MNC` : `$${costUsdt} USDT`}
+                              {paymentCurrency === 'miner' ? `${costMiner.toLocaleString('pt-BR')} Coins` : `$${costUsdt} USDT`}
                             </span>
                           </div>
 
@@ -536,14 +536,14 @@ export default function SummonModal({
                           {canAffordChest
                             ? `COMPRAR ${currentChest.name.toUpperCase()} (${chestCost} ${paymentCurrency.toUpperCase()}) E ENVIAR AO INVENTÁRIO`
                             : paymentCurrency === 'miner'
-                              ? `SALDO INSUFICIENTE: FALTAM ${(chestCost - minerBalance).toFixed(2)} MINER`
+                              ? `SALDO INSUFICIENTE: FALTAM ${(chestCost - minerBalance).toFixed(2)} Coins`
                               : `SALDO INSUFICIENTE: FALTAM ${(chestCost - walletState.usdtBalance).toFixed(2)} USDT`}
                         </span>
                       </button>
 
                       <div className="flex items-center justify-between text-[11px] text-slate-400 px-1">
                         <span>
-                          Pagamento via: <b>{paymentCurrency === 'miner' ? 'Minercoin (Saldo In-Game)' : 'USDT (Carteira Web3)'}</b>
+                          Pagamento via: <b>{paymentCurrency === 'miner' ? 'Coins (Saldo In-Game)' : 'USDT (Carteira Web3)'}</b>
                         </span>
                         <span>
                           Entrega: <b>{currentChest.heroesCount || 1} {(currentChest.heroesCount || 1) === 1 ? 'herói' : 'heróis'} guardados no Inventário</b>
@@ -564,7 +564,7 @@ export default function SummonModal({
                 </p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
-                  {MINER_ROSTER.map(minerClass => {
+                  {Coins_ROSTER.map(minerClass => {
                     const cost = minerClass.directCostBcoin || 20;
                     const canAfford = paymentCurrency === 'miner'
                       ? minerBalance >= cost
