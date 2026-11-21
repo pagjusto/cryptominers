@@ -23,7 +23,7 @@ export function getHeroBaseHP(rarity) {
 
 export function applyHeroBaseHP(hero) {
   const maxHealth = getHeroBaseHP(hero?.rarity);
-  const previousMax = Number(hero?.maxHealth) > 0 ? Number(hero.maxHealth) : maxHealth;
+  const previousMax = Number(hero?.maxHealth) > 0 ? Number(hero.maxHealth) : (typeof hero?.currentHealth === 'number' ? 100 : maxHealth);
   const hasCurrent = typeof hero?.currentHealth === 'number' && Number.isFinite(hero.currentHealth);
   const currentHealth = hasCurrent
     ? Math.max(0, Math.min(maxHealth, (hero.currentHealth / previousMax) * maxHealth))
