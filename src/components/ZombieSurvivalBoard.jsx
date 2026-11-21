@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { HERO_ROSTER, getWeaponById } from '../data/heroRoster';
+import { getHeroBaseHP } from '../utils/heroHealth';
 
 const COLS = 15;
 const ROWS = 11;
@@ -38,7 +39,7 @@ function createWave(wave = 1) {
 }
 
 function normalizeSurvivor(survivor, index) {
-  const maxHealth = survivor.maxHealth || 100;
+  const maxHealth = Number(survivor.maxHealth) > 0 ? survivor.maxHealth : getHeroBaseHP(survivor.rarity);
   const wasInShelter = survivor.status === 'house' || survivor.status === 'waiting_house';
   return {
     ...survivor,
