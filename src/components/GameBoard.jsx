@@ -483,7 +483,7 @@ export default function GameBoard({
 
         // REGRA OFICIAL DO USUÁRIO: "veja que tem o medico na equipe e ele nao esta levando pro ambulatorio curar automaticamente"
         // Quando um herói é ferido (<= 5% de vida), a Dra. Íris (Médica do Abrigo) resgata e leva o sobrevivente para o ambulatório
-        if (miner.status === 'injured' || miner.injuredAwaitingRescue || (currentHealth / maxHealth) * 100 <= 5) {
+        if (miner.status !== 'house' && miner.status !== 'waiting_house' && (miner.status === 'injured' || miner.injuredAwaitingRescue || (currentHealth / maxHealth) * 100 <= 5)) {
           miner.maxHealth = maxHealth;
           miner.currentHealth = Math.min(currentHealth, maxHealth * 0.05);
           miner.isMining = false;
@@ -498,7 +498,6 @@ export default function GameBoard({
             // Leito livre no ambulatório: internação imediata sob cuidados da Dra. Íris
             miner.status = 'house';
             miner.injuredAwaitingRescue = false;
-            state.lastRelayCheck = 0;
             state.floatTexts.push({
               text: '🚑 AMBULATÓRIO (DRA. ÍRIS)',
               x: (miner.x || 2) * TILE_SIZE + TILE_SIZE / 2,
@@ -511,7 +510,6 @@ export default function GameBoard({
             // Ambulatório lotado: aguarda na fila de espera
             miner.status = 'waiting_house';
             miner.injuredAwaitingRescue = true;
-            state.lastRelayCheck = 0;
             state.floatTexts.push({
               text: '⏳ FILA DO AMBULATÓRIO',
               x: (miner.x || 2) * TILE_SIZE + TILE_SIZE / 2,
@@ -544,7 +542,6 @@ export default function GameBoard({
             miner.status = 'work';
             miner.injuredAwaitingRescue = false;
             miner.moveCooldown = 0.5;
-            state.lastRelayCheck = 0;
 
             // Reposiciona o sobrevivente curado na zona tática correspondente
             const spawnPt = getSafeHeroSpawn(minerIndex);
