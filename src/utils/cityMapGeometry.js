@@ -67,8 +67,8 @@ export function isCityObstacle(c, r) {
   if (c === 11 && r === 0) return true;
 
   // 4. BARRICADAS DE SACOS DE AREIA NORTE (Acima da base militar)
-  // Circulado pelo usuário: barricadas noroeste e nordeste na estrada norte
-  if ((c === 5 || c === 6 || c === 8 || c === 9) && r === 2) return true;
+  // Deixa passagem livre nas colunas 6, 7 e 8 para evitar armadilha de 1 bloco sob o outdoor
+  if ((c === 5 || c === 9) && r === 2) return true;
 
   // 5. VIA OESTE & GRAMADO LIVRE (Conecta o noroeste à avenida principal)
   // Deixado 100% livre em (1, 4) e (2, 4) para permitir fluxo contínuo de heróis e zumbis

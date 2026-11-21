@@ -453,35 +453,26 @@ export default function GameBoard({
       };
 
       // REGRA OFICIAL DO USUÁRIO: "Anti-Stacking de personagens tbm"
-      // Passo 1: Nenhum herói pode ocupar a mesma célula de grid (x, y) de outro herói, nem ficar dentro de obstáculos
-      const occupiedHeroTiles = new Map();
+      // Recuperação de emergência: se algum herói estiver dentro de um obstáculo sólido ou da base militar,
+      // reposiciona de forma suave e segura para uma coordenada válida do mapa
       state.miners.forEach(m => {
         if (m.status !== 'work') return;
         const hx = Math.round(m.x);
         const hy = Math.round(m.y);
-        const key = `${hx},${hy}`;
         const isInsideObstacle = isCityBuilding(hx, hy) || isBaseCompound(hx, hy);
 
-        if (!occupiedHeroTiles.has(key) && !isInsideObstacle) {
-          occupiedHeroTiles.set(key, m);
-        } else {
-          // Conflito ou preso dentro de obstáculo! Reloca para a célula livre adjacente mais próxima ou ponto seguro
-          const freeCell = findNearestFreeHeroCell(hx, hy, m.id, state.miners, state.grid, isCanyon, state.enemies);
+        if (isInsideObstacle) {
           const fallbackCell = SAFE_HERO_SPAWN_POINTS.find(p => 
             !isCityBuilding(p.x, p.y) && 
             !isBaseCompound(p.x, p.y) && 
-            !occupiedHeroTiles.has(`${p.x},${p.y}`)
+            !state.miners.some(other => other.id !== m.id && Math.round(other.x) === p.x && Math.round(other.y) === p.y)
           ) || { x: 2, y: 5 };
-          const target = freeCell || fallbackCell;
 
-          if (target) {
-            m.x = target.x;
-            m.y = target.y;
-            m.visualX = target.x;
-            m.visualY = target.y;
-            m.stuckTimer = 0;
-            occupiedHeroTiles.set(`${target.x},${target.y}`, m);
-          }
+          m.x = fallbackCell.x;
+          m.y = fallbackCell.y;
+          m.visualX = fallbackCell.x;
+          m.visualY = fallbackCell.y;
+          m.stuckTimer = 0;
         }
       });
 
@@ -1031,27 +1022,27 @@ export default function GameBoard({
         miner.moveCooldown = (miner.moveCooldown || 0) - dt * (miner.speed || 1);
 
         // REGRA OFICIAL DO USUÁRIO: "QUANDO ISSO ACONTECER DEVE REESPAUNAR EM OUTRO LOCAL LIVRE"
-        // Detecção de travamento (Stuck Detection): se o herói está tentando andar mas não progride suas coordenadas
-        const currentVx = miner.visualX ?? miner.x;
-        const currentVy = miner.visualY ?? miner.y;
-        const lastVx = miner.lastTrackedVx ?? currentVx;
-        const lastVy = miner.lastTrackedVy ?? currentVy;
-        const distMoved = Math.hypot(currentVx - lastVx, currentVy - lastVy);
+        // Detecção de travamento real: apenas se o herói estiver fora de combate e preso na MESMA célula por mais de 5.0 segundos
+        const curTileX = Math.round(miner.x);
+        const curTileY = Math.round(miner.y);
 
-        miner.lastTrackedVx = currentVx;
-        miner.lastTrackedVy = currentVy;
-
-        if (!miner.isMining && distMoved < 0.02) {
-          miner.stuckTimer = (miner.stuckTimer || 0) + dt;
+        if (!miner.isMining) {
+          if (miner.lastTrackedTileX === curTileX && miner.lastTrackedTileY === curTileY) {
+            miner.stuckTimer = (miner.stuckTimer || 0) + dt;
+          } else {
+            miner.lastTrackedTileX = curTileX;
+            miner.lastTrackedTileY = curTileY;
+            miner.stuckTimer = 0;
+          }
         } else {
           miner.stuckTimer = 0;
+          miner.lastTrackedTileX = curTileX;
+          miner.lastTrackedTileY = curTileY;
         }
 
-        // Se o herói ficou travado tentando andar sem sair do lugar por mais de 2.0 segundos:
-        if (miner.stuckTimer > 2.0) {
-          const curX = Math.round(miner.x);
-          const curY = Math.round(miner.y);
-          const freeCell = findNearestFreeHeroCell(curX, curY, miner.id, state.miners, state.grid, isCanyon, state.enemies);
+        // Se o herói ficou realmente encurralado na mesma célula sem conseguir avançar por mais de 5.0 segundos:
+        if (miner.stuckTimer > 5.0) {
+          const freeCell = findNearestFreeHeroCell(curTileX, curTileY, miner.id, state.miners, state.grid, isCanyon, state.enemies);
           const fallbackCell = SAFE_HERO_SPAWN_POINTS.find(p => 
             !isCityBuilding(p.x, p.y) && 
             !isBaseCompound(p.x, p.y) && 
@@ -1063,10 +1054,10 @@ export default function GameBoard({
           miner.y = targetSpawn.y;
           miner.visualX = targetSpawn.x;
           miner.visualY = targetSpawn.y;
-          miner.lastTrackedVx = targetSpawn.x;
-          miner.lastTrackedVy = targetSpawn.y;
+          miner.lastTrackedTileX = targetSpawn.x;
+          miner.lastTrackedTileY = targetSpawn.y;
           miner.stuckTimer = 0;
-          miner.moveCooldown = 0.2;
+          miner.moveCooldown = 0.35;
           miner.isMining = false;
           miner.lockedEnemyId = null;
 

@@ -507,8 +507,8 @@ export const INITIAL_MINERS = [
     power: 3,
     speed: 1.4,
     status: 'work',
-    x: 7,
-    y: 7,
+    x: 3,
+    y: 9,
     avatar: '🎯',
     color: '#64748b'
   },
@@ -525,8 +525,8 @@ export const INITIAL_MINERS = [
     power: 3.2,
     speed: 1.6,
     status: 'work',
-    x: 8,
-    y: 7,
+    x: 6,
+    y: 9,
     avatar: '🦊',
     color: '#64748b'
   }
