@@ -582,8 +582,8 @@ export default function App() {
   const handleUpgradeHouseWithFragments = (targetHouseId, fragmentsCost, mncCost) => {
     const currentTier = resolveHouseTier(localStorage.getItem('crypto_miners_house') || currentHouseId);
     const targetTier = resolveHouseTier(targetHouseId);
-    if (targetTier.level !== currentTier.level + 1) return;
-    if (constructionFragments < fragmentsCost || bcoin < mncCost) return;
+    if (targetTier.level !== currentTier.level + 1) return false;
+    if (constructionFragments < fragmentsCost || bcoin < mncCost) return false;
 
     const nextFragments = constructionFragments - fragmentsCost;
     const nextMnc = parseFloat((bcoin - mncCost).toFixed(3));
@@ -593,6 +593,7 @@ export default function App() {
     localStorage.setItem('crypto_miners_bcoin', nextMnc.toString());
     setCurrentHouseId(targetTier.id);
     localStorage.setItem('crypto_miners_house', targetTier.id);
+    return true;
   };
 
   // Baús de Heróis adquiridos em USDT guardados no Inventário
