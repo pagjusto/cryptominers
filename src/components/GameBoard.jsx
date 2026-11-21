@@ -699,7 +699,7 @@ export default function GameBoard({
             miner.visualY = spawnPt.y;
 
             state.floatTexts.push({
-              text: '💚 ALTA MÉDICA (COMBATE)',
+              text: '💚 ALTA MÉDICA (RESERVA)',
               x: spawnPt.x * TILE_SIZE + TILE_SIZE / 2,
               y: spawnPt.y * TILE_SIZE - 12,
               color: '#22c55e',
