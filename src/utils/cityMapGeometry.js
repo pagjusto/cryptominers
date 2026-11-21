@@ -170,23 +170,12 @@ export const TACTICAL_ZONES = [
  * Zumbis surgem nas bordas e cantos extremos e caminham para as áreas livres definidas.
  */
 export const CORNER_SPAWN_POINTS = [
-  // Canto Noroeste (Extremo superior esquerdo em grama aberta)
-  { x: 1, y: 0, c: 1, r: 0 },
-  { x: 1, y: 1, c: 1, r: 1 },
-  // Canto Nordeste (Extremo superior direito)
-  { x: 13, y: 1, c: 13, r: 1 },
-  { x: 12, y: 1, c: 12, r: 1 },
-  // Canto Sudoeste (Extremo inferior esquerdo)
-  { x: 1, y: 9, c: 1, r: 9 },
-  { x: 2, y: 9, c: 2, r: 9 },
-  // Canto Sudeste (Extremo inferior direito)
-  { x: 14, y: 9, c: 14, r: 9 },
-  { x: 14, y: 10, c: 14, r: 10 },
-  // Vias de Entrada Externas
-  { x: 1, y: 3, c: 1, r: 3 },  // Avenida Oeste
-  { x: 12, y: 5, c: 12, r: 5 }, // Avenida Leste
-  { x: 6, y: 1, c: 6, r: 1 },  // Acesso Norte
-  { x: 7, y: 9, c: 7, r: 9 }   // Acesso Sul
+  { x: 1, y: 1, c: 1, r: 1 }, { x: 5, y: 1, c: 5, r: 1 }, { x: 6, y: 1, c: 6, r: 1 },
+  { x: 1, y: 2, c: 1, r: 2 }, { x: 5, y: 3, c: 5, r: 3 }, { x: 6, y: 3, c: 6, r: 3 },
+  { x: 1, y: 7, c: 1, r: 7 }, { x: 1, y: 9, c: 1, r: 9 }, { x: 2, y: 9, c: 2, r: 9 },
+  { x: 3, y: 9, c: 3, r: 9 }, { x: 6, y: 9, c: 6, r: 9 }, { x: 7, y: 9, c: 7, r: 9 },
+  { x: 9, y: 9, c: 9, r: 9 }, { x: 14, y: 8, c: 14, r: 8 }, { x: 14, y: 9, c: 14, r: 9 },
+  { x: 13, y: 10, c: 13, r: 10 }, { x: 12, y: 8, c: 12, r: 8 }
 ];
 
 export function getCornerSpawnPoint(index = 0) {
@@ -218,14 +207,7 @@ export function getSpawnZoneCells(cols = GRID_COLS, rows = GRID_ROWS) {
   return cells;
 }
 
-export const CORNER_SPAWN_POINTS = [
-  { x: 1, y: 1, c: 1, r: 1 }, { x: 5, y: 1, c: 5, r: 1 }, { x: 6, y: 1, c: 6, r: 1 },
-  { x: 1, y: 2, c: 1, r: 2 }, { x: 5, y: 3, c: 5, r: 3 }, { x: 6, y: 3, c: 6, r: 3 },
-  { x: 1, y: 7, c: 1, r: 7 }, { x: 1, y: 9, c: 1, r: 9 }, { x: 2, y: 9, c: 2, r: 9 },
-  { x: 3, y: 9, c: 3, r: 9 }, { x: 6, y: 9, c: 6, r: 9 }, { x: 7, y: 9, c: 7, r: 9 },
-  { x: 9, y: 9, c: 9, r: 9 }, { x: 14, y: 8, c: 14, r: 8 }, { x: 14, y: 9, c: 14, r: 9 },
-  { x: 13, y: 10, c: 13, r: 10 }, { x: 12, y: 8, c: 12, r: 8 }
-];
+
 
 // Heróis e zumbis nascem nas duas áreas verdes. Após o spawn, a movimentação continua livre.
 export const SAFE_HERO_SPAWN_POINTS = [
