@@ -47,6 +47,262 @@ import { getHeroById, getWeaponById } from '../data/heroRoster';
 
 const BOSS_BATTLE_DURATION_MS = 5 * 60 * 1000;
 
+// Configuração oficial dos 5 leitos hospitalares da base médica e da Dra. Íris
+const BASE_HOSPITAL_BEDS = [
+  { id: 1, x: 391, y: 377, angle: 0.86 },
+  { id: 2, x: 436, y: 349, angle: 0.86 },
+  { id: 3, x: 480, y: 324, angle: 0.86 },
+  { id: 4, x: 519, y: 300, angle: 0.86 },
+  { id: 5, x: 557, y: 277, angle: 0.86 }
+];
+const DRA_IRIS_POS = { x: 490, y: 386 };
+
+// Renderiza a Dra. Íris e os heróis internados em tratamento nos leitos do hospital
+function drawBaseInfirmaryAndPatients(ctx, state, now) {
+  // 1. DRA. ÍRIS (MÉDICA CHEFE DO ABRIGO)
+  const ix = DRA_IRIS_POS.x;
+  const iy = DRA_IRIS_POS.y;
+  const bobY = Math.sin((now || 0) * 0.003) * 1.5;
+
+  ctx.save();
+  // Sombra suave no piso
+  ctx.fillStyle = 'rgba(15, 23, 42, 0.45)';
+  ctx.beginPath();
+  ctx.ellipse(ix, iy + 14, 11, 4.5, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Corpo da médica (Jaleco Branco, Estetoscópio e Prancheta Médica)
+  ctx.save();
+  ctx.translate(ix, iy + bobY);
+
+  // Pernas / calça médica azul escura
+  ctx.fillStyle = '#1e293b';
+  ctx.fillRect(-5, 4, 4, 10);
+  ctx.fillRect(1, 4, 4, 10);
+
+  // Sapatos escuros
+  ctx.fillStyle = '#0f172a';
+  ctx.fillRect(-6, 12, 5, 3);
+  ctx.fillRect(1, 12, 5, 3);
+
+  // Jaleco branco médico
+  ctx.fillStyle = '#f8fafc';
+  ctx.beginPath();
+  ctx.roundRect(-8, -8, 16, 14, 3);
+  ctx.fill();
+  ctx.strokeStyle = '#cbd5e1';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  // Gola e lapela do jaleco
+  ctx.fillStyle = '#e2e8f0';
+  ctx.beginPath();
+  ctx.moveTo(-4, -8);
+  ctx.lineTo(0, -1);
+  ctx.lineTo(4, -8);
+  ctx.fill();
+
+  // Estetoscópio ciano / azul
+  ctx.strokeStyle = '#0284c7';
+  ctx.lineWidth = 1.6;
+  ctx.beginPath();
+  ctx.arc(0, -5, 4.5, 0.2, Math.PI - 0.2);
+  ctx.stroke();
+  ctx.fillStyle = '#38bdf8';
+  ctx.beginPath();
+  ctx.arc(0, -1, 1.8, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Braços do jaleco
+  ctx.fillStyle = '#f8fafc';
+  ctx.fillRect(-10, -7, 3, 9);
+  ctx.fillRect(7, -7, 3, 9);
+
+  // Prancheta médica na mão esquerda
+  ctx.fillStyle = '#92400e';
+  ctx.fillRect(8, -2, 6, 8);
+  ctx.fillStyle = '#fef3c7';
+  ctx.fillRect(9, -1, 4, 6);
+  ctx.fillStyle = '#0f172a';
+  ctx.fillRect(10, 0, 2, 1);
+  ctx.fillRect(10, 2, 2, 1);
+
+  // Cabeça e rosto
+  ctx.fillStyle = '#fce7f3';
+  ctx.beginPath();
+  ctx.arc(0, -14, 6.5, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Cabelo castanho com coque
+  ctx.fillStyle = '#78350f';
+  ctx.beginPath();
+  ctx.arc(0, -16, 7, Math.PI, Math.PI * 2);
+  ctx.fill();
+  ctx.fillRect(-7, -16, 3, 5);
+  ctx.fillRect(4, -16, 3, 5);
+  ctx.beginPath();
+  ctx.arc(0, -21, 3.5, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Presilha médica com cruz vermelha
+  ctx.fillStyle = '#f8fafc';
+  ctx.beginPath();
+  ctx.arc(0, -18, 2.5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#ef4444';
+  ctx.fillRect(-0.5, -19.5, 1, 3);
+  ctx.fillRect(-1.5, -18.5, 3, 1);
+
+  // Olhos amigáveis
+  ctx.fillStyle = '#0f172a';
+  ctx.fillRect(-3, -14, 1.5, 1.5);
+  ctx.fillRect(1.5, -14, 1.5, 1.5);
+
+  ctx.restore();
+
+  // Emblema e Crachá Flutuante: "🩺 Dra. Íris"
+  ctx.font = 'bold 10px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  const badgeText = '🩺 Dra. Íris';
+  const textWidth = ctx.measureText(badgeText).width;
+  const badgeW = textWidth + 14;
+  const badgeH = 17;
+  const badgeX = ix - badgeW / 2;
+  const badgeY = iy - 32 + bobY * 0.5;
+
+  ctx.fillStyle = 'rgba(15, 23, 42, 0.88)';
+  ctx.beginPath();
+  ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 8);
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(56, 189, 248, 0.75)';
+  ctx.lineWidth = 1.2;
+  ctx.stroke();
+
+  ctx.fillStyle = '#e0f2fe';
+  ctx.shadowColor = 'rgba(56, 189, 248, 0.6)';
+  ctx.shadowBlur = 4;
+  ctx.fillText(badgeText, ix, badgeY + badgeH / 2);
+  ctx.shadowBlur = 0;
+
+  // 2. HERÓIS EM RECUPERAÇÃO NOS LEITOS (m.status === 'house')
+  const recoveringHeroes = (state.miners || []).filter(m => m.status === 'house');
+
+  BASE_HOSPITAL_BEDS.forEach((bed, bedIdx) => {
+    const patient = recoveringHeroes[bedIdx];
+    if (!patient) return; // Leito vazio permanece com a arte do mapa
+
+    const maxHp = Number(patient.maxHealth) || 100;
+    const curHp = Number(patient.currentHealth ?? maxHp * 0.05);
+    const hpPct = Math.max(0, Math.min(100, Math.round((curHp / maxHp) * 100)));
+
+    ctx.save();
+    ctx.translate(bed.x, bed.y);
+    ctx.rotate(bed.angle - Math.PI / 2); // Alinha o paciente ao longo do leito
+
+    // Respiração suave do paciente deitado
+    const breath = Math.sin((now || 0) * 0.0035 + bedIdx) * 0.8;
+
+    // Cabeça no travesseiro
+    ctx.fillStyle = '#f1c7a5';
+    ctx.beginPath();
+    ctx.arc(0, -11, 5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Cabelo / característica visual do herói
+    const heroColor = patient.color || '#38bdf8';
+    ctx.fillStyle = heroColor;
+    ctx.beginPath();
+    ctx.arc(0, -13, 5, Math.PI, Math.PI * 2);
+    ctx.fill();
+
+    // Olhos fechados descansando (- -)
+    ctx.strokeStyle = '#475569';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(-3, -11);
+    ctx.lineTo(-1, -11);
+    ctx.moveTo(1, -11);
+    ctx.lineTo(3, -11);
+    ctx.stroke();
+
+    // Tronco / Cobertor hospitalar azul com dobra branca
+    ctx.fillStyle = '#1e40af';
+    ctx.beginPath();
+    ctx.roundRect(-6, -6 + breath, 12, 18, 3);
+    ctx.fill();
+
+    // Dobra do lençol branco hospitalar no peito
+    ctx.fillStyle = '#f8fafc';
+    ctx.fillRect(-6, -6 + breath, 12, 3);
+
+    // Cruz vermelha no cobertor
+    ctx.fillStyle = '#ef4444';
+    ctx.fillRect(-1, 0 + breath, 2, 6);
+    ctx.fillRect(-3, 2 + breath, 6, 2);
+
+    ctx.restore();
+
+    // Partículas de sono "zZ" subindo da cabeça
+    const zCycle = ((now || 0) * 0.025 + bedIdx * 25) % 45;
+    const zAlpha = Math.max(0, 1 - zCycle / 45);
+    const headCanvasX = bed.x - Math.cos(bed.angle) * 12;
+    const headCanvasY = bed.y - Math.sin(bed.angle) * 12 - zCycle * 0.45;
+
+    ctx.save();
+    ctx.font = 'bold 9px monospace';
+    ctx.fillStyle = `rgba(186, 230, 253, ${zAlpha})`;
+    ctx.shadowColor = '#0369a1';
+    ctx.shadowBlur = 3;
+    ctx.fillText('zZ', headCanvasX - 4, headCanvasY);
+    ctx.restore();
+
+    // Barra de Vida e Nome do Herói Acima do Leito
+    const barW = 38;
+    const barH = 5;
+    const barX = bed.x - barW / 2;
+    const barY = bed.y - 24;
+
+    // Fundo da barra
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+    ctx.beginPath();
+    ctx.roundRect(barX - 2, barY - 10, barW + 4, 18, 4);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(56, 189, 248, 0.5)';
+    ctx.lineWidth = 0.8;
+    ctx.stroke();
+
+    // Nome do herói no leito
+    ctx.font = 'bold 8px monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#f8fafc';
+    const heroName = (patient.name || patient.classId || `Herói ${bedIdx + 1}`).substring(0, 8);
+    ctx.fillText(`${heroName} • L${bed.id}`, bed.x, barY - 4);
+
+    // Trilho da barra
+    ctx.fillStyle = '#334155';
+    ctx.fillRect(barX, barY + 2, barW, barH);
+
+    // Barra de progresso de recuperação verde luminosa
+    const fillW = Math.max(1, Math.round((barW * hpPct) / 100));
+    const hpGrad = ctx.createLinearGradient(barX, 0, barX + barW, 0);
+    hpGrad.addColorStop(0, '#22c55e');
+    hpGrad.addColorStop(1, '#86efac');
+    ctx.fillStyle = hpGrad;
+    ctx.fillRect(barX, barY + 2, fillW, barH);
+
+    // Indicador sutil de "+PV"
+    if (Math.sin((now || 0) * 0.005 + bedIdx) > 0.3) {
+      ctx.font = 'bold 7px monospace';
+      ctx.fillStyle = '#4ade80';
+      ctx.fillText('+PV', barX + barW + 8, barY + 5);
+    }
+  });
+
+  ctx.restore();
+}
+
 // Renderização top-down da base médica: leitos ocupados/vagos e pátio de reserva.
 function drawBaseShelterVisual(ctx, house, miners, now) {
   if (!house || house.level < 1 || !house.slots) return;
@@ -1399,7 +1655,7 @@ export default function GameBoard({
         if (miner.moveCooldown <= 0) {
           miner.moveCooldown = 0.35; // Passo dinâmico calibrado pela velocidade
 
-          const decision = findNextHeroAction(miner, state.grid, state.miners, isCanyon);
+          const decision = findNextHeroAction(miner, state.grid, state.miners, isCanyon, state.enemies);
 
           if (decision.action === 'mine' && decision.targetBlock) {
             const curX = Math.round(miner.x);
@@ -1455,25 +1711,27 @@ export default function GameBoard({
               o.id !== miner.id && 
               Math.round(o.x) === nextX && 
               Math.round(o.y) === nextY && 
-              o.targetNextStep && 
-              o.targetNextStep.x === curX && 
-              o.targetNextStep.y === curY
+              o.activeMoveTarget && 
+              o.activeMoveTarget.x === curX && 
+              o.activeMoveTarget.y === curY
             );
             if (swapPartner && String(miner.id) > String(swapPartner.id)) {
               miner.moveCooldown = 0.15;
+              miner.activeMoveTarget = null;
               return;
             }
-            miner.targetNextStep = { x: nextX, y: nextY };
+            miner.activeMoveTarget = { x: nextX, y: nextY };
 
             // Movimentação livre: heróis atravessam outros heróis e zumbis sem bloquear ou pausar
             miner.x = decision.nextStep.x;
             miner.y = decision.nextStep.y;
+            miner.activeMoveTarget = null; // Limpa imediatamente após dar o passo para não reter trava residual
             if (decision.nextStep.dir) {
               miner.targetDir = decision.nextStep.dir;
             }
 
             // Ao dar o passo, checa se entrou em alcance de tiro sem parar no mesmo local
-            const immediateCheck = findNextHeroAction(miner, state.grid, state.miners, isCanyon);
+            const immediateCheck = findNextHeroAction(miner, state.grid, state.miners, isCanyon, state.enemies);
             if (immediateCheck.action === 'mine' && immediateCheck.targetBlock) {
               const curX = Math.round(miner.x);
               const curY = Math.round(miner.y);
@@ -1782,6 +2040,9 @@ export default function GameBoard({
           ctx.restore();
         });
       }
+
+      // REGRA OFICIAL DO USUÁRIO: "nao estou vendo a dra na base, jogadores em recuperação devem aparecer deitados no leito, um em cada leito"
+      drawBaseInfirmaryAndPatients(ctx, state, now);
 
       state.miners.forEach((miner, minerIndex) => {
         if (miner.status === 'house' || miner.status === 'waiting_house' || miner.status === 'reserve' || miner.status === 'sleep') return;

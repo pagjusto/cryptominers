@@ -137,9 +137,10 @@ export function findNearestFreeHeroCell(hx, hy, heroId, allMiners = [], grid = n
 /**
  * Encontra a melhor ação e o próximo passo para o herói minerador.
  * 1. Se estiver no raio de combate (distância <= 2 com linha de tiro limpa), passa a atirar imediatamente.
- * 2. Se não estiver, localiza o zumbi mais próximo alcançável via BFS e avança em direção a ele.
+ * 2. REGRA OFICIAL DO USUÁRIO: "quando jogadores nao acham zumbs perto devem verificar no mapa onde tem zumbis e ir ate eles"
+ *    Localiza todos os zumbis e o Boss no mapa e marcha pelo menor caminho contornando prédios e base.
  */
-export function findNextHeroAction(miner, grid, allMiners = [], isCanyon = true) {
+export function findNextHeroAction(miner, grid, allMiners = [], isCanyon = true, activeEnemies = []) {
   // REGRA OFICIAL DO USUÁRIO: "e se quebrar interrompe a mineração"
   if (miner.durability !== undefined && miner.durability <= 0) {
     return { action: 'broken', reason: 'weapon_broken' };
@@ -149,17 +150,33 @@ export function findNextHeroAction(miner, grid, allMiners = [], isCanyon = true)
   const my = Math.max(1, Math.min(GRID_ROWS - 2, Math.round(miner.y)));
 
   // 1. Coleta todas as criaturas ativas restantes no mapa (Zumbis e Boss)
-  const activeTargets = [];
+  // Utiliza as entidades dinâmicas de activeEnemies (se fornecidas) e complementa com o grid
+  const targetMap = new Map();
+  if (Array.isArray(activeEnemies) && activeEnemies.length > 0) {
+    activeEnemies.forEach(e => {
+      if (e.hp === undefined || e.hp > 0) {
+        const k = `${e.gx},${e.gy}`;
+        targetMap.set(k, { x: e.gx, y: e.gy, isBoss: e.type === 'boss', id: e.id });
+      }
+    });
+  }
+
+  // Complementa com blocos de zumbis/boss ativos no grid
   for (let r = 1; r < GRID_ROWS - 1; r++) {
     for (let c = 1; c < GRID_COLS - 1; c++) {
       const b = grid[r] ? grid[r][c] : BLOCK_EMPTY;
       if (b === BLOCK_ZOMBIE || b === BLOCK_BOSS || (b !== BLOCK_EMPTY && b !== BLOCK_BEDROCK)) {
-        activeTargets.push({ x: c, y: r, isBoss: b === BLOCK_BOSS });
+        const k = `${c},${r}`;
+        if (!targetMap.has(k)) {
+          targetMap.set(k, { x: c, y: r, isBoss: b === BLOCK_BOSS });
+        }
       }
     }
   }
 
-  // Se não há criaturas ativas, o mapa está limpo
+  const activeTargets = Array.from(targetMap.values());
+
+  // Se não há criaturas ativas em nenhum lugar do mapa
   if (activeTargets.length === 0) {
     return { action: 'idle' };
   }
@@ -167,15 +184,12 @@ export function findNextHeroAction(miner, grid, allMiners = [], isCanyon = true)
   // REGRA OFICIAL DO USUÁRIO:
   // "os herois nao podem travar em locais podendo passar um pelo outro mas nao pararem no mesmo local,
   //  podem passar tambem pelos zumbis mas nao parar no mesmo local que eles, isso faz eles cruzarem pela mesma celula e nao travarem"
-  // Se a célula atual (mx, my) já estiver ocupada por outro herói que já está minerando aqui ou por um zumbi,
-  // o herói NÃO pode parar aqui para atirar como nova posição.
   const isCurrentCellOccupied = isCellOccupiedForStop(mx, my, miner.id, allMiners, grid);
 
   // ============================================================================
   // ÂNCORA FIRME DE COMBATE (ANTI PING-PONG / NÃO TROCA DE LUGAR):
   // Se este herói já está em combate ativo (isMining) e seu alvo ainda existe e está
   // no alcance de tiro com linha de visão, ele PERMANECE FIRME ATIRANDO!
-  // Outro herói passando ou cruzando pela mesma célula NÃO expulsa este herói.
   // ============================================================================
   if (miner.isMining && miner.targetBlock) {
     const target = activeTargets.find(t => t.x === miner.targetBlock.x && t.y === miner.targetBlock.y);
@@ -198,11 +212,10 @@ export function findNextHeroAction(miner, grid, allMiners = [], isCanyon = true)
   // ============================================================================
   const activeBoss = activeTargets.find(t => t.isBoss);
 
-  if (activeBoss) {
-    // 1. O Boss é o alvo SUPREMO e PRIORITÁRIO de toda a equipe
-    // Só entra em combate estático se a célula atual NÃO estiver sobreposta com outro herói minerando ou zumbi
+  // Combate imediato contra o Boss se já estiver no raio de tiro
+  if (activeBoss && !isCurrentCellOccupied) {
     const distToBoss = Math.abs(activeBoss.x - mx) + Math.abs(activeBoss.y - my);
-    if (!isCurrentCellOccupied && distToBoss <= COMBAT_RANGE && hasClearLineOfSight(mx, my, activeBoss.x, activeBoss.y)) {
+    if (distToBoss <= COMBAT_RANGE && hasClearLineOfSight(mx, my, activeBoss.x, activeBoss.y)) {
       const targetDir = activeBoss.x < mx ? -1 : (activeBoss.x > mx ? 1 : (miner.targetDir || 1));
       return {
         action: 'mine',
@@ -210,101 +223,10 @@ export function findNextHeroAction(miner, grid, allMiners = [], isCanyon = true)
         targetDir
       };
     }
-
-    // 2. Se o herói ainda não está no alcance de combate do Boss, todos devem marchar até ele!
-    // Busca em Largura (BFS) focada exclusivamente em aproximar o herói do Boss
-    const queue = [{ x: mx, y: my, path: [] }];
-    const visited = new Set();
-    visited.add(`${mx},${my}`);
-
-    let bestCandidate = null;
-    let closestNodeToBoss = null;
-    let minDistanceToBoss = Infinity;
-
-    while (queue.length > 0) {
-      const curr = queue.shift();
-
-      const distFromCurrToBoss = Math.hypot(activeBoss.x - curr.x, activeBoss.y - curr.y);
-      if (curr.path.length > 0 && distFromCurrToBoss < minDistanceToBoss) {
-        minDistanceToBoss = distFromCurrToBoss;
-        closestNodeToBoss = curr;
-      }
-
-      // Posição de ataque 'curr' só é adotada se nenhum outro herói ou zumbi estiver estacionado nela
-      const isSpotOccupied = curr.path.length > 0 && isCellOccupiedForStop(curr.x, curr.y, miner.id, allMiners, grid);
-
-      const canShootBoss = !isSpotOccupied && 
-        (Math.abs(activeBoss.x - curr.x) + Math.abs(activeBoss.y - curr.y) <= COMBAT_RANGE) && 
-        hasClearLineOfSight(curr.x, curr.y, activeBoss.x, activeBoss.y);
-
-      if (canShootBoss && curr.path.length > 0) {
-        bestCandidate = {
-          target: activeBoss,
-          nextStep: curr.path[0],
-          pathLength: curr.path.length,
-          score: curr.path.length
-        };
-        break; // Encontrou a rota mais curta até a posição livre de disparo contra o Boss!
-      }
-
-      // Exploração nas 4 direções cardinais (heróis atravessam livremente outras entidades no caminho)
-      const nextMoves = [
-        { x: curr.x, y: curr.y - 1, dir: miner.targetDir || 1 },
-        { x: curr.x + 1, y: curr.y, dir: 1 },
-        { x: curr.x, y: curr.y + 1, dir: miner.targetDir || 1 },
-        { x: curr.x - 1, y: curr.y, dir: -1 }
-      ];
-
-      for (const m of nextMoves) {
-        const key = `${m.x},${m.y}`;
-        if (!visited.has(key) && !isSolidTerrain(m.x, m.y, grid, isCanyon)) {
-          visited.add(key);
-          queue.push({
-            x: m.x,
-            y: m.y,
-            path: [...curr.path, { x: m.x, y: m.y, dir: m.dir }]
-          });
-        }
-      }
-    }
-
-    if (bestCandidate && bestCandidate.nextStep) {
-      return {
-        action: 'move',
-        nextStep: bestCandidate.nextStep,
-        targetDeposit: activeBoss,
-        pathLength: bestCandidate.pathLength
-      };
-    }
-
-    if (closestNodeToBoss && closestNodeToBoss.path.length > 0) {
-      return {
-        action: 'move',
-        nextStep: closestNodeToBoss.path[0],
-        targetDeposit: activeBoss,
-        pathLength: closestNodeToBoss.path.length
-      };
-    }
   }
 
-  // 2. Se o herói já estava focado em um alvo e ele ainda existe e está no alcance com célula livre
-  if (!isCurrentCellOccupied && miner.targetBlock) {
-    const stillAlive = activeTargets.find(t => t.x === miner.targetBlock.x && t.y === miner.targetBlock.y);
-    if (stillAlive) {
-      const dist = Math.abs(stillAlive.x - mx) + Math.abs(stillAlive.y - my);
-      if (dist <= COMBAT_RANGE && hasClearLineOfSight(mx, my, stillAlive.x, stillAlive.y)) {
-        const targetDir = stillAlive.x < mx ? -1 : (stillAlive.x > mx ? 1 : (miner.targetDir || 1));
-        return {
-          action: 'mine',
-          targetBlock: { x: stillAlive.x, y: stillAlive.y },
-          targetDir
-        };
-      }
-    }
-  }
-
-  // 3. Verifica se qualquer criatura ativa está no raio imediato (dist <= COMBAT_RANGE) em célula livre
-  if (!isCurrentCellOccupied) {
+  // Combate imediato contra qualquer zumbi no raio tático
+  if (!activeBoss && !isCurrentCellOccupied) {
     const inRangeTargets = activeTargets
       .map(t => ({
         ...t,
@@ -324,7 +246,10 @@ export function findNextHeroAction(miner, grid, allMiners = [], isCanyon = true)
     }
   }
 
-  // 4. Mapeia aglomeração de heróis em cada alvo para distribuir o fogo da equipe
+  // ============================================================================
+  // REGRA OFICIAL DO USUÁRIO:
+  // "quando jogadores nao acham zumbs perto devem verificar no mapa onde tem zumbis e ir ate eles"
+  // ============================================================================
   const targetCrowdMap = {};
   allMiners.forEach(m => {
     if (m.id !== miner.id && m.targetBlock) {
@@ -333,49 +258,73 @@ export function findNextHeroAction(miner, grid, allMiners = [], isCanyon = true)
     }
   });
 
-  // 5. Busca em Largura (BFS) para encontrar a rota mais curta até a posição de combate mais próxima
+  // Busca em Largura (BFS) em malha completa para encontrar a melhor rota nas ruas/gramados
   const queue = [{ x: mx, y: my, path: [] }];
-  const visited = new Set();
-  visited.add(`${mx},${my}`);
+  const visited = new Set([`${mx},${my}`]);
 
   let bestCandidate = null;
+  let fallbackCandidate = null;
 
   while (queue.length > 0) {
     const curr = queue.shift();
 
-    // REGRA OFICIAL DO USUÁRIO: "Anti-Stacking de personagens tbm"
-    // Posição de ataque 'curr' só é adotada se nenhum outro herói ou zumbi estiver estacionado nela
-    const isSpotOccupied = curr.path.length > 0 && isCellOccupiedForStop(curr.x, curr.y, miner.id, allMiners, grid);
+    if (activeBoss) {
+      const distToBoss = Math.abs(activeBoss.x - curr.x) + Math.abs(activeBoss.y - curr.y);
+      const isSpotOccupied = curr.path.length > 0 && isCellOccupiedForStop(curr.x, curr.y, miner.id, allMiners, grid);
+      const canShootBoss = distToBoss <= COMBAT_RANGE && hasClearLineOfSight(curr.x, curr.y, activeBoss.x, activeBoss.y);
 
-    // Se a partir desta posição 'curr' é possível atirar em algum alvo ativo (dist <= COMBAT_RANGE e linha limpa)
-    const reachableTarget = !isSpotOccupied ? activeTargets.find(t => {
-      const d = Math.abs(t.x - curr.x) + Math.abs(t.y - curr.y);
-      return d <= COMBAT_RANGE && hasClearLineOfSight(curr.x, curr.y, t.x, t.y);
-    }) : null;
+      if (canShootBoss && curr.path.length > 0) {
+        if (!isSpotOccupied) {
+          bestCandidate = {
+            target: activeBoss,
+            nextStep: curr.path[0],
+            pathLength: curr.path.length
+          };
+          break; // Rota ideal até posição livre de tiro contra o Boss encontrada
+        } else if (!fallbackCandidate) {
+          fallbackCandidate = {
+            target: activeBoss,
+            nextStep: curr.path[0],
+            pathLength: curr.path.length
+          };
+        }
+      }
+    } else {
+      const isSpotOccupied = curr.path.length > 0 && isCellOccupiedForStop(curr.x, curr.y, miner.id, allMiners, grid);
+      const reachableTarget = activeTargets.find(t => {
+        const d = Math.abs(t.x - curr.x) + Math.abs(t.y - curr.y);
+        return d <= COMBAT_RANGE && hasClearLineOfSight(curr.x, curr.y, t.x, t.y);
+      });
 
-    if (reachableTarget && curr.path.length > 0) {
-      const key = `${reachableTarget.x},${reachableTarget.y}`;
-      const crowd = targetCrowdMap[key] || 0;
-      // Pondera distância do trajeto + penalidade de aglomeração para espalhar os heróis pelo mapa
-      const score = curr.path.length + crowd * 1.5;
+      if (reachableTarget && curr.path.length > 0) {
+        const key = `${reachableTarget.x},${reachableTarget.y}`;
+        const crowd = targetCrowdMap[key] || 0;
+        const score = curr.path.length + crowd * 1.5;
 
-      if (!bestCandidate || score < bestCandidate.score) {
-        bestCandidate = {
-          target: reachableTarget,
-          nextStep: curr.path[0],
-          pathLength: curr.path.length,
-          score
-        };
-
-        // Se encontrou um alvo livre de aglomeração a uma distância curta, adota imediatamente
-        if (crowd === 0 && curr.path.length <= 4) {
-          break;
+        if (!isSpotOccupied) {
+          if (!bestCandidate || score < bestCandidate.score) {
+            bestCandidate = {
+              target: reachableTarget,
+              nextStep: curr.path[0],
+              pathLength: curr.path.length,
+              score
+            };
+            if (crowd === 0 && curr.path.length <= 4) {
+              break;
+            }
+          }
+        } else if (!fallbackCandidate || score < fallbackCandidate.score) {
+          fallbackCandidate = {
+            target: reachableTarget,
+            nextStep: curr.path[0],
+            pathLength: curr.path.length,
+            score
+          };
         }
       }
     }
 
     // Exploração nas 4 direções cardinais com variação determinística baseada no ID do herói
-    // Evita que múltiplos heróis em marcha sincronizada escolham rigorosamente o mesmo caminho em fila indiana
     const idOffset = (typeof miner.id === 'string' ? miner.id.charCodeAt(miner.id.length - 1) : (Number(miner.id) || 0)) % 4;
     const baseMoves = [
       { x: curr.x + 1, y: curr.y, dir: 1 },
@@ -389,27 +338,27 @@ export function findNextHeroAction(miner, grid, allMiners = [], isCanyon = true)
       const key = `${m.x},${m.y}`;
       if (!visited.has(key) && !isSolidTerrain(m.x, m.y, grid, isCanyon)) {
         visited.add(key);
-        // Regra Oficial do Usuário: heróis podem cruzar livremente pela mesma célula de outros heróis e zumbis
         queue.push({
           x: m.x,
           y: m.y,
-          cost: (curr.cost || 0) + 1,
           path: [...curr.path, { x: m.x, y: m.y, dir: m.dir }]
         });
       }
     }
   }
 
-  if (bestCandidate && bestCandidate.nextStep) {
+  const chosenCandidate = bestCandidate || fallbackCandidate;
+  if (chosenCandidate && chosenCandidate.nextStep) {
     return {
       action: 'move',
-      nextStep: bestCandidate.nextStep,
-      targetDeposit: bestCandidate.target,
-      pathLength: bestCandidate.pathLength
+      nextStep: chosenCandidate.nextStep,
+      targetDeposit: chosenCandidate.target,
+      pathLength: chosenCandidate.pathLength
     };
   }
 
-  // 6. Fallback Inteligente Direcional: se o BFS for muito longo, avança na direção do alvo mais próximo
+  // 5. Rota Global Direcionada: se o herói estiver muito distante e a busca ampla não encerrou um ponto livre,
+  // localiza o zumbi mais próximo no mapa e caminha diretamente pela malha viária em direção a ele
   let closestTarget = null;
   let minDist = Infinity;
   for (const t of activeTargets) {
@@ -421,29 +370,31 @@ export function findNextHeroAction(miner, grid, allMiners = [], isCanyon = true)
   }
 
   if (closestTarget) {
-    let candidates = [
-      { x: mx + 1, y: my, dir: 1 },
-      { x: mx - 1, y: my, dir: -1 },
-      { x: mx, y: my + 1, dir: miner.targetDir || 1 },
-      { x: mx, y: my - 1, dir: miner.targetDir || 1 }
-    ].filter(pos => !isSolidTerrain(pos.x, pos.y, grid, isCanyon));
-
-    if (candidates.length > 0) {
-      // Prioriza candidatos livres para parar, mas permite cruzar por células com outros heróis ou zumbis
-      candidates.sort((a, b) => {
-        const occA = isCellOccupiedForStop(a.x, a.y, miner.id, allMiners, grid) ? 1 : 0;
-        const occB = isCellOccupiedForStop(b.x, b.y, miner.id, allMiners, grid) ? 1 : 0;
-        if (occA !== occB) return occA - occB;
-        const distA = Math.hypot(closestTarget.x - a.x, closestTarget.y - a.y);
-        const distB = Math.hypot(closestTarget.x - b.x, closestTarget.y - b.y);
-        return distA - distB;
-      });
-
-      return {
-        action: 'move',
-        nextStep: candidates[0],
-        targetDeposit: closestTarget
-      };
+    const directQueue = [{ x: mx, y: my, path: [] }];
+    const directVisited = new Set([`${mx},${my}`]);
+    while (directQueue.length > 0) {
+      const curr = directQueue.shift();
+      const dist = Math.abs(closestTarget.x - curr.x) + Math.abs(closestTarget.y - curr.y);
+      if (dist <= COMBAT_RANGE && curr.path.length > 0) {
+        return {
+          action: 'move',
+          nextStep: curr.path[0],
+          targetDeposit: closestTarget,
+          pathLength: curr.path.length
+        };
+      }
+      for (const m of [
+        { x: curr.x + 1, y: curr.y, dir: 1 },
+        { x: curr.x - 1, y: curr.y, dir: -1 },
+        { x: curr.x, y: curr.y + 1, dir: 1 },
+        { x: curr.x, y: curr.y - 1, dir: -1 }
+      ]) {
+        const k = `${m.x},${m.y}`;
+        if (!directVisited.has(k) && !isSolidTerrain(m.x, m.y, grid, isCanyon)) {
+          directVisited.add(k);
+          directQueue.push({ x: m.x, y: m.y, path: [...curr.path, m] });
+        }
+      }
     }
   }
 
