@@ -98,6 +98,12 @@ export default function App() {
     const saved = localStorage.getItem('crypto_miners_invested');
     return saved !== null ? parseFloat(saved) : 30.000;
   });
+
+  // ROI de saque: considera somente USDT efetivamente sacado (valor líquido recebido).
+  const [totalWithdrawnUsdt, setTotalWithdrawnUsdt] = useState(() => {
+    const saved = localStorage.getItem('crypto_miners_total_withdrawn_usdt');
+    return saved !== null ? Math.max(0, parseFloat(saved) || 0) : 0;
+  });
   const [isInvestmentOpen, setIsInvestmentOpen] = useState(false);
 
   // Lucro Arrecadado pelo Estúdio com Taxas do Marketplace (3% da plataforma)
@@ -402,6 +408,7 @@ export default function App() {
   };
 
   const handleWithdrawClaim = (amount, netUsdt, taxPct, gasAccounting = {}) => {
+    setTotalWithdrawnUsdt(prev => parseFloat((prev + Math.max(0, Number(netUsdt) || 0)).toFixed(2)));
     let nextBcoinBalance = bcoin;
     setBcoin(prev => {
       const nextBalance = parseFloat(Math.max(0, prev - amount).toFixed(3));
@@ -860,8 +867,8 @@ export default function App() {
   const minersInHouse = miners.filter(m => m.status === 'house');
 
   const currentMinerRate = cryptoZombiesConfig?.minerCoinUsdtRate || 0.01;
-  const currentWithdrawalTax = calculateWithdrawalTax(totalInvested, totalMinedSession, currentMinerRate);
-  const roiPct = totalInvested > 0 ? Math.min(500, Math.round(((totalMinedSession * currentMinerRate) / totalInvested) * 100)) : 0;
+  const currentWithdrawalTax = calculateWithdrawalTax(totalInvested, totalWithdrawnUsdt);
+  const roiPct = totalInvested > 0 ? Math.min(500, Math.round((totalWithdrawnUsdt / totalInvested) * 100)) : 0;
 
   // Mineração 100% ativa no navegador: quando fechado ou desligado, o jogo não minera offline
 
@@ -876,6 +883,10 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('crypto_miners_invested', totalInvested.toString());
   }, [totalInvested]);
+
+  useEffect(() => {
+    localStorage.setItem('crypto_miners_total_withdrawn_usdt', totalWithdrawnUsdt.toString());
+  }, [totalWithdrawnUsdt]);
 
   useEffect(() => {
     localStorage.setItem('crypto_miners_studio_rev', studioRevenue.toString());
