@@ -137,7 +137,7 @@ export default function UserProfileModal({
   const minWithdrawUsd = 40;
   const minWithdrawMnc = Math.ceil(minWithdrawUsd / (minerRate || 0.01));
 
-  // Cálculo de Saque com Base na Cotação da Minercoin
+  // Cálculo de Saque com Base na Cotação da Coins
   const parsedWithdrawAmount = parseFloat(withdrawAmount) || 0;
   const withdrawGrossUsdt = parseFloat((parsedWithdrawAmount * minerRate).toFixed(2));
   const isMinMet = withdrawGrossUsdt >= minWithdrawUsd;
@@ -152,7 +152,7 @@ export default function UserProfileModal({
       return;
     }
     if (!isMinMet) {
-      alert(`O valor mínimo de saque é US$ ${minWithdrawUsd.toFixed(2)} (${minWithdrawMnc.toLocaleString()} MNC).`);
+      alert(`O valor mínimo de saque é US$ ${minWithdrawUsd.toFixed(2)} (${minWithdrawMnc.toLocaleString()} Coins).`);
       return;
     }
     if (!hasEnoughBalance) {
@@ -305,7 +305,7 @@ export default function UserProfileModal({
             <ArrowDownToLine size={15} />
             <span>SAQUES & CLAIM</span>
             <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-              1 MNC = US$ {minerRate.toFixed(2)}
+              1 Coins = US$ {minerRate.toFixed(2)}
             </span>
           </button>
 
@@ -505,7 +505,7 @@ export default function UserProfileModal({
                     <span>💎</span>
                   </div>
                   <div className="font-arcade text-base text-amber-400 font-bold">
-                    {totalMinedSession.toFixed(2)} MNC
+                    {totalMinedSession.toFixed(2)} Coins
                   </div>
                   <div className="text-[11px] text-slate-400 font-mono">
                     ≈ US$ ${(totalMinedSession * minerRate).toFixed(2)}
@@ -522,7 +522,7 @@ export default function UserProfileModal({
                     US$ {totalInvested.toFixed(2)}
                   </div>
                   <div className="text-[11px] text-emerald-400 font-mono">
-                    1 MNC = US$ {minerRate.toFixed(2)}
+                    1 Coins = US$ {minerRate.toFixed(2)}
                   </div>
                 </div>
 
@@ -653,10 +653,10 @@ export default function UserProfileModal({
                   <div className="p-3.5 rounded-2xl bg-blue-950/40 border border-blue-500/20 text-xs text-slate-300 space-y-1">
                     <div className="flex items-center gap-1.5 font-bold text-blue-400">
                       <ShieldCheck size={16} />
-                      <span>Cotação Oficial da Minercoin (MNC)</span>
+                      <span>Cotação Oficial da Coins (Coins)</span>
                     </div>
                     <p className="text-[11px] text-slate-400 leading-relaxed">
-                      Seus tokens <b>MNC</b> conquistados na mineração possuem cotação oficial de <b>1 MNC = US$ {minerRate.toFixed(2)}</b>. Ao efetuar o saque na aba Saques, o valor líquido correspondente em USDT entra diretamente na sua carteira conectada.
+                      Seus tokens <b>Coins</b> conquistados na mineração possuem cotação oficial de <b>1 Coins = US$ {minerRate.toFixed(2)}</b>. Ao efetuar o saque na aba Saques, o valor líquido correspondente em USDT entra diretamente na sua carteira conectada.
                     </p>
                   </div>
 
@@ -839,13 +839,13 @@ export default function UserProfileModal({
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
                         <Coins size={16} className="text-amber-400" />
-                        <span className="font-bold text-slate-200">Cotação Oficial da Minercoin</span>
+                        <span className="font-bold text-slate-200">Cotação Oficial da Coins</span>
                         <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono font-bold border border-emerald-500/40">
-                          1 MNC = US$ {minerRate.toFixed(2)}
+                          1 Coins = US$ {minerRate.toFixed(2)}
                         </span>
                       </div>
                       <p className="text-[11px] text-slate-400">
-                        Saque mínimo de <b>US$ {minWithdrawUsd.toFixed(2)} ({minWithdrawMnc.toLocaleString()} MNC)</b>. A taxa dinâmica protege o pool de liquidez do jogo.
+                        Saque mínimo de <b>US$ {minWithdrawUsd.toFixed(2)} ({minWithdrawMnc.toLocaleString()} Coins)</b>. A taxa dinâmica protege o pool de liquidez do jogo.
                       </p>
                     </div>
 
@@ -863,7 +863,7 @@ export default function UserProfileModal({
                       <span className="text-[10px] text-slate-400 uppercase tracking-wider block">Saldo In-Game Disponível</span>
                       <div className="flex items-baseline gap-1 mt-1">
                         <b className="font-arcade text-xl text-amber-300">{bcoinBalance.toFixed(2)}</b>
-                        <span className="text-xs text-amber-400 font-arcade">MNC</span>
+                        <span className="text-xs text-amber-400 font-arcade">Coins</span>
                       </div>
                       <span className="text-[10px] text-slate-400 font-mono">
                         ≈ US$ ${(bcoinBalance * minerRate).toFixed(2)}
@@ -898,8 +898,8 @@ export default function UserProfileModal({
                   {/* Campo de Entrada de Valor para Saque */}
                   <div className="p-4 rounded-2xl bg-slate-950/90 border border-slate-800 space-y-3">
                     <div className="flex items-center justify-between text-xs">
-                      <label className="font-bold text-slate-300">Quanto deseja sacar (MNC)?</label>
-                      <span className="text-[11px] text-amber-300 font-mono font-bold">Mínimo: US$ 50 ({minWithdrawMnc.toLocaleString()} MNC)</span>
+                      <label className="font-bold text-slate-300">Quanto deseja sacar (Coins)?</label>
+                      <span className="text-[11px] text-amber-300 font-mono font-bold">Mínimo: US$ 50 ({minWithdrawMnc.toLocaleString()} Coins)</span>
                     </div>
 
                     <div className="relative">
@@ -914,7 +914,7 @@ export default function UserProfileModal({
                         className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-base text-amber-300 font-arcade focus:outline-none focus:border-amber-500/60"
                       />
                       <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-arcade text-slate-400">
-                        MNC
+                        Coins
                       </span>
                     </div>
 
@@ -951,7 +951,7 @@ export default function UserProfileModal({
                     <div className="flex justify-between text-slate-400">
                       <span>Valor Solicitado:</span>
                       <span className="font-mono text-amber-300 font-bold">
-                        {parsedWithdrawAmount.toFixed(2)} MNC (≈ US$ {withdrawGrossUsdt.toFixed(2)})
+                        {parsedWithdrawAmount.toFixed(2)} Coins (≈ US$ {withdrawGrossUsdt.toFixed(2)})
                       </span>
                     </div>
 
@@ -978,7 +978,7 @@ export default function UserProfileModal({
                     </button>
                   ) : !isMinMet ? (
                     <div className="p-3 rounded-2xl bg-slate-950 border border-slate-800 text-center text-xs text-slate-400">
-                      ⚠️ O valor mínimo para realizar o saque é de <b>US$ 50 ({minWithdrawMnc.toLocaleString()} MNC)</b>.
+                      ⚠️ O valor mínimo para realizar o saque é de <b>US$ 50 ({minWithdrawMnc.toLocaleString()} Coins)</b>.
                     </div>
                   ) : !hasEnoughBalance ? (
                     <div className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-center text-xs text-rose-400">
@@ -1000,7 +1000,7 @@ export default function UserProfileModal({
                       <span>Como funciona a taxa de saque?</span>
                     </div>
                     <p>
-                      A taxa é calculada pelo ROI já recuperado em saques efetivamente recebidos, em relação ao investimento elegível: 15% para ROI de 0% a 49%; 10% de 50% a 99%; 5% de 100% a 149%; e 3% a partir de 150%. MHC minerada, mas ainda não sacada, não conta como valor recuperado.
+                      A taxa é calculada pelo ROI já recuperado em saques efetivamente recebidos, em relação ao investimento elegível: 15% para ROI de 0% a 49%; 10% de 50% a 99%; 5% de 100% a 149%; e 3% a partir de 150%. Coins minerada, mas ainda não sacada, não conta como valor recuperado.
                     </p>
                   </div>
 
