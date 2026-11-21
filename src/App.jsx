@@ -84,6 +84,7 @@ import HeroFusionModal from './components/HeroFusionModal';
 import GearInventoryModal from './components/GearInventoryModal';
 import CampaignMapModal from './components/CampaignMapModal';
 import { INITIAL_GEAR_STASH } from './data/gearData';
+import { applyHeroBaseHP } from './utils/heroHealth';
 
 export default function App() {
   const [bcoin, setBcoin] = useState(() => {
@@ -299,6 +300,15 @@ export default function App() {
     }
     return INITIAL_MINERS;
   });
+
+  // Aplica a tabela única de HP por raridade a toda a equipe, inclusive heróis já salvos e recém-adquiridos.
+  // Ao migrar o HP máximo, preserva a porcentagem de vida atual do herói.
+  useEffect(() => {
+    const updated = miners.map(applyHeroBaseHP);
+    if (updated.some((hero, index) => hero !== miners[index])) {
+      setMiners(updated);
+    }
+  }, [miners]);
 
   // Casa dos mineradores (House System - sistema próprio de mineração e abrigos)
   const [currentHouseId, setCurrentHouseId] = useState(() => {
