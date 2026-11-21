@@ -1263,11 +1263,7 @@ export default function App() {
     }));
   };
 
-  const handleUpgradeHouse = (newHouseId, cost) => {
-    if (bcoin < cost) return;
-    setBcoin(prev => parseFloat((prev - cost).toFixed(3)));
-    setCurrentHouseId(newHouseId);
-  };
+
 
   // Anúncio Patrocinado: Consertar arma / Restaurar durabilidade
   const handleRepairMiner = (minerId) => {
@@ -1849,11 +1845,9 @@ export default function App() {
         currentHouseId={currentHouseId}
         miners={miners}
         onToggleHouseRest={handleToggleHouseRest}
-        onUpgradeHouse={handleUpgradeHouse}
         onUpgradeWithFragments={handleUpgradeHouseWithFragments}
         constructionFragments={constructionFragments}
         minerBalance={bcoin}
-        walletState={walletState}
       />
 
       {/* MODAL MINT COM BÊNÇÃO DA SORTE PATROCINADA */}
