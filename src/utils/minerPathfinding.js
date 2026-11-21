@@ -346,12 +346,11 @@ export function findNextHeroAction(miner, grid, allMiners = [], isCanyon = true)
       const key = `${m.x},${m.y}`;
       if (!visited.has(key) && !isSolidTerrain(m.x, m.y, grid, isCanyon)) {
         visited.add(key);
-        // Desencoraja rotas que atravessem outro herói parado
-        const hasStationaryHero = allMiners.some(o => o.id !== miner.id && o.isMining && Math.round(o.x) === m.x && Math.round(o.y) === m.y);
+        // Regra Oficial do Usuário: heróis podem cruzar livremente pela mesma célula de outros heróis e zumbis
         queue.push({
           x: m.x,
           y: m.y,
-          cost: (curr.cost || 0) + 1 + (hasStationaryHero ? 3.0 : 0),
+          cost: (curr.cost || 0) + 1,
           path: [...curr.path, { x: m.x, y: m.y, dir: m.dir }]
         });
       }

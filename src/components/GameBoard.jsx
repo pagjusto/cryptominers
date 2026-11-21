@@ -1315,6 +1315,33 @@ export default function GameBoard({
           const decision = findNextHeroAction(miner, state.grid, state.miners, isCanyon);
 
           if (decision.action === 'mine' && decision.targetBlock) {
+            const curX = Math.round(miner.x);
+            const curY = Math.round(miner.y);
+            // REGRA OFICIAL DO USUÁRIO:
+            // "os herois nao podem travar em locais podendo passar um pelo outro mas nao pararem no mesmo local,
+            //  podem passar tambem pelos zumbis mas nao parar no mesmo local que eles, isso faz eles cruzarem pela mesma celula e nao travarem"
+            const isOverlappingHero = state.miners.some(o => 
+              o.id !== miner.id && 
+              o.status === 'work' && 
+              o.isMining && 
+              Math.round(o.x) === curX && 
+              Math.round(o.y) === curY
+            );
+            const isOverlappingZombie = state.enemies?.some(e => 
+              (e.hp === undefined || e.hp > 0) && 
+              Math.round(e.gx) === curX && 
+              Math.round(e.gy) === curY
+            );
+
+            // Não para no mesmo local: se a célula estiver ocupada por outro herói minerando ou zumbi, ajusta para posição livre
+            if (isOverlappingHero || isOverlappingZombie) {
+              const freeSpot = findNearestFreeHeroCell(curX, curY, miner.id, state.miners, state.grid, isCanyon, state.enemies);
+              if (freeSpot) {
+                miner.x = freeSpot.x;
+                miner.y = freeSpot.y;
+              }
+            }
+
             miner.targetBlock = decision.targetBlock;
             miner.targetDir = decision.targetDir;
             miner.isMining = true;
@@ -1329,40 +1356,48 @@ export default function GameBoard({
               matchedEnemy.underAttackByHeroId = miner.id;
             }
           } else if (decision.action === 'move' && decision.nextStep) {
-            // Anti-stacking na movimentação: verifica se a célula de destino já está ocupada por outro herói
-            const isDestOccupied = state.miners.some(other => 
-              other.id !== miner.id && 
-              other.status === 'work' && 
-              Math.round(other.x) === decision.nextStep.x && 
-              Math.round(other.y) === decision.nextStep.y
-            );
-
-            if (!isDestOccupied) {
-              miner.x = decision.nextStep.x;
-              miner.y = decision.nextStep.y;
-              if (decision.nextStep.dir) {
-                miner.targetDir = decision.nextStep.dir;
-              }
-            } else {
-              // Célula temporariamente ocupada: pausa breve para desvio
-              miner.moveCooldown = 0.15;
+            // REGRA OFICIAL DO USUÁRIO:
+            // "podendo passar um pelo outro mas nao pararem no mesmo local , podem passar tambem pelos zumbis mas nao parar no mesmo local que eles, isso faz eles cruzarem pela mesma celula e nao travarem"
+            // Movimentação livre: heróis atravessam outros heróis e zumbis sem bloquear ou pausar
+            miner.x = decision.nextStep.x;
+            miner.y = decision.nextStep.y;
+            if (decision.nextStep.dir) {
+              miner.targetDir = decision.nextStep.dir;
             }
 
-            // Ao dar o passo, checa imediatamente se já encostou ou entrou em alcance de tiro
+            // Ao dar o passo, checa se entrou em alcance de tiro sem parar no mesmo local
             const immediateCheck = findNextHeroAction(miner, state.grid, state.miners, isCanyon);
             if (immediateCheck.action === 'mine' && immediateCheck.targetBlock) {
-              miner.targetBlock = immediateCheck.targetBlock;
-              miner.targetDir = immediateCheck.targetDir;
-              miner.isMining = true;
-              miner.swingTimer = 0.4;
-              const matchedEnemy = state.enemies?.find(e => e.gx === immediateCheck.targetBlock.x && e.gy === immediateCheck.targetBlock.y);
-              if (matchedEnemy) {
-                miner.lockedEnemyId = matchedEnemy.id;
-                matchedEnemy.isUnderAttack = true;
-                matchedEnemy.attackedTimer = 2.0;
-                matchedEnemy.isWalking = false;
-                matchedEnemy.moveCooldown = 2.0;
-                matchedEnemy.underAttackByHeroId = miner.id;
+              const curX = Math.round(miner.x);
+              const curY = Math.round(miner.y);
+              const isOverlappingHero = state.miners.some(o => 
+                o.id !== miner.id && 
+                o.status === 'work' && 
+                o.isMining && 
+                Math.round(o.x) === curX && 
+                Math.round(o.y) === curY
+              );
+              const isOverlappingZombie = state.enemies?.some(e => 
+                (e.hp === undefined || e.hp > 0) && 
+                Math.round(e.gx) === curX && 
+                Math.round(e.gy) === curY
+              );
+
+              // Só fixa em combate se não estiver parado exatamente em cima de outro herói ou zumbi
+              if (!isOverlappingHero && !isOverlappingZombie) {
+                miner.targetBlock = immediateCheck.targetBlock;
+                miner.targetDir = immediateCheck.targetDir;
+                miner.isMining = true;
+                miner.swingTimer = 0.4;
+                const matchedEnemy = state.enemies?.find(e => e.gx === immediateCheck.targetBlock.x && e.gy === immediateCheck.targetBlock.y);
+                if (matchedEnemy) {
+                  miner.lockedEnemyId = matchedEnemy.id;
+                  matchedEnemy.isUnderAttack = true;
+                  matchedEnemy.attackedTimer = 2.0;
+                  matchedEnemy.isWalking = false;
+                  matchedEnemy.moveCooldown = 2.0;
+                  matchedEnemy.underAttackByHeroId = miner.id;
+                }
               }
             }
           }
