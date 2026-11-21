@@ -487,7 +487,7 @@ export default function AdminConfigModal({
                 </div>
 
                 <div>
-                  <label className="text-slate-400 block mb-1">Cotação da Minercoin (1 MNC em USDT):</label>
+                  <label className="text-slate-400 block mb-1">Cotação da Coins (1 Coins em USDT):</label>
                   <input
                     type="number"
                     step="0.001"
@@ -496,7 +496,7 @@ export default function AdminConfigModal({
                     onChange={e => setConfig(prev => ({ ...prev, minerCoinUsdtRate: parseFloat(e.target.value) || 0.01 }))}
                     className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 font-mono font-bold text-emerald-400"
                   />
-                  <span className="text-[10px] text-slate-500 block mt-1">Cotação oficial do projeto: <b>1 MNC = US$ 0,01</b>. Ajustável pelo administrador. Todos os cálculos de ROI e saques utilizam esta cotação.</span>
+                  <span className="text-[10px] text-slate-500 block mt-1">Cotação oficial do projeto: <b>1 Coins = US$ 0,01</b>. Ajustável pelo administrador. Todos os cálculos de ROI e saques utilizam esta cotação.</span>
                 </div>
               </div>
             </div>
