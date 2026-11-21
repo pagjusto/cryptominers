@@ -57,9 +57,11 @@ function drawBaseShelterVisual(ctx, house, miners, now) {
   const color = house.color || '#38bdf8';
   const inBeds = miners.filter(m => m.status === 'house').slice(0, house.slots);
   const waiting = miners.filter(m => m.status === 'waiting_house');
-  const resting = miners.filter(m => (m.status === 'reserve' || m.status === 'sleep') &&
-    m.status !== 'injured' && !m.injuredAwaitingRescue &&
-    (Number(m.currentHealth ?? m.maxHealth ?? 100) / Number(m.maxHealth || 100)) * 100 > 5).slice(0, 4);
+  const resting = miners.filter(m =>
+    (m.status === 'reserve' || m.status === 'sleep') &&
+    !m.injuredAwaitingRescue &&
+    (Number(m.currentHealth ?? m.maxHealth ?? 100) / Number(m.maxHealth || 100)) * 100 > 5
+  );
 
   ctx.save();
   ctx.beginPath();
@@ -88,7 +90,7 @@ function drawBaseShelterVisual(ctx, house, miners, now) {
   ctx.fillStyle = color;
   ctx.fillText(inBeds.length + ' OCUPADOS • ' + Math.max(0, house.slots - inBeds.length) + ' LIVRES', x + w - 10, y + 16);
 
-  // Ala de leitos: cinco por fileira; cada nível acrescenta fileiras reais e visíveis.
+  // Leitos: os heróis em tratamento aparecem deitados, um por vaga ocupada.
   const bedStartX = x + 8;
   const bedStartY = y + headerH + 8;
   const bedW = 64;
@@ -112,14 +114,12 @@ function drawBaseShelterVisual(ctx, house, miners, now) {
     ctx.lineWidth = patient ? 2 : 1.2;
     ctx.strokeRect(bx + 1, by + 1, bedW - 2, bedH - 2);
 
-    // Colchão e cabeceira
     ctx.fillStyle = patient ? 'rgba(96, 165, 250, 0.25)' : 'rgba(148, 163, 184, 0.12)';
     ctx.fillRect(bx + 5, by + 6, bedW - 10, bedH - 12);
     ctx.fillStyle = patient ? '#e2e8f0' : '#94a3b8';
     ctx.fillRect(bx + 7, by + 8, 13, 12);
 
     if (patient) {
-      // Herói deitado: cabeça, corpo e cobertor, em vista superior.
       const cy = by + bedH / 2 + 1;
       ctx.fillStyle = '#f1c7a5';
       ctx.beginPath();
@@ -143,50 +143,77 @@ function drawBaseShelterVisual(ctx, house, miners, now) {
     }
   }
 
-  // Pátio de descanso para sobreviventes saudáveis que não estão em combate.
+  // Pátio interno: todos os heróis saudáveis fora da mineração e todos os feridos na fila.
+  // Os ícones são compactos para manter a representação dentro do mesmo quadrado da base.
   const patioX = bedStartX + bedAreaW + 12;
   const patioW = x + w - patioX - 8;
+  const patioY = y + headerH + 6;
+  const patioH = h - headerH - 12;
   ctx.fillStyle = 'rgba(15, 23, 42, 0.62)';
-  ctx.fillRect(patioX, y + headerH + 6, patioW, h - headerH - 12);
+  ctx.fillRect(patioX, patioY, patioW, patioH);
   ctx.strokeStyle = 'rgba(148, 163, 184, 0.35)';
-  ctx.strokeRect(patioX, y + headerH + 6, patioW, h - headerH - 12);
-  ctx.font = 'bold 10px monospace';
+  ctx.strokeRect(patioX, patioY, patioW, patioH);
+
+  const drawRoster = (heroes, label, startY, waitingList = false) => {
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.font = 'bold 9px monospace';
+    ctx.fillStyle = waitingList ? '#fbbf24' : '#cbd5e1';
+    ctx.fillText(label + ' • ' + heroes.length, patioX + 5, startY + 7);
+
+    const cols = 4;
+    const cellW = Math.max(28, (patioW - 8) / cols);
+    const rowH = 23;
+    const availableRows = Math.max(1, Math.floor((patioY + patioH - startY - 17) / rowH));
+    const maxVisible = cols * availableRows;
+    const visible = heroes.slice(0, maxVisible);
+
+    visible.forEach((hero, index) => {
+      const col = index % cols;
+      const row = Math.floor(index / cols);
+      const cx = patioX + 5 + col * cellW + cellW / 2;
+      const cy = startY + 23 + row * rowH;
+      // Fila usa contorno amarelo; reserva usa contorno azul discreto. Ambos ficam em pé.
+      ctx.fillStyle = waitingList ? 'rgba(251, 191, 36, 0.18)' : 'rgba(56, 189, 248, 0.13)';
+      ctx.fillRect(cx - 8, cy - 9, 16, 19);
+      ctx.strokeStyle = waitingList ? '#fbbf24' : 'rgba(125, 211, 252, 0.65)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(cx - 8, cy - 9, 16, 19);
+      ctx.fillStyle = '#f1c7a5';
+      ctx.beginPath();
+      ctx.arc(cx, cy - 4, 3.2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = hero.color || (waitingList ? '#f59e0b' : '#22c55e');
+      ctx.fillRect(cx - 4, cy, 8, 7);
+    });
+
+    const overflow = heroes.length - visible.length;
+    if (overflow > 0) {
+      ctx.font = 'bold 8px monospace';
+      ctx.textAlign = 'right';
+      ctx.fillStyle = waitingList ? '#fbbf24' : '#cbd5e1';
+      ctx.fillText('+' + overflow, patioX + patioW - 4, patioY + patioH - 7);
+    }
+    return startY + 23 + Math.ceil(Math.min(heroes.length, maxVisible) / cols) * rowH;
+  };
+
   ctx.textAlign = 'center';
-  ctx.fillStyle = '#cbd5e1';
-  ctx.fillText('PÁTIO', patioX + patioW / 2, y + headerH + 18);
+  ctx.font = 'bold 9px monospace';
+  ctx.fillStyle = '#e2e8f0';
+  ctx.fillText('PÁTIO INTERNO', patioX + patioW / 2, patioY + 9);
 
-  resting.forEach((hero, index) => {
-    const col = index % 2;
-    const row = Math.floor(index / 2);
-    const px = patioX + 35 + col * 58;
-    const py = y + headerH + 50 + row * 62 + Math.sin(now / 520 + index) * 2;
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
-    ctx.beginPath();
-    ctx.ellipse(px, py + 18, 13, 5, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = '#cbd5e1';
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.moveTo(px - 4, py + 8); ctx.lineTo(px - 7, py + 18);
-    ctx.moveTo(px + 4, py + 8); ctx.lineTo(px + 7, py + 18);
-    ctx.stroke();
-    ctx.fillStyle = hero.color || '#22c55e';
-    ctx.fillRect(px - 9, py - 8, 18, 18);
-    ctx.fillStyle = '#f1c7a5';
-    ctx.beginPath();
-    ctx.arc(px, py - 14, 7, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = '#f8fafc';
-    ctx.font = '8px monospace';
-    ctx.fillText((hero.name || 'Herói').slice(0, 12), px, py + 29);
-  });
-
+  const rosterStart = patioY + 17;
+  const reserveEnd = drawRoster(resting, 'RESERVA', rosterStart, false);
   if (waiting.length > 0) {
-    ctx.fillStyle = '#fbbf24';
-    ctx.font = 'bold 10px monospace';
+    const waitingStart = Math.min(reserveEnd + 2, patioY + patioH - 35);
+    drawRoster(waiting, 'FILA DE LEITOS', waitingStart, true);
+  } else if (resting.length === 0) {
+    ctx.font = '8px monospace';
     ctx.textAlign = 'center';
-    ctx.fillText('FILA: ' + waiting.length, patioX + patioW / 2, y + h - 12);
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillText('SEM HERÓIS NA RESERVA', patioX + patioW / 2, patioY + 38);
   }
+
   ctx.restore();
 }
 
