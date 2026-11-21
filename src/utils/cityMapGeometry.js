@@ -174,8 +174,8 @@ export const CORNER_SPAWN_POINTS = [
   { x: 1, y: 2, c: 1, r: 2 }, { x: 5, y: 3, c: 5, r: 3 }, { x: 6, y: 3, c: 6, r: 3 },
   { x: 1, y: 7, c: 1, r: 7 }, { x: 1, y: 9, c: 1, r: 9 }, { x: 2, y: 9, c: 2, r: 9 },
   { x: 3, y: 9, c: 3, r: 9 }, { x: 6, y: 9, c: 6, r: 9 }, { x: 7, y: 9, c: 7, r: 9 },
-  { x: 9, y: 9, c: 9, r: 9 }, { x: 14, y: 8, c: 14, r: 8 }, { x: 14, y: 9, c: 14, r: 9 },
-  { x: 13, y: 10, c: 13, r: 10 }
+  { x: 9, y: 9, c: 9, r: 9 }, { x: 2, y: 8, c: 2, r: 8 }, { x: 4, y: 8, c: 4, r: 8 },
+  { x: 7, y: 8, c: 7, r: 8 }, { x: 13, y: 7, c: 13, r: 7 }
 ];
 
 export function getCornerSpawnPoint(index = 0) {
@@ -192,8 +192,8 @@ export function getCornerSpawnPoint(index = 0) {
 // Personagens podem caminhar pelo mapa todo; estas zonas são somente os pontos de nascimento.
 export const SPAWN_ZONE_VERSION = 2;
 export function isSpawnZoneCell(c, r) {
-  const inNorthSpawn = r >= 1 && r <= 3 && c >= 1 && c <= 7;
-  const inSouthSpawn = r >= 7 && r <= 10 && c >= 1 && c <= 14;
+  const inNorthSpawn = r >= 1 && r <= 4 && c >= 1 && c <= 10;
+  const inSouthSpawn = r >= 6 && r <= 9 && c >= 1 && c <= 13;
   return (inNorthSpawn || inSouthSpawn) && !isCityBuilding(c, r) && !isBaseCompound(c, r);
 }
 
@@ -213,8 +213,8 @@ export function getSpawnZoneCells(cols = GRID_COLS, rows = GRID_ROWS) {
 export const SAFE_HERO_SPAWN_POINTS = [
   { x: 1, y: 1 }, { x: 5, y: 1 }, { x: 6, y: 1 }, { x: 1, y: 2 }, { x: 5, y: 3 },
   { x: 6, y: 3 }, { x: 7, y: 2 }, { x: 1, y: 7 }, { x: 1, y: 9 }, { x: 2, y: 9 },
-  { x: 3, y: 9 }, { x: 6, y: 9 }, { x: 7, y: 9 }, { x: 9, y: 9 }, { x: 14, y: 8 },
-  { x: 14, y: 9 }, { x: 13, y: 10 }
+  { x: 3, y: 9 }, { x: 6, y: 9 }, { x: 7, y: 9 }, { x: 9, y: 9 }, { x: 4, y: 8 },
+  { x: 7, y: 8 }, { x: 13, y: 7 }
 ];
 
 export function getSafeHeroSpawn(index = 0) {
