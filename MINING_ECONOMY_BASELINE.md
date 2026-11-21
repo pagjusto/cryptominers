@@ -181,3 +181,26 @@ Aos 270 dias, o herói chega a 80 anos, tem eficiência-base 0%, HP 0% e se apos
 - O valor de 480,24 MNC/dia é a referência total da equipe mediana, não uma recompensa por Boss.
 - Os valores de eficiência por idade e o bônus por estrelas são fatores distintos, combinados pela fórmula acima.
 - Não alterar esta base sem uma nova decisão explícita de balanceamento.
+
+## Tabela comercial de baús de heróis — aprovada em 21/11/2026
+
+Esta é a tabela de preços comerciais definida para os pacotes de 1, 5, 10 e 15 heróis. O pacote de 15 heróis tem preço final de **US$ 432,13**, já com 8% de desconto aplicado. O valor unitário-base é inferido matematicamente a partir desse pacote.
+
+| Pacote | Quantidade de heróis | Desconto | Preço final (USDT) |
+|---|---:|---:|---:|
+| Miner | 1 | 0% | **US$ 31,31** |
+| Explorer | 5 | 0% | **US$ 156,57** |
+| Elite | 10 | 4% | **US$ 300,61** |
+| Legendary | 15 | 8% | **US$ 432,13** |
+
+### Regra de cálculo
+
+- Preço unitário-base inferido: **US$ 31,313768... por herói**, calculado por 432,13 ÷ 0,92 ÷ 15.
+- Miner: 1 × preço unitário-base, sem desconto.
+- Explorer: 5 × preço unitário-base, sem desconto.
+- Elite: 10 × preço unitário-base, com 4% de desconto.
+- Legendary: 15 × preço unitário-base, com 8% de desconto.
+- Preços finais arredondados para duas casas decimais.
+- O usuário confirmou o preço de US$ 432,13 para Legendary e os descontos de 4% para Elite e 8% para Legendary. Os preços dos pacotes de 1, 5 e 10 heróis são derivados matematicamente dessa base.
+
+**Importante:** esta seção documenta os preços comerciais. Ela não altera automaticamente os preços de compra atualmente implementados no código do jogo; a implementação deve ser feita separadamente após revisão do fluxo de compra.
