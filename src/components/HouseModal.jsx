@@ -25,21 +25,15 @@ export default function HouseModal({
   const minersInHouse = miners.filter(m => m.status === 'house');
   const minersWaiting = miners.filter(m => m.status === 'waiting_house');
 
-  // Custos em Fragmentos de Construção por categoria de casa
-  const FRAGMENT_COSTS = {
-    reinforced: 5,
-    advanced: 10,
-    legendary: 15
-  };
-
   const handleBuyUpgradeWithFragments = (targetHouse) => {
-    const fragCost = FRAGMENT_COSTS[targetHouse.id] || 5;
-    if (constructionFragments < fragCost) {
-      alert(`Fragmentos insuficientes! Necessário: ${fragCost} Fragmentos de Construção (você tem ${constructionFragments}).`);
+    const fragCost = targetHouse.fragmentCost || 0;
+    const mncCost = targetHouse.mncCost || 0;
+    if (constructionFragments < fragCost || minerBalance < mncCost) {
+      alert(`Recursos insuficientes. Evolução exige ${fragCost} Fragmentos e ${mncCost.toLocaleString('pt-BR')} MNC. Saldo atual: ${constructionFragments} Fragmentos e ${minerBalance.toLocaleString('pt-BR')} MNC.`);
       return;
     }
     if (onUpgradeWithFragments) {
-      onUpgradeWithFragments(targetHouse.id, fragCost);
+      onUpgradeWithFragments(targetHouse.id, fragCost, mncCost);
       sfx.playLevelUp();
       confetti({
         particleCount: 120,
@@ -271,14 +265,14 @@ export default function HouseModal({
                     {constructionFragments} FRAGMENTO{constructionFragments === 1 ? '' : 'S'} DE CONSTRUÇÃO DISPONÍVEIS
                   </span>
                   <span className="text-[11px] text-slate-400">
-                    Obtidos nos Baús de Construção. Evolua seu abrigo sem gastar moedas!
+                    Fragmentos obtidos nos Baús de Construção. Evolução permanente da base.
                   </span>
                 </div>
               </div>
             </div>
 
             <p className="text-xs text-slate-400">
-              Evolua seu abrigo para tratar mais sobreviventes simultaneamente e acelerar a recuperação:
+              A evolução é permanente e sequencial. Cada nível aumenta os leitos visíveis e a capacidade real do ambulatório.
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -286,8 +280,9 @@ export default function HouseModal({
                 const targetIndex = HOUSE_TIERS.findIndex(h => h.id === house.id);
                 const isOwned = currentHouse.id === house.id;
                 const isPast = targetIndex < houseIndex;
-                const fragCost = FRAGMENT_COSTS[house.id] || 5;
-                const canAffordFrags = constructionFragments >= fragCost;
+                const fragCost = house.fragmentCost || 0;
+                const mncCost = house.mncCost || 0;
+                const canAffordFrags = constructionFragments >= fragCost && minerBalance >= mncCost;
 
                 return (
                   <div 
@@ -309,7 +304,7 @@ export default function HouseModal({
                             backgroundColor: `${house.color}15`
                           }}
                         >
-                          {house.slots} VAGAS • {house.recoverySpeedPct}% VEL
+                          {house.slots} LEITOS • NÍVEL {house.level}
                         </span>
                       </div>
 
@@ -324,12 +319,12 @@ export default function HouseModal({
 
                     <div className="pt-2 border-t border-slate-800/80 space-y-2">
                       <div className="flex items-center justify-between text-xs">
-                        <span className="font-tech text-slate-400">
-                          Requisito de Crafting:
-                        </span>
-                        <span className="font-mono text-emerald-400 font-bold">
-                          🧱 {fragCost} Fragmentos
-                        </span>
+                        <span className="font-tech text-slate-400">Fragmentos:</span>
+                        <span className="font-mono text-emerald-400 font-bold">🧱 {fragCost}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-tech text-slate-400">Custo em MNC:</span>
+                        <span className="font-mono text-amber-300 font-bold">🪙 {mncCost.toLocaleString('pt-BR')} MNC</span>
                       </div>
 
                       {isOwned ? (
@@ -351,7 +346,7 @@ export default function HouseModal({
                               : 'bg-slate-800/80 text-slate-500 border border-slate-700/50 cursor-not-allowed'
                           }`}
                         >
-                          🔨 CRAFTAR EVOLUÇÃO (🧱 {fragCost} FRAGS)
+                          🔨 EVOLUIR BASE
                         </button>
                       ) : (
                         /* Proibido pular níveis */
