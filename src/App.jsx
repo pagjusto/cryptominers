@@ -34,6 +34,7 @@ import { INITIAL_MARKET_LISTINGS, MARKETPLACE_FEE_PCT, FEE_SPLIT } from './data/
 import { MINER_ROSTER } from './data/minersCatalog';
 import { generateMineMap } from './utils/mapGenerator';
 import { getPlayerMap, generatePlayerMap, DEFAULT_PLAYER_ID, removeBossFromPlayerMap, spawnBossInPlayerMap } from './utils/individualMapEngine';
+import { evaluateBossSchedule, recordBossDefeatInSchedule, forceBossInvasionNow } from './utils/bossScheduleManager';
 import { sfx } from './utils/sfx';
 import { isSupabaseConfigured } from './lib/supabaseClient';
 import { 
@@ -493,6 +494,33 @@ export default function App() {
     return () => window.removeEventListener('cripto_myners_construction_chest_awarded', handleChestAwarded);
   }, []);
 
+  // Regra Oficial do Usuário: "dinamica do boss, aparecem só 2x por dia em horarios randomizados"
+  const [bossScheduleState, setBossScheduleState] = useState(() => evaluateBossSchedule());
+
+  // Sincronizador contínuo da agenda de invasões do Boss (2x ao dia em horários randomizados)
+  useEffect(() => {
+    const updateSchedule = () => {
+      const state = evaluateBossSchedule();
+      setBossScheduleState(state);
+
+      const isBossOnMap = mapData?.deposits?.some(d => (d.type === 'boss' || d.blockId === 10) && !d.isCompleted);
+      if (state.isBossActiveNow && !isBossOnMap) {
+        // Horário de invasão sorteado chegou: ativa o Boss no mapa com sirene e névoa
+        const heroTiles = (miners || []).filter(m => m.status === 'work').map(m => ({ c: Math.round(m.x), r: Math.round(m.y) }));
+        const updated = spawnBossInPlayerMap(activePlayerId, { heroTiles });
+        setMapData(updated);
+      } else if (!state.isBossActiveNow && isBossOnMap) {
+        // Fora do horário de invasão: mantém o Boss recolhido
+        const updated = removeBossFromPlayerMap(activePlayerId);
+        setMapData(updated);
+      }
+    };
+
+    updateSchedule();
+    const ticker = setInterval(updateSchedule, 1000);
+    return () => clearInterval(ticker);
+  }, [activePlayerId, miners, mapData]);
+
   // Funções de Teste Oficial: Remoção e Inserção Dinâmica do Boss
   const handleToggleBoss = () => {
     const isBossActive = mapData?.deposits?.some(d => (d.type === 'boss' || d.blockId === 10) && !d.isCompleted);
@@ -547,6 +575,12 @@ export default function App() {
   // Executa o sorteio oficial quando o Boss é derrotado.
   // A lista recebida já contém apenas sobreviventes da equipe registrada no início da batalha.
   const handleBossDefeated = ({ bossId, participants = [] }) => {
+    // Registra a vitória na agenda oficial diária e recolhe o Boss do mapa
+    recordBossDefeatInSchedule();
+    setBossScheduleState(evaluateBossSchedule());
+    const withoutBoss = removeBossFromPlayerMap(activePlayerId);
+    setMapData(withoutBoss);
+
     const result = executeConstructionBossRoll(participants, DEFAULT_CONSTRUCTION_CHEST_CONFIG, {
       bossId,
       eventType: 'boss_defeat'
@@ -1729,25 +1763,42 @@ export default function App() {
                   🧟 <b className="text-white">{mapData?.deposits?.filter(d => d.type === 'zombie' && !d.isCompleted).length ?? 20}</b>/30 Zumbis
                 </span>
 
-                <button 
-                  onClick={handleToggleBoss}
-                  className="flex items-center gap-1 text-xs bg-red-950/80 hover:bg-red-900 text-red-300 hover:text-white px-2 py-0.5 rounded-md border border-red-500/50 hover:border-red-400 font-bold shadow-sm cursor-pointer transition-all active:scale-95" 
-                  title="Clique para alternar (Remover ou Inserir o Boss)"
-                >
-                  💀 Boss: <b className={mapData?.deposits?.some(d => (d.type === 'boss' || d.blockId === 10) && !d.isCompleted) ? 'text-amber-300' : 'text-emerald-400'}>
-                    {mapData?.deposits?.some(d => (d.type === 'boss' || d.blockId === 10) && !d.isCompleted) ? 'Ativo' : 'Morto'}
-                  </b>
-                  <span className="text-[10px] text-amber-300 underline ml-0.5 font-normal">
-                    {mapData?.deposits?.some(d => (d.type === 'boss' || d.blockId === 10) && !d.isCompleted) ? '(Remover)' : '(Inserir)'}
+                {/* STATUS DO BOSS: 2X AO DIA EM HORÁRIOS RANDOMIZADOS */}
+                {bossScheduleState.isBossActiveNow ? (
+                  <span 
+                    className="flex items-center gap-1 text-xs bg-red-950/90 text-red-200 border border-red-500/80 px-2 py-0.5 rounded-md font-bold shadow-lg animate-pulse"
+                    title="Invasão do Boss ativa agora! Derrote-o com sua equipe."
+                  >
+                    💀 Boss: <b className="text-amber-300">ATIVO</b> ({bossScheduleState.defeatedCount + 1}/2 hoje)
                   </span>
-                </button>
+                ) : (
+                  <span 
+                    className="flex items-center gap-1 text-xs bg-slate-900/90 text-amber-300 border border-amber-500/50 px-2 py-0.5 rounded-md font-bold shadow-sm"
+                    title={`Horários diários randomizados (2x/dia). Próxima invasão: ${bossScheduleState.nextEventTimeStr}`}
+                  >
+                    💀 Boss às <b>{bossScheduleState.nextEventTimeStr}</b> ({bossScheduleState.countdownText})
+                  </span>
+                )}
 
                 <button
-                  onClick={() => handleTestBossCycle(3500)}
-                  className="text-[11px] bg-amber-600/30 hover:bg-amber-600/60 text-amber-200 border border-amber-500/40 px-2 py-0.5 rounded-md cursor-pointer transition-all active:scale-95 flex items-center gap-1 font-semibold"
-                  title="Testar Ciclo: Remove o Boss agora e Reinsere automaticamente após 3.5s"
+                  onClick={() => {
+                    const heroTiles = (miners || []).filter(m => m.status === 'work').map(m => ({ c: Math.round(m.x), r: Math.round(m.y) }));
+                    if (bossScheduleState.isBossActiveNow) {
+                      const updated = removeBossFromPlayerMap(activePlayerId);
+                      setMapData(updated);
+                      recordBossDefeatInSchedule();
+                      setBossScheduleState(evaluateBossSchedule());
+                    } else {
+                      forceBossInvasionNow(20);
+                      const updated = spawnBossInPlayerMap(activePlayerId, { heroTiles });
+                      setMapData(updated);
+                      setBossScheduleState(evaluateBossSchedule());
+                    }
+                  }}
+                  className="text-[11px] bg-red-950/80 hover:bg-red-900 text-red-300 hover:text-white border border-red-500/50 hover:border-red-400 px-2 py-0.5 rounded-md cursor-pointer transition-all active:scale-95 flex items-center gap-1 font-bold shadow-sm"
+                  title="Testar Invasão do Boss imediatamente (força início ou encerramento da batalha de teste)"
                 >
-                  🔄 Testar
+                  ⚡ {bossScheduleState.isBossActiveNow ? 'Encerrar' : 'Invasão (Teste)'}
                 </button>
 
                 <button

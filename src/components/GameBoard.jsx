@@ -931,13 +931,9 @@ export default function GameBoard({
             miner.swingTimer = 0;
             miner.moveCooldown = 0;
           } else {
-            // ZUMBI VIVO! O herói DEVE continuar atacando este MESMO zumbi e NÃO DEVE CAMINHAR!
+            // ZUMBI VIVO! O herói ataca o alvo em combate fluido (sem travar os pés no chão)
             miner.targetBlock = { x: lockedEnemy.gx, y: lockedEnemy.gy };
             miner.isMining = true;
-
-            // Herói permanece 100% estático disparando no zumbi (não caminha)
-            miner.x = mx;
-            miner.y = my;
 
             // Vira o herói diretamente na direção do zumbi atacado
             if (lockedEnemy.gx < miner.x) {
@@ -946,11 +942,8 @@ export default function GameBoard({
               miner.targetDir = 1;
             }
 
-            // O zumbi também fica travado sob ataque (não caminha para longe)
             lockedEnemy.isUnderAttack = true;
-            lockedEnemy.attackedTimer = 2.0;
-            lockedEnemy.isWalking = false;
-            lockedEnemy.moveCooldown = 2.0;
+            lockedEnemy.attackedTimer = 1.0;
             lockedEnemy.underAttackByHeroId = miner.id;
             const enemyCurrX = lockedEnemy.visualX ?? lockedEnemy.gx;
             if (Math.abs(miner.x - enemyCurrX) > 0.05) {
@@ -1001,10 +994,6 @@ export default function GameBoard({
         }
 
         if (miner.isMining && miner.targetBlock) {
-          // Garante que o herói permaneça 100% estático disparando no zumbi (não caminha)
-          miner.x = mx;
-          miner.y = my;
-
           // Garante que o herói SEMPRE esteja virado diretamente para o zumbi que está atacando
           if (miner.targetBlock.x < miner.x) {
             miner.targetDir = -1;
@@ -1019,9 +1008,10 @@ export default function GameBoard({
             const { x: tx, y: ty } = miner.targetBlock;
             const blockType = state.grid[ty] ? state.grid[ty][tx] : BLOCK_EMPTY;
             const cellKey = `${tx},${ty}`;
-            const curHp = state.hpMap[cellKey];
+            const targetEnemy = state.enemies?.find(e => (miner.lockedEnemyId && e.id === miner.lockedEnemyId) || (e.gx === tx && e.gy === ty));
+            const curHp = state.hpMap[cellKey] ?? targetEnemy?.hp ?? 2;
 
-            if (curHp === undefined || curHp <= 0 || blockType === BLOCK_EMPTY || blockType === BLOCK_BEDROCK) {
+            if (curHp === undefined || curHp <= 0 || (blockType === BLOCK_EMPTY && !targetEnemy) || blockType === BLOCK_BEDROCK) {
               miner.lockedEnemyId = null;
               miner.targetBlock = null;
               miner.isMining = false;
@@ -1029,14 +1019,9 @@ export default function GameBoard({
               return;
             }
 
-            // REGRA OFICIAL DO USUÁRIO: "enquanto o zumbi é atacado ele nao deve caminhar"
-            // REGRA OFICIAL DO USUÁRIO: "boss e zumbis devem virar para o lado que esta atacando"
-            const targetEnemy = state.enemies?.find(e => (miner.lockedEnemyId && e.id === miner.lockedEnemyId) || (e.gx === tx && e.gy === ty));
             if (targetEnemy) {
               targetEnemy.isUnderAttack = true;
-              targetEnemy.attackedTimer = 2.0;
-              targetEnemy.isWalking = false;
-              targetEnemy.moveCooldown = 2.0;
+              targetEnemy.attackedTimer = 1.0;
               targetEnemy.underAttackByHeroId = miner.id;
               const enemyCurrX = targetEnemy.visualX ?? targetEnemy.gx;
               if (Math.abs(miner.x - enemyCurrX) > 0.05) {

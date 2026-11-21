@@ -460,16 +460,8 @@ export function updateEnemies(enemies, state, dt, now, isCanyon = true) {
       if (enemy.attackedTimer > 0) {
         enemy.attackedTimer -= dt;
       }
-
-      // REGRA OFICIAL DO USUÁRIO: "enquanto o zumbi é atacado ele nao deve caminhar"
-      // REGRA OFICIAL DO USUÁRIO: "quando heroi começa atacar um zumbi ele deve continuar atacando o mesmo zumbi ate mata-lo e nao deve caminhar enquanto isso"
-      const isTargetedByHero = activeHeroes.some(m => m.isMining && ((m.lockedEnemyId && m.lockedEnemyId === enemy.id) || (m.targetBlock && m.targetBlock.x === enemy.gx && m.targetBlock.y === enemy.gy)));
-      const isUnderAttack = (enemy.hitFlash > 0) || (enemy.attackedTimer > 0) || (enemy.isUnderAttack) || isTargetedByHero;
-      if (isUnderAttack) {
-        enemy.isWalking = false;
-        enemy.isUnderAttack = true;
-        enemy.moveCooldown = 1.5; // Permanece estático e em posição de combate enquanto sob ataque
-        return;
+      if (enemy.hitFlash > 0) {
+        enemy.hitFlash -= dt * 2.5;
       }
 
       // Temporizador para decidir a próxima caminhada
