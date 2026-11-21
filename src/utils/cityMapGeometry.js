@@ -175,7 +175,7 @@ export const CORNER_SPAWN_POINTS = [
   { x: 1, y: 7, c: 1, r: 7 }, { x: 1, y: 9, c: 1, r: 9 }, { x: 2, y: 9, c: 2, r: 9 },
   { x: 3, y: 9, c: 3, r: 9 }, { x: 6, y: 9, c: 6, r: 9 }, { x: 7, y: 9, c: 7, r: 9 },
   { x: 9, y: 9, c: 9, r: 9 }, { x: 14, y: 8, c: 14, r: 8 }, { x: 14, y: 9, c: 14, r: 9 },
-  { x: 13, y: 10, c: 13, r: 10 }, { x: 12, y: 8, c: 12, r: 8 }
+  { x: 13, y: 10, c: 13, r: 10 }
 ];
 
 export function getCornerSpawnPoint(index = 0) {
@@ -214,7 +214,7 @@ export const SAFE_HERO_SPAWN_POINTS = [
   { x: 1, y: 1 }, { x: 5, y: 1 }, { x: 6, y: 1 }, { x: 1, y: 2 }, { x: 5, y: 3 },
   { x: 6, y: 3 }, { x: 7, y: 2 }, { x: 1, y: 7 }, { x: 1, y: 9 }, { x: 2, y: 9 },
   { x: 3, y: 9 }, { x: 6, y: 9 }, { x: 7, y: 9 }, { x: 9, y: 9 }, { x: 14, y: 8 },
-  { x: 14, y: 9 }, { x: 13, y: 10 }, { x: 12, y: 8 }
+  { x: 14, y: 9 }, { x: 13, y: 10 }
 ];
 
 export function getSafeHeroSpawn(index = 0) {
