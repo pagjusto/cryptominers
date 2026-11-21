@@ -259,6 +259,7 @@ export default function GameBoard({
   houseConfigRef.current = { houseSlots, recoverySpeedPct };
   const houseVisualRef = useRef(houseVisualTier);
   houseVisualRef.current = houseVisualTier;
+  const initialHeroSpawnDoneRef = useRef(false);
 
   const gameStateRef = useRef({
     grid: mapData.grid,
@@ -344,6 +345,7 @@ export default function GameBoard({
 
   useEffect(() => {
     const current = gameStateRef.current.miners;
+    const isInitialSpawnPass = !initialHeroSpawnDoneRef.current;
     gameStateRef.current.miners = miners.map((m, idx) => {
       const existing = current.find(em => em.id === m.id);
       let initX = existing ? existing.x : m.x;
@@ -352,7 +354,7 @@ export default function GameBoard({
       // Se a posição for inválida ou cair dentro de edifícios/muros da cidade, realoca para rua/grama aberta
       const insideBuilding = isCityBuilding(Math.round(initX), Math.round(initY));
       const outOfBounds = initX <= 0 || initX >= GRID_COLS - 1 || initY <= 0 || initY >= GRID_ROWS - 1;
-      const outsideRespawnZone = !existing && !isSpawnZoneCell(Math.round(initX), Math.round(initY));
+      const outsideRespawnZone = isInitialSpawnPass && !isSpawnZoneCell(Math.round(initX), Math.round(initY));
       if (typeof initX !== 'number' || isNaN(initX) || insideBuilding || outOfBounds || outsideRespawnZone) {
         const safePt = getSafeHeroSpawn(idx);
         initX = safePt.x;
@@ -386,6 +388,7 @@ export default function GameBoard({
         targetDir: 1 
       };
     });
+    if (miners.length > 0) initialHeroSpawnDoneRef.current = true;
   }, [miners, mine]);
 
   useEffect(() => {
