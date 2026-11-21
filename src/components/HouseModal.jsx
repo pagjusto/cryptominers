@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Home, Sparkles, HeartPulse, ArrowUpRight, Check, Shield, Zap, Users } from 'lucide-react';
+import { X, HeartPulse, Check, Users } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { HOUSE_TIERS, resolveHouseTier } from '../data/housesData';
 import { sfx } from '../utils/sfx';
@@ -105,7 +105,7 @@ export default function HouseModal({
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
-                🏠 Imobiliária
+                🏗️ Evolução da Base
               </button>
             </div>
 
