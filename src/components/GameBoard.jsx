@@ -45,6 +45,8 @@ import {
 import { findNextHeroAction, findNearestFreeHeroCell, COMBAT_RANGE, hasClearLineOfSight } from '../utils/minerPathfinding';
 import { getHeroById, getWeaponById } from '../data/heroRoster';
 
+const BOSS_BATTLE_DURATION_MS = 5 * 60 * 1000;
+
 // Renderização top-down da base médica: leitos ocupados/vagos e pátio de reserva.
 function drawBaseShelterVisual(ctx, house, miners, now) {
   if (!house || house.level < 1 || !house.slots) return;
