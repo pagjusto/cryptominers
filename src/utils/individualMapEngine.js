@@ -490,7 +490,7 @@ export function recordDepositDamage(playerId = DEFAULT_PLAYER_ID, c, r, damage =
           ? distantOpenCells[Math.floor(Math.random() * distantOpenCells.length)]
           : (openCorners.length > 0 
               ? openCorners[Math.floor(Math.random() * openCorners.length)]
-              : (openCells.length > 0 ? openCells[Math.floor(Math.random() * openCells.length)] : (spawnCells[0] || { c: 1, r: 1 }))));
+              : (openCells.length > 0 ? openCells[Math.floor(Math.random() * openCells.length)] : (spawnCells.find(pos => !activeKeys.has(`${pos.c},${pos.r}`)) || spawnCells[0] || { c: 1, r: 1 }))));
 
     // Determina a zona tática com menor quantidade de zumbis para manter proporção rigorosa
     const zoneCounts = TACTICAL_ZONES.map(z => ({
@@ -633,7 +633,7 @@ export function spawnBossInPlayerMap(playerId = DEFAULT_PLAYER_ID, options = {})
     ? cornerCandidates[Math.floor(Math.random() * cornerCandidates.length)]
     : (distantCells.length > 0 
         ? distantCells[Math.floor(Math.random() * distantCells.length)]
-        : (freeCells.length > 0 ? freeCells[Math.floor(Math.random() * freeCells.length)] : (validCells[0] || { c: 1, r: 1 }))));
+        : (freeCells.length > 0 ? freeCells[Math.floor(Math.random() * freeCells.length)] : (validCells.find(pos => !occupiedSet.has(`${pos.c},${pos.r}`)) || validCells[0] || { c: 1, r: 1 }))));
 
   mapState.lastBossPos = { c: chosenPos.c, r: chosenPos.r };
 
