@@ -1222,9 +1222,9 @@ export default function GameBoard({
                 }
               }
 
-              // Desgaste da durabilidade da arma
+              // Desgaste da durabilidade da arma calibrado para ~2 quebras ao dia (~12 horas por ciclo completo)
               if (miner.durability === undefined) miner.durability = 100;
-              miner.durability = Math.max(0, parseFloat((miner.durability - 0.05).toFixed(3)));
+              miner.durability = Math.max(0, parseFloat((miner.durability - 0.0023).toFixed(4)));
 
               // REGRA OFICIAL DO USUÁRIO: "e se quebrar interrompe a mineração"
               if (miner.durability <= 0) {
@@ -1243,18 +1243,12 @@ export default function GameBoard({
                 return;
               }
 
-              // REGRA OFICIAL DO USUÁRIO: "se baixar de 50% deve diminuir a capacidade de mineração do heroi pela metade"
-              const isWeaponDamaged = miner.durability < 50;
-
+              // Sem punições intermediárias (100% de capacidade). Apenas se quebrar (0%) é que interrompe a mineração.
               // Bônus de Arma / Picareta: Aumenta Poder e Chance de Crítico
               const weaponPower = miner.equippedGear?.weapon?.powerBonus || 0;
               const weaponCrit = miner.equippedGear?.weapon?.critBonus || 0;
 
-              let basePower = isWeaponDamaged ? Math.max(1, miner.power * 0.5) : miner.power;
-              let hitDamage = basePower + weaponPower;
-              if (isWeaponDamaged) {
-                hitDamage = Math.max(1, Math.floor(hitDamage * 0.5));
-              }
+              let hitDamage = miner.power + weaponPower;
 
               const critChance = (cid === 'brute' ? 0.28 : 0.05) + weaponCrit;
               const isCrit = Math.random() < critChance;

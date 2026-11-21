@@ -160,7 +160,6 @@ export default function HeroList({
           const healthPct = Math.round(((miner.currentHealth ?? miner.maxHealth ?? 100) / (miner.maxHealth || 100)) * 100);
           const durability = miner.durability !== undefined ? Math.round(miner.durability) : 100;
           const isBroken = durability <= 0;
-          const isDull = durability < 50;
           const hourlyCoins = miner.coinsPerHour || ((miner.power || 2) * 0.05 * (miner.speed || 1.2));
           const ratePerMinute = hourlyCoins / 60;
 
@@ -170,7 +169,7 @@ export default function HeroList({
               className={`bg-slate-950/90 border rounded-2xl p-2.5 sm:p-3 transition hover:border-slate-700 shadow-sm flex flex-col gap-2.5 w-full ${
                 isBroken 
                   ? 'border-rose-500/70 ring-1 ring-rose-500/40 bg-rose-950/10' 
-                  : (isDull ? 'border-amber-500/50 ring-1 ring-amber-500/20' : 'border-slate-800')
+                  : 'border-slate-800'
               }`}
             >
               {/* LINHA 1: IDENTIDADE DO COMBATENTE + AÇÕES E STATUS */}
@@ -371,22 +370,18 @@ export default function HeroList({
                 {/* Durabilidade da Arma & Botão Consertar */}
                 <div className="flex items-center justify-between border-t border-slate-800/60 pt-1 text-[10px] gap-2">
                   <span className="flex items-center gap-1.5 text-slate-300 truncate">
-                    <Wrench size={11} className={isBroken ? 'text-rose-500 animate-bounce shrink-0' : (isDull ? 'text-amber-400 shrink-0' : 'text-slate-400 shrink-0')} />
+                    <Wrench size={11} className={isBroken ? 'text-rose-500 animate-bounce shrink-0' : 'text-slate-400 shrink-0'} />
                     <span className="truncate">
                       <b className="text-amber-300/90">{rosterWeapon?.name || 'Arma'}</b>:{' '}
-                      <span className={isBroken ? 'text-rose-400 font-bold font-mono' : (isDull ? 'text-amber-400 font-bold font-mono' : 'text-slate-400 font-mono')}>
+                      <span className={isBroken ? 'text-rose-400 font-bold font-mono' : 'text-slate-400 font-mono'}>
                         {durability}%
                       </span>
                     </span>
-                    {isBroken ? (
+                    {isBroken && (
                       <span className="text-[9px] text-rose-400 font-bold whitespace-nowrap bg-rose-500/20 px-1 py-0.2 rounded border border-rose-500/30">
                         QUEBRADA (INTERROMPIDO)
                       </span>
-                    ) : (isDull ? (
-                      <span className="text-[9px] text-amber-400 font-bold whitespace-nowrap">
-                        (-50% eficácia)
-                      </span>
-                    ) : null)}
+                    )}
                   </span>
 
                   {durability < 100 && (
