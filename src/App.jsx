@@ -28,7 +28,7 @@ import {
 import confetti from 'canvas-confetti';
 import { MINES, INITIAL_MINERS, MINER_CLASSES } from './data/minersData';
 import { HERO_ROSTER, WEAPON_CATALOG, getHeroById, getWeaponById } from './data/heroRoster';
-import { HOUSE_TIERS, resolveHouseTier } from './data/housesData';
+import { resolveHouseTier } from './data/housesData';
 import { ENTRY_PACKAGES, calculateWithdrawalTax } from './data/investmentData';
 import { INITIAL_MARKET_LISTINGS, MARKETPLACE_FEE_PCT, FEE_SPLIT } from './data/marketplaceData';
 import { MINER_ROSTER } from './data/minersCatalog';
