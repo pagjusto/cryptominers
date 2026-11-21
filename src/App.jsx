@@ -1346,26 +1346,53 @@ export default function App() {
       if (m.id !== minerId) return m;
       const maxHealth = Number(m.maxHealth) > 0 ? Number(m.maxHealth) : 100;
       const currentHealth = Number.isFinite(Number(m.currentHealth)) ? Number(m.currentHealth) : maxHealth;
-      if (m.status === 'house' || m.status === 'waiting_house' || m.status === 'injured' ||
-          m.injuredAwaitingRescue || (currentHealth / maxHealth) * 100 <= 5) return m;
+      // Heróis feridos podem ser reativados manualmente com 30% de vida
+      if (m.status === 'injured' || m.injuredAwaitingRescue || (currentHealth / maxHealth) * 100 <= 5) {
+        return {
+          ...m,
+          status: 'work',
+          injuredAwaitingRescue: false,
+          injuredTimer: 0,
+          currentHealth: Math.round(maxHealth * 0.30),
+          isMining: false,
+          targetBlock: null,
+          lockedEnemyId: null,
+          swingTimer: 0,
+          moveCooldown: 0.5
+        };
+      }
+      if (m.status === 'house' || m.status === 'waiting_house') return m;
       return { ...m, status: m.status === 'work' ? 'reserve' : 'work' };
     }));
   };
 
   const handleAllWork = () => {
     setMiners(prev => {
-      // Ordena por eficiência apenas heróis saudáveis; feridos nunca retornam ao combate por ação em massa.
-      const eligible = prev.filter(m => {
+      // Cura heróis feridos automaticamente para 30% de vida ao enviar todos ao combate
+      const healed = prev.map(m => {
         const maxHealth = Number(m.maxHealth) > 0 ? Number(m.maxHealth) : 100;
         const currentHealth = Number.isFinite(Number(m.currentHealth)) ? Number(m.currentHealth) : maxHealth;
-        return m.status !== 'injured' && !m.injuredAwaitingRescue && (currentHealth / maxHealth) * 100 > 5;
+        if (m.status === 'injured' || m.injuredAwaitingRescue || (currentHealth / maxHealth) * 100 <= 5) {
+          return {
+            ...m,
+            status: 'work',
+            injuredAwaitingRescue: false,
+            injuredTimer: 0,
+            currentHealth: Math.round(maxHealth * 0.30),
+            isMining: false,
+            targetBlock: null,
+            lockedEnemyId: null,
+            swingTimer: 0,
+            moveCooldown: 0.5
+          };
+        }
+        return m;
       });
+      const eligible = healed.filter(m => m.status !== 'house' && m.status !== 'waiting_house');
       const sorted = [...eligible].sort((a, b) => calculateMinerEfficiency(b) - calculateMinerEfficiency(a));
       const top15Ids = new Set(sorted.slice(0, 15).map(m => m.id));
-      const updated = prev.map(m => {
-        const maxHealth = Number(m.maxHealth) > 0 ? Number(m.maxHealth) : 100;
-        const currentHealth = Number.isFinite(Number(m.currentHealth)) ? Number(m.currentHealth) : maxHealth;
-        if (m.status === 'injured' || m.injuredAwaitingRescue || (currentHealth / maxHealth) * 100 <= 5) return m;
+      const updated = healed.map(m => {
+        if (m.status === 'house' || m.status === 'waiting_house') return m;
         if (top15Ids.has(m.id)) {
           return { ...m, status: 'work' };
         }

@@ -490,6 +490,25 @@ export default function GameBoard({
           miner.targetBlock = null;
           miner.lockedEnemyId = null;
           miner.swingTimer = 0;
+
+          // AUTO-RECUPERAÇÃO DE CAMPO: Heróis feridos se recuperam sozinhos após 30 segundos
+          // Evita a espiral da morte onde todos ficam travados permanentemente sem poder jogar
+          miner.injuredTimer = (miner.injuredTimer || 0) + dt;
+          if (miner.injuredTimer >= 30) {
+            miner.currentHealth = Math.round(maxHealth * 0.30); // Recupera 30% da vida
+            miner.status = 'work';
+            miner.injuredAwaitingRescue = false;
+            miner.injuredTimer = 0;
+            miner.moveCooldown = 0.5;
+            state.floatTexts.push({
+              text: '💚 RECUPERADO!',
+              x: miner.x * TILE_SIZE + TILE_SIZE / 2,
+              y: miner.y * TILE_SIZE - 8,
+              color: '#4ade80',
+              opacity: 1.0,
+              vy: -32
+            });
+          }
           return;
         }
 
