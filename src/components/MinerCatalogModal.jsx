@@ -322,7 +322,7 @@ export default function MinerCatalogModal({ isOpen, onClose, onOpenMintModal }) 
               {/* Rodapé da Carta */}
               <div className="border-t border-slate-800 pt-4 flex items-center justify-between">
                 <span className="text-xs text-slate-400 font-tech">
-                  Disponível no Recrutamento ou Contrato Direto por <b className="text-amber-300 font-mono">{selectedMiner.directCostBcoin * 100} MNC</b>.
+                  Disponível no Recrutamento ou Contrato Direto por <b className="text-amber-300 font-mono">{selectedMiner.directCostBcoin * 100} Coins</b>.
                 </span>
                 <button
                   onClick={() => {
