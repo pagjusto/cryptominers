@@ -245,6 +245,7 @@ export default function GameBoard({
   playerId = 'player_default',
   onDepositBroken,
   onBossDefeated,
+  onBossExpired,
   onMinersChange, 
   onCollectBcoin, 
   onRescueMiner, 
@@ -265,6 +266,7 @@ export default function GameBoard({
   // REGRA OFICIAL DO USUÁRIO: "quando aparecer o boss coloca um aviso na tela dizendo ALERTA BOSS PISCANDO UMAS 4 VEZES"
   const [bossAlert, setBossAlert] = useState(false);
   const [bossAlertKey, setBossAlertKey] = useState(0);
+  const [bossRemainingSeconds, setBossRemainingSeconds] = useState(null);
   const lastAlertedBossIdRef = useRef(null);
   const alertTimeoutRef = useRef(null);
 
@@ -290,11 +292,36 @@ export default function GameBoard({
     };
   }, []);
 
+  // HUD do tempo restante do evento (5 minutos), baseado no snapshot persistido da batalha.
+  useEffect(() => {
+    const updateBossTimer = () => {
+      const boss = mapData?.deposits?.find(d => (d.type === 'boss' || d.blockId === BLOCK_BOSS) && !d.isCompleted);
+      if (!boss) {
+        setBossRemainingSeconds(null);
+        return;
+      }
+      let session = null;
+      try {
+        session = JSON.parse(localStorage.getItem(`cryptozombies_boss_snapshot_${playerId || 'player_default'}_${boss.id}`) || 'null');
+      } catch (e) {}
+      const startedAt = Date.parse(session?.startedAt || '');
+      if (!Number.isFinite(startedAt)) {
+        setBossRemainingSeconds(300);
+        return;
+      }
+      setBossRemainingSeconds(Math.max(0, Math.ceil((BOSS_BATTLE_DURATION_MS - (Date.now() - startedAt)) / 1000)));
+    };
+    updateBossTimer();
+    const timer = setInterval(updateBossTimer, 250);
+    return () => clearInterval(timer);
+  }, [mapData, playerId]);
+
   const callbacksRef = useRef({});
   callbacksRef.current = {
     playerId,
     onDepositBroken,
     onBossDefeated,
+    onBossExpired,
     onCollectBcoin,
     onRescueMiner,
     onMapCleared,
@@ -516,6 +543,19 @@ export default function GameBoard({
               localStorage.setItem(sessionKey, JSON.stringify({ bossId: activeBossForSession.id, startedAt, participants: initialParticipants }));
             } catch (e) {}
           }
+        }
+
+        // Evento oficial do Boss: duração máxima de 5 minutos desde o snapshot inicial.
+        const bossSession = state.bossBattleSessions?.[activeBossForSession.id];
+        const startedAtMs = Date.parse(bossSession?.startedAt || '');
+        if (bossSession && !bossSession.expired && Number.isFinite(startedAtMs) &&
+            now - startedAtMs >= BOSS_BATTLE_DURATION_MS) {
+          bossSession.expired = true;
+          callbacksRef.current.onBossExpired?.({
+            bossId: activeBossForSession.id,
+            startedAt: bossSession.startedAt,
+            participants: bossSession.participants
+          });
         }
       }
 
@@ -2037,6 +2077,15 @@ export default function GameBoard({
         onClick={handleCanvasClick}
         onMouseDown={handleCanvasMouseDown}
       />
+
+      {bossRemainingSeconds !== null && (
+        <div className="absolute top-3 left-1/2 -translate-x-1/2 z-30 pointer-events-none rounded-xl border border-red-500/60 bg-red-950/90 px-4 py-2 text-center shadow-[0_0_18px_rgba(239,68,68,0.45)]">
+          <div className="text-[10px] font-bold tracking-widest text-red-300">BOSS • TEMPO DO EVENTO</div>
+          <div className="font-mono text-xl font-black text-white tabular-nums">
+            {String(Math.floor(bossRemainingSeconds / 60)).padStart(2, '0')}:{String(bossRemainingSeconds % 60).padStart(2, '0')}
+          </div>
+        </div>
+      )}
 
       {/* REGRA OFICIAL DO USUÁRIO: "ALERTA DE BOSS", "deve ficar bem no meio do mapa", "poem uma sombra vermelha", "PISCANDO UMAS 4 VEZES" */}
       {bossAlert && (
