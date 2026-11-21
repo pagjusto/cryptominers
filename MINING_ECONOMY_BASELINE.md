@@ -20,16 +20,24 @@ Status: configuração aprovada como referência do cenário mediano.
 - Taxa média da equipe completa: **0,0055583333 MNC por segundo**.
 - Não há divisão fixa de recompensa por Boss. O tempo válido de mineração é o que acumula a produção.
 
-## Produção individual reconstruída por raridade
+## Produção individual oficial por raridade
 
-A tabela abaixo é a reconstrução matemática a partir dos multiplicadores e da composição da equipe de referência. Não é uma transcrição literal de uma tabela histórica.
+Tabela de produção aprovada em 18/11/2026, com seis raridades. O herói Common é a referência-base de 20,88 MNC por dia; os demais valores são calculados pelos multiplicadores aprovados.
 
-| Raridade | MNC por herói/dia | MNC por herói/segundo |
-|---|---:|---:|
-| Comum (1×) | 20,88 | 0,0002416667 |
-| Raro (1,5×) | 31,32 | 0,0003625000 |
-| Épico (2×) | 41,76 | 0,0004833333 |
-| Lendário (3×) | 62,64 | 0,0007250000 |
+| Raridade | Multiplicador | MNC por herói/dia | MNC por herói/hora | MNC por herói/segundo |
+|---|---:|---:|---:|---:|
+| Common | 1× | 20,88 | 0,8700 | 0,0002416667 |
+| Rare | 1,5× | 31,32 | 1,3050 | 0,0003625000 |
+| Super Rare | 1,75× | 36,54 | 1,5225 | 0,0004229167 |
+| Epic | 2× | 41,76 | 1,7400 | 0,0004833333 |
+| Legendary | 3× | 62,64 | 2,6100 | 0,0007250000 |
+| Super Legendary | 4× | 83,52 | 3,4800 | 0,0009666667 |
+
+Fórmula oficial:
+
+    produção_diária_individual = 20,88 × multiplicador_da_raridade
+
+A produção é acumulada por segundo de mineração válida. As frações permanecem preservadas internamente e o arredondamento ocorre somente na interface. Não há bônus adicional por classe, função ou arma na produção-base.
 
 ## Conferência da equipe mediana
 
@@ -43,12 +51,23 @@ A tabela abaixo é a reconstrução matemática a partir dos multiplicadores e d
 
 ## Fórmula-base
 
-A composição de referência representa 23 unidades ponderadas de mineração:
+A composição do cenário mediano representa 23 unidades ponderadas de mineração:
 
     (6 × 1) + (4 × 1,5) + (4 × 2) + (1 × 3) = 23
     480,24 MNC ÷ 23 = 20,88 MNC por unidade 1× ao dia
 
-A taxa individual diária de referência é: 20,88 × multiplicador da raridade.
+A taxa individual diária é: 20,88 × multiplicador da raridade.
+
+A tabela oficial contempla seis raridades, mas a composição de referência do cenário mediano permanece com 15 heróis distribuídos entre Common, Rare, Epic e Legendary. Super Rare e Super Legendary fazem parte da tabela de produção oficial, mas não entram nessa composição específica.
+
+### Taxas agregadas do cenário mediano
+
+- Produção diária: **480,24 MNC**.
+- Produção por hora: **20,01 MNC**.
+- Produção por minuto: **0,3335 MNC**.
+- Produção por segundo: **0,0055583333 MNC**.
+
+Essas taxas representam a equipe completa durante 24 horas de mineração válida, antes dos ajustes de eficiência por envelhecimento e estrelas.
 
 ## Eficiência por envelhecimento e estrelas
 
