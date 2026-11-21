@@ -284,21 +284,22 @@ export const DEFAULT_CRIPTO_MYNERS_CONFIG = {
     }
   },
 
-  // 6. SISTEMA OFICIAL DE BAÚS DE CONSTRUÇÃO (APARIÇÃO POR CICLO DE 1 HORA)
+  // 6. SISTEMA DE BAÚS DE CONSTRUÇÃO (SORTEIO POR BOSS DERROTADO)
   constructionChestConfig: {
     enabled: true,
-    baseRateCommonPct: 0.5, // Taxa-base configurável por herói comum (ex: 0.5%)
-    rarityMultipliers: {
-      common: 1.0,      // 1x
-      rare: 1.5,        // 1.5x
-      epic: 2.0,        // 2x
-      legendary: 3.0    // 3x
+    chanceByRarityPct: {
+      common: 2.0,
+      rare: 2.2,
+      superRare: 2.3,
+      epic: 2.4,
+      legendary: 2.6667,
+      superLegendary: 3.0
     },
-    maxAccountChanceCapPct: 10.0, // Teto absoluto de 10% por ciclo
-    cycleDurationSeconds: 3600,   // 1 hora de mineração ativa (3600s)
-    dailyLimitPerPlayer: 3,       // Máximo de 3 baús por dia
-    timezone: 'America/Sao_Paulo',// Horário oficial de Brasília
-    rewardFragmentCount: 1        // Exatamente 1 Fragmento de Construção por baú
+    maxAccountChanceCapPct: 40.0,
+    cycleDurationSeconds: 0,
+    dailyLimitPerPlayer: 3,
+    timezone: 'America/Sao_Paulo',
+    rewardFragmentCount: 1
   }
 };
 
@@ -323,7 +324,15 @@ export function getCriptoMynersConfig() {
       rarityAttributes: { ...DEFAULT_CRIPTO_MYNERS_CONFIG.rarityAttributes, ...(parsed.rarityAttributes || {}) },
       upgradesConfig: { ...DEFAULT_CRIPTO_MYNERS_CONFIG.upgradesConfig, ...(parsed.upgradesConfig || {}) },
       adsConfig: { ...DEFAULT_CRIPTO_MYNERS_CONFIG.adsConfig, ...(parsed.adsConfig || {}) },
-      constructionChestConfig: { ...DEFAULT_CRIPTO_MYNERS_CONFIG.constructionChestConfig, ...(parsed.constructionChestConfig || {}) }
+      constructionChestConfig: {
+        ...DEFAULT_CRIPTO_MYNERS_CONFIG.constructionChestConfig,
+        ...(parsed.constructionChestConfig || {}),
+        chanceByRarityPct: DEFAULT_CRIPTO_MYNERS_CONFIG.constructionChestConfig.chanceByRarityPct,
+        maxAccountChanceCapPct: parsed.constructionChestConfig?.maxAccountChanceCapPct === 10
+          ? 40
+          : (parsed.constructionChestConfig?.maxAccountChanceCapPct ?? 40),
+        cycleDurationSeconds: 0
+      }
     };
   } catch (e) {
     console.error('Erro ao ler configuração do Cripto Myners:', e);
