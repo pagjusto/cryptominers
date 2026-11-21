@@ -2,7 +2,7 @@
 
 ![CryptoZombies Banner](public/miners/all_miners_banner.png)
 
-> **CryptoZombies** é um jogo Web3 de sobrevivência e estratégia contra hordas de zumbis, com estética pixel art retrô. Desenvolvido em **React 19**, **Vite** e **Canvas**, o jogo implementa mapas individuais por jogador, economia interna baseada em **MHC**, sistema de sobreviventes, abrigos médicos, Baús do Boss e simulador completo de ROI.
+> **CryptoZombies** é um jogo Web3 de sobrevivência e estratégia contra hordas de zumbis, com estética pixel art retrô. Desenvolvido em **React 19**, **Vite** e **Canvas**, o jogo implementa mapas individuais por jogador, economia interna baseada em **Coins**, sistema de sobreviventes, abrigos médicos, Baús do Boss e simulador completo de ROI.
 
 ---
 
@@ -13,11 +13,11 @@
 - **Sobrevivência contra zumbis**: A experiência de jogo é centrada no combate e na sobrevivência contra hordas de zumbis.
 - **Sem sistema de jazidas**: As antigas mecânicas de jazidas de recursos não fazem mais parte da versão atual do jogo.
 
-### 2. 💰 Economia Oficial da MHC
-- **Cotação interna de referência**: **1 MHC = US$ 0,01** (100 MHC = US$ 1,00).
+### 2. 💰 Economia Oficial de Coins
+- **Cotação interna de referência**: **1 Coins = US$ 0,01** (100 Coins = US$ 1,00).
 - **Modelo híbrido**: cotação definida pelo administrador antes da negociação na Solana e acompanhando o mercado após a entrada/negociação on-chain.
-- **Compras**: pacotes vendidos em USDT, com crédito de MHC após confirmação do pagamento.
-- **Sem burn por enquanto**: MHC utilizada em upgrades é debitada normalmente, sem queima.
+- **Compras**: pacotes vendidos em USDT, com crédito de Coins após confirmação do pagamento.
+- **Sem burn por enquanto**: Coins utilizada em upgrades é debitada normalmente, sem queima.
 
 ### 3. ⚔️ Sistema de Heróis Mineradores
 - **Limite de Mineração**: Até **15 heróis ativos** minerando simultaneamente por mapa.
@@ -38,7 +38,7 @@
 
 ### 5. 🏡 Casas de Repouso
 - Aceleração da recuperação de energia dos heróis.
-- Evolução por níveis utilizando Fragmentos de Construção e MHC.
+- Evolução por níveis utilizando Fragmentos de Construção e Coins.
 - Níveis: *Tiny House*, *Basic House*, *Comfort House*, *Mansion*, *Villa*, *Palace*.
 
 ### 6. 📊 Menu Estatísticas & Simulador de ROI (3 Cenários)
@@ -55,8 +55,8 @@
 
 ### 7. 💳 Perfil, Carteira Web3 & Saques
 - **Rede de saque aprovada**: Solana, utilizando USDT no padrão SPL.
-- **Conversão de referência**: 1 MHC = US$ 0,01.
-- **Saque mínimo**: 40 USDT (equivalente a 4.000 MHC pela cotação de referência).
+- **Conversão de referência**: 1 Coins = US$ 0,01.
+- **Saque mínimo**: 40 USDT (equivalente a 4.000 Coins pela cotação de referência).
 - **Taxa de rede (gas)**: paga pelo projeto com os recursos da taxa percentual de saque; não há desconto adicional ao jogador.
 - O custo real do gas é registrado em cada saque e reduz a parcela líquida da taxa percentual que fica com o projeto.
 - Os percentuais/faixas definitivos da taxa de saque ainda precisam ser confirmados.
@@ -70,7 +70,7 @@
 
 ## 📚 Documentação de regras
 
-- [Economia da MHC, compras, saques, Solana e política de burn](docs/economia-minercoin.md)
+- [Economia de Coins, compras, saques, Solana e política de burn](docs/economia-minercoin.md)
 
 ---
 
@@ -109,7 +109,7 @@ npm test
 ```
 
 ### Cobertura dos Testes:
-- Cotação interna de referência de MHC e cálculos de breakeven.
+- Cotação interna de referência de Coins e cálculos de breakeven.
 - Regras econômicas e conversão de saques.
 - Mapas individuais e isolamento entre jogadores.
 - Suporte a 1.000 jogadores simultâneos gerando mapas em menos de 600ms.
