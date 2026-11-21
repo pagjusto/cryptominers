@@ -55,9 +55,27 @@ export function hasClearLineOfSight(x1, y1, x2, y2) {
 }
 
 /**
- * Localiza a célula transitável livre mais próxima para um herói (Anti-Stacking)
- * Garante que nenhum herói seja realocado para uma célula já ocupada por outro herói, zumbi ou obstáculo.
+ * Verifica se a célula está ocupada por outro herói ou por um zumbi, impedindo que este herói pare nela.
+ * REGRA OFICIAL DO USUÁRIO:
+ * "os herois nao podem travar em locais podendo passar um pelo outro mas nao pararem no mesmo local,
+ *  podem passar tambem pelos zumbis mas nao parar no mesmo local que eles, isso faz eles cruzarem pela mesma celula e nao travarem"
  */
+export function isCellOccupiedForStop(x, y, heroId, allMiners = [], grid = null) {
+  // Outro herói ativo parado/minerando nesta célula
+  const hasHero = allMiners.some(o => 
+    o.id !== heroId && 
+    (o.status === 'work' || !o.status) && 
+    Math.round(o.x) === x && 
+    Math.round(o.y) === y
+  );
+  if (hasHero) return true;
+
+  // Zumbi ou Boss nesta célula
+  if (grid && grid[y] && (grid[y][x] === BLOCK_ZOMBIE || grid[y][x] === BLOCK_BOSS)) {
+    return true;
+  }
+  return false;
+}
 export function findNearestFreeHeroCell(hx, hy, heroId, allMiners = [], grid = null, isCanyon = true, enemies = []) {
   const GRID_COLS = grid && grid[0] ? grid[0].length : 15;
   const GRID_ROWS = grid ? grid.length : 11;
@@ -144,6 +162,13 @@ export function findNextHeroAction(miner, grid, allMiners = [], isCanyon = true)
     return { action: 'idle' };
   }
 
+  // REGRA OFICIAL DO USUÁRIO:
+  // "os herois nao podem travar em locais podendo passar um pelo outro mas nao pararem no mesmo local,
+  //  podem passar tambem pelos zumbis mas nao parar no mesmo local que eles, isso faz eles cruzarem pela mesma celula e nao travarem"
+  // Se a célula atual (mx, my) já estiver ocupada por outro herói minerando/parado ou por um zumbi,
+  // o herói NÃO pode parar aqui para atirar. Ele deve continuar se movendo para cruzar a célula!
+  const isCurrentCellOccupied = isCellOccupiedForStop(mx, my, miner.id, allMiners, grid);
+
   // ============================================================================
   // REGRA OFICIAL DO USUÁRIO:
   // "quando o boss aparece todos os herois devem caminhar para perto dele e atacalo"
@@ -152,8 +177,9 @@ export function findNextHeroAction(miner, grid, allMiners = [], isCanyon = true)
 
   if (activeBoss) {
     // 1. O Boss é o alvo SUPREMO e PRIORITÁRIO de toda a equipe
+    // Só entra em combate estático se a célula atual NÃO estiver sobreposta com outro herói/zumbi
     const distToBoss = Math.abs(activeBoss.x - mx) + Math.abs(activeBoss.y - my);
-    if (distToBoss <= COMBAT_RANGE && hasClearLineOfSight(mx, my, activeBoss.x, activeBoss.y)) {
+    if (!isCurrentCellOccupied && distToBoss <= COMBAT_RANGE && hasClearLineOfSight(mx, my, activeBoss.x, activeBoss.y)) {
       const targetDir = activeBoss.x < mx ? -1 : (activeBoss.x > mx ? 1 : (miner.targetDir || 1));
       return {
         action: 'mine',
@@ -181,15 +207,10 @@ export function findNextHeroAction(miner, grid, allMiners = [], isCanyon = true)
         closestNodeToBoss = curr;
       }
 
-      // Posição de ataque 'curr' só é adotada se nenhum outro herói estiver parado estacionado nela
-      const isHeroStandingHere = curr.path.length > 0 && allMiners.some(other => 
-        other.id !== miner.id && 
-        (other.status === 'work' || !other.status) &&
-        Math.round(other.x) === curr.x && 
-        Math.round(other.y) === curr.y
-      );
+      // Posição de ataque 'curr' só é adotada se nenhum outro herói ou zumbi estiver estacionado nela
+      const isSpotOccupied = curr.path.length > 0 && isCellOccupiedForStop(curr.x, curr.y, miner.id, allMiners, grid);
 
-      const canShootBoss = !isHeroStandingHere && 
+      const canShootBoss = !isSpotOccupied && 
         (Math.abs(activeBoss.x - curr.x) + Math.abs(activeBoss.y - curr.y) <= COMBAT_RANGE) && 
         hasClearLineOfSight(curr.x, curr.y, activeBoss.x, activeBoss.y);
 
@@ -200,10 +221,10 @@ export function findNextHeroAction(miner, grid, allMiners = [], isCanyon = true)
           pathLength: curr.path.length,
           score: curr.path.length
         };
-        break; // Encontrou a rota mais curta até a posição de disparo contra o Boss!
+        break; // Encontrou a rota mais curta até a posição livre de disparo contra o Boss!
       }
 
-      // Exploração nas 4 direções cardinais
+      // Exploração nas 4 direções cardinais (heróis atravessam livremente outras entidades no caminho)
       const nextMoves = [
         { x: curr.x, y: curr.y - 1, dir: miner.targetDir || 1 },
         { x: curr.x + 1, y: curr.y, dir: 1 },
@@ -243,8 +264,8 @@ export function findNextHeroAction(miner, grid, allMiners = [], isCanyon = true)
     }
   }
 
-  // 2. Se o herói já estava focado em um alvo e ele ainda existe e está bem perto (distância Manhattan <= 1)
-  if (miner.targetBlock) {
+  // 2. Se o herói já estava focado em um alvo e ele ainda existe e está no alcance com célula livre
+  if (!isCurrentCellOccupied && miner.targetBlock) {
     const stillAlive = activeTargets.find(t => t.x === miner.targetBlock.x && t.y === miner.targetBlock.y);
     if (stillAlive) {
       const dist = Math.abs(stillAlive.x - mx) + Math.abs(stillAlive.y - my);
@@ -259,24 +280,25 @@ export function findNextHeroAction(miner, grid, allMiners = [], isCanyon = true)
     }
   }
 
-  // 3. Verifica se qualquer criatura ativa está bem perto no raio imediato (adjacência estrita <= 1)
-  // Ordena por proximidade para atirar na ameaça mais próxima
-  const inRangeTargets = activeTargets
-    .map(t => ({
-      ...t,
-      dist: Math.abs(t.x - mx) + Math.abs(t.y - my)
-    }))
-    .filter(t => t.dist <= COMBAT_RANGE && hasClearLineOfSight(mx, my, t.x, t.y))
-    .sort((a, b) => a.dist - b.dist);
+  // 3. Verifica se qualquer criatura ativa está no raio imediato (dist <= COMBAT_RANGE) em célula livre
+  if (!isCurrentCellOccupied) {
+    const inRangeTargets = activeTargets
+      .map(t => ({
+        ...t,
+        dist: Math.abs(t.x - mx) + Math.abs(t.y - my)
+      }))
+      .filter(t => t.dist <= COMBAT_RANGE && hasClearLineOfSight(mx, my, t.x, t.y))
+      .sort((a, b) => a.dist - b.dist);
 
-  if (inRangeTargets.length > 0) {
-    const chosen = inRangeTargets[0];
-    const targetDir = chosen.x < mx ? -1 : (chosen.x > mx ? 1 : (miner.targetDir || 1));
-    return {
-      action: 'mine',
-      targetBlock: { x: chosen.x, y: chosen.y },
-      targetDir
-    };
+    if (inRangeTargets.length > 0) {
+      const chosen = inRangeTargets[0];
+      const targetDir = chosen.x < mx ? -1 : (chosen.x > mx ? 1 : (miner.targetDir || 1));
+      return {
+        action: 'mine',
+        targetBlock: { x: chosen.x, y: chosen.y },
+        targetDir
+      };
+    }
   }
 
   // 4. Mapeia aglomeração de heróis em cada alvo para distribuir o fogo da equipe
@@ -299,16 +321,11 @@ export function findNextHeroAction(miner, grid, allMiners = [], isCanyon = true)
     const curr = queue.shift();
 
     // REGRA OFICIAL DO USUÁRIO: "Anti-Stacking de personagens tbm"
-    // Posição de ataque 'curr' só é adotada se nenhum outro herói estiver parado minerando ou estacionado nela
-    const isHeroStandingHere = curr.path.length > 0 && allMiners.some(other => 
-      other.id !== miner.id && 
-      (other.status === 'work' || !other.status) &&
-      Math.round(other.x) === curr.x && 
-      Math.round(other.y) === curr.y
-    );
+    // Posição de ataque 'curr' só é adotada se nenhum outro herói ou zumbi estiver estacionado nela
+    const isSpotOccupied = curr.path.length > 0 && isCellOccupiedForStop(curr.x, curr.y, miner.id, allMiners, grid);
 
-    // Se a partir desta posição 'curr' é possível atirar em algum alvo ativo (bem perto, dist <= 1 e linha limpa)
-    const reachableTarget = !isHeroStandingHere ? activeTargets.find(t => {
+    // Se a partir desta posição 'curr' é possível atirar em algum alvo ativo (dist <= COMBAT_RANGE e linha limpa)
+    const reachableTarget = !isSpotOccupied ? activeTargets.find(t => {
       const d = Math.abs(t.x - curr.x) + Math.abs(t.y - curr.y);
       return d <= COMBAT_RANGE && hasClearLineOfSight(curr.x, curr.y, t.x, t.y);
     }) : null;
@@ -385,17 +402,12 @@ export function findNextHeroAction(miner, grid, allMiners = [], isCanyon = true)
       { x: mx, y: my - 1, dir: miner.targetDir || 1 }
     ].filter(pos => !isSolidTerrain(pos.x, pos.y, grid, isCanyon));
 
-    // Anti-stacking: prefere células vizinhas que não estejam ocupadas por outro herói
-    const freeCandidates = candidates.filter(pos => 
-      !allMiners.some(o => o.id !== miner.id && (o.status === 'work' || !o.status) && Math.round(o.x) === pos.x && Math.round(o.y) === pos.y)
-    );
-    if (freeCandidates.length > 0) {
-      candidates = freeCandidates;
-    }
-
     if (candidates.length > 0) {
-      // Escolhe o vizinho livre que mais reduz a distância até o alvo
+      // Prioriza candidatos livres para parar, mas permite cruzar por células com outros heróis ou zumbis
       candidates.sort((a, b) => {
+        const occA = isCellOccupiedForStop(a.x, a.y, miner.id, allMiners, grid) ? 1 : 0;
+        const occB = isCellOccupiedForStop(b.x, b.y, miner.id, allMiners, grid) ? 1 : 0;
+        if (occA !== occB) return occA - occB;
         const distA = Math.hypot(closestTarget.x - a.x, closestTarget.y - a.y);
         const distB = Math.hypot(closestTarget.x - b.x, closestTarget.y - b.y);
         return distA - distB;

@@ -13,16 +13,15 @@ export const GRID_ROWS = 11;
 export const TILE_SIZE = 76;
 
 /**
- * Retorna se a célula (c, r) está no perímetro interno, pátio ou cercas da Base Militar e Hospital.
- * Regra Oficial do Usuário: "veja que zumbis estao invadindo a area da base"
- * Zumbis e Boss NUNCA podem nascer nem caminhar dentro do santuário da base.
+ * Retorna se a célula (c, r) está no perímetro interno, muros, pátio ou leitos da Base Militar e Hospital.
+ * Regra Oficial do Usuário: 
+ * "e tem herois e zumbis subindo na base onde nao deveriam subir"
+ * Zumbis e heróis NUNCA podem subir nem caminhar dentro do santuário da base (Colunas 4 a 10, Linhas 3 a 8).
  */
 export function isBaseCompound(c, r) {
-  // Complexo militar fortificado: Hangar, Hospital Cruz Vermelha, Pátio cercado e Doca da Ambulância
-  // Linhas 4 a 7, Colunas 4 a 10:
-  if (c >= 4 && c <= 10 && (r >= 4 && r <= 7)) return true;
-  // Telhado do hangar, guaritas e muro norte na linha 3:
-  if ((c === 4 || c === 7 || c === 8 || c === 9) && r === 3) return true;
+  // Complexo militar fortificado & Hospital: todo o quadrado central (muros, leitos, caixas e armaria)
+  // Colunas 4 a 10, Linhas 3 a 8 são 100% impenetráveis por heróis e zumbis
+  if (c >= 4 && c <= 10 && r >= 3 && r <= 8) return true;
   return false;
 }
 
@@ -139,8 +138,8 @@ export const TACTICAL_ZONES = [
   { id: 'nw_grass_open', name: 'Noroeste Gramado Aberto', center: { x: 1, y: 2 } },
   // 2. Noroeste - Gramado Atrás da Ruína (Canto superior esquerdo)
   { id: 'nw_grass_high', name: 'Noroeste Gramado Alto', center: { x: 5, y: 1 } },
-  // 3. Noroeste - Encruzilhada da Base Norte (Estrada de terra)
-  { id: 'nw_crossroad', name: 'Norte Encruzilhada', center: { x: 5, y: 3 } },
+  // 3. Norte - Estrada Aberta Norte
+  { id: 'n_road_open', name: 'Norte Estrada', center: { x: 6, y: 2 } },
   // 4. Oeste - Estrada de Asfalto Livre
   { id: 'w_road_side', name: 'Oeste Estrada Livre', center: { x: 2, y: 5 } },
   // 5. Sudoeste - Gramado Sul da Avenida
@@ -157,10 +156,10 @@ export const TACTICAL_ZONES = [
   { id: 'se_crossroad', name: 'Sudeste Encruzilhada', center: { x: 9, y: 9 } },
   // 11. Sudeste - Gramado Extremo Leste
   { id: 'se_grass_corner', name: 'Sudeste Canto Leste', center: { x: 14, y: 8 } },
-  // 12. Leste - Avenida de Asfalto Leste (Em frente ao hospital)
+  // 12. Leste - Avenida de Asfalto Leste
   { id: 'e_avenue', name: 'Leste Avenida', center: { x: 12, y: 5 } },
   // 13. Nordeste - Trilha de Terra da Torre
-  { id: 'ne_trail_tower', name: 'Nordeste Trilha Torre', center: { x: 10, y: 2 } },
+  { id: 'ne_trail_tower', name: 'Nordeste Trilha Torre', center: { x: 12, y: 2 } },
   // 14. Nordeste - Gramado Superior da Torre
   { id: 'ne_grass_high', name: 'Nordeste Gramado Alto', center: { x: 13, y: 1 } }
 ];
@@ -171,11 +170,11 @@ export const TACTICAL_ZONES = [
  */
 export const CORNER_SPAWN_POINTS = [
   { x: 1, y: 1, c: 1, r: 1 }, { x: 5, y: 1, c: 5, r: 1 }, { x: 6, y: 1, c: 6, r: 1 },
-  { x: 1, y: 2, c: 1, r: 2 }, { x: 5, y: 3, c: 5, r: 3 }, { x: 6, y: 3, c: 6, r: 3 },
+  { x: 1, y: 2, c: 1, r: 2 }, { x: 9, y: 1, c: 9, r: 1 }, { x: 6, y: 2, c: 6, r: 2 },
   { x: 1, y: 7, c: 1, r: 7 }, { x: 1, y: 9, c: 1, r: 9 }, { x: 2, y: 9, c: 2, r: 9 },
   { x: 3, y: 9, c: 3, r: 9 }, { x: 6, y: 9, c: 6, r: 9 }, { x: 7, y: 9, c: 7, r: 9 },
-  { x: 9, y: 9, c: 9, r: 9 }, { x: 2, y: 8, c: 2, r: 8 }, { x: 4, y: 8, c: 4, r: 8 },
-  { x: 7, y: 8, c: 7, r: 8 }, { x: 13, y: 7, c: 13, r: 7 }
+  { x: 9, y: 9, c: 9, r: 9 }, { x: 2, y: 5, c: 2, r: 5 }, { x: 2, y: 6, c: 2, r: 6 },
+  { x: 12, y: 1, c: 12, r: 1 }, { x: 13, y: 1, c: 13, r: 1 }, { x: 14, y: 7, c: 14, r: 7 }
 ];
 
 export function getCornerSpawnPoint(index = 0) {
@@ -190,11 +189,13 @@ export function getCornerSpawnPoint(index = 0) {
 // Norte: gramados/caminhos superiores à esquerda e centro-norte.
 // Sul: faixa de gramado inferior, contornando ruínas e complexo central.
 // Personagens podem caminhar pelo mapa todo; estas zonas são somente os pontos de nascimento.
-export const SPAWN_ZONE_VERSION = 2;
+export const SPAWN_ZONE_VERSION = 3;
 export function isSpawnZoneCell(c, r) {
-  const inNorthSpawn = r >= 1 && r <= 4 && c >= 1 && c <= 10;
-  const inSouthSpawn = r >= 6 && r <= 9 && c >= 1 && c <= 13;
-  return (inNorthSpawn || inSouthSpawn) && !isCityBuilding(c, r) && !isBaseCompound(c, r);
+  const inNorthSpawn = r >= 1 && r <= 2 && c >= 1 && c <= 13;
+  const inSouthSpawn = r >= 9 && r <= 10 && c >= 1 && c <= 13;
+  const inWestSpawn = c >= 1 && c <= 3 && r >= 1 && r <= 9;
+  const inEastSpawn = c >= 11 && c <= 14 && r >= 1 && r <= 8;
+  return (inNorthSpawn || inSouthSpawn || inWestSpawn || inEastSpawn) && !isCityBuilding(c, r) && !isBaseCompound(c, r);
 }
 
 export function getSpawnZoneCells(cols = GRID_COLS, rows = GRID_ROWS) {
@@ -207,14 +208,13 @@ export function getSpawnZoneCells(cols = GRID_COLS, rows = GRID_ROWS) {
   return cells;
 }
 
-
-
-// Heróis e zumbis nascem nas duas áreas verdes. Após o spawn, a movimentação continua livre.
+// Heróis nascem em estradas e gramados 100% livres e desimpedidos (fora da base central)
 export const SAFE_HERO_SPAWN_POINTS = [
-  { x: 1, y: 1 }, { x: 5, y: 1 }, { x: 6, y: 1 }, { x: 1, y: 2 }, { x: 5, y: 3 },
-  { x: 6, y: 3 }, { x: 7, y: 2 }, { x: 1, y: 7 }, { x: 1, y: 9 }, { x: 2, y: 9 },
-  { x: 3, y: 9 }, { x: 6, y: 9 }, { x: 7, y: 9 }, { x: 9, y: 9 }, { x: 4, y: 8 },
-  { x: 7, y: 8 }, { x: 13, y: 7 }
+  { x: 1, y: 1 }, { x: 5, y: 1 }, { x: 6, y: 1 }, { x: 9, y: 1 }, { x: 6, y: 2 },
+  { x: 1, y: 2 }, { x: 2, y: 5 }, { x: 2, y: 6 }, { x: 1, y: 7 }, { x: 1, y: 8 },
+  { x: 1, y: 9 }, { x: 2, y: 9 }, { x: 3, y: 9 }, { x: 5, y: 9 }, { x: 6, y: 9 },
+  { x: 7, y: 9 }, { x: 9, y: 9 }, { x: 12, y: 1 }, { x: 13, y: 1 }, { x: 12, y: 2 },
+  { x: 12, y: 5 }, { x: 14, y: 7 }, { x: 14, y: 8 }
 ];
 
 export function getSafeHeroSpawn(index = 0) {

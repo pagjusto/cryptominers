@@ -28,6 +28,8 @@ import { HERO_ROSTER, WEAPON_CATALOG, getHeroById, getWeaponById, getRarityConfi
 // ============================================================================
 let cityBgImg = null;
 let cityBgLoaded = false;
+let cityMapImages = { 1: null, 2: null, 3: null };
+let cityMapsLoaded = { 1: false, 2: false, 3: false };
 let billboardImg = null;
 let billboardLoaded = false;
 let billboardShadowCanvas = null;
@@ -272,22 +274,49 @@ export function initCityMap(onLoaded) {
   initBillboard();
   initUserFog();
   initSirenTower();
-  if (cityBgLoaded && cityBgImg) {
-    if (onLoaded) onLoaded();
-    return;
-  }
-  const img = new Image();
-  img.crossOrigin = 'anonymous';
-  img.src = `/city_map.webp?v=2`;
-  img.onload = () => {
-    cityBgImg = img;
-    cityBgLoaded = true;
-    if (onLoaded) onLoaded();
+
+  const mapSources = {
+    1: `/city_map_lvl1.webp?v=2`,
+    2: `/city_map_lvl2.webp?v=2`,
+    3: `/city_map_lvl3.webp?v=2`
   };
-  img.onerror = () => {
-    console.error('Falha ao carregar /city_map.webp');
-    initCanyonMap(onLoaded);
-  };
+
+  [1, 2, 3].forEach((lvl) => {
+    if (cityMapsLoaded[lvl] && cityMapImages[lvl]) {
+      return;
+    }
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.src = mapSources[lvl];
+    img.onload = () => {
+      cityMapImages[lvl] = img;
+      cityMapsLoaded[lvl] = true;
+      if (lvl === 1) {
+        cityBgImg = img;
+        cityBgLoaded = true;
+      }
+      if (onLoaded) onLoaded();
+    };
+    img.onerror = () => {
+      if (lvl === 1) {
+        // Fallback para /city_map.webp
+        const fallbackImg = new Image();
+        fallbackImg.crossOrigin = 'anonymous';
+        fallbackImg.src = `/city_map.webp?v=2`;
+        fallbackImg.onload = () => {
+          cityMapImages[1] = fallbackImg;
+          cityMapsLoaded[1] = true;
+          cityBgImg = fallbackImg;
+          cityBgLoaded = true;
+          if (onLoaded) onLoaded();
+        };
+        fallbackImg.onerror = () => {
+          console.error('Falha ao carregar /city_map.webp');
+          initCanyonMap(onLoaded);
+        };
+      }
+    };
+  });
 }
 
 export function initCanyonMap(onLoaded) {
@@ -308,15 +337,37 @@ export function initCanyonMap(onLoaded) {
   };
 }
 
-// 1. Chão do Mapa: Cidade de Sobrevivência Zumbi em Alta Definição
-export function drawContinuousCaveFloor(ctx, width, height, mine, now, isBossAlive = false) {
-  if (!cityBgImg && typeof window !== 'undefined') {
+// 1. Chão do Mapa: Cidade de Sobrevivência Zumbi em Alta Definição (Evolui com o Nível do Abrigo)
+export function drawContinuousCaveFloor(ctx, width, height, mine, now, isBossAlive = false, houseVisualTier = null) {
+  if ((!cityBgImg || !cityMapsLoaded[1]) && typeof window !== 'undefined') {
     initCityMap();
   }
 
-  // 1. Prioridade Oficial: Mapa da Cidade de Sobrevivência Zumbi
-  if (cityBgLoaded && cityBgImg) {
-    ctx.drawImage(cityBgImg, 0, 0, width, height);
+  // Identifica o nível do abrigo (Nível 1 = 5 leitos, Nível 2 = 10 leitos, Nível 3 = 15 leitos)
+  let level = 1;
+  if (houseVisualTier) {
+    if (typeof houseVisualTier === 'number') level = houseVisualTier;
+    else if (houseVisualTier.level) level = houseVisualTier.level;
+    else if (houseVisualTier.slots >= 15) level = 3;
+    else if (houseVisualTier.slots >= 10) level = 2;
+    else level = 1;
+  } else if (typeof window !== 'undefined') {
+    try {
+      const saved = localStorage.getItem('crypto_miners_house');
+      if (saved === 'advanced' || saved === 'mansion' || saved === 'palace' || saved === 'legendary') level = 3;
+      else if (saved === 'reinforced' || saved === 'luxury') level = 2;
+      else level = 1;
+    } catch (e) {}
+  }
+  level = Math.max(1, Math.min(3, level));
+
+  const targetMapImg = (cityMapsLoaded[level] && cityMapImages[level])
+    ? cityMapImages[level]
+    : ((cityMapsLoaded[1] && cityMapImages[1]) ? cityMapImages[1] : (cityBgLoaded && cityBgImg ? cityBgImg : null));
+
+  // 1. Prioridade Oficial: Mapa da Cidade de Sobrevivência Zumbi no Nível Correspondente
+  if (targetMapImg) {
+    ctx.drawImage(targetMapImg, 0, 0, width, height);
 
     // 1.1 OUTDOOR / BILLBOARD VETORIZADO "CRYPTOZOMBIES" & SOMBRA RETANGULAR PROJETADA
     drawBillboard(ctx, now);

@@ -822,11 +822,13 @@ export default function GameBoard({
         const mx = Math.max(1, Math.min(GRID_COLS - 2, Math.round(miner.x)));
         const my = Math.max(1, Math.min(GRID_ROWS - 2, Math.round(miner.y)));
 
-        // Garante que nenhum herói fique preso sobre o outdoor ou obstáculos físicos da cidade
-        if (isCityBuilding(mx, my)) {
+        // Garante que nenhum herói suba na base, outdoor ou obstáculos físicos da cidade
+        if (isCityBuilding(mx, my) || isBaseCompound(mx, my)) {
           const safePoint = getSafeHeroSpawn(minerIndex);
           miner.x = safePoint.x;
           miner.y = safePoint.y;
+          miner.visualX = safePoint.x;
+          miner.visualY = safePoint.y;
           miner.targetBlock = null;
           miner.isMining = false;
         }
@@ -875,9 +877,12 @@ export default function GameBoard({
           const curHp = state.hpMap[cellKey] ?? lockedEnemy.hp;
           const blockType = state.grid[lockedEnemy.gy] ? state.grid[lockedEnemy.gy][lockedEnemy.gx] : BLOCK_EMPTY;
           const isAlive = curHp !== undefined && curHp > 0 && blockType !== BLOCK_EMPTY && blockType !== BLOCK_BEDROCK && (lockedEnemy.hp === undefined || lockedEnemy.hp > 0);
+          const dist = Math.abs(lockedEnemy.gx - mx) + Math.abs(lockedEnemy.gy - my);
+          const hasLoS = hasClearLineOfSight(mx, my, lockedEnemy.gx, lockedEnemy.gy);
 
-          if (!isAlive) {
-            // Zumbi foi morto! Apenas agora libera a trava do herói para buscar o próximo
+          if (!isAlive || dist > COMBAT_RANGE || !hasLoS) {
+            // Zumbi morto, fora de alcance tático (dist > 2) ou atrás de obstáculos sólidos:
+            // Libera a trava para que o herói volte a caminhar e manobrar livremente!
             miner.lockedEnemyId = null;
             miner.targetBlock = null;
             miner.isMining = false;
@@ -1375,8 +1380,7 @@ export default function GameBoard({
             //  podem passar tambem pelos zumbis mas nao parar no mesmo local que eles, isso faz eles cruzarem pela mesma celula e nao travarem"
             const isOverlappingHero = state.miners.some(o => 
               o.id !== miner.id && 
-              o.status === 'work' && 
-              o.isMining && 
+              (o.status === 'work' || !o.status) && 
               Math.round(o.x) === curX && 
               Math.round(o.y) === curY
             );
@@ -1386,12 +1390,20 @@ export default function GameBoard({
               Math.round(e.gy) === curY
             );
 
-            // Não para no mesmo local: se a célula estiver ocupada por outro herói minerando ou zumbi, ajusta para posição livre
+            // Não para no mesmo local: se a célula estiver ocupada por outro herói ou zumbi, ajusta para posição livre
             if (isOverlappingHero || isOverlappingZombie) {
               const freeSpot = findNearestFreeHeroCell(curX, curY, miner.id, state.miners, state.grid, isCanyon, state.enemies);
               if (freeSpot) {
                 miner.x = freeSpot.x;
                 miner.y = freeSpot.y;
+                miner.visualX = freeSpot.x;
+                miner.visualY = freeSpot.y;
+              } else {
+                // Não estaciona na mesma célula: continua a marcha para cruzar livremente
+                miner.moveCooldown = 0.2;
+                miner.isMining = false;
+                miner.targetBlock = null;
+                return;
               }
             }
 
@@ -1457,8 +1469,9 @@ export default function GameBoard({
         }
       });
 
-      // REGRA OFICIAL DO USUÁRIO: "Anti-Stacking de personagens tbm"
-      // Passo 3: Atualização visual contínua (lerp) e força de repulsão suave entre heróis
+      // Passo 3: Atualização visual contínua (lerp suave entre células)
+      // REGRA OFICIAL DO USUÁRIO: "podendo passar um pelo outro mas nao pararem no mesmo local"
+      // Os heróis cruzam suavemente pela mesma célula sem forças de empurrão conflitantes
       state.miners.forEach(m => {
         if (m.visualX === undefined || isNaN(m.visualX)) m.visualX = m.x;
         if (m.visualY === undefined || isNaN(m.visualY)) m.visualY = m.y;
@@ -1466,37 +1479,6 @@ export default function GameBoard({
         m.visualX += (m.x - m.visualX) * lerpSpeed;
         m.visualY += (m.y - m.visualY) * lerpSpeed;
       });
-
-      const activeMiners = state.miners.filter(m => m.status === 'work');
-      for (let i = 0; i < activeMiners.length; i++) {
-        const m1 = activeMiners[i];
-        for (let j = i + 1; j < activeMiners.length; j++) {
-          const m2 = activeMiners[j];
-          const dx = m1.visualX - m2.visualX;
-          const dy = m1.visualY - m2.visualY;
-          const dist = Math.hypot(dx, dy);
-          const MIN_HERO_DIST = 0.92; // ~44px de distância mínima
-          if (dist < MIN_HERO_DIST && dist > 0.0001) {
-            const overlap = MIN_HERO_DIST - dist;
-            const pushFactor = (overlap / dist) * 0.45;
-            const px = dx * pushFactor;
-            const py = dy * pushFactor;
-
-            const n1x = m1.visualX + px;
-            const n1y = m1.visualY + py;
-            if (!isCityBuilding(Math.round(n1x), Math.round(n1y))) {
-              m1.visualX = n1x;
-              m1.visualY = n1y;
-            }
-            const n2x = m2.visualX - px;
-            const n2y = m2.visualY - py;
-            if (!isCityBuilding(Math.round(n2x), Math.round(n2y))) {
-              m2.visualX = n2x;
-              m2.visualY = n2y;
-            }
-          }
-        }
-      }
 
       // 1.5. ATUALIZAÇÃO DOS PROJÉTEIS DE GOSMA VERDE (ZUMBIS & BOSS)
       state.slimes = state.slimes || [];
@@ -1657,7 +1639,7 @@ export default function GameBoard({
       }
 
       const railY = 5 * TILE_SIZE + 24;
-      drawContinuousCaveFloor(ctx, logicalWidth, logicalHeight, mine, now, isBossAlive);
+      drawContinuousCaveFloor(ctx, logicalWidth, logicalHeight, mine, now, isBossAlive, houseVisualRef.current);
       if (mine?.id !== 'canyon') {
         drawTunnelPortals(ctx, logicalWidth, railY);
       }
