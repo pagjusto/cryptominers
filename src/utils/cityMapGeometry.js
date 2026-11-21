@@ -14,36 +14,42 @@ export const TILE_SIZE = 76;
 
 /**
  * Retorna se a célula (c, r) está no perímetro interno, muros, pátio ou leitos da Base Militar e Hospital.
- * Regra Oficial do Usuário: 
- * "e tem herois e zumbis subindo na base onde nao deveriam subir"
- * Zumbis e heróis NUNCA podem subir nem caminhar dentro do santuário da base (Colunas 4 a 10, Linhas 3 a 8).
+ * REGRA OFICIAL DO USUÁRIO: 
+ * "na marca circulada nao podera herois e zumbis andar sobre e essa barreira"
+ * Zumbis e heróis NUNCA podem subir nem caminhar sobre os muros ou dentro do santuário da base.
  */
 export function isBaseCompound(c, r) {
-  // Complexo militar fortificado & Hospital: todo o quadrado central (muros, leitos, caixas e armaria)
-  // Colunas 4 a 10, Linhas 3 a 8 são 100% impenetráveis por heróis e zumbis
-  if (c >= 4 && c <= 10 && r >= 3 && r <= 8) return true;
+  // Complexo militar fortificado & Hospital: todo o perímetro fortificado demarcado pelo usuário (muros, torre oeste, leitos, caixas e armaria)
+  // Topo / Ápice Norte (Muro de concreto sob o outdoor):
+  if (r === 2 && (c === 7 || c === 8)) return true;
+  // Linha 3 (Salas norte e leitos superiores):
+  if (r === 3 && c >= 5 && c <= 10) return true;
+  // Linha 4 (Torre de vigia oeste até muro leste):
+  if (r === 4 && c >= 3 && c <= 11) return true;
+  // Linha 5 (Torre de vigia oeste até quina leste):
+  if (r === 5 && c >= 3 && c <= 11) return true;
+  // Linha 6 (Portão de madeira sudoeste até quina sudeste):
+  if (r === 6 && c >= 4 && c <= 11) return true;
+  // Linha 7 (Muro sul e portão metálico sudeste):
+  if (r === 7 && c >= 5 && c <= 10) return true;
+  // Fundo / Ápice Sul (Quina inferior do muro fortificado):
+  if (r === 8 && (c === 7 || c === 8)) return true;
   return false;
 }
 
 /**
  * Retorna se a célula (c, r) contém um obstáculo sólido:
  * Mapeamento estrito baseado nas demarcações oficiais do usuário:
- * "onde foi selecionado em hiotese alguma zumbis e herois podem pizar em cima ou passar ali"
+ * "agora sem as cercas e sacos de areia os zumbis e herois podem andar livremente sem ficar travados exeto nas contruçoes carros torre e outdoor"
+ * "na marca circulada nao podera herois e zumbis andar sobre e essa barreira"
  * 
- * - Ruína Noroeste (prédio concreto e escombros)
+ * - Ruína Noroeste (prédio de concreto)
  * - Outdoor / Billboard "CryptoZombies" e sustentação
- * - Torre de vigia norte
- * - Barricadas de sacos de areia norte
- * - Caixa d'água / gerador oeste
+ * - Torre de sirene oeste e guarita de madeira leste
  * - Carros abandonados (oeste e leste)
- * - Cercas de arame, barricadas e escombros oeste
- * - Base Militar Fortificada & Complexo Hospitalar (muros, hospital, pátio)
- * - Barricadas de sacos de areia sul
- * - Caixote de madeira sul
- * - Ruína Sudeste (prédio de concreto, muros e escombros)
- * - Cercas de arame e bloqueios de concreto leste
- * - Silo / reservatório metálico de combustível leste
- * - Guarita / torre de vigia e cercas leste
+ * - Base Militar Fortificada & Complexo Hospitalar (todo o perímetro marcado em vermelho)
+ * - Ruína Sudeste (prédio de concreto no canto inferior direito)
+ * - Silos / reservatórios metálicos nas bordas
  * 
  * Onde for true: nem heróis nem zumbis/boss podem pisar, atravessar ou nascer.
  * Onde for false: ruas pavimentadas (livres de carros), caminhos de terra batida e gramados livres.
@@ -52,37 +58,34 @@ export function isCityObstacle(c, r) {
   // Limites exteriores do mapa (fora do grid de combate)
   if (c < 0 || c >= GRID_COLS || r < 0 || r >= GRID_ROWS) return true;
 
-  // REGRA OFICIAL DO USUÁRIO:
-  // "agora sem as cercas e sacos de areia os zumbis e herois podem andar livremente sem ficar travados exeto nas contruçoes carros torre e outdoor"
-
   // 1. CONSTRUÇÕES - RUÍNA NOROESTE (Prédio de concreto destruído no topo esquerdo)
-  if (c >= 2 && c <= 4 && (r === 1 || r === 2)) return true;
+  if ((c === 2 || c === 3) && (r === 1 || r === 2)) return true;
 
   // 2. OUTDOOR / BILLBOARD "CRYPTOZOMBIES" (Norte no gramado)
   if ((c === 7 || c === 8) && (r === 0 || r === 1)) return true;
 
-  // 3. TORRE DE VIGIA NORTE (Madeira no topo direito)
-  if (c === 11 && r === 0) return true;
-
-  // 4. CARROS ABANDONADOS NO ASFALTO (Oeste e Leste)
-  if (c === 1 && r === 5) return true; // Carro na pista oeste
-  if ((c === 13 || c === 14) && r === 5) return true; // Carro na pista leste
-
-  // 5. TORRE DE SIRENE E ALARME DE VIGIA OESTE
+  // 3. TORRE DE SIRENE E ALARME DE VIGIA OESTE
   if (c === 2 && r === 3) return true;
 
+  // 4. TORRE DE VIGIA NORTE / LESTE (Guarita elevada de madeira)
+  if (c === 11 && r === 3) return true;
+
+  // 5. CARROS ABANDONADOS NO ASFALTO (Oeste e Leste)
+  if (c === 1 && r === 5) return true; // Carro na pista oeste
+  if (c === 14 && r === 5) return true; // Carro na pista leste
+
   // 6. CONSTRUÇÃO CENTRAL - BASE MILITAR & HOSPITAL DE SOBREVIVÊNCIA
-  // Todo o quadrado fortificado central (muros e interior com leitos e armaria)
+  // Perímetro fortificado diamantado demarcado pelo usuário (muros, torre oeste, leitos e armaria)
   if (isBaseCompound(c, r)) return true;
 
   // 7. CONSTRUÇÕES - RUÍNA SUDESTE (Prédio de concreto destruído no canto inferior direito)
-  if (c >= 11 && c <= 13 && (r === 8 || r === 9)) return true;
+  if ((c === 12 || c === 13) && (r >= 8 && r <= 10)) return true;
 
   // 8. CONSTRUÇÕES - SILO / RESERVATÓRIO METÁLICO DE COMBUSTÍVEL LESTE
-  if ((c === 13 || c === 14) && (r === 3 || r === 4)) return true;
+  if (c === 14 && (r === 3 || r === 4)) return true;
 
-  // 9. CONSTRUÇÕES - GUARITA ELEVADA LESTE
-  if (c === 11 && (r === 3 || r === 4)) return true;
+  // 9. CONSTRUÇÕES - RESERVATÓRIO / HIDRANTE METÁLICO OESTE
+  if (c === 0 && (r === 3 || r === 4)) return true;
 
   // Todas as demais estradas, caminhos de terra batida e gramados estão 100% livres
   return false;
