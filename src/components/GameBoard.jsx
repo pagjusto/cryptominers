@@ -38,6 +38,7 @@ import {
   SAFE_HERO_SPAWN_POINTS,
   isCanyonTrackOrTunnel, 
   isBaseCompound,
+  isSpawnZoneCell,
   TACTICAL_ZONES,
   CORNER_SPAWN_POINTS 
 } from '../utils/cityMapGeometry';
@@ -351,7 +352,8 @@ export default function GameBoard({
       // Se a posição for inválida ou cair dentro de edifícios/muros da cidade, realoca para rua/grama aberta
       const insideBuilding = isCityBuilding(Math.round(initX), Math.round(initY));
       const outOfBounds = initX <= 0 || initX >= GRID_COLS - 1 || initY <= 0 || initY >= GRID_ROWS - 1;
-      if (typeof initX !== 'number' || isNaN(initX) || insideBuilding || outOfBounds) {
+      const outsideRespawnZone = !existing && !isSpawnZoneCell(Math.round(initX), Math.round(initY));
+      if (typeof initX !== 'number' || isNaN(initX) || insideBuilding || outOfBounds || outsideRespawnZone) {
         const safePt = getSafeHeroSpawn(idx);
         initX = safePt.x;
         initY = safePt.y;
