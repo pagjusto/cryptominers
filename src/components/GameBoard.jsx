@@ -43,7 +43,7 @@ import {
   CORNER_SPAWN_POINTS 
 } from '../utils/cityMapGeometry';
 import { findNextHeroAction, findNearestFreeHeroCell, COMBAT_RANGE, hasClearLineOfSight } from '../utils/minerPathfinding';
-import { getHeroById, getWeaponById } from '../data/heroRoster';
+import { getHeroById, getWeaponById, getDurabilityLossPerStrike } from '../data/heroRoster';
 
 const BOSS_BATTLE_DURATION_MS = 5 * 60 * 1000;
 
@@ -1222,9 +1222,11 @@ export default function GameBoard({
                 }
               }
 
-              // Desgaste da durabilidade da arma calibrado para ~2 quebras ao dia (~12 horas por ciclo completo)
+              // Desgaste da durabilidade da arma calibrado por raridade (Lendário/Super Lendário ~12h, escalonado até Comum ~4h)
               if (miner.durability === undefined) miner.durability = 100;
-              miner.durability = Math.max(0, parseFloat((miner.durability - 0.0023).toFixed(4)));
+              const targetRarity = miner.rarity || (miner.heroId && getHeroById(miner.heroId)?.rarity) || 'common';
+              const wearLoss = getDurabilityLossPerStrike(targetRarity);
+              miner.durability = Math.max(0, parseFloat((miner.durability - wearLoss).toFixed(4)));
 
               // REGRA OFICIAL DO USUÁRIO: "e se quebrar interrompe a mineração"
               if (miner.durability <= 0) {

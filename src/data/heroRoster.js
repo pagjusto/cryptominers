@@ -79,6 +79,24 @@ export function getRarityConfig(rarity) {
   return RARITY_CONFIG[raw] || RARITY_CONFIG.common;
 }
 
+// Calibração oficial de durabilidade das armas por raridade:
+// Super Lendário & Lendário: ~12 horas por quebra (~2x ao dia)
+// As demais raridades escalonam proporcionalmente (10h, 8h, 6h e 4h)
+export const DURABILITY_DEGRADATION_RATES = {
+  super_legend: 0.0023, // ~12 horas por ciclo (~2x ao dia)
+  legendary: 0.0023,    // ~12 horas por ciclo (~2x ao dia)
+  epic: 0.0028,         // ~10 horas por ciclo (~2.4x ao dia)
+  super_rare: 0.0035,   // ~8 horas por ciclo (~3x ao dia)
+  rare: 0.0046,         // ~6 horas por ciclo (~4x ao dia)
+  common: 0.0069        // ~4 horas por ciclo (~6x ao dia)
+};
+
+export function getDurabilityLossPerStrike(rarity) {
+  const config = getRarityConfig(rarity);
+  const key = config?.id || 'common';
+  return DURABILITY_DEGRADATION_RATES[key] || DURABILITY_DEGRADATION_RATES.common;
+}
+
 export const HERO_ROSTER = [
   {
     id: 'verdant',
