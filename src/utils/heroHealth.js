@@ -10,7 +10,7 @@ const HERO_BASE_HP = {
 };
 
 export function getHeroBaseHP(rarity) {
-  const key = String(rarity || 'common').toLowerCase().replace(/[\\s-]/g, '_');
+  const key = String(rarity || 'common').toLowerCase().replace(/[\s-]/g, '_');
   const aliases = {
     superrare: 'super_rare',
     super_raro: 'super_rare',
