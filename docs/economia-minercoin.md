@@ -40,6 +40,15 @@ Os pacotes aprovados são vendidos em USDT, sem bônus ou descontos adicionais:
 - A rede escolhida para os saques de USDT é **Solana**, utilizando o padrão/token **SPL**.
 - A carteira de destino será uma carteira compatível com USDT na rede Solana.
 
+### Taxa de rede (gas) — decisão aprovada
+
+- **O projeto paga a taxa de rede (gas)** da transferência de USDT pela Solana.
+- O jogador **não terá um desconto adicional** no valor do saque por causa do gas.
+- O custo efetivo do gas deverá ser registrado individualmente no histórico/detalhamento de cada saque.
+- Esse custo será pago pelo projeto **com os recursos arrecadados por meio da taxa percentual de saque**; portanto, o gas reduz a parcela líquida dessa taxa que fica com o projeto.
+- O registro do saque deverá permitir identificar, separadamente, o valor bruto, a taxa percentual cobrada do jogador, o custo de gas pago pelo projeto e o valor líquido recebido pelo jogador.
+- O custo do gas não deve ser somado novamente à cobrança do jogador nem abatido do valor líquido que ele recebe.
+
 ## Política de burn
 
 - **Não haverá mecanismo de burn de MHC por enquanto.**
@@ -51,12 +60,12 @@ Os pacotes aprovados são vendidos em USDT, sem bônus ou descontos adicionais:
 
 - Manter histórico/versionamento das cotações com data e hora de vigência.
 - Registrar em cada operação financeira a cotação aplicada, a quantidade de MHC, o valor em USDT e o momento da operação.
+- Em cada saque, registrar também o valor bruto, a taxa percentual, o custo real de gas pago pelo projeto e o valor líquido recebido pelo jogador.
 - Não recalcular transações anteriores quando a cotação mudar.
 - Não confundir cotação interna de referência com garantia de preço de mercado após negociação on-chain.
 
 ## Itens ainda não definidos neste documento
 
-- Quem paga a taxa de rede da transferência de saque.
-- Taxas operacionais/plataforma aplicáveis ao saque.
+- Percentuais e faixas definitivas da taxa de saque (a política regressiva precisa ser confirmada antes da implementação).
 - Liquidez disponível e mecanismo efetivo de conversão/execução on-chain.
 - Detalhes técnicos do contrato/token e da integração de USDT na Solana.
