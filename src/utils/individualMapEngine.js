@@ -461,6 +461,7 @@ export function recordDepositDamage(playerId = DEFAULT_PLAYER_ID, c, r, damage =
 
     const openCorners = cornerPoints.filter(pos => 
       !activeKeys.has(`${pos.c},${pos.r}`) && 
+      !heroSet.has(`${pos.c},${pos.r}`) &&
       !isCityBuilding(pos.c, pos.r) && 
       !isBaseCompound(pos.c, pos.r) &&
       (pos.c !== c || pos.r !== r)
@@ -477,6 +478,7 @@ export function recordDepositDamage(playerId = DEFAULT_PLAYER_ID, c, r, damage =
 
     const openCells = spawnCells.filter(pos => 
       !activeKeys.has(`${pos.c},${pos.r}`) && 
+      !heroSet.has(`${pos.c},${pos.r}`) &&
       !isCityBuilding(pos.c, pos.r) &&
       !isBaseCompound(pos.c, pos.r) &&
       (pos.c !== c || pos.r !== r)
