@@ -1,79 +1,67 @@
-// CRYPTOZOMBIES — SISTEMA OFICIAL DE ABRIGOS
-// 4 categorias de abrigo para tratamento e recuperação da vida dos sobreviventes:
-// - Básica: Capacidade 5, Velocidade 100%
-// - Reforçada: Capacidade 10, Velocidade 125%
-// - Avançada: Capacidade 15, Velocidade 150%
-// - Lendária: Capacidade 20, Velocidade 200%
-
+// CRYPTOZOMBIES — EVOLUÇÃO PERMANENTE DA BASE MÉDICA
+// Lançamento: três níveis sequenciais. O nível controla a capacidade visual e real dos leitos.
 export const HOUSE_TIERS = [
   {
     id: 'none',
+    level: 0,
     name: 'Sem Abrigo',
     icon: '⛺',
     slots: 0,
     recoverySpeedPct: 50,
-    costUsdt: 0,
-    costBcoin: 0,
+    fragmentCost: 0,
+    mncCost: 0,
     color: '#64748b',
-    description: 'Sem abrigo médico: sobreviventes feridos aguardam tratamento.'
+    description: 'Sem ambulatório: sobreviventes feridos aguardam resgate e leito.'
   },
   {
     id: 'basic',
+    level: 1,
     name: 'Abrigo Básico',
     icon: '🛖',
     slots: 5,
     recoverySpeedPct: 100,
-    costUsdt: 25,
-    costBcoin: 25,
+    fragmentCost: 0,
+    mncCost: 0,
     color: '#38bdf8',
-    description: 'Acomoda até 5 sobreviventes em tratamento simultaneamente com 100% da velocidade padrão.'
+    description: 'Base inicial gratuita com 5 leitos visíveis e tratamento padrão.'
   },
   {
     id: 'reinforced',
+    level: 2,
     name: 'Abrigo Reforçado',
     icon: '🏡',
     slots: 10,
     recoverySpeedPct: 125,
-    costUsdt: 50,
-    costBcoin: 50,
+    fragmentCost: 20,
+    mncCost: 1500,
     color: '#22c55e',
-    description: 'Trata até 10 sobreviventes simultaneamente, com recuperação 125% mais rápida que a básica.'
+    description: 'Evolução permanente: amplia a enfermaria para 10 leitos e acelera o tratamento.'
   },
   {
     id: 'advanced',
+    level: 3,
     name: 'Abrigo Avançado',
     icon: '🏠',
     slots: 15,
     recoverySpeedPct: 150,
-    costUsdt: 85,
-    costBcoin: 85,
-    popular: true,
+    fragmentCost: 40,
+    mncCost: 4000,
     color: '#f59e0b',
-    description: 'Trata até 15 sobreviventes simultaneamente, com recuperação 150% da velocidade básica.'
-  },
-  {
-    id: 'legendary',
-    name: 'Abrigo Lendário',
-    icon: '🏰',
-    slots: 20,
-    recoverySpeedPct: 200,
-    costUsdt: 135,
-    costBcoin: 135,
-    badge: 'MÁXIMO (2.0x)',
-    color: '#ec4899',
-    description: 'Trata até 20 sobreviventes simultaneamente, com recuperação duas vezes mais rápida que a básica.'
+    popular: true,
+    description: 'Evolução permanente: amplia a enfermaria para 15 leitos e aumenta a velocidade de tratamento.'
   }
 ];
 
-// Mapeamento de retrocompatibilidade para IDs antigos salvos no localStorage
+// IDs antigos salvos no localStorage são migrados para os três níveis atuais.
 export function resolveHouseTier(houseId) {
   const aliasMap = {
     tiny: 'basic',
     mini: 'basic',
     luxury: 'reinforced',
     mansion: 'advanced',
-    palace: 'legendary'
+    palace: 'advanced',
+    legendary: 'advanced'
   };
   const resolvedId = aliasMap[houseId] || houseId;
-  return HOUSE_TIERS.find(h => h.id === resolvedId) || HOUSE_TIERS[1]; // Padrão: Abrigo Básico
+  return HOUSE_TIERS.find(h => h.id === resolvedId) || HOUSE_TIERS[1];
 }
