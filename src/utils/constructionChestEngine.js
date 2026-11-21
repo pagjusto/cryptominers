@@ -1,29 +1,29 @@
-// CRIPTO MYNERS — SISTEMA OFICIAL DE APARIÇÃO DOS BAÚS DE CONSTRUÇÃO
-// Regras Oficiais:
-// - Verificação a cada ciclo de 1 hora (3600s) de mineração válida e ativa
-// - Somente heróis minerando ativamente participam do cálculo (status 'work' e energia > 0)
-// - Taxa-base configurável pelo administrador (Comum: 1x, Raro: 1.5x, Épico: 2x, Lendário: 3x)
-// - Teto absoluto de 10% de chance máxima por conta em cada ciclo
-// - Limite diário por jogador de no máximo 3 Baús de Construção por dia
+// CRYPTOZOMBIES — BAÚ DO BOSS
+// - Um sorteio individual por jogador a cada Boss derrotado
+// - Chances diretas por raridade: Comum 2%, Raro 2,2%, Super Raro 2,3%, Épico 2,4%, Lendário 2,6667%, Super Lendário 3%
+// - Chances por raridade: Comum 2%, Raro 2,2%, Super Raro 2,3%, Épico 2,4%, Lendário 2,6667%, Super Lendário 3%
+// - Soma das contribuições limitada ao teto máximo de 40% por Boss e por jogador
+// - Limite diário por jogador de no máximo 3 Baús do Boss por dia
 // - Renovação diária à meia-noite no horário de Brasília (America/Sao_Paulo)
 // - Recebimento automático no inventário sem necessidade de clicar no mapa
-// - Cada Baú de Construção entrega exatamente 1 Fragmento de Construção (usado na evolução das casas)
+// - Recompensas ao abrir: 45% fragmento, 45% poção, 10% ambos; Baú de Herói adicional independente de 5%
 // - Registro de auditoria administrativa e proteção contra duplicação/fraudes
 
 export const DEFAULT_CONSTRUCTION_CHEST_CONFIG = {
   enabled: true,
-  baseRateCommonPct: 0.5, // 0.5% por herói comum (configurável pelo admin)
-  rarityMultipliers: {
-    common: 1.0,      // 1x
-    rare: 1.5,        // 1.5x
-    epic: 2.0,        // 2x
-    legendary: 3.0    // 3x
+  chanceByRarityPct: {
+    common: 2.0,
+    rare: 2.2,
+    superRare: 2.3,
+    epic: 2.4,
+    legendary: 2.6667,
+    superLegendary: 3.0
   },
-  maxAccountChanceCapPct: 10.0, // Teto absoluto de 10% por ciclo
-  cycleDurationSeconds: 3600,   // 1 hora de mineração ativa (3600s)
+  maxAccountChanceCapPct: 40.0, // Teto absoluto de 40% por Boss e por jogador
+  cycleDurationSeconds: 0,      // Sem ciclo horário; sorteio a cada Boss derrotado
   dailyLimitPerPlayer: 3,       // Máximo de 3 baús por dia
   timezone: 'America/Sao_Paulo',// Horário oficial de Brasília
-  rewardFragmentCount: 1        // Exatamente 1 Fragmento de Construção por baú
+  rewardFragmentCount: 1        // Quantidade concedida quando o sorteio inclui Fragmento
 };
 
 const DAILY_STORAGE_KEY = 'cripto_myners_construction_daily_v1';
@@ -65,53 +65,54 @@ export function getBrasiliaTimeString(date = new Date()) {
 }
 
 /**
- * Normaliza a raridade de um herói para as 4 oficiais: common, rare, epic, legendary
+ * Normaliza as seis raridades oficiais para as chaves de probabilidade.
  */
 export function normalizeHeroRarity(hero) {
-  const r = (hero.rarity || hero.classInfo?.rarity || 'common').toLowerCase();
+  const r = String(hero.rarity || hero.classInfo?.rarity || 'common').toLowerCase();
+  if (r.includes('super') && (r.includes('legend') || r.includes('lend'))) return 'superLegendary';
+  if (r.includes('super') && (r.includes('rare') || r.includes('raro'))) return 'superRare';
   if (r.includes('legendary') || r.includes('lend')) return 'legendary';
   if (r.includes('epic') || r.includes('épico') || r.includes('epico')) return 'epic';
-  if (r.includes('super') || r.includes('rare') || r.includes('raro')) return 'rare';
+  if (r.includes('rare') || r.includes('raro')) return 'rare';
   return 'common';
 }
 
 /**
- * Calcula a probabilidade de aparição com base EXCLUSIVAMENTE nos heróis ativos minerando
- * Heróis descansando, sem energia ou fora da mina NÃO participam do cálculo
+ * Calcula a chance aditiva do Baú do Boss.
+ * A elegibilidade oficial depende exclusivamente do snapshot imutável da equipe inicial.
+ * Heróis não morrem; portanto, não há validação de vida ou status no encerramento.
+ * A visualização/teste administrativo pode solicitar explicitamente uma prévia dos trabalhadores atuais.
  */
-export function calculateActiveMinersChance(miners = [], config = DEFAULT_CONSTRUCTION_CHEST_CONFIG) {
-  const baseRate = typeof config.baseRateCommonPct === 'number' ? config.baseRateCommonPct : DEFAULT_CONSTRUCTION_CHEST_CONFIG.baseRateCommonPct;
-  const multipliers = config.rarityMultipliers || DEFAULT_CONSTRUCTION_CHEST_CONFIG.rarityMultipliers;
-  const maxCap = config.maxAccountChanceCapPct || DEFAULT_CONSTRUCTION_CHEST_CONFIG.maxAccountChanceCapPct;
+export function calculateActiveMinersChance(miners = [], config = DEFAULT_CONSTRUCTION_CHEST_CONFIG, options = {}) {
+  const { allowWorkforcePreview = false } = options;
+  const chances = config.chanceByRarityPct || DEFAULT_CONSTRUCTION_CHEST_CONFIG.chanceByRarityPct;
+  const maxCap = config.maxAccountChanceCapPct ?? DEFAULT_CONSTRUCTION_CHEST_CONFIG.maxAccountChanceCapPct;
 
-  // Filtra somente heróis minerando ativamente:
-  // - status !== 'house' (não está na casa)
-  // - status !== 'waiting_house' (não está na fila de descanso)
-  // - status !== 'rest'
-  // - currentStamina > 0 (possui energia para trabalhar)
+  // Sorteio oficial: todos os integrantes do snapshot inicial são elegíveis.
+  // Heróis não morrem; ferimentos, HP e status no encerramento não removem participação.
+  // A condição work só é usada em prévias/simulações administrativas explicitamente solicitadas.
   const activeMiners = miners.filter(m => {
-    const isResting = m.status === 'house' || m.status === 'waiting_house' || m.status === 'rest';
-    const hasStamina = (m.currentStamina ?? 100) > 0;
-    return !isResting && hasStamina;
+    if (m.bossSnapshotParticipant === true) return true;
+    return allowWorkforcePreview === true && m.status === 'work' && (m.currentHealth ?? 100) > 5;
   });
 
   const breakdownByRarity = {
     common: 0,
     rare: 0,
+    superRare: 0,
     epic: 0,
-    legendary: 0
+    legendary: 0,
+    superLegendary: 0
   };
 
   const contributions = activeMiners.map(m => {
     const rarity = normalizeHeroRarity(m);
     breakdownByRarity[rarity] = (breakdownByRarity[rarity] || 0) + 1;
-    const mult = multipliers[rarity] || 1.0;
-    const individualChance = parseFloat((baseRate * mult).toFixed(4));
+    const individualChance = chances[rarity] ?? DEFAULT_CONSTRUCTION_CHEST_CONFIG.chanceByRarityPct[rarity];
     return {
       heroId: m.id,
       name: m.name,
       rarity,
-      mult,
       chance: individualChance
     };
   });
@@ -125,9 +126,9 @@ export function calculateActiveMinersChance(miners = [], config = DEFAULT_CONSTR
     activeMiners,
     contributions,
     breakdownByRarity,
-    baseRateCommonPct: baseRate,
-    rawTotalChance: parseFloat(rawTotalChance.toFixed(3)),
-    finalChance: parseFloat(finalChance.toFixed(3)),
+    chanceByRarityPct: chances,
+    rawTotalChance,
+    finalChance,
     isCapped,
     maxCap
   };
@@ -295,11 +296,11 @@ export function logConstructionAudit(action, details, adminName = 'Administrador
 }
 
 /**
- * Executa a verificação oficial de 1 ciclo de mineração (ou teste manual admin)
- * Retorna o resultado do sorteio, respeitando o teto de 10%, limite diário de 3 e status ativo.
+ * Executa o sorteio individual após a derrota de um Boss.
+ * Aplica o teto de 40%, limite diário de 3 e a elegibilidade da equipe inicial viva ao fim.
  */
-export function executeConstructionCycleRoll(miners = [], config = DEFAULT_CONSTRUCTION_CHEST_CONFIG, options = {}) {
-  const { isSimulated = false, forceSuccess = false } = options;
+export function executeConstructionBossRoll(miners = [], config = DEFAULT_CONSTRUCTION_CHEST_CONFIG, options = {}) {
+  const { isSimulated = false, forceSuccess = false, bossId = null } = options;
 
   // 1. Verifica se o sistema está habilitado
   if (config.enabled === false && !isSimulated) {
@@ -311,13 +312,13 @@ export function executeConstructionCycleRoll(miners = [], config = DEFAULT_CONST
   }
 
   // 2. Calcula probabilidade dos heróis ativos
-  const activeChance = calculateActiveMinersChance(miners, config);
+  const activeChance = calculateActiveMinersChance(miners, config, { allowWorkforcePreview: isSimulated });
 
   if (activeChance.activeMinersCount === 0) {
     return {
       success: false,
       reason: 'no_active_miners',
-      message: 'Nenhum herói minerando ativamente no momento. Somente heróis na mina com energia participam.',
+      message: 'Nenhum sobrevivente ativo participou do combate contra o Boss.',
       activeChance
     };
   }
@@ -331,6 +332,7 @@ export function executeConstructionCycleRoll(miners = [], config = DEFAULT_CONST
       id: `EVT-${Date.now().toString(36).toUpperCase()}`,
       timestamp: getBrasiliaTimeString(),
       type: 'DAILY_LIMIT_REACHED',
+      bossId,
       chestsAwardedToday: dailyStats.chestsAwardedToday,
       dailyLimit,
       activeMinersCount: activeChance.activeMinersCount,
@@ -349,7 +351,7 @@ export function executeConstructionCycleRoll(miners = [], config = DEFAULT_CONST
     };
   }
 
-  // 4. Executa o sorteio criptograficamente seguro (0.00% a 100.00%)
+  // 4. Executa o sorteio do Boss com chance efetiva limitada a 40%.
   const roll = parseFloat((Math.random() * 100).toFixed(4));
   const won = forceSuccess || roll <= activeChance.finalChance;
 
@@ -362,9 +364,10 @@ export function executeConstructionCycleRoll(miners = [], config = DEFAULT_CONST
       icon: '🧱',
       color: '#f59e0b',
       tagline: 'Material Raro de Expansão',
-      description: 'Baú especial obtido durante a mineração ativa. Contém exatamente 1 Fragmento de Construção para evolução de casas.',
+      description: 'Baú especial obtido durante a combate ativo. Contém exatamente 1 Fragmento de Construção para evolução de casas.',
       foundAt: getBrasiliaTimeString(),
       foundDateBrasilia: dailyStats.date,
+      bossId,
       rewardFragmentCount: 1,
       opened: false,
       activeMinersCount: activeChance.activeMinersCount,
@@ -386,6 +389,7 @@ export function executeConstructionCycleRoll(miners = [], config = DEFAULT_CONST
         id: newChest.id,
         timestamp: newChest.foundAt,
         type: 'CHEST_FOUND',
+        bossId,
         activeMinersCount: activeChance.activeMinersCount,
         breakdownByRarity: activeChance.breakdownByRarity,
         chanceApplied: activeChance.finalChance,
@@ -412,12 +416,13 @@ export function executeConstructionCycleRoll(miners = [], config = DEFAULT_CONST
       }
     };
   } else {
-    // Sorteio não premiado neste ciclo
+    // Sorteio do Boss não premiado
     if (!isSimulated) {
       addConstructionHistoryEntry({
         id: `TRY-${Date.now().toString(36).toUpperCase()}`,
         timestamp: getBrasiliaTimeString(),
-        type: 'CYCLE_MISSED',
+        type: 'BOSS_CHEST_MISSED',
+        bossId,
         activeMinersCount: activeChance.activeMinersCount,
         breakdownByRarity: activeChance.breakdownByRarity,
         chanceApplied: activeChance.finalChance,
@@ -437,9 +442,13 @@ export function executeConstructionCycleRoll(miners = [], config = DEFAULT_CONST
   }
 }
 
+// Alias temporário para compatibilidade com chamadas antigas do painel.
+export const executeConstructionCycleRoll = executeConstructionBossRoll;
+
 /**
- * Abre um Baú de Construção do inventário de forma idempotente e segura
- * Cada baú entrega exatamente 1 Fragmento de Construção.
+ * Abre um Baú do Boss e concede as recompensas oficiais.
+ * Recompensa principal: 45% fragmento, 45% poção, 10% ambos.
+ * Baú de Herói: chance adicional e independente de 5%.
  */
 export function openConstructionChestById(chestId) {
   if (typeof window === 'undefined') return { success: false, message: 'Janela indisponível' };
@@ -448,39 +457,56 @@ export function openConstructionChestById(chestId) {
   const targetIndex = chests.findIndex(c => c.id === chestId);
 
   if (targetIndex === -1) {
-    return { success: false, message: 'Baú de Construção não encontrado no inventário.' };
+    return { success: false, message: 'Baú do Boss não encontrado no inventário.' };
   }
 
   const targetChest = chests[targetIndex];
   if (targetChest.opened) {
-    return { success: false, message: 'Este Baú de Construção já foi aberto anteriormente.' };
+    return { success: false, message: 'Este Baú do Boss já foi aberto anteriormente.' };
   }
 
-  // Remove o baú do inventário ou marca como aberto
-  const updatedChests = chests.filter(c => c.id !== chestId);
+  // Sorteios independentes: um resultado principal garantido e chance extra de Baú de Herói.
+  const mainRoll = Math.random();
+  const fragmentGranted = mainRoll < 0.45 || mainRoll >= 0.90;
+  const potionGranted = mainRoll >= 0.45;
+  const heroChestGranted = Math.random() < 0.05;
+
+  // Consome exatamente uma unidade do inventário.
+  const updatedChests = chests.filter((c, index) => index !== targetIndex);
   saveStoredConstructionChests(updatedChests);
 
-  // Adiciona exatamente 1 Fragmento de Construção
   const currentFragments = getStoredConstructionFragments();
-  const nextFragments = currentFragments + 1;
-  saveStoredConstructionFragments(nextFragments);
+  const nextFragments = currentFragments + (fragmentGranted ? 1 : 0);
+  if (fragmentGranted) saveStoredConstructionFragments(nextFragments);
 
-  // Registra no histórico
+  const rewardParts = [];
+  if (fragmentGranted) rewardParts.push('1 Fragmento de Construção');
+  if (potionGranted) rewardParts.push('1 Poção do Rejuvenecimento');
+  if (heroChestGranted) rewardParts.push('1 Baú de Herói');
+
   addConstructionHistoryEntry({
     id: `OPEN-${Date.now().toString(36).toUpperCase()}`,
     timestamp: getBrasiliaTimeString(),
     type: 'CHEST_OPENED',
     chestId,
-    fragmentsGranted: 1,
-    result: `Baú de Construção aberto: +1 Fragmento de Construção (Total: ${nextFragments})`
+    fragmentsGranted: fragmentGranted ? 1 : 0,
+    potionsGranted: potionGranted ? 1 : 0,
+    heroChestsGranted: heroChestGranted ? 1 : 0,
+    mainRoll,
+    heroChestRoll: heroChestGranted,
+    result: `Baú do Boss aberto: ${rewardParts.join(' + ')}`
   });
 
   return {
     success: true,
     chestId,
-    fragmentCountAdded: 1,
+    fragmentGranted,
+    potionGranted,
+    heroChestGranted,
+    fragmentCountAdded: fragmentGranted ? 1 : 0,
     totalFragments: nextFragments,
-    updatedChests
+    updatedChests,
+    rewardParts
   };
 }
 
@@ -499,10 +525,9 @@ export function getConstructionAdminSummary(config = DEFAULT_CONSTRUCTION_CHEST_
 
   return {
     enabled: config.enabled !== false,
-    baseRateCommonPct: config.baseRateCommonPct ?? 0.5,
-    rarityMultipliers: config.rarityMultipliers || DEFAULT_CONSTRUCTION_CHEST_CONFIG.rarityMultipliers,
-    maxCapPct: config.maxAccountChanceCapPct || 10.0,
-    cycleDurationSeconds: config.cycleDurationSeconds || 3600,
+    chanceByRarityPct: config.chanceByRarityPct || DEFAULT_CONSTRUCTION_CHEST_CONFIG.chanceByRarityPct,
+    maxCapPct: config.maxAccountChanceCapPct ?? 40.0,
+    cycleDurationSeconds: config.cycleDurationSeconds ?? 0,
     dailyLimit: config.dailyLimitPerPlayer || 3,
     chestsAwardedToday: dailyStats.chestsAwardedToday,
     remainingDailyLimit: Math.max(0, (config.dailyLimitPerPlayer || 3) - dailyStats.chestsAwardedToday),
