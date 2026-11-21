@@ -551,7 +551,7 @@ export default function GameBoard({
         const bossSession = state.bossBattleSessions?.[activeBossForSession.id];
         const startedAtMs = Date.parse(bossSession?.startedAt || '');
         if (bossSession && !bossSession.expired && Number.isFinite(startedAtMs) &&
-            now - startedAtMs >= BOSS_BATTLE_DURATION_MS) {
+            Date.now() - startedAtMs >= BOSS_BATTLE_DURATION_MS) {
           bossSession.expired = true;
           callbacksRef.current.onBossExpired?.({
             bossId: activeBossForSession.id,
