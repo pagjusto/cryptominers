@@ -131,6 +131,50 @@ export default function HouseModal({
               </span>
             </div>
 
+            {/* Tabela de tempo de tratamento por nível */}
+            <div className="p-3 rounded-2xl bg-slate-950/60 border border-slate-800">
+              <h4 className="font-tech font-bold text-xs text-emerald-300 uppercase tracking-wider mb-2">
+                ⏱️ Tempo estimado de tratamento
+              </h4>
+              <div className="overflow-x-auto">
+                <table className="w-full text-[11px] text-left">
+                  <thead className="text-slate-500 border-b border-slate-800">
+                    <tr>
+                      <th className="py-1.5 pr-2">Base</th>
+                      <th className="py-1.5 px-2 text-right">Leitos</th>
+                      <th className="py-1.5 px-2 text-right">0→100%</th>
+                      <th className="py-1.5 pl-2 text-right">5→100%</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {HOUSE_TIERS.map(tier => {
+                      const fullMinutes = tier.slots > 0
+                        ? 240 / (tier.recoverySpeedPct / 100)
+                        : null;
+                      const injuredMinutes = fullMinutes === null ? null : fullMinutes * 0.95;
+                      const formatDuration = minutes => {
+                        const rounded = Math.round(minutes);
+                        const hours = Math.floor(rounded / 60);
+                        const mins = rounded % 60;
+                        return hours ? (mins ? `${hours}h ${String(mins).padStart(2, '0')}min` : `${hours}h`) : `${mins}min`;
+                      };
+                      return (
+                        <tr key={tier.id} className={tier.id === currentHouse.id ? 'text-emerald-300' : 'text-slate-300'}>
+                          <td className="py-1.5 pr-2 font-bold">{tier.name}</td>
+                          <td className="py-1.5 px-2 text-right">{tier.slots}</td>
+                          <td className="py-1.5 px-2 text-right font-mono">{fullMinutes === null ? '—' : formatDuration(fullMinutes)}</td>
+                          <td className="py-1.5 pl-2 text-right font-mono">{injuredMinutes === null ? '—' : formatDuration(injuredMinutes)}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              <p className="mt-2 text-[10px] leading-relaxed text-slate-500">
+                Estimativa com recuperação padrão de 240 min para 100% e velocidade do abrigo. Feridos entram no tratamento com 5% de PV; sem leitos não há tratamento ativo.
+              </p>
+            </div>
+
             {/* Camas Ocupadas na Casa */}
             <div>
               <div className="flex items-center justify-between mb-2">
