@@ -279,7 +279,7 @@ export default function ChestOpeningModal({
                     )}
                   </div>
                   <p className="text-xs text-slate-400 mt-0.5">
-                    {chestConfig.description || 'Abra seu baú e invoque heróis mineradores para escavar veios de Minercoin.'}
+                    {chestConfig.description || 'Abra seu baú e convoque novos heróis combatentes para a equipe. Concede exclusivamente heróis (sem recompensas em moedas).'}
                   </p>
                 </div>
               </div>

@@ -74,7 +74,6 @@ import { getSavedWalletState, saveWalletState, requestWalletConnection, disconne
 import MinerCatalogModal from './components/MinerCatalogModal';
 import MineSelectorModal from './components/MineSelectorModal';
 import InventoryModal from './components/InventoryModal';
-import PlayableChestModal from './components/PlayableChestModal';
 import RewardedAdModal from './components/RewardedAdModal';
 import ChestOpeningModal from './components/ChestOpeningModal';
 import HouseModal from './components/HouseModal';
@@ -324,23 +323,12 @@ export default function App() {
   });
   const [isHouseOpen, setIsHouseOpen] = useState(false);
 
-  // Inventário de Baús Místicos encontrados pelos mineradores
-  const [inventoryChests, setInventoryChests] = useState(() => {
-    const saved = localStorage.getItem('crypto_miners_chests');
-    if (saved) {
-      try {
-        let parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) return parsed;
-      } catch (e) {}
-    }
-    return [
-      {
-        id: 'chest-welcome',
-        title: 'Super Baú de Titânio',
-        foundAt: 'Início da Jornada'
-      }
-    ];
-  });
+  // Limpeza de baús antigos da mina descontinuados
+  useEffect(() => {
+    try {
+      localStorage.removeItem('crypto_miners_chests');
+    } catch (e) {}
+  }, []);
 
   const [gameSpeed, setGameSpeed] = useState(1);
   const [soundEnabled, setSoundEnabled] = useState(false); // Som desativado por padrão conforme solicitado
@@ -461,7 +449,6 @@ export default function App() {
     });
   };
   const [isInventoryOpen, setIsInventoryOpen] = useState(false);
-  const [activePlayableChest, setActivePlayableChest] = useState(null);
 
   // Baús de Construção e Fragmentos de Construção
   const [constructionChests, setConstructionChests] = useState(() => getStoredConstructionChests());
@@ -900,10 +887,6 @@ export default function App() {
     localStorage.setItem('crypto_miners_house', currentHouseId);
   }, [currentHouseId]);
 
-  useEffect(() => {
-    localStorage.setItem('crypto_miners_chests', JSON.stringify(inventoryChests));
-  }, [inventoryChests]);
-
   // ============================================================================
   // SINCRONIZAÇÃO E CARREGAMENTO EM NUVEM COM O SUPABASE
   // ============================================================================
@@ -937,9 +920,6 @@ export default function App() {
           if (cloudData.heroes && cloudData.heroes.length > 0) {
             setMiners(cloudData.heroes);
           }
-          if (cloudData.inventory?.inventoryChests) {
-            setInventoryChests(cloudData.inventory.inventoryChests);
-          }
           if (cloudData.inventory?.purchasedChests) {
             setPurchasedChests(cloudData.inventory.purchasedChests);
           }
@@ -960,7 +940,6 @@ export default function App() {
             await syncHeroesToSupabase(walletState.address, miners);
           }
           await syncInventoryToSupabase(walletState.address, {
-            inventoryChests,
             purchasedChests,
             gearStash
           });
@@ -993,7 +972,6 @@ export default function App() {
           await syncHeroesToSupabase(walletState.address, miners);
         }
         await syncInventoryToSupabase(walletState.address, {
-          inventoryChests,
           purchasedChests,
           gearStash
         });
@@ -1004,7 +982,7 @@ export default function App() {
     }, 4000);
 
     return () => clearTimeout(timer);
-  }, [bcoin, miners, totalInvested, studioRevenue, currentHouseId, inventoryChests, purchasedChests, gearStash, walletState?.address]);
+  }, [bcoin, miners, totalInvested, studioRevenue, currentHouseId, purchasedChests, gearStash, walletState?.address]);
 
   const toggleSound = () => {
     const nextState = !soundEnabled;
@@ -1170,40 +1148,6 @@ export default function App() {
         y: (typeof listing.miner.y === 'number' && !isNaN(listing.miner.y)) ? listing.miner.y : 1
       }
     ]);
-  };
-
-  // Encontrar um novo baú místico na mina
-  const handleFindMysticChest = (chest) => {
-    setInventoryChests(prev => [chest, ...prev]);
-  };
-
-  const handleSimulateFindChest = () => {
-    const newChest = {
-      id: 'chest-' + Date.now(),
-      title: 'Cofre Místico de Titânio',
-      foundAt: new Date().toLocaleTimeString()
-    };
-    handleFindMysticChest(newChest);
-    sfx.playCrystalCollect();
-    confetti({
-      particleCount: 50,
-      spread: 60,
-      origin: { y: 0.5 },
-      colors: ['#38bdf8', '#fbbf24']
-    });
-  };
-
-  // Abrir o mini-desafio do baú no inventário
-  const handleSelectChestToOpen = (chest) => {
-    setIsInventoryOpen(false);
-    setActivePlayableChest(chest);
-  };
-
-  // Recompensa concluída do Playable Ad
-  const handleChestOpened = (chestId, rewardAmount) => {
-    setInventoryChests(prev => prev.filter(c => c.id !== chestId));
-    handleCollectBcoin(rewardAmount);
-    setActivePlayableChest(null);
   };
 
   // 1. COMPRAR E ABRIR IMEDIATAMENTE (OPÇÃO A OU B NO MODAL)
@@ -1637,19 +1581,19 @@ export default function App() {
             </span>
           </button>
 
-          {/* BOTÃO INVENTÁRIO DE BAÚS (PLAYABLE ADS) */}
+          {/* BOTÃO INVENTÁRIO DE BAÚS (HERÓIS & BOSS) */}
           <button
             onClick={() => setIsInventoryOpen(true)}
             className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg border font-tech text-xs font-bold transition cursor-pointer ${
-              inventoryChests.length > 0
+              (purchasedChests.length + constructionChests.length) > 0
                 ? 'bg-amber-500/20 border-amber-400 text-amber-300 shadow-sm animate-pulse'
                 : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700'
             }`}
           >
-            <Package size={13} className={inventoryChests.length > 0 ? 'text-amber-400' : 'text-slate-400'} />
+            <Package size={13} className={(purchasedChests.length + constructionChests.length) > 0 ? 'text-amber-400' : 'text-slate-400'} />
             <span>INVENTÁRIO</span>
             <span className="px-1 py-0.1 rounded-full bg-amber-500 text-slate-950 text-[9px] font-bold font-mono">
-              {inventoryChests.length}
+              {purchasedChests.length + constructionChests.length}
             </span>
           </button>
 
@@ -1857,7 +1801,6 @@ export default function App() {
                 onMinersChange={setMiners}
                 onCollectBcoin={handleCollectBcoin}
                 onRescueMiner={handleRescueMiner}
-                onFindMysticChest={handleFindMysticChest}
                 onMapCleared={handleMapCleared}
                 onStatsUpdate={setStatsData}
                 onDropGear={handleDropGear}
@@ -2038,19 +1981,16 @@ export default function App() {
         }}
       />
 
-      {/* MODAL DE INVENTÁRIO (BAÚS DE HERÓIS, CONSTRUÇÃO E DA MINA) */}
+      {/* MODAL DE INVENTÁRIO (BAÚS DE HERÓIS E DE CONSTRUÇÃO DO BOSS) */}
       <InventoryModal
         isOpen={isInventoryOpen}
         onClose={() => setIsInventoryOpen(false)}
-        chests={inventoryChests}
         purchasedChests={purchasedChests}
         constructionChests={constructionChests}
         constructionFragments={constructionFragments}
         rejuvenationPotions={rejuvenationPotions}
         onOpenHeroChest={handleOpenPurchasedChest}
         onOpenConstructionChest={handleOpenConstructionChest}
-        onSelectChestToOpen={handleSelectChestToOpen}
-        onSimulateFindChest={handleSimulateFindChest}
         onOpenMintModal={() => setIsSummonOpen(true)}
         onOpenHouseModal={() => setIsHouseOpen(true)}
       />
@@ -2065,14 +2005,6 @@ export default function App() {
           setNewlyFoundConstructionChest(null);
           setIsInventoryOpen(true);
         }}
-      />
-
-      {/* MODAL DE PLAYABLE AD: MINI-DESAFIO DE EXPLODIR O BAÚ */}
-      <PlayableChestModal
-        isOpen={!!activePlayableChest}
-        chest={activePlayableChest}
-        onClose={() => setActivePlayableChest(null)}
-        onChestOpened={handleChestOpened}
       />
 
       {/* MODAL DE ANÚNCIO PATROCINADO (ENERGIA TURBO, REPARO & BÊNÇÃO) */}

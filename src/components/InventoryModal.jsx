@@ -16,27 +16,22 @@ function groupInventoryItems(items, getKey) {
 export default function InventoryModal({ 
   isOpen, 
   onClose, 
-  chests = [], 
   purchasedChests = [],
   constructionChests = [],
   constructionFragments = 0,
   rejuvenationPotions = 0,
   onOpenHeroChest,
   onOpenConstructionChest,
-  onSelectChestToOpen,
-  onSimulateFindChest,
   onOpenMintModal,
   onOpenHouseModal
 }) {
   const [activeTab, setActiveTab] = useState(() => {
     if (constructionChests.length > 0) return 'construction';
-    if (purchasedChests.length > 0) return 'heroes';
-    return 'mine';
+    return 'heroes';
   });
   const [justOpenedChest, setJustOpenedChest] = useState(null);
   const groupedPurchasedChests = groupInventoryItems(purchasedChests, chest => chest.id);
   const groupedConstructionChests = groupInventoryItems(constructionChests, chest => chest.type || chest.kind || 'boss-chest');
-  const groupedMineChests = groupInventoryItems(chests, chest => chest.type || chest.title || 'mystic-chest');
 
   if (!isOpen) return null;
 
@@ -57,7 +52,7 @@ export default function InventoryModal({
                 INVENTÁRIO DO JOGADOR
               </h3>
               <span className="text-[11px] text-slate-400">
-                Baús de heróis adquiridos e cofres encontrados na mina
+                Baús de Heróis adquiridos e Baús de Construção do Boss
               </span>
             </div>
           </div>
@@ -93,17 +88,6 @@ export default function InventoryModal({
           >
             <img src="/items/construction_fragment.png" alt="Construção" className="w-3.5 h-3.5 object-contain" />
             <span>Construção ({constructionChests.length})</span>
-          </button>
-          <button
-            onClick={() => { setActiveTab('mine'); setJustOpenedChest(null); }}
-            className={`flex-1 py-2 px-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
-              activeTab === 'mine'
-                ? 'bg-amber-500 text-slate-950 shadow-md'
-                : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
-            }`}
-          >
-            <Package size={14} />
-            <span>Mina ({chests.length})</span>
           </button>
         </div>
 
@@ -360,83 +344,16 @@ export default function InventoryModal({
               )}
 
             </div>
-          ) : (
-            /* ABA 3: BAÚS MÍSTICOS ENCONTRADOS NA MINA */
-            chests.length === 0 ? (
-              <div className="py-8 text-center bg-slate-950/60 rounded-2xl border border-dashed border-slate-800 p-6">
-                <span className="text-4xl block mb-2">📭</span>
-                <h4 className="font-tech font-bold text-sm text-slate-300 mb-1">
-                  Nenhum Baú Místico no momento
-                </h4>
-                <p className="text-xs text-slate-400 max-w-xs mx-auto mb-4">
-                  Seus mineradores têm chance de encontrar Baús de Titânio secretos enquanto escavam rochas e veios minerais!
-                </p>
-
-                <button
-                  onClick={onSimulateFindChest}
-                  className="px-4 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500 hover:text-slate-950 text-amber-300 border border-amber-500/40 font-bold text-xs transition flex items-center gap-1.5 mx-auto cursor-pointer"
-                >
-                  <Sparkles size={14} />
-                  <span>Simular Encontrar Baú Místico Agora</span>
-                </button>
-              </div>
-            ) : (
-              groupedMineChests.map(({ item: chest, quantity, key }) => (
-                <div 
-                  key={key}
-                  className="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800 hover:border-amber-500/50 transition flex items-center justify-between group"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-2xl flex items-center justify-center shrink-0 group-hover:scale-105 transition">
-                      🔒
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-1.5">
-                        <h4 className="font-bold text-sm text-white">
-                          {chest.title || 'Baú Místico de Titânio'}
-                        </h4>
-                        <span className="text-[9px] font-bold font-arcade bg-amber-400/20 text-amber-300 px-2 py-0.5 rounded-full border border-amber-400/30">PATROCINADO</span>
-                        <span className="text-[9px] font-bold font-mono bg-slate-800 text-white px-2 py-0.5 rounded-full border border-slate-700">×{quantity}</span>
-                      </div>
-
-                      <span className="text-[11px] text-slate-400 block">
-                        Recompensa estimada: <b className="text-amber-300 font-mono">1.8 a 3.8 BCOIN</b>
-                      </span>
-
-                      <span className="text-[10px] text-slate-500 block mt-0.5">
-                        Requer mini-desafio de 3 golpes (Playable Ad)
-                      </span>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => onSelectChestToOpen(chest)}
-                    className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-arcade text-xs font-bold transition shadow-md flex items-center gap-1 shrink-0 cursor-pointer"
-                  >
-                    <Sparkles size={13} />
-                    <span>ABRIR</span>
-                  </button>
-                </div>
-              ))
-            )
-          )}
+          ) : null}
         </div>
 
         {/* Rodapé Informativo */}
         <div className="pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
           <span>
             {activeTab === 'heroes' 
-              ? 'Abra cada baú individualmente com ou sem anúncio.' 
-              : 'Abrir um baú da mina ativa um desafio interativo rápido com recompensa.'}
+              ? 'Abra cada baú individualmente com ou sem bônus de anúncio.' 
+              : 'Baús do Boss concedem Fragmentos de Construção e Poções do Rejuvenescimento.'}
           </span>
-          {activeTab === 'mine' && chests.length > 0 && (
-            <button
-              onClick={onSimulateFindChest}
-              className="text-amber-400 hover:underline font-bold text-[11px] shrink-0 cursor-pointer"
-            >
-              + Adicionar Outro Baú
-            </button>
-          )}
         </div>
 
       </div>

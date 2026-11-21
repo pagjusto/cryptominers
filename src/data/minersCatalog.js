@@ -353,12 +353,12 @@ export const MINT_CHEST_TYPES = [
   },
   {
     id: 'explorer',
-    name: 'Baú Tático',
+    name: 'Baú de Herói',
     heroesCount: 5,
     costUsdt: 50,
     costBcoin: 5000,
     popular: true,
-    description: 'Entrega 5 combatentes sobreviventes com chances elevadas de Raros e Épicos.',
+    description: 'Entrega 5 combatentes sobreviventes com chances elevadas de Raros e Épicos. Não concede moedas, apenas heróis.',
     icon: '🗺️',
     color: '#22c55e',
     chances: [

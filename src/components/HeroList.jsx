@@ -1,7 +1,6 @@
 import React from 'react';
 import { 
   Flame, 
-  Zap, 
   HeartPulse, 
   Play,
   Pause, 
@@ -9,7 +8,8 @@ import {
   Sparkles, 
   Lock, 
   Shield,
-  Clock
+  Clock,
+  Pickaxe
 } from 'lucide-react';
 import { MINER_CLASSES } from '../data/minersData';
 import { HERO_ROSTER, getWeaponById, getRarityConfig } from '../data/heroRoster';
@@ -161,6 +161,8 @@ export default function HeroList({
           const durability = miner.durability !== undefined ? Math.round(miner.durability) : 100;
           const isBroken = durability <= 0;
           const isDull = durability < 50;
+          const hourlyCoins = miner.coinsPerHour || ((miner.power || 2) * 0.05 * (miner.speed || 1.2));
+          const ratePerMinute = hourlyCoins / 60;
 
           return (
             <div 
@@ -334,11 +336,11 @@ export default function HeroList({
                 {/* Atributos Básicos & Porcentagem de Vida */}
                 <div className="flex items-center justify-between text-xs font-mono">
                   <div className="flex items-center gap-3">
-                    <span className="flex items-center gap-1 text-rose-400 font-bold" title="Poder de ataque">
-                      <Flame size={12} /> {miner.power}
-                    </span>
-                    <span className="flex items-center gap-1 text-amber-400 font-bold" title="Velocidade de movimento">
-                      <Zap size={12} /> {miner.speed.toFixed(1)}
+                    <span 
+                      className="flex items-center gap-1 text-amber-400 font-bold" 
+                      title={`Taxa de mineração: ${ratePerMinute.toFixed(4)} MNC/min (${hourlyCoins.toFixed(2)} MNC/h)`}
+                    >
+                      <Pickaxe size={12} className="text-amber-400" /> {ratePerMinute.toFixed(3)} MNC/min
                     </span>
                     <span className="flex items-center gap-1 text-sky-400 font-bold" title="Vida máxima">
                       <HeartPulse size={12} /> {miner.maxHealth || 100}

@@ -44,15 +44,15 @@ export const DEFAULT_CRYPTO_ZOMBIES_CONFIG = {
     },
     explorer: {
       id: 'explorer',
-      name: 'Baú Explorer',
-      tagline: 'Esquadrão de Exploração',
+      name: 'Baú de Herói',
+      tagline: 'Esquadrão de Heróis',
       heroesCount: 5,
       costUsdt: 50,
       icon: '🗺️',
       image: '/items/hero_chest.png',
       color: '#22c55e',
       popular: true,
-      description: 'Entrega 5 heróis mineradores com chances elevadas de heróis Raros e Épicos.',
+      description: 'Entrega 5 heróis combatentes com chances elevadas de heróis Raros e Épicos. Não concede recompensa em moedas, apenas heróis.',
       normalProbabilities: {
         common: 76,
         rare: 16,
