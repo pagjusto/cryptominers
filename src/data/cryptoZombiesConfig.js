@@ -5,7 +5,7 @@ const CONFIG_STORAGE_KEY = 'crypto_zombies_admin_config_v1';
 const LEGACY_CONFIG_STORAGE_KEY = 'cripto_myners_admin_config_v1';
 
 export const DEFAULT_CRYPTO_ZOMBIES_CONFIG = {
-  // Cotação da Minercoin (MNC) em USDT: 1 MNC = US$ 0,01 oficial
+  // Cotação da Coins (Coins) em USDT: 1 Coins = US$ 0,01 oficial
   minerCoinUsdtRate: 0.01,
 
   // Limite da Mina
@@ -197,7 +197,7 @@ export const DEFAULT_CRYPTO_ZOMBIES_CONFIG = {
       basePowerMin: 1.5,
       basePowerMax: 3.0,
       coinsPerHourMin: 1.25,
-      coinsPerHourMax: 1.55, // média 1.40 MNC/h
+      coinsPerHourMax: 1.55, // média 1.40 Coins/h
       maxEnergy: 100, // Regra Oficial: 100
       energyDrainPerHour: 12, // Regra Oficial: 12/h (0.2/min)
       energyDrainPerMinute: 0.20,
@@ -211,7 +211,7 @@ export const DEFAULT_CRYPTO_ZOMBIES_CONFIG = {
       basePowerMin: 3.5,
       basePowerMax: 6.5,
       coinsPerHourMin: 2.25,
-      coinsPerHourMax: 2.75, // média 2.50 MNC/h
+      coinsPerHourMax: 2.75, // média 2.50 Coins/h
       maxEnergy: 120, // Regra Oficial: 120
       energyDrainPerHour: 12, // Regra Oficial: 12/h (0.2/min)
       energyDrainPerMinute: 0.20,
@@ -225,7 +225,7 @@ export const DEFAULT_CRYPTO_ZOMBIES_CONFIG = {
       basePowerMin: 7.0,
       basePowerMax: 13.0,
       coinsPerHourMin: 3.50,
-      coinsPerHourMax: 4.10, // média 3.80 MNC/h
+      coinsPerHourMax: 4.10, // média 3.80 Coins/h
       maxEnergy: 140, // Regra Oficial: 140
       energyDrainPerHour: 12, // Regra Oficial: 12/h (0.2/min)
       energyDrainPerMinute: 0.20,
@@ -239,7 +239,7 @@ export const DEFAULT_CRYPTO_ZOMBIES_CONFIG = {
       basePowerMin: 14.0,
       basePowerMax: 24.0,
       coinsPerHourMin: 6.00,
-      coinsPerHourMax: 6.84, // média 6.42 MNC/h
+      coinsPerHourMax: 6.84, // média 6.42 Coins/h
       maxEnergy: 160, // Regra Oficial: 160
       energyDrainPerHour: 12, // Regra Oficial: 12/h (0.2/min)
       energyDrainPerMinute: 0.20,
@@ -316,7 +316,7 @@ export function getCryptoZombiesConfig() {
     if (saved && !localStorage.getItem(CONFIG_STORAGE_KEY)) localStorage.setItem(CONFIG_STORAGE_KEY, saved);
     if (!saved) return DEFAULT_CRYPTO_ZOMBIES_CONFIG;
     const parsed = JSON.parse(saved);
-    // Migração automática da antiga taxa 1.0 (da época 1:1) para a taxa oficial de 1 MNC = US$ 0,01
+    // Migração automática da antiga taxa 1.0 (da época 1:1) para a taxa oficial de 1 Coins = US$ 0,01
     const effectiveRate = (parsed.minerCoinUsdtRate !== undefined && Number(parsed.minerCoinUsdtRate) !== 1.0)
       ? Number(parsed.minerCoinUsdtRate)
       : 0.01;
