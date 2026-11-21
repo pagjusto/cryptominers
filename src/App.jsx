@@ -1709,7 +1709,7 @@ export default function App() {
                 className="absolute top-2.5 left-3 z-30 flex items-center gap-1.5 bg-slate-950/85 backdrop-blur-md px-2.5 py-1.5 rounded-xl border border-slate-700/80 shadow-2xl select-none"
               >
                 <span className="flex items-center gap-1 text-xs bg-lime-950/80 text-lime-300 px-2 py-0.5 rounded-md border border-lime-500/50 font-bold shadow-sm" title="Status dos Zumbis">
-                  🧟 <b className="text-white">{mapData?.deposits?.filter(d => d.type === 'zombie' && !d.isCompleted).length ?? 30}</b>/30 Zumbis
+                  🧟 <b className="text-white">{mapData?.deposits?.filter(d => d.type === 'zombie' && !d.isCompleted).length ?? 20}</b>/30 Zumbis
                 </span>
 
                 <button 
