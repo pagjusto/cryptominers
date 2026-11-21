@@ -94,7 +94,7 @@ export default function InventoryModal({
         {/* Lista de Baús */}
         <div className="flex-1 overflow-y-auto no-scrollbar py-3 space-y-3">
           {activeTab === 'heroes' ? (
-            /* ABA 1: BAÚS DE HERÓIS COMPRADOS EM MINERCOIN OU USDT */
+            /* ABA 1: BAÚS DE HERÓIS COMPRADOS EM Coins OU USDT */
             purchasedChests.length === 0 ? (
               <div className="py-8 text-center bg-slate-950/60 rounded-2xl border border-dashed border-slate-800 p-6">
                 <span className="text-4xl block mb-2">🎁</span>
@@ -102,7 +102,7 @@ export default function InventoryModal({
                   Nenhum Baú de Heróis no Inventário
                 </h4>
                 <p className="text-xs text-slate-400 max-w-sm mx-auto mb-4">
-                  Adquira baús na loja (MINT) com <b>Minercoin</b> ou <b>USDT</b>. Todos os baús comprados (1, 5, 10 ou 15 heróis) são guardados aqui para você abrir um por um, escolhendo entre Abertura Normal ou com Bônus de Anúncio!
+                  Adquira baús na loja (MINT) com <b>Coins</b> ou <b>USDT</b>. Todos os baús comprados (1, 5, 10 ou 15 heróis) são guardados aqui para você abrir um por um, escolhendo entre Abertura Normal ou com Bônus de Anúncio!
                 </p>
 
                 {onOpenMintModal && (
@@ -172,7 +172,7 @@ export default function InventoryModal({
                             <span className={`font-mono font-bold px-1.5 py-0.2 rounded text-[10px] ${
                               isBossReward ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' : (isMiner ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30')
                             }`}>
-                              {isBossReward ? '🎁 RECOMPENSA DO BOSS' : (isMiner ? '🪙 MINERCOIN' : '💳 USDT')} {chest.cost ? `(${chest.cost})` : ''}
+                              {isBossReward ? '🎁 RECOMPENSA DO BOSS' : (isMiner ? '🪙 Coins' : '💳 USDT')} {chest.cost ? `(${chest.cost})` : ''}
                             </span>
                             {chest.purchasedAt && (
                               <span className="text-[10px] text-slate-500">
