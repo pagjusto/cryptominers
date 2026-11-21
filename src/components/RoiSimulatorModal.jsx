@@ -172,7 +172,7 @@ export default function RoiSimulatorModal({
             </div>
           </div>
 
-          {/* 2. SELETOR DA CASA DE MINERAÇÃO */}
+          {/* 2. SELETOR DA CASA DE CoinsAÇÃO */}
           <div className="bg-slate-950/70 p-4 rounded-2xl border border-slate-800 space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-slate-300 flex items-center gap-1.5 uppercase tracking-wider">
@@ -279,7 +279,7 @@ export default function RoiSimulatorModal({
                 Produção Diária
               </span>
               <span className="font-arcade text-lg text-emerald-400 font-bold block">
-                +{currentData.effectiveCoinsPerDay} MINER
+                +{currentData.effectiveCoinsPerDay} Coins
               </span>
               <span className="text-[10px] text-slate-400 font-mono">
                 ≈ ${currentData.dailyUsd} USD / dia
@@ -294,7 +294,7 @@ export default function RoiSimulatorModal({
                 {currentData.roiDailyPct}% / dia
               </span>
               <span className="text-[10px] text-slate-400">
-                {currentData.effectiveCoinsPerMonth} MINER / mês
+                {currentData.effectiveCoinsPerMonth} Coins / mês
               </span>
             </div>
 
@@ -382,7 +382,7 @@ export default function RoiSimulatorModal({
                 Retorno Acumulado Projetado (Bruto em USDT)
               </span>
               <span className="text-xs font-mono text-emerald-400 font-bold bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/30">
-                1 MNC = US$ ${(config.minerCoinUsdtRate || 0.01).toFixed(2)}
+                1 Coins = US$ ${(config.minerCoinUsdtRate || 0.01).toFixed(2)}
               </span>
             </div>
 
@@ -433,7 +433,7 @@ export default function RoiSimulatorModal({
           <div className="p-3 rounded-2xl bg-slate-950/50 border border-slate-800/80 text-[11px] text-slate-400 flex items-start gap-2">
             <Info size={16} className="text-amber-400 shrink-0 mt-0.5" />
             <p className="leading-relaxed">
-              <b>Transparência CryptoZombies:</b> Os cálculos acima são estimativas matemáticas calculadas estritamente com base nos parâmetros configurados de probabilidade, produção média, consumo de estamina e cotação oficial configurada de 1 MINER = ${(config.minerCoinUsdtRate || 1.0).toFixed(2)} USDT (não é 1:1 fixo). O simulador considera o funcionamento real da mina (limite de 15 mineradores ativos simultâneos e descansos periódicos na casa) e não constitui garantia de retorno financeiro.
+              <b>Transparência CryptoZombies:</b> Os cálculos acima são estimativas matemáticas calculadas estritamente com base nos parâmetros configurados de probabilidade, produção média, consumo de estamina e cotação oficial configurada de 1 Coins = ${(config.minerCoinUsdtRate || 1.0).toFixed(2)} USDT (não é 1:1 fixo). O simulador considera o funcionamento real da mina (limite de 15 mineradores ativos simultâneos e descansos periódicos na casa) e não constitui garantia de retorno financeiro.
             </p>
           </div>
 
