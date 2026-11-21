@@ -57,7 +57,9 @@
 - **Rede de saque aprovada**: Solana, utilizando USDT no padrão SPL.
 - **Conversão de referência**: 1 MHC = US$ 0,01.
 - **Saque mínimo**: 40 USDT (equivalente a 4.000 MHC pela cotação de referência).
-- **Taxas de rede e taxas operacionais**: ainda não definidas.
+- **Taxa de rede (gas)**: paga pelo projeto com os recursos da taxa percentual de saque; não há desconto adicional ao jogador.
+- O custo real do gas é registrado em cada saque e reduz a parcela líquida da taxa percentual que fica com o projeto.
+- Os percentuais/faixas definitivos da taxa de saque ainda precisam ser confirmados.
 
 ### 8. 🛠️ Painel Administrativo
 - Configuração de probabilidades de drop de Baús do Boss e taxa-base.
