@@ -853,6 +853,20 @@ export default function App() {
   const currentHouse = resolveHouseTier(currentHouseId);
   const minersInHouse = miners.filter(m => m.status === 'house');
 
+  // Heróis efetivamente minerando em combate ativo (status work, durabilidade positiva e não feridos)
+  const activeWorkingMiners = miners.filter(m => 
+    m.status === 'work' && 
+    (m.durability === undefined || m.durability > 0) &&
+    !m.injuredAwaitingRescue
+  );
+
+  const currentMncPerHour = activeWorkingMiners.reduce((acc, m) => {
+    const coinsPerHour = m.coinsPerHour || ((m.power || 2) * 0.05 * (m.speed || 1.2));
+    return acc + coinsPerHour;
+  }, 0);
+
+  const currentMncPerMinute = currentMncPerHour / 60;
+
   const currentMinerRate = cryptoZombiesConfig?.minerCoinUsdtRate || 0.01;
   const currentWithdrawalTax = calculateWithdrawalTax(totalInvested, totalWithdrawnUsdt);
   const roiPct = totalInvested > 0 ? Math.min(500, Math.round((totalWithdrawnUsdt / totalInvested) * 100)) : 0;
@@ -1513,9 +1527,12 @@ export default function App() {
         <span className="text-slate-600">|</span>
         <span className="font-mono text-emerald-400 text-xs font-bold">🪙 {bcoin.toFixed(2)} MNC</span>
         <span className="text-slate-600">|</span>
-        <span className="flex items-center gap-1 text-[9px] text-emerald-400 font-mono" title="Supabase Conectado">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span>NUVEM</span>
+        <span 
+          className="flex items-center gap-1 text-[10px] text-amber-300 font-mono font-bold bg-amber-500/15 px-2 py-0.5 rounded border border-amber-500/30 cursor-pointer"
+          title={`Taxa atual de mineração: ${currentMncPerMinute.toFixed(4)} MNC/min (${currentMncPerHour.toFixed(2)} MNC/h) • ${activeWorkingMiners.length} herói(s) minerando`}
+        >
+          <Pickaxe size={11} className="text-amber-400" />
+          <span>{currentMncPerMinute.toFixed(3)} MNC/min</span>
         </span>
         <span className="text-[10px] text-amber-400/80 bg-amber-500/15 px-1.5 py-0.2 rounded border border-amber-500/30 flex items-center gap-0.5">
           <span>MENU</span>
@@ -1657,6 +1674,16 @@ export default function App() {
           >
             <RefreshCw size={15} />
           </button>
+
+          {/* Taxa de Mineração Atual da Equipe */}
+          <div 
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-950/80 border border-amber-500/30 text-[11px] font-mono shrink-0 cursor-help"
+            title={`Taxa atual de mineração: ${currentMncPerMinute.toFixed(4)} MNC/min (${currentMncPerHour.toFixed(2)} MNC/h) • ${activeWorkingMiners.length} herói(s) minerando`}
+          >
+            <Pickaxe size={12} className="text-amber-400" />
+            <span className="text-amber-300 font-bold">{currentMncPerMinute.toFixed(3)} MNC/min</span>
+            <span className="text-[9px] text-slate-400 hidden xl:inline">({activeWorkingMiners.length} ativos)</span>
+          </div>
 
           {/* Status da Nuvem Supabase */}
           <div 

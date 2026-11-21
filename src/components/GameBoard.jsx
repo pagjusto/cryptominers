@@ -59,108 +59,28 @@ const DRA_IRIS_POS = { x: 490, y: 386 };
 
 // Renderiza a Dra. Íris e os heróis internados em tratamento nos leitos do hospital
 function drawBaseInfirmaryAndPatients(ctx, state, now) {
-  // 1. DRA. ÍRIS (MÉDICA CHEFE DO ABRIGO)
+  // 1. DRA. ÍRIS (MÉDICA CHEFE DO ABRIGO - Modelo oficial do spritesheet idêntico ao seu avatar)
   const ix = DRA_IRIS_POS.x;
   const iy = DRA_IRIS_POS.y;
-  const bobY = Math.sin((now || 0) * 0.003) * 1.5;
 
-  ctx.save();
-  // Sombra suave no piso
-  ctx.fillStyle = 'rgba(15, 23, 42, 0.45)';
-  ctx.beginPath();
-  ctx.ellipse(ix, iy + 14, 11, 4.5, 0, 0, Math.PI * 2);
-  ctx.fill();
+  const irisMiner = {
+    id: 'iris',
+    heroId: 'iris',
+    name: 'Dra. Íris',
+    classId: 'medic',
+    spriteIndex: 4,
+    weaponId: 'medical-kit',
+    rarity: 'common',
+    status: 'stationed',
+    isMining: false
+  };
 
-  // Corpo da médica (Jaleco Branco, Estetoscópio e Prancheta Médica)
-  ctx.save();
-  ctx.translate(ix, iy + bobY);
-
-  // Pernas / calça médica azul escura
-  ctx.fillStyle = '#1e293b';
-  ctx.fillRect(-5, 4, 4, 10);
-  ctx.fillRect(1, 4, 4, 10);
-
-  // Sapatos escuros
-  ctx.fillStyle = '#0f172a';
-  ctx.fillRect(-6, 12, 5, 3);
-  ctx.fillRect(1, 12, 5, 3);
-
-  // Jaleco branco médico
-  ctx.fillStyle = '#f8fafc';
-  ctx.beginPath();
-  ctx.roundRect(-8, -8, 16, 14, 3);
-  ctx.fill();
-  ctx.strokeStyle = '#cbd5e1';
-  ctx.lineWidth = 1;
-  ctx.stroke();
-
-  // Gola e lapela do jaleco
-  ctx.fillStyle = '#e2e8f0';
-  ctx.beginPath();
-  ctx.moveTo(-4, -8);
-  ctx.lineTo(0, -1);
-  ctx.lineTo(4, -8);
-  ctx.fill();
-
-  // Estetoscópio ciano / azul
-  ctx.strokeStyle = '#0284c7';
-  ctx.lineWidth = 1.6;
-  ctx.beginPath();
-  ctx.arc(0, -5, 4.5, 0.2, Math.PI - 0.2);
-  ctx.stroke();
-  ctx.fillStyle = '#38bdf8';
-  ctx.beginPath();
-  ctx.arc(0, -1, 1.8, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Braços do jaleco
-  ctx.fillStyle = '#f8fafc';
-  ctx.fillRect(-10, -7, 3, 9);
-  ctx.fillRect(7, -7, 3, 9);
-
-  // Prancheta médica na mão esquerda
-  ctx.fillStyle = '#92400e';
-  ctx.fillRect(8, -2, 6, 8);
-  ctx.fillStyle = '#fef3c7';
-  ctx.fillRect(9, -1, 4, 6);
-  ctx.fillStyle = '#0f172a';
-  ctx.fillRect(10, 0, 2, 1);
-  ctx.fillRect(10, 2, 2, 1);
-
-  // Cabeça e rosto
-  ctx.fillStyle = '#fce7f3';
-  ctx.beginPath();
-  ctx.arc(0, -14, 6.5, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Cabelo castanho com coque
-  ctx.fillStyle = '#78350f';
-  ctx.beginPath();
-  ctx.arc(0, -16, 7, Math.PI, Math.PI * 2);
-  ctx.fill();
-  ctx.fillRect(-7, -16, 3, 5);
-  ctx.fillRect(4, -16, 3, 5);
-  ctx.beginPath();
-  ctx.arc(0, -21, 3.5, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Presilha médica com cruz vermelha
-  ctx.fillStyle = '#f8fafc';
-  ctx.beginPath();
-  ctx.arc(0, -18, 2.5, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = '#ef4444';
-  ctx.fillRect(-0.5, -19.5, 1, 3);
-  ctx.fillRect(-1.5, -18.5, 3, 1);
-
-  // Olhos amigáveis
-  ctx.fillStyle = '#0f172a';
-  ctx.fillRect(-3, -14, 1.5, 1.5);
-  ctx.fillRect(1.5, -14, 1.5, 1.5);
-
-  ctx.restore();
+  // Renderiza a Dra. Íris com seu modelo oficial do catálogo e spritesheet (virada para os leitos)
+  drawMinerCharacter(ctx, ix, iy, irisMiner, null, now, 0, -1, 4);
 
   // Emblema e Crachá Flutuante: "🩺 Dra. Íris"
+  const bobY = Math.sin((now || 0) * 0.003) * 0.8;
+  ctx.save();
   ctx.font = 'bold 10px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
@@ -169,7 +89,7 @@ function drawBaseInfirmaryAndPatients(ctx, state, now) {
   const badgeW = textWidth + 14;
   const badgeH = 17;
   const badgeX = ix - badgeW / 2;
-  const badgeY = iy - 32 + bobY * 0.5;
+  const badgeY = iy - 34 + bobY;
 
   ctx.fillStyle = 'rgba(15, 23, 42, 0.88)';
   ctx.beginPath();
@@ -184,6 +104,7 @@ function drawBaseInfirmaryAndPatients(ctx, state, now) {
   ctx.shadowBlur = 4;
   ctx.fillText(badgeText, ix, badgeY + badgeH / 2);
   ctx.shadowBlur = 0;
+  ctx.restore();
 
   // 2. HERÓIS EM RECUPERAÇÃO NOS LEITOS (m.status === 'house')
   const recoveringHeroes = (state.miners || []).filter(m => m.status === 'house');

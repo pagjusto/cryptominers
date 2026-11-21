@@ -4600,11 +4600,12 @@ export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swi
     ctx.save();
     ctx.translate(0, 14); // Pivot exatamente na base dos pés
 
-    // Frequência dinâmica dos passos (mesmo ritmo e amplitude de passada dos zumbis)
+    // Frequência dinâmica dos passos (ritmo de passada ao caminhar)
     const stepPhase = now * 0.016;
-    const heroLegSwing = Math.sin(stepPhase) * 0.42; // ~24 graus de passada alternada
-    const stepBob = Math.abs(Math.sin(stepPhase)) * 1.6;
-    const torsoSway = Math.sin(stepPhase) * 0.035;
+    const isWalking = (legAngle !== 0);
+    const heroLegSwing = isWalking ? Math.sin(stepPhase) * 0.42 : 0; // Pernas firmes se estiver parado/stationed
+    const stepBob = isWalking ? Math.abs(Math.sin(stepPhase)) * 1.6 : Math.sin(now * 0.003) * 0.8; // Respiração suave
+    const torsoSway = isWalking ? Math.sin(stepPhase) * 0.035 : 0;
 
     if (hasParts) {
       ctx.save();
