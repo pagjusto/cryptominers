@@ -1739,7 +1739,7 @@ export default function GameBoard({
       }
 
       state.miners.forEach((miner, minerIndex) => {
-        if (miner.status === 'house' || miner.status === 'waiting_house' || miner.status === 'reserve') return;
+        if (miner.status === 'house' || miner.status === 'waiting_house' || miner.status === 'reserve' || miner.status === 'sleep') return;
         const classInfo = MINER_CLASSES[miner.classId] || MINER_CLASSES.miner;
         const rx = miner.visualX !== undefined ? miner.visualX : miner.x;
         const ry = miner.visualY !== undefined ? miner.visualY : miner.y;
