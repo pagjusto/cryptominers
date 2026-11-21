@@ -197,31 +197,42 @@ export function getCornerSpawnPoint(index = 0) {
  * Lista oficial de spawn inicial dos heróis distribuídos por todo o mapa nos locais definidos pelo usuário.
  * Cada um dos 15 heróis ocupa uma zona tática própria ao redor da base.
  */
+// ZONAS DE RESPAWN DEFINIDAS PELO USUÁRIO NA MARCAÇÃO VERDE DO MAPA.
+// Norte: gramados/caminhos superiores à esquerda e centro-norte.
+// Sul: faixa de gramado inferior, contornando ruínas e complexo central.
+// Personagens podem caminhar pelo mapa todo; estas zonas são somente os pontos de nascimento.
+export const SPAWN_ZONE_VERSION = 2;
+export function isSpawnZoneCell(c, r) {
+  const inNorthSpawn = r >= 1 && r <= 3 && c >= 1 && c <= 7;
+  const inSouthSpawn = r >= 7 && r <= 10 && c >= 1 && c <= 14;
+  return (inNorthSpawn || inSouthSpawn) && !isCityBuilding(c, r) && !isBaseCompound(c, r);
+}
+
+export function getSpawnZoneCells(cols = GRID_COLS, rows = GRID_ROWS) {
+  const cells = [];
+  for (let r = 1; r < rows - 1; r++) {
+    for (let c = 1; c < cols - 1; c++) {
+      if (isSpawnZoneCell(c, r)) cells.push({ c, r, x: c, y: r });
+    }
+  }
+  return cells;
+}
+
+export const CORNER_SPAWN_POINTS = [
+  { x: 1, y: 1, c: 1, r: 1 }, { x: 5, y: 1, c: 5, r: 1 }, { x: 6, y: 1, c: 6, r: 1 },
+  { x: 1, y: 2, c: 1, r: 2 }, { x: 5, y: 3, c: 5, r: 3 }, { x: 6, y: 3, c: 6, r: 3 },
+  { x: 1, y: 7, c: 1, r: 7 }, { x: 1, y: 9, c: 1, r: 9 }, { x: 2, y: 9, c: 2, r: 9 },
+  { x: 3, y: 9, c: 3, r: 9 }, { x: 6, y: 9, c: 6, r: 9 }, { x: 7, y: 9, c: 7, r: 9 },
+  { x: 9, y: 9, c: 9, r: 9 }, { x: 14, y: 8, c: 14, r: 8 }, { x: 14, y: 9, c: 14, r: 9 },
+  { x: 13, y: 10, c: 13, r: 10 }, { x: 12, y: 8, c: 12, r: 8 }
+];
+
+// Heróis e zumbis nascem nas duas áreas verdes. Após o spawn, a movimentação continua livre.
 export const SAFE_HERO_SPAWN_POINTS = [
-  // 1. ZONA NORDESTE (Área demarcada pelo usuário ao lado do outdoor com alta densidade de zumbis)
-  // Regra Oficial do Usuário: "spawne herois aki tbm , sempre tem bastante zumbi aqui"
-  { x: 12, y: 2 }, // Gramado Nordeste Trilha
-  { x: 13, y: 1 }, // Gramado Nordeste Superior
-  { x: 11, y: 2 }, // Próximo ao Outdoor Leste
-  { x: 14, y: 2 }, // Canto Superior Nordeste Aberto
-  { x: 13, y: 3 }, // Estrada Nordeste Curva
-
-  // 2. ZONA OESTE & NOROESTE (Próximo à Torre e Estrada Oeste)
-  { x: 2, y: 5 },  // Estrada Oeste Livre
-  { x: 1, y: 3 },  // Avenida Oeste Livre
-  { x: 5, y: 1 },  // Noroeste Gramado Alto
-  { x: 5, y: 3 },  // Encruzilhada Norte
-
-  // 3. ZONA SUL & SUDOESTE (Portão da Base e Gramado Sul)
-  { x: 3, y: 9 },  // Sul-Oeste Gramado Frontal
-  { x: 6, y: 9 },  // Sul Portão Central
-  { x: 9, y: 9 },  // Sudeste Encruzilhada
-  { x: 1, y: 7 },  // Sudoeste Gramado
-  { x: 1, y: 9 },  // Sudoeste Canto
-
-  // 4. ZONA LESTE (Avenida em frente ao hospital)
-  { x: 12, y: 5 }, // Leste Avenida
-  { x: 14, y: 8 }  // Sudeste Canto Leste
+  { x: 1, y: 1 }, { x: 5, y: 1 }, { x: 6, y: 1 }, { x: 1, y: 2 }, { x: 5, y: 3 },
+  { x: 6, y: 3 }, { x: 7, y: 2 }, { x: 1, y: 7 }, { x: 1, y: 9 }, { x: 2, y: 9 },
+  { x: 3, y: 9 }, { x: 6, y: 9 }, { x: 7, y: 9 }, { x: 9, y: 9 }, { x: 14, y: 8 },
+  { x: 14, y: 9 }, { x: 13, y: 10 }, { x: 12, y: 8 }
 ];
 
 export function getSafeHeroSpawn(index = 0) {
