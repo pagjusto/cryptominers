@@ -2,7 +2,7 @@
 
 ![CryptoZombies Banner](public/miners/all_miners_banner.png)
 
-> **CryptoZombies** é um jogo Web3 de sobrevivência e estratégia contra hordas de zumbis, com estética pixel art retrô. Desenvolvido em **React 19**, **Vite** e **Canvas**, o jogo implementa mapas individuais por jogador, economia dinâmica sustentável baseada em **Minercoin (MNC)**, sistema de sobreviventes, abrigos médicos, Baús do Boss e simulador completo de ROI.
+> **CryptoZombies** é um jogo Web3 de sobrevivência e estratégia contra hordas de zumbis, com estética pixel art retrô. Desenvolvido em **React 19**, **Vite** e **Canvas**, o jogo implementa mapas individuais por jogador, economia interna baseada em **MHC**, sistema de sobreviventes, abrigos médicos, Baús do Boss e simulador completo de ROI.
 
 ---
 
@@ -13,10 +13,11 @@
 - **Sobrevivência contra zumbis**: A experiência de jogo é centrada no combate e na sobrevivência contra hordas de zumbis.
 - **Sem sistema de jazidas**: As antigas mecânicas de jazidas de recursos não fazem mais parte da versão atual do jogo.
 
-### 2. 💰 Economia Oficial da Minercoin (MNC)
-- **Cotação Oficial do Projeto**: **1 MNC = US$ 0,01** (100 MNC = US$ 1,00).
-- **Cotação Dinâmica**: Ajustável pelo administrador no painel administrativo, refletindo imediatamente em todo o jogo (preço de baús, recompensas, projeções de ROI e saques).
-- **Recompensas Justas**: Produção em MNC baseada nos atributos dos heróis (Power, Speed, Stamina) e multiplicadores de casa.
+### 2. 💰 Economia Oficial da MHC
+- **Cotação interna de referência**: **1 MHC = US$ 0,01** (100 MHC = US$ 1,00).
+- **Modelo híbrido**: cotação definida pelo administrador antes da negociação na Solana e acompanhando o mercado após a entrada/negociação on-chain.
+- **Compras**: pacotes vendidos em USDT, com crédito de MHC após confirmação do pagamento.
+- **Sem burn por enquanto**: MHC utilizada em upgrades é debitada normalmente, sem queima.
 
 ### 3. ⚔️ Sistema de Heróis Mineradores
 - **Limite de Mineração**: Até **15 heróis ativos** minerando simultaneamente por mapa.
@@ -37,7 +38,7 @@
 
 ### 5. 🏡 Casas de Repouso
 - Aceleração da recuperação de energia dos heróis.
-- Evolução por níveis utilizando Fragmentos de Construção e MNC.
+- Evolução por níveis utilizando Fragmentos de Construção e MHC.
 - Níveis: *Tiny House*, *Basic House*, *Comfort House*, *Mansion*, *Villa*, *Palace*.
 
 ### 6. 📊 Menu Estatísticas & Simulador de ROI (3 Cenários)
@@ -52,19 +53,22 @@
      - Comparativo lado a lado e projeções de retorno acumulado (30d, 60d, 90d, 180d).
   5. **ROI Real da Conta**: Histórico real de investimento vs retorno monetário.
 
-### 7. 💳 Perfil, Carteira Web3 & Saques com Taxa Regressiva
-- Conexão de carteira (MetaMask / Web3).
-- Saques de MNC convertidos com base na cotação oficial em USD.
-- **Tabela Regressiva de Taxas de Saque**:
-  - **15%**: Menos de 50% do investimento recuperado.
-  - **10%**: Entre 50% e 100% do investimento recuperado.
-  - **5%**: Mais de 100% do investimento recuperado (pós-breakeven).
+### 7. 💳 Perfil, Carteira Web3 & Saques
+- **Rede de saque aprovada**: Solana, utilizando USDT no padrão SPL.
+- **Conversão de referência**: 1 MHC = US$ 0,01.
+- **Saque mínimo**: 40 USDT (equivalente a 4.000 MHC pela cotação de referência).
+- **Taxas de rede e taxas operacionais**: ainda não definidas.
 
 ### 8. 🛠️ Painel Administrativo
 - Configuração de probabilidades de drop de Baús do Boss e taxa-base.
-- Cotação em tempo real de 1 MNC em USDT.
 - Gestão de anúncios premiados (Rewarded Ads).
 - Ajustes de parâmetros da economia e mineração.
+
+---
+
+## 📚 Documentação de regras
+
+- [Economia da MHC, compras, saques, Solana e política de burn](docs/economia-minercoin.md)
 
 ---
 
@@ -103,16 +107,17 @@ npm test
 ```
 
 ### Cobertura dos Testes:
-- ✅ Cotação oficial `1 MNC = US$ 0,01` e cálculos de breakeven.
-- ✅ Escala de taxas de saque regressivas (15%, 10%, 5%).
-- ✅ Mapas individuais e isolamento entre jogadores.
-- ✅ Suporte a 1.000 jogadores simultâneos gerando mapas em menos de 600ms.
+- Cotação interna de referência de MHC e cálculos de breakeven.
+- Regras econômicas e conversão de saques.
+- Mapas individuais e isolamento entre jogadores.
+- Suporte a 1.000 jogadores simultâneos gerando mapas em menos de 600ms.
 
 ---
 
 ## 🛠️ Tecnologias Utilizadas
 
-- **Frontend**: [React 19](https://react.dev/), [Vite](https://vitejs.dev/)
+- **Frontend**: [React 19](https://react.dev/)
+- **Build**: [Vite](https://vitejs.dev/)
 - **Estilização**: [Tailwind CSS v4](https://tailwindcss.com/)
 - **Ícones**: [Lucide React](https://lucide.dev/)
 - **Efeitos**: [Canvas Confetti](https://www.npmjs.com/package/canvas-confetti)
