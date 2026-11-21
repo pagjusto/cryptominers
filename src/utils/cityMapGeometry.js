@@ -198,8 +198,30 @@ export function getCornerSpawnPoint(index = 0) {
  * Cada um dos 15 heróis ocupa uma zona tática própria ao redor da base.
  */
 export const SAFE_HERO_SPAWN_POINTS = [
-  ...TACTICAL_ZONES.map(z => ({ x: z.center.x, y: z.center.y })),
-  { x: 1, y: 3 } // 15º herói na avenida oeste livre
+  // 1. ZONA NORDESTE (Área demarcada pelo usuário ao lado do outdoor com alta densidade de zumbis)
+  // Regra Oficial do Usuário: "spawne herois aki tbm , sempre tem bastante zumbi aqui"
+  { x: 12, y: 2 }, // Gramado Nordeste Trilha
+  { x: 13, y: 1 }, // Gramado Nordeste Superior
+  { x: 11, y: 2 }, // Próximo ao Outdoor Leste
+  { x: 14, y: 2 }, // Canto Superior Nordeste Aberto
+  { x: 13, y: 3 }, // Estrada Nordeste Curva
+
+  // 2. ZONA OESTE & NOROESTE (Próximo à Torre e Estrada Oeste)
+  { x: 2, y: 5 },  // Estrada Oeste Livre
+  { x: 1, y: 3 },  // Avenida Oeste Livre
+  { x: 5, y: 1 },  // Noroeste Gramado Alto
+  { x: 5, y: 3 },  // Encruzilhada Norte
+
+  // 3. ZONA SUL & SUDOESTE (Portão da Base e Gramado Sul)
+  { x: 3, y: 9 },  // Sul-Oeste Gramado Frontal
+  { x: 6, y: 9 },  // Sul Portão Central
+  { x: 9, y: 9 },  // Sudeste Encruzilhada
+  { x: 1, y: 7 },  // Sudoeste Gramado
+  { x: 1, y: 9 },  // Sudoeste Canto
+
+  // 4. ZONA LESTE (Avenida em frente ao hospital)
+  { x: 12, y: 5 }, // Leste Avenida
+  { x: 14, y: 8 }  // Sudeste Canto Leste
 ];
 
 export function getSafeHeroSpawn(index = 0) {

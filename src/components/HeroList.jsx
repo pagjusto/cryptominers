@@ -306,17 +306,15 @@ export default function HeroList({
                   {/* Botão de Ação */}
                   <button
                     onClick={() => onToggleStatus(miner.id)}
-                    disabled={miner.status === 'house' || miner.status === 'waiting_house'}
+                    disabled={miner.status === 'house' || miner.status === 'waiting_house' || miner.status === 'injured' || miner.injuredAwaitingRescue}
                     className={`px-3 py-1 rounded-xl text-[10px] font-tech font-bold flex items-center justify-center gap-1 transition cursor-pointer active:scale-95 shadow-sm shrink-0 whitespace-nowrap ${
                       isWorking
                         ? 'bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700'
                         : (miner.status === 'house'
-                            ? 'bg-blue-600 hover:bg-emerald-500 text-white hover:text-slate-950'
+                            ? 'bg-blue-600 text-white'
                             : (miner.status === 'waiting_house'
-                                ? 'bg-amber-600 text-white hover:bg-amber-500'
-                                : ((miner.status === 'injured' || miner.injuredAwaitingRescue)
-                                    ? 'bg-rose-500 text-white hover:bg-emerald-500 hover:text-slate-950 animate-pulse'
-                                    : 'bg-emerald-500 text-slate-950 hover:bg-emerald-400')))
+                                ? 'bg-amber-600 text-white'
+                                : 'bg-emerald-500 text-slate-950 hover:bg-emerald-400'))
                     }`}
                   >
                     {isWorking ? <Pause size={10} /> : <Play size={10} className="fill-current" />}
@@ -325,11 +323,7 @@ export default function HeroList({
                         ? 'PAUSAR' 
                         : (miner.status === 'house' 
                             ? 'TRATANDO' 
-                            : (miner.status === 'waiting_house' 
-                                ? 'AGUARDANDO' 
-                                : ((miner.status === 'injured' || miner.injuredAwaitingRescue)
-                                    ? '💚 CURAR & ATIVAR'
-                                    : 'ATIVAR')))}
+                            : (miner.status === 'waiting_house' ? 'AGUARDANDO' : 'ATIVAR'))}
                     </span>
                   </button>
                 </div>

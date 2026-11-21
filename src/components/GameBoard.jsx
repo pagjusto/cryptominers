@@ -59,6 +59,7 @@ export default function GameBoard({
   onDropGear,
   statsResetTrigger = 0,
   houseSlots = 5,
+  recoverySpeedPct = 100,
   gameSpeed = 1 
 }) {
   const canvasRef = useRef(null);
@@ -107,8 +108,8 @@ export default function GameBoard({
     onMinersChange
   };
 
-  const houseConfigRef = useRef({ houseSlots });
-  houseConfigRef.current = { houseSlots };
+  const houseConfigRef = useRef({ houseSlots, recoverySpeedPct });
+  houseConfigRef.current = { houseSlots, recoverySpeedPct };
 
   const gameStateRef = useRef({
     grid: mapData.grid,
@@ -477,52 +478,125 @@ export default function GameBoard({
       });
 
       state.miners.forEach((miner, minerIndex) => {
-        // Feridos com 5% de vida ou menos ficam deitados/aguardando resgate:
-        // não atacam, não mineram e não podem ser alvos dos inimigos.
         const maxHealth = Number(miner.maxHealth) > 0 ? Number(miner.maxHealth) : 100;
         const currentHealth = Number.isFinite(Number(miner.currentHealth)) ? Number(miner.currentHealth) : maxHealth;
+
+        // REGRA OFICIAL DO USUÁRIO: "veja que tem o medico na equipe e ele nao esta levando pro ambulatorio curar automaticamente"
+        // Quando um herói é ferido (<= 5% de vida), a Dra. Íris (Médica do Abrigo) resgata e leva o sobrevivente para o ambulatório
         if (miner.status === 'injured' || miner.injuredAwaitingRescue || (currentHealth / maxHealth) * 100 <= 5) {
           miner.maxHealth = maxHealth;
           miner.currentHealth = Math.min(currentHealth, maxHealth * 0.05);
-          miner.status = 'injured';
-          miner.injuredAwaitingRescue = true;
           miner.isMining = false;
           miner.targetBlock = null;
           miner.lockedEnemyId = null;
           miner.swingTimer = 0;
 
-          // AUTO-RECUPERAÇÃO DE CAMPO: Heróis feridos se recuperam sozinhos após 30 segundos
-          // Evita a espiral da morte onde todos ficam travados permanentemente sem poder jogar
-          miner.injuredTimer = (miner.injuredTimer || 0) + dt;
-          if (miner.injuredTimer >= 30) {
-            miner.currentHealth = Math.round(maxHealth * 0.30); // Recupera 30% da vida
-            miner.status = 'work';
+          const capacity = houseConfigRef.current?.houseSlots || 5;
+          const inHouse = state.miners.filter(m => m.status === 'house').length;
+
+          if (inHouse < capacity) {
+            // Leito livre no ambulatório: internação imediata sob cuidados da Dra. Íris
+            miner.status = 'house';
             miner.injuredAwaitingRescue = false;
-            miner.injuredTimer = 0;
-            miner.moveCooldown = 0.5;
+            state.lastRelayCheck = 0;
             state.floatTexts.push({
-              text: '💚 RECUPERADO!',
-              x: miner.x * TILE_SIZE + TILE_SIZE / 2,
-              y: miner.y * TILE_SIZE - 8,
-              color: '#4ade80',
+              text: '🚑 AMBULATÓRIO (DRA. ÍRIS)',
+              x: (miner.x || 2) * TILE_SIZE + TILE_SIZE / 2,
+              y: (miner.y || 8) * TILE_SIZE - 12,
+              color: '#38bdf8',
               opacity: 1.0,
-              vy: -32
+              vy: -30
+            });
+          } else {
+            // Ambulatório lotado: aguarda na fila de espera
+            miner.status = 'waiting_house';
+            miner.injuredAwaitingRescue = true;
+            state.lastRelayCheck = 0;
+            state.floatTexts.push({
+              text: '⏳ FILA DO AMBULATÓRIO',
+              x: (miner.x || 2) * TILE_SIZE + TILE_SIZE / 2,
+              y: (miner.y || 8) * TILE_SIZE - 12,
+              color: '#fbbf24',
+              opacity: 1.0,
+              vy: -25
             });
           }
           return;
         }
 
-        // Heróis no abrigo ou na fila ficam fora do combate enquanto aguardam tratamento.
+        // ====================================================================
+        // TRATAMENTO MÉDICO NO AMBULATÓRIO DO ABRIGO (DRA. ÍRIS)
+        // ====================================================================
         if (miner.status === 'house') {
           miner.isMining = false;
           miner.targetBlock = null;
+          miner.lockedEnemyId = null;
+          miner.swingTimer = 0;
+
+          // Recuperação contínua de vida baseada na eficiência do abrigo
+          const recSpeedPct = houseConfigRef.current?.recoverySpeedPct || 100;
+          const healRatePerSec = (maxHealth * 0.075) * (recSpeedPct / 100); // ~13 segundos para regenerar de 5% a 100%
+          miner.currentHealth = Math.min(maxHealth, (miner.currentHealth || (maxHealth * 0.05)) + healRatePerSec * dt);
+
+          // Quando atinge 100% de vida: alta médica e retorno automático ao combate!
+          if (miner.currentHealth >= maxHealth) {
+            miner.currentHealth = maxHealth;
+            miner.status = 'work';
+            miner.injuredAwaitingRescue = false;
+            miner.moveCooldown = 0.5;
+            state.lastRelayCheck = 0;
+
+            // Reposiciona o sobrevivente curado na zona tática correspondente
+            const spawnPt = getSafeHeroSpawn(minerIndex);
+            miner.x = spawnPt.x;
+            miner.y = spawnPt.y;
+            miner.visualX = spawnPt.x;
+            miner.visualY = spawnPt.y;
+
+            state.floatTexts.push({
+              text: '💚 ALTA MÉDICA (COMBATE)',
+              x: spawnPt.x * TILE_SIZE + TILE_SIZE / 2,
+              y: spawnPt.y * TILE_SIZE - 12,
+              color: '#22c55e',
+              opacity: 1.0,
+              vy: -35
+            });
+
+            // Se houver sobrevivente na fila (waiting_house), interna imediatamente no leito liberado
+            const capacity = houseConfigRef.current?.houseSlots || 5;
+            const currentInHouse = state.miners.filter(m => m.status === 'house').length;
+            if (currentInHouse < capacity) {
+              const nextInLine = state.miners.find(m => m.status === 'waiting_house');
+              if (nextInLine) {
+                nextInLine.status = 'house';
+                nextInLine.injuredAwaitingRescue = false;
+              }
+            }
+          }
           return;
         }
 
-        // 2. Fila de espera por vaga na Casa
+        // Fila de espera do ambulatório: checa se liberou vaga
         if (miner.status === 'waiting_house') {
           miner.isMining = false;
           miner.targetBlock = null;
+          miner.lockedEnemyId = null;
+          miner.swingTimer = 0;
+
+          const capacity = houseConfigRef.current?.houseSlots || 5;
+          const inHouse = state.miners.filter(m => m.status === 'house').length;
+          if (inHouse < capacity) {
+            miner.status = 'house';
+            miner.injuredAwaitingRescue = false;
+            state.floatTexts.push({
+              text: '🚑 VAGA LIBERADA (AMBULATÓRIO)',
+              x: (miner.x || 2) * TILE_SIZE + TILE_SIZE / 2,
+              y: (miner.y || 8) * TILE_SIZE - 12,
+              color: '#38bdf8',
+              opacity: 1.0,
+              vy: -30
+            });
+          }
           return;
         }
 

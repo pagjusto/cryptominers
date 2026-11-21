@@ -525,8 +525,8 @@ export const INITIAL_MINERS = [
     power: 3.2,
     speed: 1.6,
     status: 'work',
-    x: 6,
-    y: 9,
+    x: 12,
+    y: 2,
     avatar: '🦊',
     color: '#64748b'
   }
