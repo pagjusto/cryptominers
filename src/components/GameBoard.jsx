@@ -85,7 +85,7 @@ function drawBaseShelterVisual(ctx, house, miners, now) {
   ctx.fillText('AMBULATÓRIO • NÍVEL ' + house.level, x + 10, y + 16);
   ctx.textAlign = 'right';
   ctx.fillStyle = color;
-  ctx.fillText(inBeds.length + '/' + house.slots + ' LEITOS', x + w - 10, y + 16);
+  ctx.fillText(inBeds.length + ' OCUPADOS • ' + Math.max(0, house.slots - inBeds.length) + ' LIVRES', x + w - 10, y + 16);
 
   // Ala de leitos: cinco por fileira; cada nível acrescenta fileiras reais e visíveis.
   const bedStartX = x + 8;
