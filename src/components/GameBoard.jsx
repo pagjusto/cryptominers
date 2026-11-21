@@ -1402,12 +1402,14 @@ export default function GameBoard({
           if (decision.action === 'mine' && decision.targetBlock) {
             const curX = Math.round(miner.x);
             const curY = Math.round(miner.y);
-            // REGRA OFICIAL DO USUÁRIO:
-            // "os herois nao podem travar em locais podendo passar um pelo outro mas nao pararem no mesmo local,
-            //  podem passar tambem pelos zumbis mas nao parar no mesmo local que eles, isso faz eles cruzarem pela mesma celula e nao travarem"
-            const isOverlappingHero = state.miners.some(o => 
+
+            // REGRA OFICIAL DO USUÁRIO & ANTI PING-PONG:
+            // 1. Se o herói já está minerando/atirando (miner.isMining), ele NÃO é expulso por outro herói que cruza sua célula.
+            // 2. Se está começando a atirar agora, só não deve estacionar se OUTRO herói já estiver fixo e atirando nesta célula
+            //    ou se houver um zumbi na mesma célula.
+            const isAnotherHeroShootingHere = state.miners.some(o => 
               o.id !== miner.id && 
-              (o.status === 'work' || !o.status) && 
+              o.isMining && 
               Math.round(o.x) === curX && 
               Math.round(o.y) === curY
             );
@@ -1417,21 +1419,12 @@ export default function GameBoard({
               Math.round(e.gy) === curY
             );
 
-            // Não para no mesmo local: se a célula estiver ocupada por outro herói ou zumbi, ajusta para posição livre
-            if (isOverlappingHero || isOverlappingZombie) {
-              const freeSpot = findNearestFreeHeroCell(curX, curY, miner.id, state.miners, state.grid, isCanyon, state.enemies);
-              if (freeSpot) {
-                miner.x = freeSpot.x;
-                miner.y = freeSpot.y;
-                miner.visualX = freeSpot.x;
-                miner.visualY = freeSpot.y;
-              } else {
-                // Não estaciona na mesma célula: continua a marcha para cruzar livremente
-                miner.moveCooldown = 0.2;
-                miner.isMining = false;
-                miner.targetBlock = null;
-                return;
-              }
+            // Se outro herói já é o atirador fixo desta célula, este herói não para aqui; continua sua marcha
+            if (!miner.isMining && (isAnotherHeroShootingHere || isOverlappingZombie)) {
+              miner.moveCooldown = 0.2;
+              miner.isMining = false;
+              miner.targetBlock = null;
+              return;
             }
 
             miner.targetBlock = decision.targetBlock;
@@ -1448,8 +1441,28 @@ export default function GameBoard({
               matchedEnemy.underAttackByHeroId = miner.id;
             }
           } else if (decision.action === 'move' && decision.nextStep) {
-            // REGRA OFICIAL DO USUÁRIO:
-            // "podendo passar um pelo outro mas nao pararem no mesmo local , podem passar tambem pelos zumbis mas nao parar no mesmo local que eles, isso faz eles cruzarem pela mesma celula e nao travarem"
+            const curX = Math.round(miner.x);
+            const curY = Math.round(miner.y);
+            const nextX = decision.nextStep.x;
+            const nextY = decision.nextStep.y;
+
+            // Prevenção de troca simultânea mútua de células (Swap ping-pong):
+            // Se outro herói está em nextStep e pretende ir para a célula atual deste herói,
+            // serializa a passagem para um passar primeiro e o outro aguardar brevemente.
+            const swapPartner = state.miners.find(o => 
+              o.id !== miner.id && 
+              Math.round(o.x) === nextX && 
+              Math.round(o.y) === nextY && 
+              o.targetNextStep && 
+              o.targetNextStep.x === curX && 
+              o.targetNextStep.y === curY
+            );
+            if (swapPartner && String(miner.id) > String(swapPartner.id)) {
+              miner.moveCooldown = 0.15;
+              return;
+            }
+            miner.targetNextStep = { x: nextX, y: nextY };
+
             // Movimentação livre: heróis atravessam outros heróis e zumbis sem bloquear ou pausar
             miner.x = decision.nextStep.x;
             miner.y = decision.nextStep.y;

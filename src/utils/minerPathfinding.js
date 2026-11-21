@@ -55,20 +55,22 @@ export function hasClearLineOfSight(x1, y1, x2, y2) {
 }
 
 /**
- * Verifica se a célula está ocupada por outro herói ou por um zumbi, impedindo que este herói pare nela.
+ * Verifica se a célula está ocupada por outro herói que já está estacionado e atirando,
+ * ou por um zumbi/boss, impedindo que este herói pare nela como ponto final de tiro.
  * REGRA OFICIAL DO USUÁRIO:
  * "os herois nao podem travar em locais podendo passar um pelo outro mas nao pararem no mesmo local,
  *  podem passar tambem pelos zumbis mas nao parar no mesmo local que eles, isso faz eles cruzarem pela mesma celula e nao travarem"
  */
 export function isCellOccupiedForStop(x, y, heroId, allMiners = [], grid = null) {
-  // Outro herói ativo parado/minerando nesta célula
-  const hasHero = allMiners.some(o => 
+  // Outro herói ativo que já está estacionado e atirando nesta célula
+  const hasHeroStationed = allMiners.some(o => 
     o.id !== heroId && 
     (o.status === 'work' || !o.status) && 
+    o.isMining && 
     Math.round(o.x) === x && 
     Math.round(o.y) === y
   );
-  if (hasHero) return true;
+  if (hasHeroStationed) return true;
 
   // Zumbi ou Boss nesta célula
   if (grid && grid[y] && (grid[y][x] === BLOCK_ZOMBIE || grid[y][x] === BLOCK_BOSS)) {
@@ -165,9 +167,30 @@ export function findNextHeroAction(miner, grid, allMiners = [], isCanyon = true)
   // REGRA OFICIAL DO USUÁRIO:
   // "os herois nao podem travar em locais podendo passar um pelo outro mas nao pararem no mesmo local,
   //  podem passar tambem pelos zumbis mas nao parar no mesmo local que eles, isso faz eles cruzarem pela mesma celula e nao travarem"
-  // Se a célula atual (mx, my) já estiver ocupada por outro herói minerando/parado ou por um zumbi,
-  // o herói NÃO pode parar aqui para atirar. Ele deve continuar se movendo para cruzar a célula!
+  // Se a célula atual (mx, my) já estiver ocupada por outro herói que já está minerando aqui ou por um zumbi,
+  // o herói NÃO pode parar aqui para atirar como nova posição.
   const isCurrentCellOccupied = isCellOccupiedForStop(mx, my, miner.id, allMiners, grid);
+
+  // ============================================================================
+  // ÂNCORA FIRME DE COMBATE (ANTI PING-PONG / NÃO TROCA DE LUGAR):
+  // Se este herói já está em combate ativo (isMining) e seu alvo ainda existe e está
+  // no alcance de tiro com linha de visão, ele PERMANECE FIRME ATIRANDO!
+  // Outro herói passando ou cruzando pela mesma célula NÃO expulsa este herói.
+  // ============================================================================
+  if (miner.isMining && miner.targetBlock) {
+    const target = activeTargets.find(t => t.x === miner.targetBlock.x && t.y === miner.targetBlock.y);
+    if (target) {
+      const dist = Math.abs(target.x - mx) + Math.abs(target.y - my);
+      if (dist <= COMBAT_RANGE && hasClearLineOfSight(mx, my, target.x, target.y)) {
+        const targetDir = target.x < mx ? -1 : (target.x > mx ? 1 : (miner.targetDir || 1));
+        return {
+          action: 'mine',
+          targetBlock: { x: target.x, y: target.y },
+          targetDir
+        };
+      }
+    }
+  }
 
   // ============================================================================
   // REGRA OFICIAL DO USUÁRIO:
@@ -177,7 +200,7 @@ export function findNextHeroAction(miner, grid, allMiners = [], isCanyon = true)
 
   if (activeBoss) {
     // 1. O Boss é o alvo SUPREMO e PRIORITÁRIO de toda a equipe
-    // Só entra em combate estático se a célula atual NÃO estiver sobreposta com outro herói/zumbi
+    // Só entra em combate estático se a célula atual NÃO estiver sobreposta com outro herói minerando ou zumbi
     const distToBoss = Math.abs(activeBoss.x - mx) + Math.abs(activeBoss.y - my);
     if (!isCurrentCellOccupied && distToBoss <= COMBAT_RANGE && hasClearLineOfSight(mx, my, activeBoss.x, activeBoss.y)) {
       const targetDir = activeBoss.x < mx ? -1 : (activeBoss.x > mx ? 1 : (miner.targetDir || 1));
@@ -351,13 +374,16 @@ export function findNextHeroAction(miner, grid, allMiners = [], isCanyon = true)
       }
     }
 
-    // Exploração nas 4 direções cardinais
-    const nextMoves = [
-      { x: curr.x, y: curr.y - 1, dir: miner.targetDir || 1 },
+    // Exploração nas 4 direções cardinais com variação determinística baseada no ID do herói
+    // Evita que múltiplos heróis em marcha sincronizada escolham rigorosamente o mesmo caminho em fila indiana
+    const idOffset = (typeof miner.id === 'string' ? miner.id.charCodeAt(miner.id.length - 1) : (Number(miner.id) || 0)) % 4;
+    const baseMoves = [
       { x: curr.x + 1, y: curr.y, dir: 1 },
       { x: curr.x, y: curr.y + 1, dir: miner.targetDir || 1 },
-      { x: curr.x - 1, y: curr.y, dir: -1 }
+      { x: curr.x - 1, y: curr.y, dir: -1 },
+      { x: curr.x, y: curr.y - 1, dir: miner.targetDir || 1 }
     ];
+    const nextMoves = baseMoves.slice(idOffset).concat(baseMoves.slice(0, idOffset));
 
     for (const m of nextMoves) {
       const key = `${m.x},${m.y}`;
