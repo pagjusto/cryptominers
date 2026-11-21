@@ -1,42 +1,25 @@
-import { isCityObstacle, GRID_COLS, GRID_ROWS } from '../src/utils/cityMapGeometry.js';
-import { isSolidTerrain, findNextHeroAction } from '../src/utils/minerPathfinding.js';
-import { BLOCK_EMPTY, BLOCK_BEDROCK, BLOCK_ZOMBIE, BLOCK_BOSS } from '../src/data/minersData.js';
-import { generatePlayerMap } from '../src/utils/individualMapEngine.js';
+import { findNextHeroAction, isCellOccupiedForStop, hasClearLineOfSight } from '../src/utils/minerPathfinding.js';
+import { BLOCK_EMPTY, BLOCK_BEDROCK, BLOCK_ZOMBIE } from '../src/data/minersData.js';
 
-const mapData = generatePlayerMap('test_player', 1);
-const grid = Array.from({ length: GRID_ROWS }, () => Array(GRID_COLS).fill(BLOCK_EMPTY));
-for (let c = 0; c < GRID_COLS; c++) {
+const grid = Array.from({ length: 11 }, () => Array(15).fill(BLOCK_EMPTY));
+for (let c = 0; c < 15; c++) {
   grid[0][c] = BLOCK_BEDROCK;
-  grid[GRID_ROWS - 1][c] = BLOCK_BEDROCK;
+  grid[10][c] = BLOCK_BEDROCK;
 }
-for (let r = 0; r < GRID_ROWS; r++) {
+for (let r = 0; r < 11; r++) {
   grid[r][0] = BLOCK_BEDROCK;
-  grid[r][GRID_COLS - 1] = BLOCK_BEDROCK;
+  grid[r][14] = BLOCK_BEDROCK;
 }
-mapData.deposits.forEach(d => {
-  grid[d.r][d.c] = d.type === 'boss' ? BLOCK_BOSS : BLOCK_ZOMBIE;
-});
+grid[2][10] = BLOCK_ZOMBIE;
 
-const miner = {
-  id: 'miner_test',
-  x: 1,
-  y: 2,
-  classId: 'common',
-  speed: 1,
-  targetDir: 1
-};
+const miners = [
+  { id: 'hero1', x: 9, y: 2, status: 'work', speed: 1, targetBlock: { x: 10, y: 2 } },
+  { id: 'hero2', x: 7, y: 2, status: 'work', speed: 1 },
+];
 
-console.log('Testing miner at (1, 2):');
-console.log('isSolidTerrain(1, 2):', isSolidTerrain(1, 2, grid, true));
-console.log('Neighbors:');
-[
-  { x: 1, y: 1 },
-  { x: 2, y: 2 },
-  { x: 1, y: 3 },
-  { x: 0, y: 2 }
-].forEach(n => {
-  console.log(` (${n.x}, ${n.y}) solid=${isSolidTerrain(n.x, n.y, grid, true)} gridVal=${grid[n.y]?.[n.x]}`);
-});
+console.log('Occupied check for (8, 2):', isCellOccupiedForStop(8, 2, 'hero2', miners, grid));
+console.log('Occupied check for (9, 2):', isCellOccupiedForStop(9, 2, 'hero2', miners, grid));
+console.log('Line of sight from (8, 2) to (10, 2):', hasClearLineOfSight(8, 2, 10, 2));
 
-const act = findNextHeroAction(miner, grid, [miner], true);
-console.log('Action:', act);
+const act = findNextHeroAction(miners[1], grid, miners, true);
+console.log('Act:', act);

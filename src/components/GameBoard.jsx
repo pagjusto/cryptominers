@@ -548,16 +548,18 @@ export default function GameBoard({
         }
 
         // Evento oficial do Boss: duração máxima de 5 minutos desde o snapshot inicial.
-        const bossSession = state.bossBattleSessions?.[activeBossForSession.id];
-        const startedAtMs = Date.parse(bossSession?.startedAt || '');
-        if (bossSession && !bossSession.expired && Number.isFinite(startedAtMs) &&
-            Date.now() - startedAtMs >= BOSS_BATTLE_DURATION_MS) {
-          bossSession.expired = true;
-          callbacksRef.current.onBossExpired?.({
-            bossId: activeBossForSession.id,
-            startedAt: bossSession.startedAt,
-            participants: bossSession.participants
-          });
+        if (activeBossForSession) {
+          const bossSession = state.bossBattleSessions?.[activeBossForSession.id];
+          const startedAtMs = Date.parse(bossSession?.startedAt || '');
+          if (bossSession && !bossSession.expired && Number.isFinite(startedAtMs) &&
+              Date.now() - startedAtMs >= BOSS_BATTLE_DURATION_MS) {
+            bossSession.expired = true;
+            callbacksRef.current.onBossExpired?.({
+              bossId: activeBossForSession.id,
+              startedAt: bossSession.startedAt,
+              participants: bossSession.participants
+            });
+          }
         }
       }
 
