@@ -158,7 +158,7 @@ function drawBaseShelterVisual(ctx, house, miners, now) {
     const col = index % 2;
     const row = Math.floor(index / 2);
     const px = patioX + 35 + col * 58;
-    const py = y + headerH + 50 + row * 62;
+    const py = y + headerH + 50 + row * 62 + Math.sin(now / 520 + index) * 2;
     ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
     ctx.beginPath();
     ctx.ellipse(px, py + 18, 13, 5, 0, 0, Math.PI * 2);
@@ -639,7 +639,7 @@ export default function GameBoard({
           miner.lockedEnemyId = null;
           miner.swingTimer = 0;
 
-          const capacity = houseConfigRef.current?.houseSlots || 5;
+          const capacity = houseConfigRef.current?.houseSlots ?? 5;
           const inHouse = state.miners.filter(m => m.status === 'house').length;
 
           if (inHouse < capacity) {
@@ -708,7 +708,7 @@ export default function GameBoard({
             });
 
             // Se houver sobrevivente na fila (waiting_house), interna imediatamente no leito liberado
-            const capacity = houseConfigRef.current?.houseSlots || 5;
+            const capacity = houseConfigRef.current?.houseSlots ?? 5;
             const currentInHouse = state.miners.filter(m => m.status === 'house').length;
             if (currentInHouse < capacity) {
               const nextInLine = state.miners.find(m => m.status === 'waiting_house');
@@ -728,7 +728,7 @@ export default function GameBoard({
           miner.lockedEnemyId = null;
           miner.swingTimer = 0;
 
-          const capacity = houseConfigRef.current?.houseSlots || 5;
+          const capacity = houseConfigRef.current?.houseSlots ?? 5;
           const inHouse = state.miners.filter(m => m.status === 'house').length;
           if (inHouse < capacity) {
             miner.status = 'house';
@@ -1740,7 +1740,7 @@ export default function GameBoard({
         state.lastRelayCheck = now;
         
         // A. Alocar quem está esperando na fila da Casa se houver leito livre
-        const capacity = houseConfigRef.current?.houseSlots || 5;
+        const capacity = houseConfigRef.current?.houseSlots ?? 5;
         let inHouse = state.miners.filter(m => m.status === 'house').length;
         if (inHouse < capacity) {
           for (const m of state.miners) {
