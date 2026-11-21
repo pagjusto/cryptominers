@@ -29,7 +29,10 @@ import {
   isCanyonTrackOrTunnel, 
   isBaseCompound,
   TACTICAL_ZONES,
-  CORNER_SPAWN_POINTS 
+  CORNER_SPAWN_POINTS,
+  getSpawnZoneCells,
+  isSpawnZoneCell,
+  SPAWN_ZONE_VERSION
 } from './cityMapGeometry.js';
 import { ENEMIES } from '../data/enemiesCatalog.js';
 
@@ -158,36 +161,16 @@ export function generatePlayerMap(playerId = DEFAULT_PLAYER_ID, cycleNumber = 1)
   const maxZombies = MAX_DEPOSITS_PER_MAP - 1;
   const chosenPositions = [];
   const usedKeys = new Set();
+  const spawnCells = getSpawnZoneCells(GRID_COLS, GRID_ROWS);
 
   for (let i = 0; i < maxZombies; i++) {
     const tz = TACTICAL_ZONES[i % TACTICAL_ZONES.length].center;
-    const candidates = [
-      { c: tz.x, r: tz.y },
-      { c: tz.x + 1, r: tz.y },
-      { c: tz.x - 1, r: tz.y },
-      { c: tz.x, r: tz.y + 1 },
-      { c: tz.x, r: tz.y - 1 },
-      { c: tz.x + 1, r: tz.y + 1 },
-      { c: tz.x - 1, r: tz.y - 1 }
-    ].filter(p => {
-      if (p.c <= 0 || p.c >= GRID_COLS - 1 || p.r <= 0 || p.r >= GRID_ROWS - 1) return false;
-      if (isCityBuilding(p.c, p.r) || isBaseCompound(p.c, p.r)) return false;
-      if (usedKeys.has(`${p.c},${p.r}`)) return false;
-      return true;
-    });
-
-    let chosenPos = null;
-    if (candidates.length > 0) {
-      chosenPos = candidates[0];
-    } else {
-      const fallback = validCells.find(p => !usedKeys.has(`${p.c},${p.r}`));
-      if (fallback) chosenPos = fallback;
-    }
-
-    if (chosenPos) {
-      usedKeys.add(`${chosenPos.c},${chosenPos.r}`);
-      chosenPositions.push({ ...chosenPos, targetZone: tz });
-    }
+    const availableSpawns = spawnCells.filter(p => !usedKeys.has(`${p.c},${p.r}`));
+    if (!availableSpawns.length) break;
+    const chosenPos = availableSpawns[Math.floor(Math.random() * availableSpawns.length)];
+    usedKeys.add(`${chosenPos.c},${chosenPos.r}`);
+    // O inimigo nasce na área verde e mantém sua zona tática como destino de patrulha.
+    chosenPositions.push({ ...chosenPos, targetZone: tz });
   }
 
   const mapId = `map_${playerId}_c${cycleNumber}_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
@@ -241,7 +224,7 @@ export function generatePlayerMap(playerId = DEFAULT_PLAYER_ID, cycleNumber = 1)
   });
 
   // 2. Insere o Boss Mutante (substitui o antigo baú com movimento e ataque)
-  const remainingCells = validCells.filter(pos => grid[pos.r][pos.c] === BLOCK_EMPTY);
+  const remainingCells = spawnCells.filter(pos => grid[pos.r][pos.c] === BLOCK_EMPTY);
   if (remainingCells.length > 0) {
     const bossPos = remainingCells[Math.floor(Math.random() * remainingCells.length)];
     const bossConfig = ENEMIES.BOSS;
@@ -285,6 +268,7 @@ export function generatePlayerMap(playerId = DEFAULT_PLAYER_ID, cycleNumber = 1)
     playerId,
     mapId,
     cycleNumber,
+    spawnZoneVersion: SPAWN_ZONE_VERSION,
     createdAt: new Date().toISOString(),
     completedAt: null,
     totalDeposits: deposits.length,
@@ -340,12 +324,38 @@ export function getPlayerMap(playerId = DEFAULT_PLAYER_ID) {
       return generatePlayerMap(playerId, parsed.cycleNumber || 1);
     }
 
+    // Migra o mapa já salvo uma única vez: reposiciona criaturas existentes nas zonas verdes.
+    if (parsed.spawnZoneVersion !== SPAWN_ZONE_VERSION) {
+      const spawnCells = getSpawnZoneCells(GRID_COLS, GRID_ROWS);
+      const active = parsed.deposits.filter(d => !d.isCompleted);
+      const usedSpawnKeys = new Set(active.filter(d => isSpawnZoneCell(d.c, d.r)).map(d => `${d.c},${d.r}`));
+      active.forEach(deposit => {
+        if (isSpawnZoneCell(deposit.c, deposit.r)) return;
+        const options = spawnCells.filter(p => !usedSpawnKeys.has(`${p.c},${p.r}`));
+        if (!options.length) return;
+        const next = options[Math.floor(Math.random() * options.length)];
+        const oldKey = `${deposit.c},${deposit.r}`;
+        const newKey = `${next.c},${next.r}`;
+        if (parsed.grid?.[deposit.r]?.[deposit.c] === deposit.blockId) parsed.grid[deposit.r][deposit.c] = BLOCK_EMPTY;
+        if (parsed.hpMap?.[oldKey] !== undefined) {
+          parsed.hpMap[newKey] = parsed.hpMap[oldKey];
+          delete parsed.hpMap[oldKey];
+        }
+        deposit.c = next.c;
+        deposit.r = next.r;
+        if (parsed.grid?.[next.r]) parsed.grid[next.r][next.c] = deposit.blockId;
+        usedSpawnKeys.add(newKey);
+      });
+      parsed.spawnZoneVersion = SPAWN_ZONE_VERSION;
+      savePlayerMap(playerId, parsed);
+    }
+
     // REGRA OFICIAL DO USUÁRIO: Garante SEMPRE 30 zumbis ativos no mapa (morre 1 nasce outro)
     const activeDeposits = parsed.deposits.filter(d => !d.isCompleted);
     if (activeDeposits.length < MAX_DEPOSITS_PER_MAP) {
-      const validCells = getValidDepositCells(GRID_COLS, GRID_ROWS);
+      const spawnCells = getSpawnZoneCells(GRID_COLS, GRID_ROWS);
       const activeKeys = new Set(activeDeposits.map(d => `${d.c},${d.r}`));
-      const openCells = validCells.filter(pos => !activeKeys.has(`${pos.c},${pos.r}`));
+      const openCells = spawnCells.filter(pos => !activeKeys.has(`${pos.c},${pos.r}`));
 
       const needed = MAX_DEPOSITS_PER_MAP - activeDeposits.length;
       for (let i = 0; i < needed && openCells.length > 0; i++) {
@@ -430,6 +440,7 @@ export function recordDepositDamage(playerId = DEFAULT_PLAYER_ID, c, r, damage =
     // "os zumbis nascem nos cantos do mapa e caminham para as areas definidas proporcionalmente distribuidos"
     // Gera imediatamente um substituto ativo nascendo nos cantos do mapa e mirando a zona com menos criaturas
     const validCells = getValidDepositCells(GRID_COLS, GRID_ROWS);
+    const spawnCells = getSpawnZoneCells(GRID_COLS, GRID_ROWS);
     const activeKeys = new Set(
       mapState.deposits.filter(d => !d.isCompleted).map(d => `${d.c},${d.r}`)
     );
@@ -455,7 +466,7 @@ export function recordDepositDamage(playerId = DEFAULT_PLAYER_ID, c, r, damage =
       (pos.c !== c || pos.r !== r)
     );
 
-    const distantOpenCells = validCells.filter(pos => 
+    const distantOpenCells = spawnCells.filter(pos => 
       !activeKeys.has(`${pos.c},${pos.r}`) &&
       !heroSet.has(`${pos.c},${pos.r}`) &&
       !isCityBuilding(pos.c, pos.r) &&
@@ -464,7 +475,7 @@ export function recordDepositDamage(playerId = DEFAULT_PLAYER_ID, c, r, damage =
       Math.hypot(pos.c - c, pos.r - r) >= minDistance
     );
 
-    const openCells = validCells.filter(pos => 
+    const openCells = spawnCells.filter(pos => 
       !activeKeys.has(`${pos.c},${pos.r}`) && 
       !isCityBuilding(pos.c, pos.r) &&
       !isBaseCompound(pos.c, pos.r) &&
@@ -587,7 +598,7 @@ export function spawnBossInPlayerMap(playerId = DEFAULT_PLAYER_ID, options = {})
   // Remove qualquer boss anterior
   mapState.deposits = mapState.deposits.filter(d => !(d.type === 'boss' || d.blockId === BLOCK_BOSS));
   
-  const validCells = getValidDepositCells();
+  const validCells = getSpawnZoneCells();
   const occupiedSet = new Set(mapState.deposits.map(d => `${d.c},${d.r}`));
   const heroSet = new Set((options.heroTiles || []).map(h => `${h.c},${h.r}`));
   
