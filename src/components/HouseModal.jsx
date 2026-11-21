@@ -10,11 +10,9 @@ export default function HouseModal({
   currentHouseId = 'basic', 
   miners = [], 
   onToggleHouseRest, 
-  onUpgradeHouse, 
   onUpgradeWithFragments,
   constructionFragments = 0,
   minerBalance = 0,
-  walletState = { isConnected: false, usdtBalance: 0 }
 }) {
   const [activeTab, setActiveTab] = useState('beds'); // 'beds' | 'upgrade'
 
@@ -44,26 +42,7 @@ export default function HouseModal({
     }
   };
 
-  const handleBuyUpgrade = (targetHouse) => {
-    const cost = targetHouse.costUsdt || targetHouse.costBcoin || 25;
-    // Permite pagar com MINER in-game ou USDT da carteira
-    const canPayWithMiner = minerBalance >= cost;
-    const canPayWithUsdt = walletState.isConnected && walletState.usdtBalance >= cost;
 
-    if (!canPayWithMiner && !canPayWithUsdt) {
-      alert(`Saldo insuficiente! Esta casa custa $${cost} (MINER ou USDT).`);
-      return;
-    }
-
-    onUpgradeHouse(targetHouse.id, cost);
-    sfx.playLevelUp();
-    confetti({
-      particleCount: 100,
-      spread: 70,
-      origin: { y: 0.6 },
-      colors: [targetHouse.color, '#fbbf24', '#ffffff']
-    });
-  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn select-none font-tech">
