@@ -139,10 +139,10 @@ export default function WalletModal({
               <div className="p-3.5 rounded-2xl bg-gradient-to-r from-blue-950/40 to-slate-900 border border-blue-500/20 text-xs text-slate-300 space-y-1">
                 <div className="flex items-center gap-1.5 font-bold text-blue-400">
                   <ShieldCheck size={16} />
-                  <span>Cotação Oficial da Coins (1 Coins = US$ {(getCryptoZombiesConfig()?.minerCoinUsdtRate || 0.01).toFixed(2)})</span>
+                  <span>Cotação Oficial da Coins (1 Coin = US$ {(getCryptoZombiesConfig()?.minerCoinUsdtRate || 0.01).toFixed(2)})</span>
                 </div>
                 <p className="text-[11px] text-slate-400 leading-relaxed">
-                  Novos heróis são adquiridos diretamente com <b>USDT</b> da sua carteira ou com <b>Coins</b>. Os lucros minerados no jogo são acumulados em <b>Coins</b> e convertidos para USDT com base na cotação oficial configurada (1 Coins = US$ 0,01) no Saque (Claim).
+                  Novos heróis são adquiridos diretamente com <b>USDT</b> da sua carteira ou com <b>Coins</b>. Os lucros minerados no jogo são acumulados em <b>Coins</b> e convertidos para USDT com base na cotação oficial configurada (1 Coin = US$ 0,01) no Saque (Claim).
                 </p>
               </div>
 
