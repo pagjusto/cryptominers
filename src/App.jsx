@@ -28,7 +28,7 @@ import {
 import confetti from 'canvas-confetti';
 import { MINES, INITIAL_MINERS, MINER_CLASSES } from './data/minersData';
 import { HERO_ROSTER, WEAPON_CATALOG, getHeroById, getWeaponById } from './data/heroRoster';
-import { HOUSE_TIERS } from './data/housesData';
+import { HOUSE_TIERS, resolveHouseTier } from './data/housesData';
 import { ENTRY_PACKAGES, calculateWithdrawalTax } from './data/investmentData';
 import { INITIAL_MARKET_LISTINGS, MARKETPLACE_FEE_PCT, FEE_SPLIT } from './data/marketplaceData';
 import { MINER_ROSTER } from './data/minersCatalog';
@@ -302,7 +302,8 @@ export default function App() {
 
   // Casa dos mineradores (House System - sistema próprio de mineração e abrigos)
   const [currentHouseId, setCurrentHouseId] = useState(() => {
-    return localStorage.getItem('crypto_miners_house') || 'tiny';
+    const savedHouseId = localStorage.getItem('crypto_miners_house') || 'basic';
+    return resolveHouseTier(savedHouseId).id;
   });
   const [isHouseOpen, setIsHouseOpen] = useState(false);
 
@@ -577,14 +578,21 @@ export default function App() {
     return result;
   };
 
-  // Evoluir Casa usando Fragmentos de Construção
-  const handleUpgradeHouseWithFragments = (targetHouseId, fragmentsCost) => {
-    if (constructionFragments < fragmentsCost) return;
+  // Evolução permanente e sequencial da base: fragmentos + MNC.
+  const handleUpgradeHouseWithFragments = (targetHouseId, fragmentsCost, mncCost) => {
+    const currentTier = resolveHouseTier(currentHouseId);
+    const targetTier = resolveHouseTier(targetHouseId);
+    if (targetTier.level !== currentTier.level + 1) return;
+    if (constructionFragments < fragmentsCost || bcoin < mncCost) return;
+
     const nextFragments = constructionFragments - fragmentsCost;
+    const nextMnc = parseFloat((bcoin - mncCost).toFixed(3));
     saveStoredConstructionFragments(nextFragments);
     setConstructionFragments(nextFragments);
-    setCurrentHouseId(targetHouseId);
-    localStorage.setItem('crypto_miners_house', targetHouseId);
+    setBcoin(nextMnc);
+    localStorage.setItem('crypto_miners_bcoin', nextMnc.toString());
+    setCurrentHouseId(targetTier.id);
+    localStorage.setItem('crypto_miners_house', targetTier.id);
   };
 
   // Baús de Heróis adquiridos em USDT guardados no Inventário
@@ -788,7 +796,7 @@ export default function App() {
 
   const [totalMinedSession, setTotalMinedSession] = useState(0);
 
-  const currentHouse = HOUSE_TIERS.find(h => h.id === currentHouseId) || HOUSE_TIERS[1];
+  const currentHouse = resolveHouseTier(currentHouseId);
   const minersInHouse = miners.filter(m => m.status === 'house');
 
   const currentMinerRate = cryptoZombiesConfig?.minerCoinUsdtRate || 0.01;
@@ -853,7 +861,7 @@ export default function App() {
             setStudioRevenue(cloudData.profile.studioRevenue);
           }
           if (cloudData.profile?.currentHouseId) {
-            setCurrentHouseId(cloudData.profile.currentHouseId);
+            setCurrentHouseId(resolveHouseTier(cloudData.profile.currentHouseId).id);
           }
           if (cloudData.heroes && cloudData.heroes.length > 0) {
             setMiners(cloudData.heroes);
@@ -1771,6 +1779,7 @@ export default function App() {
                 statsResetTrigger={statsResetTrigger}
                 houseSlots={currentHouse.slots}
                 recoverySpeedPct={currentHouse.recoverySpeedPct || 100}
+                houseVisualTier={currentHouse}
                 gameSpeed={gameSpeed}
               />
 
