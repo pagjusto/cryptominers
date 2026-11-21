@@ -31,7 +31,8 @@ export default function HouseModal({
       return;
     }
     if (onUpgradeWithFragments) {
-      onUpgradeWithFragments(targetHouse.id, fragCost, mncCost);
+      const upgraded = onUpgradeWithFragments(targetHouse.id, fragCost, mncCost);
+      if (upgraded !== true) return;
       sfx.playLevelUp();
       confetti({
         particleCount: 120,
