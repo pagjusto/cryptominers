@@ -202,7 +202,28 @@ function drawBaseShelterVisual(ctx, house, miners, now) {
   ctx.fillStyle = '#e2e8f0';
   ctx.fillText('PÁTIO INTERNO', patioX + patioW / 2, patioY + 9);
 
-  const rosterStart = patioY + 17;
+  // Dra. Íris é uma NPC fixa do ambulatório: desenhada dentro do pátio,
+  // sem coordenadas de mapa nem rotina de movimentação.
+  const doctorX = patioX + patioW / 2;
+  const doctorY = patioY + 27;
+  ctx.save();
+  ctx.fillStyle = '#f1c7a5';
+  ctx.beginPath();
+  ctx.arc(doctorX, doctorY, 4, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#f8fafc';
+  ctx.fillRect(doctorX - 4, doctorY + 4, 8, 9);
+  ctx.fillStyle = '#38bdf8';
+  ctx.fillRect(doctorX - 1, doctorY + 5, 2, 7);
+  ctx.fillStyle = '#e2e8f0';
+  ctx.fillRect(doctorX - 2, doctorY + 7, 4, 2);
+  ctx.font = 'bold 7px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#7dd3fc';
+  ctx.fillText('DRA. ÍRIS', doctorX, doctorY + 20);
+  ctx.restore();
+
+  const rosterStart = patioY + 45;
   const reserveEnd = drawRoster(resting, 'RESERVA', rosterStart, false);
   if (waiting.length > 0) {
     const waitingStart = Math.min(reserveEnd + 2, patioY + patioH - 35);
