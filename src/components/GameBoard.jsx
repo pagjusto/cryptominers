@@ -1637,9 +1637,6 @@ export default function GameBoard({
 
       const railY = 5 * TILE_SIZE + 24;
       drawContinuousCaveFloor(ctx, logicalWidth, logicalHeight, mine, now, isBossAlive);
-      if (mine?.id === 'canyon') {
-        drawBaseShelterVisual(ctx, houseVisualRef.current, state.miners, now);
-      }
       if (mine?.id !== 'canyon') {
         drawTunnelPortals(ctx, logicalWidth, railY);
       }

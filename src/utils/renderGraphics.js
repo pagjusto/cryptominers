@@ -278,7 +278,7 @@ export function initCityMap(onLoaded) {
   }
   const img = new Image();
   img.crossOrigin = 'anonymous';
-  img.src = `/city_map.webp?v=1`;
+  img.src = `/city_map.webp?v=2`;
   img.onload = () => {
     cityBgImg = img;
     cityBgLoaded = true;
