@@ -31,7 +31,7 @@ console.log(`Retorno em 90 dias: $${roiExpected.projectedReturn90d} USD`);
 const withdrawalAmountMnc = 1000; // 1.000 MNC
 const rate = 0.01;
 const grossUsd = withdrawalAmountMnc * rate; // $10.00 USD
-const tax15 = calculateWithdrawalTax(100, withdrawalAmountMnc, rate); // $10 minerado vs $100 investido -> ROI 10% (<100%) -> tax 15%
+const tax15 = calculateWithdrawalTax(100, grossUsd); // $10 sacado vs $100 investido -> ROI 10% (<50%) -> tax 15%
 console.log(`Saque de 1.000 MNC = US$ ${grossUsd} bruto. Taxa com $100 investido: ${tax15}%`);
 if (tax15 !== 15) throw new Error('Taxa esperada de 15%');
 

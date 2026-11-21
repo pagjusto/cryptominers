@@ -356,15 +356,16 @@ export function executeConstructionBossRoll(miners = [], config = DEFAULT_CONSTR
   const won = forceSuccess || roll <= activeChance.finalChance;
 
   if (won) {
-    // Gerar Baú de Construção único
+    // Gerar Baú de Poção e Fragmentos exclusivo do Boss
     const chestId = `CBC-${Date.now().toString(36).toUpperCase()}-${Math.floor(Math.random() * 9000 + 1000)}`;
     const newChest = {
       id: chestId,
-      name: 'Baú de Construção',
-      icon: '🧱',
+      name: 'Baú de Poção e Fragmentos',
+      icon: '🎁',
+      image: '/items/boss_chest.png',
       color: '#f59e0b',
-      tagline: 'Material Raro de Expansão',
-      description: 'Baú especial obtido durante a combate ativo. Contém exatamente 1 Fragmento de Construção para evolução de casas.',
+      tagline: 'Recompensa Exclusiva do Boss',
+      description: 'Baú exclusivo obtido ao derrotar o Boss Mutante. Contém Poções do Rejuvenescimento, Fragmentos de Construção e chance de Baú de Herói.',
       foundAt: getBrasiliaTimeString(),
       foundDateBrasilia: dailyStats.date,
       bossId,
@@ -395,7 +396,7 @@ export function executeConstructionBossRoll(miners = [], config = DEFAULT_CONSTR
         chanceApplied: activeChance.finalChance,
         isCapped: activeChance.isCapped,
         roll,
-        result: 'SUCESSO: Baú de Construção concedido ao inventário'
+        result: 'SUCESSO: Baú de Poção e Fragmentos concedido ao inventário'
       });
 
       // 4. Notifica a aplicação para abrir o modal de celebração

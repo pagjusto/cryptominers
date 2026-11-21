@@ -52,7 +52,7 @@ export default function InventoryModal({
                 INVENTÁRIO DO JOGADOR
               </h3>
               <span className="text-[11px] text-slate-400">
-                Baús de Heróis adquiridos e Baús de Construção do Boss
+                Baús de Heróis adquiridos e Baús de Poção e Fragmentos do Boss
               </span>
             </div>
           </div>
@@ -86,8 +86,8 @@ export default function InventoryModal({
                 : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
             }`}
           >
-            <img src="/items/construction_fragment.png" alt="Construção" className="w-3.5 h-3.5 object-contain" />
-            <span>Construção ({constructionChests.length})</span>
+            <img src="/items/boss_chest.png" alt="Poção e Fragmentos" className="w-3.5 h-3.5 object-contain" />
+            <span>Poção e Fragmentos ({constructionChests.length})</span>
           </button>
         </div>
 
@@ -263,7 +263,7 @@ export default function InventoryModal({
                     🎉
                   </div>
                   <h4 className="font-arcade text-xs text-emerald-300">
-                    BAÚ DO BOSS ABERTO!
+                    BAÚ DE POÇÃO E FRAGMENTOS ABERTO!
                   </h4>
                   <p className="text-[11px] text-slate-300">
                     Recompensas: <b>{justOpenedChest.openingResult?.rewardParts?.join(' + ') || 'Nenhuma recompensa registrada'}</b>.
@@ -278,15 +278,17 @@ export default function InventoryModal({
                 </div>
               )}
 
-              {/* Lista de Baús de Construção Fechados */}
+              {/* Lista de Baús de Poção e Fragmentos Fechados */}
               {constructionChests.length === 0 ? (
                 <div className="py-8 text-center bg-slate-950/60 rounded-2xl border border-dashed border-slate-800 p-6 space-y-2">
-                  <span className="text-4xl block mb-2">🧱</span>
+                  <div className="w-14 h-14 mx-auto mb-2 flex items-center justify-center">
+                    <img src="/items/boss_chest.png" alt="Baú de Poção e Fragmentos" className="w-12 h-12 object-contain filter drop-shadow-[0_2px_6px_rgba(0,0,0,0.6)]" />
+                  </div>
                   <h4 className="font-tech font-bold text-sm text-slate-300">
-                    Nenhum Baú de Construção no momento
+                    Nenhum Baú de Poção e Fragmentos no momento
                   </h4>
                   <p className="text-xs text-slate-400 max-w-sm mx-auto leading-relaxed">
-                    A cada <b>1 hora de mineração ativa</b> no navegador com heróis trabalhando, o sistema realiza uma verificação com chance de sortear um Baú de Construção (máximo de <b>3 baús por dia</b>). O recebimento é 100% automático no seu inventário!
+                    Recompensa <b>exclusiva do Boss Mutante</b>! Participe das batalhas de defesa quando o Boss invadir a base às <b>12:00</b> e <b>20:00</b>. Ao derrotá-lo com sua equipe, o baú é entregue automaticamente aqui no seu inventário (máximo de <b>3 baús por dia</b>).
                   </p>
                 </div>
               ) : (
@@ -297,12 +299,12 @@ export default function InventoryModal({
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/40 p-1 flex items-center justify-center shrink-0 group-hover:scale-105 transition shadow-inner">
-                        <img src="/items/boss_chest.png" alt="Baú do Boss" className="w-full h-full object-contain filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]" />
+                        <img src="/items/boss_chest.png" alt="Baú de Poção e Fragmentos" className="w-full h-full object-contain filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]" />
                       </div>
                       <div>
                         <div className="flex items-center gap-1.5">
                           <h4 className="font-arcade text-xs text-amber-300">
-                            {chest.name || 'Baú de Construção'}
+                            {chest.name || 'Baú de Poção e Fragmentos'}
                           </h4>
                           <span className="text-[9px] font-bold font-mono bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full border border-amber-500/30">
                             {chest.id}
@@ -315,7 +317,7 @@ export default function InventoryModal({
                         </span>
 
                         <span className="text-[10px] text-slate-500 block">
-                          Encontrado em: {chest.foundAt || 'Mineração ativa'}
+                          Encontrado em: {chest.foundAt || 'Boss Mutante derrotado'}
                         </span>
                       </div>
                     </div>
@@ -352,7 +354,7 @@ export default function InventoryModal({
           <span>
             {activeTab === 'heroes' 
               ? 'Abra cada baú individualmente com ou sem bônus de anúncio.' 
-              : 'Baús do Boss concedem Fragmentos de Construção e Poções do Rejuvenescimento.'}
+              : 'Baús de Poção e Fragmentos são exclusivos do Boss e concedem Poções e Fragmentos.'}
           </span>
         </div>
 

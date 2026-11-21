@@ -40,10 +40,10 @@ export default function ConstructionChestFoundModal({
 
         {/* Título e Mensagem */}
         <h2 className="font-arcade text-base text-amber-400 mb-1">
-          BAÚ DO BOSS ENCONTRADO!
+          BAÚ DE POÇÃO E FRAGMENTOS!
         </h2>
         <p className="text-xs text-slate-300 max-w-xs mx-auto leading-relaxed mb-4">
-          O Boss Mutante foi derrotado e dropou este <b>Baú do Boss</b> exclusivo com fragmentos, poções e chances de herói!
+          O Boss Mutante foi derrotado e dropou este <b>Baú de Poção e Fragmentos</b> exclusivo com poções, fragmentos e chances de herói!
         </p>
 
         {/* Quadro Informativo do Baú */}
@@ -54,13 +54,13 @@ export default function ConstructionChestFoundModal({
           </div>
 
           <div className="flex justify-between text-slate-400">
-            <span>Recompensa do Baú:</span>
-            <span className="font-mono text-emerald-400 font-bold">1 Fragmento de Construção</span>
+            <span>Recompensas Possíveis:</span>
+            <span className="font-mono text-emerald-400 font-bold">Poções + Fragmentos + Herói</span>
           </div>
 
           <div className="flex justify-between text-slate-400">
-            <span>Utilidade:</span>
-            <span className="text-slate-300 font-tech">Evolução exclusiva de Casas</span>
+            <span>Origem:</span>
+            <span className="text-amber-300 font-tech">Exclusivo do Boss Mutante</span>
           </div>
 
           <div className="flex justify-between text-slate-400 border-t border-slate-800/80 pt-2">
