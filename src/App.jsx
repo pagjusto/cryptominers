@@ -580,7 +580,7 @@ export default function App() {
 
   // Evolução permanente e sequencial da base: fragmentos + MNC.
   const handleUpgradeHouseWithFragments = (targetHouseId, fragmentsCost, mncCost) => {
-    const currentTier = resolveHouseTier(currentHouseId);
+    const currentTier = resolveHouseTier(localStorage.getItem('crypto_miners_house') || currentHouseId);
     const targetTier = resolveHouseTier(targetHouseId);
     if (targetTier.level !== currentTier.level + 1) return;
     if (constructionFragments < fragmentsCost || bcoin < mncCost) return;
