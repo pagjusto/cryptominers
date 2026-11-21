@@ -58,7 +58,7 @@ export default function UserProfileModal({
 
   // Saque (Claim)
   const [withdrawAmount, setWithdrawAmount] = useState(() => {
-    return bcoinBalance >= 5000 ? bcoinBalance.toFixed(2) : '5000';
+    return bcoinBalance >= 4000 ? bcoinBalance.toFixed(2) : '4000';
   });
   const [withdrawSuccessReceipt, setWithdrawSuccessReceipt] = useState(null);
   const [withdrawHistory, setWithdrawHistory] = useState(() => {
