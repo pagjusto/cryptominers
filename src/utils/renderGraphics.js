@@ -39,17 +39,17 @@ export const DEFAULT_BILLBOARD_CONFIG = {
   width: 216,
   height: 122,
 
-  // Sombra Projetada no Solo (Reflete fielmente o formato retangular do outdoor)
+  // Sombra Projetada no Solo (Calibrada pelo Usuário em 2026-11-20)
   // REGRA OFICIAL DO USUÁRIO: "sombra do outdor esta redondaa quando deveria refletir a forma do outdor retangular"
-  shadowSkewX: -0.80,        // Inclinação lateral da sombra (sol do Noroeste)
-  shadowSkewY: -0.18,        // Perspectiva no solo
-  shadowScaleX: 1.05,        // Largura da sombra
-  shadowScaleY: 0.42,        // Achatamento no solo (projeção no plano do chão)
-  shadowRotDeg: -12,         // Rotação da sombra
-  shadowOffsetX: 26,         // Deslocamento X da projeção
-  shadowOffsetY: 82,         // Deslocamento Y da projeção (ancorada no solo sob o outdoor)
-  shadowOpacity: 0.60,       // Opacidade da sombra do painel retangular
-  shadowBlur: 2,             // Suavidade / difusão da sombra
+  shadowSkewX: -0.52,
+  shadowSkewY: 0.24,
+  shadowScaleX: 1.08,
+  shadowScaleY: 0.74,
+  shadowRotDeg: -7,
+  shadowOffsetX: 23,
+  shadowOffsetY: 83,
+  shadowOpacity: 0.60,
+  shadowBlur: 0,
   
   // Sombra de contato nos pés metálicos
   footShadowOpacity: 0.85
