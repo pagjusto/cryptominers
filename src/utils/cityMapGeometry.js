@@ -66,11 +66,11 @@ export function isCityObstacle(c, r) {
   // Limites exteriores do mapa (fora do grid de combate)
   if (col < 0 || col >= GRID_COLS || row < 0 || row >= GRID_ROWS) return true;
 
-  // 1. CONSTRUÇÕES - RUÍNA NOROESTE (Prédio de concreto destruído no topo esquerdo + escombros, caixote e pedras)
-  // Cobre os dois andares, teto da ruína e todo o leque de escombros demarcados pelo usuário em vermelho:
-  if (row === 0 && (col >= 2 && col <= 4)) return true;
-  if (row === 1 && (col >= 1 && col <= 4)) return true; // Cobre pedras na esquerda col=1 e corpo do prédio
-  if (row === 2 && (col >= 1 && col <= 3)) return true; // Cobre caixote de madeira col=1, escombros e rampa col=2..3
+  // 1. CONSTRUÇÕES - RUÍNA NOROESTE (Prédio de concreto destruído no topo esquerdo + todos os escombros, caixote e lajes)
+  // Cobre os dois andares, teto da ruína, escombros caídos à esquerda e à direita e lajes da entrada:
+  if (row === 0 && (col >= 1 && col <= 5)) return true;
+  if (row === 1 && (col >= 1 && col <= 5)) return true; // Cobre pedras col=1, corpo do prédio e escombros laterais col=4..5
+  if (row === 2 && (col >= 1 && col <= 4)) return true; // Cobre caixote de madeira col=1, escombros e rampa col=2..4
 
   // 2. OUTDOOR / BILLBOARD "CRYPTOZOMBIES" (Norte no gramado)
   // Cobre a placa inteira e suportes: col=7..9 em row=0..1
@@ -130,7 +130,7 @@ export const TACTICAL_ZONES = [
   // 2. Noroeste - Gramado Atrás da Ruína (Canto superior esquerdo)
   { id: 'nw_grass_high', name: 'Noroeste Gramado Alto', center: { x: 5, y: 1 } },
   // 3. Norte - Estrada Aberta Norte
-  { id: 'n_road_open', name: 'Norte Estrada', center: { x: 5, y: 2 } },
+  { id: 'n_road_open', name: 'Norte Estrada', center: { x: 6, y: 2 } },
   // 4. Oeste - Estrada de Asfalto Livre
   { id: 'w_road_side', name: 'Oeste Estrada Livre', center: { x: 2, y: 5 } },
   // 5. Sudoeste - Gramado Sul da Avenida
@@ -160,8 +160,8 @@ export const TACTICAL_ZONES = [
  * Zumbis surgem nas bordas e cantos extremos e caminham para as áreas livres definidas.
  */
 export const CORNER_SPAWN_POINTS = [
-  { x: 1, y: 3, c: 1, r: 3 }, { x: 5, y: 1, c: 5, r: 1 }, { x: 10, y: 1, c: 10, r: 1 },
-  { x: 5, y: 2, c: 5, r: 2 }, { x: 12, y: 1, c: 12, r: 1 }, { x: 13, y: 1, c: 13, r: 1 },
+  { x: 1, y: 3, c: 1, r: 3 }, { x: 6, y: 2, c: 6, r: 2 }, { x: 10, y: 1, c: 10, r: 1 },
+  { x: 3, y: 3, c: 3, r: 3 }, { x: 12, y: 1, c: 12, r: 1 }, { x: 13, y: 1, c: 13, r: 1 },
   { x: 1, y: 7, c: 1, r: 7 }, { x: 1, y: 9, c: 1, r: 9 }, { x: 2, y: 9, c: 2, r: 9 },
   { x: 3, y: 9, c: 3, r: 9 }, { x: 6, y: 9, c: 6, r: 9 }, { x: 7, y: 9, c: 7, r: 9 },
   { x: 9, y: 9, c: 9, r: 9 }, { x: 2, y: 5, c: 2, r: 5 }, { x: 2, y: 6, c: 2, r: 6 },
@@ -201,14 +201,43 @@ export function getSpawnZoneCells(cols = GRID_COLS, rows = GRID_ROWS) {
 
 // Heróis nascem em estradas e gramados 100% livres e desimpedidos (fora da base central)
 export const SAFE_HERO_SPAWN_POINTS = [
-  { x: 1, y: 3 }, { x: 5, y: 1 }, { x: 10, y: 1 }, { x: 12, y: 1 }, { x: 13, y: 1 },
-  { x: 5, y: 2 }, { x: 10, y: 2 }, { x: 12, y: 2 }, { x: 3, y: 3 }, { x: 4, y: 3 },
-  { x: 1, y: 4 }, { x: 2, y: 5 }, { x: 12, y: 5 }, { x: 1, y: 6 }, { x: 2, y: 6 },
-  { x: 12, y: 6 }, { x: 1, y: 7 }, { x: 2, y: 7 }, { x: 1, y: 8 }, { x: 2, y: 8 },
-  { x: 1, y: 9 }, { x: 2, y: 9 }, { x: 3, y: 9 }, { x: 5, y: 9 }, { x: 6, y: 9 },
-  { x: 7, y: 9 }, { x: 9, y: 9 }, { x: 10, y: 9 }, { x: 13, y: 7 }
+  { x: 1, y: 3 }, { x: 6, y: 2 }, { x: 10, y: 1 }, { x: 12, y: 1 }, { x: 13, y: 1 },
+  { x: 3, y: 3 }, { x: 10, y: 2 }, { x: 12, y: 2 }, { x: 4, y: 3 }, { x: 1, y: 4 },
+  { x: 2, y: 5 }, { x: 12, y: 5 }, { x: 1, y: 6 }, { x: 2, y: 6 }, { x: 12, y: 6 },
+  { x: 1, y: 7 }, { x: 2, y: 7 }, { x: 1, y: 8 }, { x: 2, y: 8 }, { x: 1, y: 9 },
+  { x: 2, y: 9 }, { x: 3, y: 9 }, { x: 5, y: 9 }, { x: 6, y: 9 }, { x: 7, y: 9 },
+  { x: 9, y: 9 }, { x: 10, y: 9 }, { x: 13, y: 7 }
 ];
 
 export function getSafeHeroSpawn(index = 0) {
   return SAFE_HERO_SPAWN_POINTS[index % SAFE_HERO_SPAWN_POINTS.length];
+}
+
+/**
+ * Posições oficiais dos Especialistas do Abrigo (Dra. Íris e John Armeiro)
+ * por Nível de Evolução da Base (1, 2 e 3):
+ * 
+ * - Nível 1 (Básico, 5 leitos): Mantém as posições originais consolidadas.
+ * - Nível 2 (Reforçado, 10 leitos): Dra. Íris no ponto azul (pátio inferior), Armeiro no ponto vermelho (sala de armas).
+ * - Nível 3 (Avançado, 15 leitos): Dra. Íris no ponto azul (entre os leitos inferiores), Armeiro no ponto vermelho (sala de armas).
+ */
+export const SHELTER_SPECIALISTS_CONFIG = {
+  1: {
+    iris: { x: 490, y: 386 },
+    armorer: { x: 666, y: 358 }
+  },
+  2: {
+    iris: { x: 538, y: 471 },
+    armorer: { x: 678, y: 378 }
+  },
+  3: {
+    iris: { x: 462, y: 425 },
+    armorer: { x: 681, y: 372 }
+  }
+};
+
+export function getShelterSpecialistPos(level = 1, role = 'iris') {
+  const lvl = Math.max(1, Math.min(3, Number(level) || 1));
+  const cfg = SHELTER_SPECIALISTS_CONFIG[lvl] || SHELTER_SPECIALISTS_CONFIG[1];
+  return cfg[role] || (role === 'armorer' ? cfg.armorer : cfg.iris);
 }

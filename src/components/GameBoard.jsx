@@ -41,7 +41,9 @@ import {
   isBaseCompound,
   isSpawnZoneCell,
   TACTICAL_ZONES,
-  CORNER_SPAWN_POINTS 
+  CORNER_SPAWN_POINTS,
+  getShelterSpecialistPos,
+  SHELTER_SPECIALISTS_CONFIG 
 } from '../utils/cityMapGeometry';
 import { 
   findNextHeroAction, 
@@ -80,7 +82,7 @@ function returnHeroesFromBossEvent(state, bossId, onMinersChange = null) {
         let returnX = orig.x;
         let returnY = orig.y;
         if (isCityBuilding(returnX, returnY) || isBaseCompound(returnX, returnY)) {
-          const safePt = SAFE_HERO_SPAWN_POINTS.find(p => !isCityBuilding(p.x, p.y) && !isBaseCompound(p.x, p.y)) || { x: 5, y: 2 };
+          const safePt = SAFE_HERO_SPAWN_POINTS.find(p => !isCityBuilding(p.x, p.y) && !isBaseCompound(p.x, p.y)) || { x: 6, y: 2 };
           returnX = safePt.x;
           returnY = safePt.y;
         }
@@ -131,26 +133,59 @@ function returnHeroesFromBossEvent(state, bossId, onMinersChange = null) {
   state.activeBossEvent = null;
 }
 
-// Configuração oficial dos 5 leitos hospitalares da base médica e da Dra. Íris
-const BASE_HOSPITAL_BEDS = [
-  { id: 1, x: 391, y: 377, angle: 0.86 },
-  { id: 2, x: 436, y: 349, angle: 0.86 },
-  { id: 3, x: 480, y: 324, angle: 0.86 },
-  { id: 4, x: 519, y: 300, angle: 0.86 },
-  { id: 5, x: 557, y: 277, angle: 0.86 }
-];
-const DRA_IRIS_POS = { x: 490, y: 386 };
-// Posição oficial do John Armeiro no piso da Sala de Armas
-const ARMEIRO_POS = { x: 666, y: 358 };
+// Configuração oficial dos leitos hospitalares da base médica por Nível do Abrigo (1: 5 leitos, 2: 10 leitos, 3: 15 leitos)
+export const BASE_HOSPITAL_BEDS_TIERS = {
+  1: [
+    { id: 1, x: 391, y: 377, angle: 0.86 },
+    { id: 2, x: 436, y: 349, angle: 0.86 },
+    { id: 3, x: 480, y: 324, angle: 0.86 },
+    { id: 4, x: 519, y: 300, angle: 0.86 },
+    { id: 5, x: 557, y: 277, angle: 0.86 }
+  ],
+  2: [
+    { id: 1, x: 343, y: 398, angle: 0.86 },
+    { id: 2, x: 388, y: 370, angle: 0.86 },
+    { id: 3, x: 432, y: 345, angle: 0.86 },
+    { id: 4, x: 471, y: 321, angle: 0.86 },
+    { id: 5, x: 509, y: 298, angle: 0.86 },
+    { id: 6, x: 380, y: 457, angle: 0.86 },
+    { id: 7, x: 425, y: 429, angle: 0.86 },
+    { id: 8, x: 469, y: 404, angle: 0.86 },
+    { id: 9, x: 508, y: 380, angle: 0.86 },
+    { id: 10, x: 546, y: 357, angle: 0.86 }
+  ],
+  3: [
+    { id: 1, x: 343, y: 398, angle: 0.86 },
+    { id: 2, x: 388, y: 370, angle: 0.86 },
+    { id: 3, x: 432, y: 345, angle: 0.86 },
+    { id: 4, x: 471, y: 321, angle: 0.86 },
+    { id: 5, x: 509, y: 298, angle: 0.86 },
+    { id: 6, x: 380, y: 457, angle: 0.86 },
+    { id: 7, x: 425, y: 429, angle: 0.86 },
+    { id: 8, x: 469, y: 404, angle: 0.86 },
+    { id: 9, x: 508, y: 380, angle: 0.86 },
+    { id: 10, x: 546, y: 357, angle: 0.86 },
+    { id: 11, x: 417, y: 516, angle: 0.86 },
+    { id: 12, x: 462, y: 488, angle: 0.86 },
+    { id: 13, x: 506, y: 463, angle: 0.86 },
+    { id: 14, x: 545, y: 439, angle: 0.86 },
+    { id: 15, x: 583, y: 416, angle: 0.86 }
+  ]
+};
 
 // Renderiza a Dra. Íris e os heróis internados em tratamento nos leitos do hospital
 function drawBaseInfirmaryAndPatients(ctx, state, now) {
+  const shelterLevel = state?.shelterLevel || 1;
+  const irisPos = getShelterSpecialistPos(shelterLevel, 'iris');
+  const armorerPos = getShelterSpecialistPos(shelterLevel, 'armorer');
+  const beds = BASE_HOSPITAL_BEDS_TIERS[shelterLevel] || BASE_HOSPITAL_BEDS_TIERS[1];
+
   // 1. DRA. ÍRIS (MÉDICA CHEFE DO ABRIGO)
   // REGRA OFICIAL DO USUÁRIO: se a Dra. Íris não estiver ativa, NÃO aparece no abrigo
   const isIrisActive = Boolean(state?.isIrisActive);
   if (isIrisActive) {
-    const ix = DRA_IRIS_POS.x;
-    const iy = DRA_IRIS_POS.y;
+    const ix = irisPos.x;
+    const iy = irisPos.y;
 
     const irisMiner = {
       id: 'iris',
@@ -199,7 +234,7 @@ function drawBaseInfirmaryAndPatients(ctx, state, now) {
   // 2. HERÓIS EM RECUPERAÇÃO NOS LEITOS (m.status === 'house')
   const recoveringHeroes = (state.miners || []).filter(m => m.status === 'house');
 
-  BASE_HOSPITAL_BEDS.forEach((bed, bedIdx) => {
+  beds.forEach((bed, bedIdx) => {
     const patient = recoveringHeroes[bedIdx];
     if (!patient) return; // Leito vazio permanece com a arte do mapa
 
@@ -315,7 +350,7 @@ function drawBaseInfirmaryAndPatients(ctx, state, now) {
   // REGRA OFICIAL DO USUÁRIO: se o armeiro não estiver ativo, NÃO aparece no abrigo
   const isArmorerActive = Boolean(state?.isArmorerActive);
   if (isArmorerActive) {
-    drawArmorerCharacter(ctx, ARMEIRO_POS.x, ARMEIRO_POS.y, now, true);
+    drawArmorerCharacter(ctx, armorerPos.x, armorerPos.y, now, true);
   }
 
   ctx.restore();
@@ -614,12 +649,21 @@ export default function GameBoard({
     isArmorerActive: () => Boolean(isArmorerActive)
   };
 
+  const resolveShelterLevel = (tier) => {
+    if (typeof tier === 'number') return Math.max(1, Math.min(3, tier));
+    if (tier?.level) return Math.max(1, Math.min(3, tier.level));
+    if (tier?.slots >= 15) return 3;
+    if (tier?.slots >= 10) return 2;
+    return 1;
+  };
+
   useEffect(() => {
     if (gameStateRef.current) {
       gameStateRef.current.isArmorerActive = Boolean(isArmorerActive);
       gameStateRef.current.isIrisActive = Boolean(isIrisActive);
+      gameStateRef.current.shelterLevel = resolveShelterLevel(houseVisualTier);
     }
-  }, [isArmorerActive, isIrisActive]);
+  }, [isArmorerActive, isIrisActive, houseVisualTier]);
 
   const houseConfigRef = useRef({ houseSlots, recoverySpeedPct });
   houseConfigRef.current = { houseSlots, recoverySpeedPct };
@@ -637,6 +681,7 @@ export default function GameBoard({
     activeBossEvent: null, // Sistema oficial de transporte e retorno dos heróis no evento Boss
     isIrisActive: Boolean(isIrisActive),
     isArmorerActive: Boolean(isArmorerActive),
+    shelterLevel: resolveShelterLevel(houseVisualTier),
     miners: miners,
     floatTexts: [],
     particles: [],
@@ -1097,7 +1142,7 @@ export default function GameBoard({
             !isCityBuilding(p.x, p.y) && 
             !isBaseCompound(p.x, p.y) && 
             !state.miners.some(other => other.id !== m.id && Math.round(other.x) === p.x && Math.round(other.y) === p.y)
-          ) || { x: 5, y: 2 };
+          ) || { x: 6, y: 2 };
 
           m.x = fallbackCell.x;
           m.y = fallbackCell.y;
@@ -2481,8 +2526,11 @@ export default function GameBoard({
       // Feedback do cursor sobre John Armeiro e Dra. Íris no abrigo (somente quando visíveis e ativos)
       const isCurArmorerActive = Boolean(gameStateRef.current?.isArmorerActive);
       const isCurIrisActive = Boolean(gameStateRef.current?.isIrisActive);
-      const distArmorer = Math.hypot(coords.x - ARMEIRO_POS.x, coords.y - ARMEIRO_POS.y);
-      const distIris = Math.hypot(coords.x - DRA_IRIS_POS.x, coords.y - DRA_IRIS_POS.y);
+      const curLvl = gameStateRef.current?.shelterLevel || 1;
+      const curIrisPos = getShelterSpecialistPos(curLvl, 'iris');
+      const curArmorerPos = getShelterSpecialistPos(curLvl, 'armorer');
+      const distArmorer = Math.hypot(coords.x - curArmorerPos.x, coords.y - curArmorerPos.y);
+      const distIris = Math.hypot(coords.x - curIrisPos.x, coords.y - curIrisPos.y);
       if ((isCurArmorerActive && distArmorer < 38) || (isCurIrisActive && distIris < 38)) {
         canvasRef.current.style.cursor = 'pointer';
         return;
@@ -2561,16 +2609,19 @@ export default function GameBoard({
   const handleCanvasClick = (e) => {
     if (!canvasRef.current) return;
     const coords = getCanvasCoords(e.clientX, e.clientY);
+    const curLvl = gameStateRef.current?.shelterLevel || 1;
+    const curIrisPos = getShelterSpecialistPos(curLvl, 'iris');
+    const curArmorerPos = getShelterSpecialistPos(curLvl, 'armorer');
 
     // 1. Clique próximo ao John Armeiro (Sala de Armas)
-    const distArmorer = Math.hypot(coords.x - ARMEIRO_POS.x, coords.y - ARMEIRO_POS.y);
+    const distArmorer = Math.hypot(coords.x - curArmorerPos.x, coords.y - curArmorerPos.y);
     if (distArmorer < 38) {
       callbacksRef.current.onOpenArmorerHire?.();
       return;
     }
 
     // 2. Clique próximo à Dra. Íris (Enfermaria / Leitos)
-    const distIris = Math.hypot(coords.x - DRA_IRIS_POS.x, coords.y - DRA_IRIS_POS.y);
+    const distIris = Math.hypot(coords.x - curIrisPos.x, coords.y - curIrisPos.y);
     if (distIris < 38) {
       callbacksRef.current.onOpenHouseModal?.();
       return;
