@@ -803,23 +803,23 @@ export function drawMinerCharacter(ctx, mx, my, miner, classInfo, now, swingProg
     ctx.fillStyle = '#38bdf8';
     ctx.shadowColor = '#000000';
     ctx.shadowBlur = 4;
-    ctx.fillText('Zzz', 14, -22 + floatY);
+    ctx.fillText('Zzz', 16, -34 + floatY);
     ctx.shadowColor = 'transparent';
   }
 
   // 5. Barra de Estamina Nítida com Contorno Escuro
-  const barW = 30;
-  const barH = 4.5;
+  const barW = 32;
+  const barH = 5;
   const pct = Math.max(0, miner.currentStamina / miner.maxStamina);
 
   ctx.fillStyle = 'rgba(0, 0, 0, 0.9)';
   ctx.beginPath();
-  ctx.roundRect(-barW / 2 - 1, -29, barW + 2, barH + 2, 2.5);
+  ctx.roundRect(-barW / 2 - 1, -42, barW + 2, barH + 2, 2.5);
   ctx.fill();
 
   ctx.fillStyle = pct > 0.4 ? '#22c55e' : (pct > 0.15 ? '#f59e0b' : '#ef4444');
   ctx.beginPath();
-  ctx.roundRect(-barW / 2, -28, barW * pct, barH, 2);
+  ctx.roundRect(-barW / 2, -41, barW * pct, barH, 2);
   ctx.fill();
 
   // 6. Estrelas de Fusão do Herói (★) exibidas acima da barra
@@ -831,7 +831,7 @@ export function drawMinerCharacter(ctx, mx, my, miner, classInfo, now, swingProg
     ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
     ctx.shadowBlur = 3;
     const starStr = '★'.repeat(stars);
-    ctx.fillText(starStr, 0, -33);
+    ctx.fillText(starStr, 0, -47);
     ctx.shadowColor = 'transparent';
   }
 

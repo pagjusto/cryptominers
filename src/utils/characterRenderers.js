@@ -4598,8 +4598,8 @@ export function drawArmorerCharacter(ctx, ax, ay, now, isActive = true) {
   }
 
   const bobY = Math.sin((now || 0) * 0.003) * 0.8;
-  const pw = 34; // Proporcional aos 32px dos heróis
-  const ph = 38;
+  const pw = 44; // Proporcional ao tamanho normal dos heróis
+  const ph = 50;
 
   if (armorerLoaded && armorerImg) {
     ctx.save();
@@ -4613,8 +4613,8 @@ export function drawArmorerCharacter(ctx, ax, ay, now, isActive = true) {
     // Se estiver ativo, desenha a chave mecânica empunhada com animação sutil
     if (armorerWrenchLoaded && armorerWrenchImg) {
       ctx.save();
-      const wrenchW = 20;
-      const wrenchH = 20;
+      const wrenchW = 26;
+      const wrenchH = 26;
       const wrenchAngle = 0.2 + Math.sin((now || 0) * 0.0035) * 0.08;
       ctx.translate(pw * 0.28, -ph * 0.35);
       ctx.rotate(wrenchAngle);
@@ -4669,12 +4669,12 @@ if (typeof window !== 'undefined') {
 export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swingProgress = 0, isMining = false) {
   initRosterSprites();
 
-  // Dimensões proporcionais dos Heróis baseadas na entrada do bunker (~36px de altura)
-  const pw = 32; // Largura do herói calibrada
-  const ph = 36; // Altura do herói calibrada (entra com folga na porta do bunker de 57px)
+  // Dimensões originais e normais dos Heróis
+  const pw = 42; // Largura normal do herói
+  const ph = 48; // Altura normal do herói
   const wScale = weapon?.scale || 1.0;
-  const gw = 28 * wScale; // Largura proporcional da arma (calibrada por arma)
-  const gh = 15 * wScale; // Altura proporcional da arma
+  const gw = 38 * wScale; // Largura proporcional normal da arma
+  const gh = 21 * wScale; // Altura proporcional normal da arma
 
   const spriteIndex = hero?.spriteIndex ?? 0;
   const sourceIndex = weapon?.sourceIndex ?? spriteIndex ?? 0;
