@@ -208,13 +208,11 @@ Regras definidas na conversa de 22/11/2026:
 
 O ataque individual de 1% do HP máximo é um evento discreto; não deve ser confundido com a taxa contínua de desgaste de combate de 0,11875 PV/s. Para calcular a perda total durante um evento, contabilizar ambos somente se a implementação mantiver os dois mecanismos ativos.
 
-### Pontos ainda necessários para a simulação cronológica de 24 horas
+### Parâmetros para a simulação cronológica de 24 horas
 
-- Duração efetiva de cada evento de Boss ou quantidade de ciclos de ataque durante o evento.
-- Quantidade de heróis próximos/participantes em cada evento.
-- Confirmação de que o desgaste contínuo de combate 3× e o dano discreto de 1% por ataque são cumulativos na implementação.
-- Regras de ocupação e fila de recuperação aplicadas simultaneamente à equipe real.
-- Os valores de tempo do Abrigo Reforçado e Avançado para as raridades devem ser derivados dos multiplicadores aprovados de 125% e 150% sobre a velocidade de recuperação básica, sem confundir velocidade com duração.
+- Capacidade do ambulatório: 5 leitos no Abrigo Básico, 10 no Reforçado e 15 no Avançado.
+- A quantidade de leitos define quantos heróis recuperam simultaneamente; os excedentes aguardam em fila FIFO.
+- Os multiplicadores de recuperação são: Básico 100%, Reforçado 125% e Avançado 150% da velocidade básica.
 
 Não assumir duração de evento, número de heróis atingidos, ou perda total por Boss sem esses parâmetros.
 
@@ -226,9 +224,17 @@ Não assumir duração de evento, número de heróis atingidos, ou perda total p
 
 ## Capacidade e fila de recuperação
 
+A capacidade do ambulatório depende do nível do abrigo:
+
+| Nível do abrigo | Leitos disponíveis |
+|---|---:|
+| Básico | **5** |
+| Reforçado | **10** |
+| Avançado | **15** |
+
 - A equipe de combate possui **15 vagas**.
-- O ambulatório possui **15 vagas independentes**.
-- Se o ambulatório estiver cheio, os heróis feridos aguardam em fila FIFO (primeiro que entra, primeiro que sai).
+- A quantidade de leitos não altera o limite da equipe; ela define quantos heróis podem recuperar simultaneamente.
+- Se todos os leitos do nível atual estiverem ocupados, os heróis feridos excedentes aguardam em fila FIFO (primeiro que entra, primeiro que sai).
 - O encaminhamento do herói ao ambulatório acontece automaticamente ao atingir 5% de HP.
 - O médico Dra. Íris automatiza o encaminhamento dos heróis feridos ao ambulatório; não acelera a recuperação.
 
