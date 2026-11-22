@@ -57,24 +57,10 @@ Este documento registra as regras de gameplay aprovadas para o sistema de sobrev
 
 ## Contratação do médico e ROI
 
-- O jogador pode pagar em **USDT ou MNC**, escolhendo a moeda no momento da contratação.
-- Referência econômica: **1 MNC = 0,01 USDT**.
-- Preços aprovados:
-
-  | Plano | Duração | USDT | MNC |
-  |---|---:|---:|---:|
-  | Mensal | 30 dias | 5,20 | 520 |
-  | Trimestral | 90 dias | 13,80 | 1.380 |
-  | Semestral | 180 dias | 25,00 | 2.500 |
-
-- A renovação pode ser **manual ou automática**.
-- Na renovação manual, o jogador confirma a operação e pode pagar em USDT ou MNC.
-- A renovação automática é opcional e exclusiva em **MNC**. No vencimento, o sistema verifica o saldo disponível; havendo MNC suficiente, renova pelo mesmo período contratado.
-- Se não houver MNC suficiente, a renovação automática falha e o médico para de atuar imediatamente.
-- Não há débito automático em USDT.
-- Quando o plano expira, o médico para instantaneamente. O jogador pode renovar imediatamente, inclusive após o vencimento.
+- O custo aprovado da Dra. Íris é de **1.500 Coins por 30 dias**.
+- A contratação e cada renovação de 30 dias devem ser contabilizadas como despesa de **1.500 Coins** no cálculo do ROI líquido.
+- Não utilizar a tabela anterior de preços em USDT/MNC (5,20 USDT / 520 MNC) para este cenário; ela fica substituída pelo custo de 1.500 Coins por 30 dias.
 - O custo do médico deve ser considerado no ROI líquido, sem alterar a taxa bruta de produção de MNC dos sobreviventes.
-
 ## Cadência de ataque dos heróis e vida do Boss
 
 A cadência numérica de cada arma é definida em `WEAPON_CATALOG.attacksPerSecond` no código. Os valores aprovados para os 12 heróis do elenco são:
