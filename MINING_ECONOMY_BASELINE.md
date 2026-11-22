@@ -287,7 +287,7 @@ Esta é a tabela de preços comerciais definida para os pacotes de 1, 5, 10 e 15
 **Importante:** esta seção documenta os preços comerciais. Ela não altera automaticamente os preços de compra atualmente implementados no código do jogo; a implementação deve ser feita separadamente após revisão do fluxo de compra.
 
 
-## Balanceamento econômico de 90 dias — decisão de 22/11/2026
+## Balanceamento econômico de 90 dias — atualização de 22/11/2026
 
 ### Meta e conversão Coin/USDT
 
@@ -295,65 +295,64 @@ Esta é a tabela de preços comerciais definida para os pacotes de 1, 5, 10 e 15
 - Equivalência financeira pretendida: **430 USDT**.
 - Cotação fixa definida para este modelo: **1 Coin = 0,01 USDT**; equivalentemente, **1 USDT = 100 Coins**.
 - Portanto, **43.000 Coins = 430 USDT**.
-- Não interpretar a cotação como 1 USDT = 0,01 Coin; essa seria a relação inversa e não fecharia a meta.
+- Não interpretar a cotação como 1 USDT = 0,01 Coin.
 
-### Premissas do cenário de balanceamento
+### Premissas do cenário
 
 - Equipe mediana: 15 heróis (6 Common, 4 Rare, 4 Epic e 1 Legendary).
 - Produção-base da equipe: 480,24 Coins por 24 horas de mineração válida.
-- Recuperação 60% mais rápida: duração de recuperação igual a **40% do tempo normal**.
-- Abrigo Básico até o dia 54; upgrade para Abrigo Reforçado no dia 55.
-- Para esta projeção específica, não aplicar redução de eficiência por envelhecimento antes do dia 90; aplicar 90% somente no dia 90.
-- Despesas projetadas até o dia 90: **10.500 Coins**, compostas por Dra. Íris (3 ciclos de 30 dias = 4.500 Coins), Armeiro (3 ciclos de 30 dias = 4.500 Coins) e upgrade do Abrigo Reforçado (1.500 Coins).
-- Meta bruta necessária: **53.500 Coins** (43.000 líquidos + 10.500 de despesas).
+- A recuperação é 60% mais rápida: o tempo de recuperação corresponde a 40% do tempo normal.
+- Abrigo Básico, com 5 leitos, até o dia 54; upgrade para Abrigo Reforçado, com 10 leitos, no dia 55.
+- A fila do ambulatório segue FIFO: primeiro a chegar, primeiro a ser atendido. Quando um leito fica livre, o próximo herói da fila inicia a recuperação.
+- Para esta projeção, não aplicar redução de eficiência por envelhecimento antes do dia 90; aplicar 90% somente no dia 90.
+- Despesas projetadas até o dia 90: **10.500 Coins**: Dra. Íris (3 ciclos de 30 dias = 4.500 Coins), Armeiro (3 ciclos de 30 dias = 4.500 Coins) e upgrade do Abrigo Reforçado (1.500 Coins).
+- Meta bruta necessária: aproximadamente **53.500 Coins** para alcançar 43.000 Coins líquidos após as despesas.
 
-### Multiplicador uniforme de produção
+### Simulação cronológica com fila FIFO
 
-Foi escolhida a opção de aumentar todas as raridades pelo mesmo percentual, preservando as proporções relativas entre elas.
+Foi adotada como referência de balanceamento a simulação cronológica de 90 dias informada e aprovada pelo usuário, com a fila FIFO considerada explicitamente:
 
-A estimativa média de produção com recuperação 60% mais rápida, antes do multiplicador, é de aproximadamente **31.927,65 Coins brutos em 90 dias**. Para alcançar 53.500 Coins brutos, o fator matemático é:
+- Produção bruta de referência antes do multiplicador: **31.406,88 Coins** em 90 dias.
+- Produção média de referência: **348,97 Coins/dia**.
+- Composição: 6 Common, 4 Rare, 4 Epic e 1 Legendary.
+- Capacidade: 5 leitos até o dia 54 e 10 leitos a partir do dia 55.
+- A simulação de referência não inclui ataques do Boss nem envelhecimento, exceto a premissa específica de eficiência de 90% somente no dia 90 usada na projeção econômica.
+- Os resultados de espera e ocupação da fila apresentados na análise foram: 2.911 atendimentos; espera média geral de 5,8 minutos; maior espera registrada de 5h04; ocupação total dos leitos de aproximadamente 57,5%. Esses indicadores são referências da simulação e devem ser revalidados caso a engine ou as premissas operacionais mudem.
 
-    multiplicador = 53.500 ÷ 31.927,65
-    multiplicador = 1,6756635706×
-    aumento percentual = 67,56635706%
+### Fator uniforme de balanceamento aprovado
 
-Taxas diárias resultantes por herói, sem arredondamento interno:
+O usuário aprovou definir o fator uniforme de produção em **1,7034×**, preservando as proporções relativas entre as raridades.
 
-| Raridade | Produção-base (Coins/herói/dia) | Produção balanceada (Coins/herói/dia) |
+    produção_balanceada = produção_simulada_com_FIFO × 1,7034
+    31.406,884 × 1,7034 = 53.498,49 Coins (aprox.)
+
+O fator corresponde a um aumento de aproximadamente **70,34%** sobre a produção de referência com FIFO.
+
+Taxas diárias resultantes por herói, antes de aplicar o fator de envelhecimento do dia 90:
+
+| Raridade | Produção-base (Coins/herói/dia) | Produção com fator 1,7034× |
 |---|---:|---:|
-| Common | 20,88 | 34,9878553542 |
-| Rare | 31,32 | 52,4817830313 |
-| Epic | 41,76 | 69,9757107084 |
-| Legendary | 62,64 | 104,9635660626 |
+| Common | 20,88 | 35,5650 |
+| Rare | 31,32 | 53,3475 |
+| Epic | 41,76 | 71,1300 |
+| Legendary | 62,64 | 106,6950 |
 
-Equipe mediana balanceada:
+### Resultado econômico projetado
 
-| Raridade | Quantidade | Produção diária da raridade |
-|---|---:|---:|
-| Common | 6 | 209,9271321257 |
-| Rare | 4 | 209,9271321253 |
-| Epic | 4 | 279,9028428337 |
-| Legendary | 1 | 104,9635660626 |
-| **Total** | **15** | **804,7206731469 Coins/dia** |
-
-### Projeção por período
-
-Aplicando o mesmo fator uniforme à estimativa média anterior:
-
-| Período | Produção bruta estimada |
+| Indicador | Valor |
 |---|---:|
-| Dias 0–54 (Abrigo Básico) | 31.614,03 Coins |
-| Dias 55–89 (Abrigo Reforçado) | 21.337,30 Coins |
-| Dia 90 (eficiência de 90%) | 548,67 Coins |
-| **Total bruto** | **53.500,00 Coins** |
-| Despesas | **10.500,00 Coins** |
-| **Saldo líquido** | **43.000,00 Coins** |
-| **Equivalência** | **430,00 USDT** |
+| Produção bruta simulada com fator 1,7034× | **53.498,49 Coins** |
+| Dra. Íris — 3 ciclos | 4.500,00 Coins |
+| Armeiro — 3 ciclos | 4.500,00 Coins |
+| Upgrade do Abrigo Reforçado | 1.500,00 Coins |
+| Total de despesas | **10.500,00 Coins** |
+| Saldo líquido projetado | **42.998,49 Coins** |
+| Equivalência a 100 Coins/USDT | **429,98 USDT** |
 
-**Status:** multiplicador uniforme de 1,6756635706× registrado como parâmetro provisório de balanceamento matemático, não como resultado de simulação cronológica validada. A projeção usa disponibilidade média simplificada e ainda não reproduz evento a evento os ataques do Boss, ferimentos aleatórios, ocupação dos leitos, fila FIFO e tempos individuais de recuperação. Antes de tratar a meta como garantida ou alterar a produção definitiva da engine, validar com simulação cronológica reproduzível.
+O fator **1,7034×** fica definido como o parâmetro aprovado de balanceamento para este cenário. Por arredondamento, a projeção resulta em aproximadamente 2 Coins abaixo da meta exata de 43.000 Coins líquidos; para fins de planejamento, equivale a aproximadamente 430 USDT.
 
 ### Serviços contratados
 
 - **Dra. Íris:** 1.500 Coins por 30 dias. Automatiza o resgate de todos os heróis feridos; não aumenta leitos nem velocidade de recuperação.
-- **Armeiro:** 1.500 Coins por 30 dias. Automatiza um conserto de arma a cada 24 horas durante a contratação. O preço de contratação inclui os consertos; não há cobrança adicional por reparo.
+- **Armeiro:** 1.500 Coins por 30 dias. Automatiza um conserto de arma a cada 24 horas durante a contratação. O preço inclui os consertos; não há taxa adicional por reparo.
 - Cada contratação/renovação de 30 dias é contabilizada como despesa no ROI líquido, sem alterar a produção bruta.
