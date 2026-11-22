@@ -165,3 +165,11 @@ A composição acima é **apenas uma simulação de referência do cenário medi
 - Cada acerto causa dano discreto de 1% do HP máximo do herói atingido.
 - **Não aplicar dano contínuo acumulativo do Boss nem multiplicador de desgaste 3×.** A regra anterior de dano acumulativo foi descartada.
 - O herói que atingir 5% de HP é retirado imediatamente do combate/mineração e encaminhado ao ambulatório conforme as regras de resgate.
+
+## Reposição automática durante o Boss — decisão de 22/11/2026
+
+- Quando um sobrevivente ficar ferido durante o Boss e for encaminhado ao ambulatório, sua vaga poderá ser preenchida por outro sobrevivente disponível.
+- **A reposição automática só acontece quando a Dra. Íris estiver contratada e ativa.**
+- Sem a Dra. Íris contratada, não ocorre reposição automática; o jogador poderá realizar a substituição manualmente, respeitando a regra de que somente sobreviventes feridos podem ser substituídos durante o Boss.
+- O sobrevivente que entra como substituto pode combater normalmente, mas não passa a integrar o snapshot imutável da batalha e não recebe participação no sorteio do Baú do Boss daquele evento.
+- A substituição não altera a elegibilidade dos sobreviventes que iniciaram a batalha.
