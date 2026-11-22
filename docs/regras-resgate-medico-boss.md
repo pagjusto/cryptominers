@@ -147,3 +147,21 @@ Considerando a equipe de referência definida em `MINING_ECONOMY_BASELINE.md` (6
 | **Total** | **15** | | **33,0667%** |
 
 A composição acima é **apenas uma simulação de referência do cenário mediano**, não uma equipe fixa ou obrigatória para os jogadores. A chance real varia conforme a quantidade e a raridade dos sobreviventes elegíveis na equipe de cada jogador. O cálculo é a soma direta das chances individuais, conforme a regra aditiva implementada na engine; não é uma probabilidade composta por independência. Independentemente da composição da equipe ou da soma bruta calculada, a chance efetivamente aplicada **nunca pode ultrapassar 40% por jogador e por Boss**. Quando a soma ultrapassar 40%, o sistema limita o resultado aplicado a 40%.
+
+
+## Armeiro e automação de consertos — decisão de 22/11/2026
+
+- O Armeiro custa **1.500 Coins por 30 dias**, tanto na contratação inicial quanto em cada renovação.
+- Enquanto contratado, automatiza **um conserto de arma a cada 24 horas**.
+- O valor de 1.500 Coins inclui todos os consertos do período; não cobrar taxa adicional por reparo.
+- A contratação e cada renovação são despesas do ROI líquido; não alteram a produção bruta de mineração.
+- A Dra. Íris custa **1.500 Coins por 30 dias**. Dra. Íris + Armeiro totalizam 3.000 Coins por ciclo de 30 dias.
+- Na projeção de 90 dias, considerar três ciclos de cada serviço: 9.000 Coins no total, além do upgrade do abrigo de 1.500 Coins.
+
+## Regras de dano do Boss — atualização de 22/11/2026
+
+- O Boss ataca uma vez por segundo.
+- Cada ataque escolhe aleatoriamente um dos 15 heróis participantes; o mesmo herói pode ser escolhido em ataques consecutivos.
+- Cada acerto causa dano discreto de 1% do HP máximo do herói atingido.
+- **Não aplicar dano contínuo acumulativo do Boss nem multiplicador de desgaste 3×.** A regra anterior de dano acumulativo foi descartada.
+- O herói que atingir 5% de HP é retirado imediatamente do combate/mineração e encaminhado ao ambulatório conforme as regras de resgate.
