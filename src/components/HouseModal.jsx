@@ -14,6 +14,9 @@ export default function HouseModal({
   onUpgradeWithFragments,
   constructionFragments = 0,
   minerBalance = 0,
+  isIrisActive = true,
+  irisContract = null,
+  onToggleIrisActive = null,
   isArmorerActive = false,
   armorerContract = null,
   onOpenArmorerHire
@@ -110,7 +113,7 @@ export default function HouseModal({
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
-                <span>🔨 Sala de Armas</span>
+                <span>🔨 John Armeiro</span>
                 {isArmorerActive ? (
                   <span className="w-2 h-2 rounded-full bg-emerald-400 inline-block animate-pulse" />
                 ) : (
@@ -142,6 +145,41 @@ export default function HouseModal({
         {activeTab === 'beds' && (
           <div className="flex-1 overflow-y-auto no-scrollbar py-4 space-y-4">
             
+            {/* Banner da Dra. Íris (Médica Chefe do Abrigo) */}
+            <div className="p-3.5 rounded-2xl bg-gradient-to-r from-emerald-500/15 via-slate-950 to-teal-500/15 border border-emerald-500/40 flex items-center justify-between gap-3 shadow-md">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl border-2 border-emerald-400 bg-slate-950 overflow-hidden flex items-center justify-center shrink-0 shadow-[0_0_12px_rgba(16,185,129,0.3)]">
+                  <img src="/assets/heroes/iris.png" alt="Dra. Íris" className="w-full h-full object-contain filter drop-shadow" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-arcade text-xs sm:text-sm text-emerald-400">Dra. Íris</h4>
+                    <span className={`text-[9px] px-2 py-0.5 rounded-full border font-bold font-mono ${
+                      isIrisActive ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' : 'bg-slate-800 text-slate-400 border-slate-700'
+                    }`}>
+                      {isIrisActive ? '● ATIVA NO ABRIGO' : '○ INATIVA (NÃO APARECE)'}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-300 mt-0.5 font-medium">
+                    Médica Cirurgiã Chefe • Atendimento e Resgate nos Leitos
+                  </p>
+                </div>
+              </div>
+
+              {onToggleIrisActive && (
+                <button
+                  onClick={onToggleIrisActive}
+                  className={`px-3 py-1.5 rounded-xl font-tech text-xs font-bold transition border cursor-pointer active:scale-95 ${
+                    isIrisActive
+                      ? 'bg-emerald-950/80 text-emerald-300 border-emerald-500/50 hover:bg-emerald-900/80'
+                      : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700 hover:text-white'
+                  }`}
+                >
+                  {isIrisActive ? 'DESATIVAR' : 'ATIVAR MÉDICA'}
+                </button>
+              )}
+            </div>
+
             {/* Informação do Revezamento */}
             <div className="p-3 rounded-2xl bg-slate-950/60 border border-slate-800 text-xs text-slate-300 flex items-center justify-between">
               <span className="flex items-center gap-1.5">
@@ -293,18 +331,18 @@ export default function HouseModal({
           </div>
         )}
 
-        {/* CONTEÚDO DA ABA 2: SALA DE ARMAS & OFICINA DO MESTRE ARMEIRO */}
+        {/* CONTEÚDO DA ABA 2: SALA DE ARMAS & OFICINA DO JOHN ARMEIRO */}
         {activeTab === 'armory' && (
           <div className="flex-1 overflow-y-auto no-scrollbar py-4 space-y-4">
             
-            {/* Banner de Apresentação do Mestre Armeiro */}
+            {/* Banner de Apresentação do John Armeiro */}
             <div className="p-4 rounded-3xl bg-gradient-to-r from-amber-500/15 via-slate-950 to-orange-500/15 border-2 border-amber-500/40 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-4">
                 <div className="relative">
                   <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl border-2 border-amber-400 bg-slate-950 shadow-[0_0_20px_rgba(245,158,11,0.35)] overflow-hidden flex items-center justify-center shrink-0">
                     <img 
                       src="/assets/heroes/armeiro.png" 
-                      alt="Mestre Armeiro" 
+                      alt="John Armeiro" 
                       className="w-full h-full object-contain filter drop-shadow" 
                     />
                   </div>
@@ -316,7 +354,7 @@ export default function HouseModal({
                 <div>
                   <div className="flex items-center gap-2 flex-wrap">
                     <h3 className="font-arcade text-base text-amber-400">
-                      Mestre Armeiro
+                      John Armeiro
                     </h3>
                     <span className="text-[10px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full border border-amber-500/40 font-bold font-mono">
                       SALA DE ARMAS
@@ -337,14 +375,14 @@ export default function HouseModal({
                     ? 'bg-emerald-950/80 text-emerald-300 border-emerald-500/50 shadow-[0_0_10px_rgba(16,185,129,0.25)]' 
                     : 'bg-amber-950/60 text-amber-300 border-amber-500/40'
                 }`}>
-                  {isArmorerActive ? '● OFICINA EM OPERAÇÃO' : '○ AGUARDANDO CONTRATAÇÃO'}
+                  {isArmorerActive ? '● OFICINA EM OPERAÇÃO' : '○ INATIVO (NÃO APARECE)'}
                 </span>
 
                 <button
                   onClick={onOpenArmorerHire}
                   className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-arcade text-xs font-bold transition shadow-lg shadow-amber-950/40 cursor-pointer active:scale-95 shrink-0"
                 >
-                  {isArmorerActive ? 'GERENCIAR PLANO' : 'CONTRATAR ARMEIRO'}
+                  {isArmorerActive ? 'GERENCIAR PLANO' : 'CONTRATAR JOHN ARMEIRO'}
                 </button>
               </div>
             </div>

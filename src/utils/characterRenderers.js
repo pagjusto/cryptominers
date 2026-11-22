@@ -4570,9 +4570,12 @@ export function initArmorerSprites() {
 }
 
 /**
- * Renderiza o Mestre Armeiro na Sala de Armas do Abrigo.
+ * Renderiza o John Armeiro na Sala de Armas do Abrigo.
+ * Regra: se não estiver ativo, NÃO aparece no abrigo.
  */
 export function drawArmorerCharacter(ctx, ax, ay, now, isActive = true) {
+  if (!isActive) return;
+
   initArmorerSprites();
 
   ctx.save();
@@ -4585,17 +4588,15 @@ export function drawArmorerCharacter(ctx, ax, ay, now, isActive = true) {
   ctx.fill();
 
   // Halo suave e brilhante se a oficina estiver ativa
-  if (isActive) {
-    const pulse = 0.9 + Math.sin((now || 0) * 0.004) * 0.1;
-    const grad = ctx.createRadialGradient(0, 12, 2, 0, 12, 20 * pulse);
-    grad.addColorStop(0, 'rgba(245, 158, 11, 0.35)');
-    grad.addColorStop(0.6, 'rgba(245, 158, 11, 0.12)');
-    grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.ellipse(0, 12, 20 * pulse, 7 * pulse, 0, 0, Math.PI * 2);
-    ctx.fill();
-  }
+  const pulse = 0.9 + Math.sin((now || 0) * 0.004) * 0.1;
+  const grad = ctx.createRadialGradient(0, 12, 2, 0, 12, 20 * pulse);
+  grad.addColorStop(0, 'rgba(245, 158, 11, 0.35)');
+  grad.addColorStop(0.6, 'rgba(245, 158, 11, 0.12)');
+  grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.ellipse(0, 12, 20 * pulse, 7 * pulse, 0, 0, Math.PI * 2);
+  ctx.fill();
 
   const bobY = Math.sin((now || 0) * 0.003) * 0.8;
   // Calibrado para ter o exato mesmo tamanho visual da Dra. Íris e dos outros heróis (~35px de altura)
@@ -4607,7 +4608,7 @@ export function drawArmorerCharacter(ctx, ax, ay, now, isActive = true) {
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
     ctx.translate(0, bobY);
-    // Renderiza o Armeiro virado levemente para o pátio central (virado para a esquerda)
+    // Renderiza John Armeiro virado levemente para o pátio central (virado para a esquerda)
     ctx.scale(-1, 1);
     ctx.drawImage(armorerImg, -pw / 2, -ph + 14, pw, ph);
 
@@ -4629,11 +4630,11 @@ export function drawArmorerCharacter(ctx, ax, ay, now, isActive = true) {
     ctx.fillRect(-12, -32, 24, 32);
   }
 
-  // Emblema e Crachá Flutuante: "🔨 Mestre Armeiro"
+  // Emblema e Crachá Flutuante: "🔨 John Armeiro"
   ctx.font = 'bold 10px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  const badgeText = isActive ? '🔨 Mestre Armeiro' : '🔨 Armeiro (Inativo)';
+  const badgeText = '🔨 John Armeiro';
   const textWidth = ctx.measureText(badgeText).width;
   const badgeW = textWidth + 14;
   const badgeH = 17;
@@ -4644,15 +4645,13 @@ export function drawArmorerCharacter(ctx, ax, ay, now, isActive = true) {
   ctx.beginPath();
   ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 8);
   ctx.fill();
-  ctx.strokeStyle = isActive ? 'rgba(245, 158, 11, 0.75)' : 'rgba(148, 163, 184, 0.5)';
+  ctx.strokeStyle = 'rgba(245, 158, 11, 0.75)';
   ctx.lineWidth = 1.2;
   ctx.stroke();
 
-  ctx.fillStyle = isActive ? '#fef3c7' : '#94a3b8';
-  if (isActive) {
-    ctx.shadowColor = 'rgba(245, 158, 11, 0.6)';
-    ctx.shadowBlur = 4;
-  }
+  ctx.fillStyle = '#fef3c7';
+  ctx.shadowColor = 'rgba(245, 158, 11, 0.6)';
+  ctx.shadowBlur = 4;
   ctx.fillText(badgeText, 0, badgeY + badgeH / 2);
   ctx.shadowBlur = 0;
 

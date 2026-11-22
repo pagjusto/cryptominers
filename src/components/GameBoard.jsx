@@ -57,57 +57,61 @@ const BASE_HOSPITAL_BEDS = [
   { id: 5, x: 557, y: 277, angle: 0.86 }
 ];
 const DRA_IRIS_POS = { x: 490, y: 386 };
-// Posição oficial do Mestre Armeiro no piso da Sala de Armas (marcado pelo círculo vermelho do usuário)
+// Posição oficial do John Armeiro no piso da Sala de Armas
 const ARMEIRO_POS = { x: 666, y: 358 };
 
 // Renderiza a Dra. Íris e os heróis internados em tratamento nos leitos do hospital
 function drawBaseInfirmaryAndPatients(ctx, state, now) {
-  // 1. DRA. ÍRIS (MÉDICA CHEFE DO ABRIGO - Modelo oficial do spritesheet idêntico ao seu avatar)
-  const ix = DRA_IRIS_POS.x;
-  const iy = DRA_IRIS_POS.y;
+  // 1. DRA. ÍRIS (MÉDICA CHEFE DO ABRIGO)
+  // REGRA OFICIAL DO USUÁRIO: se a Dra. Íris não estiver ativa, NÃO aparece no abrigo
+  const isIrisActive = Boolean(state?.isIrisActive);
+  if (isIrisActive) {
+    const ix = DRA_IRIS_POS.x;
+    const iy = DRA_IRIS_POS.y;
 
-  const irisMiner = {
-    id: 'iris',
-    heroId: 'iris',
-    name: 'Dra. Íris',
-    classId: 'medic',
-    spriteIndex: 4,
-    weaponId: 'medical-kit',
-    rarity: 'common',
-    status: 'stationed',
-    isMining: false
-  };
+    const irisMiner = {
+      id: 'iris',
+      heroId: 'iris',
+      name: 'Dra. Íris',
+      classId: 'medic',
+      spriteIndex: 4,
+      weaponId: 'medical-kit',
+      rarity: 'common',
+      status: 'stationed',
+      isMining: false
+    };
 
-  // Renderiza a Dra. Íris com seu modelo oficial do catálogo e spritesheet (virada para os leitos)
-  drawMinerCharacter(ctx, ix, iy, irisMiner, null, now, 0, -1, 4);
+    // Renderiza a Dra. Íris com seu modelo oficial do catálogo e spritesheet (virada para os leitos)
+    drawMinerCharacter(ctx, ix, iy, irisMiner, null, now, 0, -1, 4);
 
-  // Emblema e Crachá Flutuante: "🩺 Dra. Íris"
-  const bobY = Math.sin((now || 0) * 0.003) * 0.8;
-  ctx.save();
-  ctx.font = 'bold 10px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  const badgeText = '🩺 Dra. Íris';
-  const textWidth = ctx.measureText(badgeText).width;
-  const badgeW = textWidth + 14;
-  const badgeH = 17;
-  const badgeX = ix - badgeW / 2;
-  const badgeY = iy - 34 + bobY;
+    // Emblema e Crachá Flutuante: "🩺 Dra. Íris"
+    const bobY = Math.sin((now || 0) * 0.003) * 0.8;
+    ctx.save();
+    ctx.font = 'bold 10px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    const badgeText = '🩺 Dra. Íris';
+    const textWidth = ctx.measureText(badgeText).width;
+    const badgeW = textWidth + 14;
+    const badgeH = 17;
+    const badgeX = ix - badgeW / 2;
+    const badgeY = iy - 34 + bobY;
 
-  ctx.fillStyle = 'rgba(15, 23, 42, 0.88)';
-  ctx.beginPath();
-  ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 8);
-  ctx.fill();
-  ctx.strokeStyle = 'rgba(56, 189, 248, 0.75)';
-  ctx.lineWidth = 1.2;
-  ctx.stroke();
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.88)';
+    ctx.beginPath();
+    ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 8);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(56, 189, 248, 0.75)';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
 
-  ctx.fillStyle = '#e0f2fe';
-  ctx.shadowColor = 'rgba(56, 189, 248, 0.6)';
-  ctx.shadowBlur = 4;
-  ctx.fillText(badgeText, ix, badgeY + badgeH / 2);
-  ctx.shadowBlur = 0;
-  ctx.restore();
+    ctx.fillStyle = '#e0f2fe';
+    ctx.shadowColor = 'rgba(56, 189, 248, 0.6)';
+    ctx.shadowBlur = 4;
+    ctx.fillText(badgeText, ix, badgeY + badgeH / 2);
+    ctx.shadowBlur = 0;
+    ctx.restore();
+  }
 
   // 2. HERÓIS EM RECUPERAÇÃO NOS LEITOS (m.status === 'house')
   const recoveringHeroes = (state.miners || []).filter(m => m.status === 'house');
@@ -224,10 +228,12 @@ function drawBaseInfirmaryAndPatients(ctx, state, now) {
     }
   });
 
-  // 3. MESTRE ARMEIRO (SALA DE ARMAS DO ABRIGO)
-  // Posicionado na ala leste da base (sala de armas), reparando e forjando equipamentos
+  // 3. JOHN ARMEIRO (SALA DE ARMAS DO ABRIGO)
+  // REGRA OFICIAL DO USUÁRIO: se o armeiro não estiver ativo, NÃO aparece no abrigo
   const isArmorerActive = Boolean(state?.isArmorerActive);
-  drawArmorerCharacter(ctx, ARMEIRO_POS.x, ARMEIRO_POS.y, now, isArmorerActive);
+  if (isArmorerActive) {
+    drawArmorerCharacter(ctx, ARMEIRO_POS.x, ARMEIRO_POS.y, now, true);
+  }
 
   ctx.restore();
 }
@@ -441,6 +447,7 @@ export default function GameBoard({
   onDropGear,
   onOpenArmorerHire,
   onOpenHouseModal,
+  isIrisActive = true,
   isArmorerActive = false,
   statsResetTrigger = 0,
   houseSlots = 5,
@@ -520,14 +527,16 @@ export default function GameBoard({
     onMinersChange,
     onOpenArmorerHire,
     onOpenHouseModal,
+    isIrisActive: () => Boolean(isIrisActive),
     isArmorerActive: () => Boolean(isArmorerActive)
   };
 
   useEffect(() => {
     if (gameStateRef.current) {
       gameStateRef.current.isArmorerActive = Boolean(isArmorerActive);
+      gameStateRef.current.isIrisActive = Boolean(isIrisActive);
     }
-  }, [isArmorerActive]);
+  }, [isArmorerActive, isIrisActive]);
 
   const houseConfigRef = useRef({ houseSlots, recoverySpeedPct });
   houseConfigRef.current = { houseSlots, recoverySpeedPct };
@@ -542,6 +551,7 @@ export default function GameBoard({
     minerStats: {},
     lastStatsEmit: 0,
     bossBattleSessions: {},
+    isIrisActive: Boolean(isIrisActive),
     isArmorerActive: Boolean(isArmorerActive),
     miners: miners,
     floatTexts: [],
@@ -2212,10 +2222,12 @@ export default function GameBoard({
       const coords = getCanvasCoords(e.clientX, e.clientY);
       const towerCoords = window.sirenTowerCoordinates;
 
-      // Feedback do cursor sobre o Armeiro e Dra. Íris no abrigo
+      // Feedback do cursor sobre John Armeiro e Dra. Íris no abrigo (somente quando visíveis e ativos)
+      const isCurArmorerActive = Boolean(gameStateRef.current?.isArmorerActive);
+      const isCurIrisActive = Boolean(gameStateRef.current?.isIrisActive);
       const distArmorer = Math.hypot(coords.x - ARMEIRO_POS.x, coords.y - ARMEIRO_POS.y);
       const distIris = Math.hypot(coords.x - DRA_IRIS_POS.x, coords.y - DRA_IRIS_POS.y);
-      if (distArmorer < 38 || distIris < 38) {
+      if ((isCurArmorerActive && distArmorer < 38) || (isCurIrisActive && distIris < 38)) {
         canvasRef.current.style.cursor = 'pointer';
         return;
       }
@@ -2294,7 +2306,7 @@ export default function GameBoard({
     if (!canvasRef.current) return;
     const coords = getCanvasCoords(e.clientX, e.clientY);
 
-    // 1. Clique próximo ao Mestre Armeiro (Sala de Armas)
+    // 1. Clique próximo ao John Armeiro (Sala de Armas)
     const distArmorer = Math.hypot(coords.x - ARMEIRO_POS.x, coords.y - ARMEIRO_POS.y);
     if (distArmorer < 38) {
       callbacksRef.current.onOpenArmorerHire?.();

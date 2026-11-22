@@ -1,5 +1,5 @@
 // CRYPTOZOMBIES — CATÁLOGO OFICIAL DE ESPECIALISTAS DO ABRIGO
-// Médica Íris (Hospital) & Mestre Armeiro (Sala de Armas)
+// Médica Íris (Hospital) & John Armeiro (Sala de Armas)
 
 export const STAFF_PLANS = [
   {
@@ -49,7 +49,7 @@ export const STAFF_MEMBERS = {
   },
   armeiro: {
     id: 'armeiro',
-    name: 'Mestre Armeiro',
+    name: 'John Armeiro',
     title: 'Armeiro & Mecânico da Base',
     room: 'Sala de Armas & Oficina',
     role: 'Manutenção e Reparo Automático de Armas',

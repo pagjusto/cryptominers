@@ -55,7 +55,7 @@ export default function ArmorerHireModal({
         className="relative w-full max-w-xl max-h-[92vh] rounded-3xl p-5 sm:p-6 bg-slate-900 border-2 border-amber-500/50 text-slate-100 shadow-2xl flex flex-col overflow-hidden"
         onClick={e => e.stopPropagation()}
       >
-        {/* TOPO: Cabeçalho com Avatar e Apresentação do Mestre Armeiro */}
+        {/* TOPO: Cabeçalho com Avatar e Apresentação do John Armeiro */}
         <div className="flex items-start justify-between pb-4 border-b border-slate-800 shrink-0">
           <div className="flex items-center gap-3.5">
             {/* Moldura do Armeiro com Borda Dourada */}
@@ -113,7 +113,7 @@ export default function ArmorerHireModal({
               <ShieldCheck size={18} className={isCurrentlyActive ? 'text-emerald-400' : 'text-amber-400'} />
               <div>
                 <span className="font-bold block">
-                  {isCurrentlyActive ? 'Oficina do Armeiro Ativa' : 'Armeiro em Standby (Disponível para Contratação)'}
+                  {isCurrentlyActive ? 'Oficina do John Armeiro Ativa' : 'John Armeiro em Standby (Disponível para Contratação)'}
                 </span>
                 <span className="text-[11px] opacity-80 block">
                   {isCurrentlyActive 
@@ -259,7 +259,7 @@ export default function ArmorerHireModal({
               }`}
             >
               <Sparkles size={13} className="fill-slate-950" />
-              <span>{isCurrentlyActive ? 'RENOVAR ARMEIRO' : 'CONTRATAR ARMEIRO'}</span>
+              <span>{isCurrentlyActive ? 'RENOVAR JOHN ARMEIRO' : 'CONTRATAR JOHN ARMEIRO'}</span>
             </button>
           </div>
         </div>

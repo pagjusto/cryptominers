@@ -325,10 +325,33 @@ export default function App() {
   });
   const [isHouseOpen, setIsHouseOpen] = useState(false);
 
-  // Mestre Armeiro (Sala de Armas & Manutenção Automática de Armas)
+  // John Armeiro (Sala de Armas & Manutenção Automática de Armas)
   const [armorerContract, setArmorerContract] = useState(() => getStaffContract('armeiro'));
   const [isArmorerHireOpen, setIsArmorerHireOpen] = useState(false);
   const isArmorerActive = Boolean(armorerContract?.active && armorerContract?.expiresAt > Date.now());
+
+  // Médica Chefe do Abrigo: Dra. Íris (Hospital & Leitos)
+  const [irisContract, setIrisContract] = useState(() => getStaffContract('iris'));
+  const isIrisActive = Boolean(
+    resolveHouseTier(currentHouseId).slots > 0 &&
+    irisContract?.active &&
+    (irisContract?.expiresAt > Date.now() || irisContract?.planId === 'permanent')
+  );
+
+  const handleToggleIrisActive = () => {
+    setIrisContract(prev => {
+      const currentlyActive = Boolean(prev?.active && (prev?.expiresAt > Date.now() || prev?.planId === 'permanent'));
+      const nextActive = !currentlyActive;
+      const updated = {
+        ...(prev || {}),
+        active: nextActive,
+        expiresAt: nextActive ? (prev?.expiresAt > Date.now() ? prev.expiresAt : Date.now() + 365 * 24 * 60 * 60 * 1000) : 0,
+        planId: prev?.planId || 'permanent'
+      };
+      saveStaffContract('iris', updated);
+      return updated;
+    });
+  };
 
   const handleHireArmorer = (plan, currency) => {
     if (currency === 'coins') {
@@ -1894,6 +1917,7 @@ export default function App() {
                 houseSlots={currentHouse.slots}
                 recoverySpeedPct={currentHouse.recoverySpeedPct || 100}
                 houseVisualTier={currentHouse}
+                isIrisActive={isIrisActive}
                 isArmorerActive={isArmorerActive}
                 onOpenArmorerHire={() => setIsArmorerHireOpen(true)}
                 onOpenHouseModal={() => setIsHouseOpen(true)}
@@ -1930,6 +1954,7 @@ export default function App() {
             onAllWork={handleAllWork}
             onRepairMiner={handleRepairMiner}
             onDiversifyTeam={handleDiversifyTeam}
+            isIrisActive={isIrisActive}
             isArmorerActive={isArmorerActive}
             armorerContract={armorerContract}
             onOpenArmorerHire={() => setIsArmorerHireOpen(true)}
@@ -1963,7 +1988,7 @@ export default function App() {
         onBatchMintPackage={handleBatchMintPackage}
       />
 
-      {/* MODAL DA CASA DOS CoinsADORES (HOUSE SYSTEM) */}
+      {/* MODAL DA CASA DOS SOBREVIVENTES (HOUSE SYSTEM) */}
       <HouseModal
         isOpen={isHouseOpen}
         onClose={() => setIsHouseOpen(false)}
@@ -1973,6 +1998,9 @@ export default function App() {
         onUpgradeWithFragments={handleUpgradeHouseWithFragments}
         constructionFragments={constructionFragments}
         minerBalance={bcoin}
+        isIrisActive={isIrisActive}
+        irisContract={irisContract}
+        onToggleIrisActive={handleToggleIrisActive}
         isArmorerActive={isArmorerActive}
         armorerContract={armorerContract}
         onOpenArmorerHire={() => {
@@ -1981,7 +2009,7 @@ export default function App() {
         }}
       />
 
-      {/* MODAL OFICIAL DE CONTRATAÇÃO DO MESTRE ARMEIRO (SALA DE ARMAS) */}
+      {/* MODAL OFICIAL DE CONTRATAÇÃO DO JOHN ARMEIRO (SALA DE ARMAS) */}
       <ArmorerHireModal
         isOpen={isArmorerHireOpen}
         onClose={() => setIsArmorerHireOpen(false)}
@@ -2226,6 +2254,7 @@ export default function App() {
                 onAllWork={handleAllWork}
                 onRepairMiner={handleRepairMiner}
                 onDiversifyTeam={handleDiversifyTeam}
+                isIrisActive={isIrisActive}
                 isArmorerActive={isArmorerActive}
                 armorerContract={armorerContract}
                 onOpenArmorerHire={() => setIsArmorerHireOpen(true)}

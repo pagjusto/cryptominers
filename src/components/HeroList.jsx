@@ -22,6 +22,7 @@ export default function HeroList({
   onAllWork, 
   onRepairMiner,
   onDiversifyTeam,
+  isIrisActive = true,
   isArmorerActive = false,
   armorerContract = null,
   onOpenArmorerHire,
@@ -118,7 +119,7 @@ export default function HeroList({
         </button>
       </div>
 
-      {/* 3. ESPECIALISTAS DO ABRIGO: DRA. ÍRIS (HOSPITAL) & MESTRE ARMEIRO (SALA DE ARMAS) */}
+      {/* 3. ESPECIALISTAS DO ABRIGO: DRA. ÍRIS (HOSPITAL) & JOHN ARMEIRO (SALA DE ARMAS) */}
       <div className="grid grid-cols-1 gap-2 mb-3.5 shrink-0">
         {/* DRA. ÍRIS: TRATAMENTO E RECUPERAÇÃO DO ABRIGO */}
         <div 
@@ -154,12 +155,16 @@ export default function HeroList({
             </div>
           </div>
 
-          <span className="px-2.5 py-1 rounded-xl bg-emerald-950/80 text-emerald-300 border border-emerald-500/40 font-mono font-bold text-[10px] shrink-0">
-            HOSPITAL ATIVO
+          <span className={`px-2.5 py-1 rounded-xl font-mono font-bold text-[10px] shrink-0 border ${
+            isIrisActive
+              ? 'bg-emerald-950/80 text-emerald-300 border-emerald-500/40'
+              : 'bg-slate-800 text-slate-400 border-slate-700'
+          }`}>
+            {isIrisActive ? 'HOSPITAL ATIVO' : 'MÉDICA INATIVA'}
           </span>
         </div>
 
-        {/* MESTRE ARMEIRO: SALA DE ARMAS & REPARO AUTOMÁTICO */}
+        {/* JOHN ARMEIRO: SALA DE ARMAS & REPARO AUTOMÁTICO */}
         <div 
           onClick={onOpenArmorerHire}
           className="p-2.5 sm:p-3 rounded-2xl bg-gradient-to-r from-amber-500/15 via-orange-500/15 to-amber-500/15 border border-amber-500/40 hover:border-amber-400 transition flex items-center justify-between group shadow-sm cursor-pointer"
@@ -167,7 +172,7 @@ export default function HeroList({
           <div className="flex items-center gap-3">
             <div 
               className="w-[46px] h-[46px] sm:w-[50px] sm:h-[50px] rounded-2xl border-2 shadow-lg shrink-0 bg-slate-950 flex items-center justify-center overflow-hidden transition-all duration-300"
-              title="Mestre Armeiro (Sala de Armas)"
+              title="John Armeiro (Sala de Armas)"
               style={{
                 borderColor: '#f59e0b',
                 boxShadow: '0 0 12px rgba(245, 158, 11, 0.45)'
@@ -175,14 +180,14 @@ export default function HeroList({
             >
               <img 
                 src="/assets/heroes/armeiro.png" 
-                alt="Mestre Armeiro" 
+                alt="John Armeiro" 
                 className="w-full h-full object-contain filter drop-shadow group-hover:scale-105 transition-transform" 
               />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-tech font-bold text-xs sm:text-sm text-amber-300">
-                  Mestre Armeiro • Sala de Armas
+                  John Armeiro • Sala de Armas
                 </span>
                 <span className="text-[9px] bg-amber-400/20 text-amber-300 px-1.5 py-0.2 rounded-full border border-amber-400/40 font-bold font-mono">
                   SALA DE ARMAS
