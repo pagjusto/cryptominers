@@ -54,6 +54,9 @@ import { getHeroById, getWeaponById, getDurabilityLossPerStrike } from '../data/
 
 const BOSS_BATTLE_DURATION_MS = 5 * 60 * 1000;
 
+// Fator econômico aprovado para a produção contínua de mineração (cenário FIFO de 90 dias).
+const MINING_PRODUCTION_MULTIPLIER = 1.7034;
+
 /**
  * Retorna todos os heróis sobreviventes que participaram da batalha contra o Boss
  * para suas posições originais de mineração pré-combate.
@@ -1447,7 +1450,7 @@ export default function GameBoard({
               const cid = miner.classId;
 
               // Regra Oficial 3.1 & 7.0: Produção econômica de MNC contínua por tempo de trabalho ativo dos heróis
-              const strikeCoins = parseFloat((((miner.coinsPerHour || 1.40) / 3600) * 0.85).toFixed(4));
+              const strikeCoins = parseFloat(((((miner.coinsPerHour || 1.40) / 3600) * 0.85) * MINING_PRODUCTION_MULTIPLIER).toFixed(8));
               if (strikeCoins > 0) {
                 callbacksRef.current.onCollectBcoin?.(strikeCoins);
                 if (miner.id) {
