@@ -39,7 +39,7 @@ import {
 } from '../utils/upgradeSimulatorEngine';
 import { calculateRoiScenario } from '../utils/roiSimulatorEngine';
 import { getCryptoZombiesConfig } from '../data/cryptoZombiesConfig';
-import { Coins_CLASSES } from '../data/minersData';
+import { MINER_CLASSES } from '../data/minersData';
 
 export default function StatisticsModal({
   isOpen,
@@ -146,7 +146,7 @@ export default function StatisticsModal({
     const houseMultiplier = currentHouse?.recoverySpeedMultiplier || 1.0;
 
     return miners.map(m => {
-      const classInfo = Coins_CLASSES[m.classId] || Coins_CLASSES.miner;
+      const classInfo = MINER_CLASSES[m.classId] || MINER_CLASSES.miner;
       const power = m.power || 2;
       const speed = m.speed || 1;
       const maxEnergy = m.maxStamina || 100;

@@ -417,3 +417,5 @@ export const MEDIC_STAFF = {
   isPlayable: false,
   lore: 'Médica cirurgiã da base militar de sobrevivência. Responsável pelo hospital de campanha e recuperação dos combatentes feridos.'
 };
+
+export const MINERS_ROSTER = MINER_ROSTER;

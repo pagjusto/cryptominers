@@ -21,12 +21,20 @@ export default function HeroList({
   onToggleStatus, 
   onAllWork, 
   onRepairMiner,
-  onDiversifyTeam
+  onDiversifyTeam,
+  isArmorerActive = false,
+  armorerContract = null,
+  onOpenArmorerHire,
+  onOpenHouseModal
 }) {
   const workingCount = miners.filter(m => m.status === 'work').length;
   const injuredCount = miners.filter(m => m.status === 'injured' || m.injuredAwaitingRescue).length;
   const houseCount = miners.filter(m => m.status === 'house').length;
   const reserveCount = miners.filter(m => m.status === 'reserve' || m.status === 'sleep').length;
+
+  const armorerDaysLeft = isArmorerActive && armorerContract?.expiresAt
+    ? Math.max(0, Math.ceil((armorerContract.expiresAt - Date.now()) / (24 * 60 * 60 * 1000)))
+    : 0;
 
   return (
     <div className="flex flex-col h-full bg-slate-900 border border-slate-800 rounded-3xl p-4 sm:p-5 shadow-2xl overflow-hidden font-tech text-white">
@@ -110,43 +118,99 @@ export default function HeroList({
         </button>
       </div>
 
-      {/* 3. MÉDICA ÍRIS: TRATAMENTO E RECUPERAÇÃO DO ABRIGO (NPC / NÃO JOGADOR) */}
-      <div 
-        className="mb-3.5 p-2.5 sm:p-3 rounded-2xl bg-gradient-to-r from-emerald-500/15 via-teal-500/15 to-emerald-500/15 border border-emerald-500/40 hover:border-emerald-400 transition flex items-center justify-between group shadow-sm shrink-0"
-      >
-        <div className="flex items-center gap-3">
-          {/* Avatar da Médica Íris (Borda Branca e Enquadramento Padrão Idêntico aos Combatentes) */}
-          <div 
-            className="w-[52px] h-[52px] rounded-2xl border-2 shadow-lg shrink-0 bg-slate-900/90 flex items-center justify-center overflow-hidden transition-all duration-300"
-            title="Dra. Íris (Médica do Abrigo)"
-            style={{
-              borderColor: '#ffffff',
-              boxShadow: '0 0 10px rgba(255, 255, 255, 0.45)',
-              backgroundImage: 'url(/assets/hero-avatars.png?v=4)',
-              backgroundRepeat: 'no-repeat',
-              backgroundSize: '676px 52px',
-              backgroundPosition: '-208px center',
-              imageRendering: 'auto'
-            }}
-          />
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-tech font-bold text-xs sm:text-sm text-emerald-300">
-                Dra. Íris • Médica do Abrigo
-              </span>
-              <span className="text-[9px] bg-emerald-400/20 text-emerald-300 px-1.5 py-0.2 rounded-full border border-emerald-400/40 font-bold font-mono">
-                ENFERMARIA
+      {/* 3. ESPECIALISTAS DO ABRIGO: DRA. ÍRIS (HOSPITAL) & MESTRE ARMEIRO (SALA DE ARMAS) */}
+      <div className="grid grid-cols-1 gap-2 mb-3.5 shrink-0">
+        {/* DRA. ÍRIS: TRATAMENTO E RECUPERAÇÃO DO ABRIGO */}
+        <div 
+          onClick={onOpenHouseModal}
+          className="p-2.5 sm:p-3 rounded-2xl bg-gradient-to-r from-emerald-500/15 via-teal-500/15 to-emerald-500/15 border border-emerald-500/40 hover:border-emerald-400 transition flex items-center justify-between group shadow-sm cursor-pointer"
+        >
+          <div className="flex items-center gap-3">
+            <div 
+              className="w-[46px] h-[46px] sm:w-[50px] sm:h-[50px] rounded-2xl border-2 shadow-lg shrink-0 bg-slate-900/90 flex items-center justify-center overflow-hidden transition-all duration-300"
+              title="Dra. Íris (Médica do Abrigo)"
+              style={{
+                borderColor: '#ffffff',
+                boxShadow: '0 0 10px rgba(255, 255, 255, 0.45)',
+                backgroundImage: 'url(/assets/hero-avatars.png?v=4)',
+                backgroundRepeat: 'no-repeat',
+                backgroundSize: '676px 52px',
+                backgroundPosition: '-208px center',
+                imageRendering: 'auto'
+              }}
+            />
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-tech font-bold text-xs sm:text-sm text-emerald-300">
+                  Dra. Íris • Médica do Abrigo
+                </span>
+                <span className="text-[9px] bg-emerald-400/20 text-emerald-300 px-1.5 py-0.2 rounded-full border border-emerald-400/40 font-bold font-mono">
+                  ENFERMARIA
+                </span>
+              </div>
+              <span className="text-[11px] text-slate-400 font-tech block">
+                Cuidados médicos contínuos e recuperação nos leitos do hospital
               </span>
             </div>
-            <span className="text-[11px] text-slate-400 font-tech block">
-              Cuidados médicos contínuos e recuperação de vida para os sobreviventes
-            </span>
           </div>
+
+          <span className="px-2.5 py-1 rounded-xl bg-emerald-950/80 text-emerald-300 border border-emerald-500/40 font-mono font-bold text-[10px] shrink-0">
+            HOSPITAL ATIVO
+          </span>
         </div>
 
-        <span className="px-2.5 py-1 rounded-xl bg-emerald-950/80 text-emerald-300 border border-emerald-500/40 font-mono font-bold text-[10px] shrink-0">
-          HOSPITAL ATIVO
-        </span>
+        {/* MESTRE ARMEIRO: SALA DE ARMAS & REPARO AUTOMÁTICO */}
+        <div 
+          onClick={onOpenArmorerHire}
+          className="p-2.5 sm:p-3 rounded-2xl bg-gradient-to-r from-amber-500/15 via-orange-500/15 to-amber-500/15 border border-amber-500/40 hover:border-amber-400 transition flex items-center justify-between group shadow-sm cursor-pointer"
+        >
+          <div className="flex items-center gap-3">
+            <div 
+              className="w-[46px] h-[46px] sm:w-[50px] sm:h-[50px] rounded-2xl border-2 shadow-lg shrink-0 bg-slate-950 flex items-center justify-center overflow-hidden transition-all duration-300"
+              title="Mestre Armeiro (Sala de Armas)"
+              style={{
+                borderColor: '#f59e0b',
+                boxShadow: '0 0 12px rgba(245, 158, 11, 0.45)'
+              }}
+            >
+              <img 
+                src="/assets/heroes/armeiro.png" 
+                alt="Mestre Armeiro" 
+                className="w-full h-full object-contain filter drop-shadow group-hover:scale-105 transition-transform" 
+              />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-tech font-bold text-xs sm:text-sm text-amber-300">
+                  Mestre Armeiro • Sala de Armas
+                </span>
+                <span className="text-[9px] bg-amber-400/20 text-amber-300 px-1.5 py-0.2 rounded-full border border-amber-400/40 font-bold font-mono">
+                  SALA DE ARMAS
+                </span>
+              </div>
+              <span className="text-[11px] text-slate-400 font-tech block">
+                {isArmorerActive 
+                  ? `Oficina ativa: restaura 100% das armas automaticamente (${armorerDaysLeft}d restantes)` 
+                  : 'Recupera armas automaticamente a 100% sem anúncios nem pausas'}
+              </span>
+            </div>
+          </div>
+
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpenArmorerHire?.();
+            }}
+            className={`px-2.5 py-1.5 rounded-xl font-mono font-bold text-[10px] shrink-0 transition cursor-pointer flex items-center gap-1.5 shadow-md ${
+              isArmorerActive
+                ? 'bg-amber-950/90 text-amber-300 border border-amber-500/60 hover:bg-amber-900/90'
+                : 'bg-amber-500 hover:bg-amber-400 text-slate-950 border border-amber-300 font-tech font-bold animate-pulse'
+            }`}
+          >
+            <Wrench size={11} className={isArmorerActive ? 'text-amber-400' : 'text-slate-950'} />
+            <span>{isArmorerActive ? `OFICINA (${armorerDaysLeft}d)` : 'CONTRATAR'}</span>
+          </button>
+        </div>
       </div>
 
       {/* 4. LISTA DE SOBREVIVENTES */}
@@ -384,18 +448,25 @@ export default function HeroList({
                     )}
                   </span>
 
-                  {durability < 100 && (
-                    <button
-                      onClick={() => onRepairMiner(miner.id)}
-                      className={`px-2.5 py-0.5 rounded-lg font-bold transition flex items-center gap-1 text-[9px] cursor-pointer shadow-sm whitespace-nowrap shrink-0 ${
-                        isBroken
-                          ? 'bg-rose-500 hover:bg-rose-400 text-slate-950 border border-rose-400 animate-pulse'
-                          : 'bg-amber-500/20 hover:bg-amber-500 hover:text-slate-950 text-amber-300 border border-amber-500/40'
-                      }`}
-                    >
-                      <Wrench size={9} />
-                      <span>Consertar</span>
-                    </button>
+                  {isArmorerActive ? (
+                    <span className="text-[9px] text-amber-300 font-bold bg-amber-500/20 px-2 py-0.5 rounded-lg border border-amber-500/40 flex items-center gap-1 font-tech shrink-0">
+                      <Wrench size={9} className="text-amber-400" />
+                      <span>Armeiro Ativo</span>
+                    </span>
+                  ) : (
+                    durability < 100 && (
+                      <button
+                        onClick={() => onRepairMiner(miner.id)}
+                        className={`px-2.5 py-0.5 rounded-lg font-bold transition flex items-center gap-1 text-[9px] cursor-pointer shadow-sm whitespace-nowrap shrink-0 ${
+                          isBroken
+                            ? 'bg-rose-500 hover:bg-rose-400 text-slate-950 border border-rose-400 animate-pulse'
+                            : 'bg-amber-500/20 hover:bg-amber-500 hover:text-slate-950 text-amber-300 border border-amber-500/40'
+                        }`}
+                      >
+                        <Wrench size={9} />
+                        <span>Consertar</span>
+                      </button>
+                    )
                   )}
                 </div>
               </div>

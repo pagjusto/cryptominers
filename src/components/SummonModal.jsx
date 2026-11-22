@@ -16,7 +16,7 @@ import {
   Calculator,
   Gift
 } from 'lucide-react';
-import { Coins_ROSTER, MINT_CHEST_TYPES } from '../data/minersCatalog';
+import { MINERS_ROSTER, MINT_CHEST_TYPES } from '../data/minersCatalog';
 import { getCryptoZombiesConfig } from '../data/cryptoZombiesConfig';
 import { sfx } from '../utils/sfx';
 
@@ -564,7 +564,7 @@ export default function SummonModal({
                 </p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
-                  {Coins_ROSTER.map(minerClass => {
+                  {MINERS_ROSTER.map(minerClass => {
                     const cost = minerClass.directCostBcoin || 20;
                     const canAfford = paymentCurrency === 'miner'
                       ? minerBalance >= cost

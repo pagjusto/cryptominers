@@ -23,15 +23,16 @@ import {
   Flame,
   Users,
   Pin,
-  ChevronDown
+  ChevronDown,
+  Wrench
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { MINES, INITIAL_CoinsS, Coins_CLASSES } from './data/minersData';
+import { MINES, INITIAL_MINERS, MINER_CLASSES } from './data/minersData';
 import { HERO_ROSTER, WEAPON_CATALOG, getHeroById, getWeaponById } from './data/heroRoster';
 import { resolveHouseTier } from './data/housesData';
 import { ENTRY_PACKAGES, calculateWithdrawalTax } from './data/investmentData';
 import { INITIAL_MARKET_LISTINGS, MARKETPLACE_FEE_PCT, FEE_SPLIT } from './data/marketplaceData';
-import { Coins_ROSTER } from './data/minersCatalog';
+import { MINERS_ROSTER } from './data/minersCatalog';
 import { generateMineMap } from './utils/mapGenerator';
 import { getPlayerMap, generatePlayerMap, DEFAULT_PLAYER_ID, removeBossFromPlayerMap, spawnBossInPlayerMap } from './utils/individualMapEngine';
 import { evaluateBossSchedule, recordBossDefeatInSchedule, forceBossInvasionNow } from './utils/bossScheduleManager';
@@ -77,6 +78,8 @@ import InventoryModal from './components/InventoryModal';
 import RewardedAdModal from './components/RewardedAdModal';
 import ChestOpeningModal from './components/ChestOpeningModal';
 import HouseModal from './components/HouseModal';
+import ArmorerHireModal from './components/ArmorerHireModal';
+import { getStaffContract, saveStaffContract } from './data/staffCatalog';
 import InvestmentModal from './components/InvestmentModal';
 import MarketplaceModal from './components/MarketplaceModal';
 import MiningStatsModal from './components/MiningStatsModal';
@@ -145,7 +148,7 @@ export default function App() {
           let migrated = parsed.map(m => {
             if (m.classId === 'ballerina') {
               hasBallerina = true;
-              const fInfo = Coins_CLASSES.fairy;
+              const fInfo = MINER_CLASSES.fairy;
               return {
                 ...m,
                 classId: 'fairy',
@@ -167,7 +170,7 @@ export default function App() {
             const classPool = ['miner', 'brute', 'goblin', 'engineer', 'mage', 'legendary', 'pirate', 'cowboy', 'fairy', 'spiderman', 'batman'];
             const balanced = parsed.map((m, idx) => {
               const newClassId = classPool[idx % classPool.length];
-              const cInfo = Coins_CLASSES[newClassId] || Coins_CLASSES.miner;
+              const cInfo = MINER_CLASSES[newClassId] || MINER_CLASSES.miner;
               return {
                 ...m,
                 classId: newClassId,
@@ -229,7 +232,7 @@ export default function App() {
           if (needsRosterSync) {
             const synced = parsed.map((m, idx) => {
               const rosterHero = HERO_ROSTER.find(h => h.id === m.heroId) || HERO_ROSTER[idx % HERO_ROSTER.length];
-              const cInfo = Coins_CLASSES[rosterHero.classId] || Coins_CLASSES.miner;
+              const cInfo = MINER_CLASSES[rosterHero.classId] || MINER_CLASSES.miner;
               return {
                 ...m,
                 heroId: rosterHero.id,
@@ -253,11 +256,11 @@ export default function App() {
           if (!parsed.some(m => m.heroId === 'hunter') || !parsed.some(m => m.heroId === 'scarlet')) {
             const updated = [...parsed];
             if (!updated.some(m => m.heroId === 'hunter') && updated.length < 15) {
-              const hunter = INITIAL_CoinsS.find(m => m.heroId === 'hunter');
+              const hunter = INITIAL_MINERS.find(m => m.heroId === 'hunter');
               if (hunter) updated.push({ ...hunter, id: 'miner-' + Date.now() + '-hunter' });
             }
             if (!updated.some(m => m.heroId === 'scarlet') && updated.length < 15) {
-              const scarlet = INITIAL_CoinsS.find(m => m.heroId === 'scarlet');
+              const scarlet = INITIAL_MINERS.find(m => m.heroId === 'scarlet');
               if (scarlet) updated.push({ ...scarlet, id: 'miner-' + Date.now() + '-scarlet' });
             }
             localStorage.setItem('crypto_miners_team', JSON.stringify(updated));
@@ -304,7 +307,7 @@ export default function App() {
         }
       } catch (e) {}
     }
-    return INITIAL_CoinsS;
+    return INITIAL_MINERS;
   });
 
   // Aplica a tabela única de HP por raridade a toda a equipe, inclusive heróis já salvos e recém-adquiridos.
@@ -322,6 +325,63 @@ export default function App() {
     return resolveHouseTier(savedHouseId).id;
   });
   const [isHouseOpen, setIsHouseOpen] = useState(false);
+
+  // Mestre Armeiro (Sala de Armas & Manutenção Automática de Armas)
+  const [armorerContract, setArmorerContract] = useState(() => getStaffContract('armeiro'));
+  const [isArmorerHireOpen, setIsArmorerHireOpen] = useState(false);
+  const isArmorerActive = Boolean(armorerContract?.active && armorerContract?.expiresAt > Date.now());
+
+  const handleHireArmorer = (plan, currency) => {
+    if (currency === 'coins') {
+      if (bcoin < plan.costCoins) {
+        alert(`Saldo insuficiente de Coins. Você precisa de ${plan.costCoins.toLocaleString('pt-BR')} Coins.`);
+        return false;
+      }
+      setBcoin(prev => {
+        const next = parseFloat(Math.max(0, prev - plan.costCoins).toFixed(3));
+        localStorage.setItem('crypto_miners_bcoin', next.toString());
+        return next;
+      });
+    } else {
+      if ((walletState?.usdtBalance || 0) < plan.costUsdt) {
+        alert(`Saldo insuficiente de USDT. Você precisa de $${plan.costUsdt.toFixed(2)} USDT.`);
+        return false;
+      }
+      setWalletState(prev => {
+        const nextUsdt = parseFloat(Math.max(0, prev.usdtBalance - plan.costUsdt).toFixed(2));
+        const updated = { ...prev, usdtBalance: nextUsdt };
+        saveWalletState(updated);
+        return updated;
+      });
+    }
+
+    const durationMs = plan.durationDays * 24 * 60 * 60 * 1000;
+    const currentExpiry = (armorerContract?.active && armorerContract?.expiresAt > Date.now())
+      ? armorerContract.expiresAt
+      : Date.now();
+    const nextExpiry = currentExpiry + durationMs;
+
+    const newContract = {
+      active: true,
+      planId: plan.id,
+      hiredAt: Date.now(),
+      expiresAt: nextExpiry,
+      durationDays: plan.durationDays,
+      paidWith: currency
+    };
+
+    setArmorerContract(newContract);
+    saveStaffContract('armeiro', newContract);
+
+    // Imediatamente restaura as armas de todos os heróis da equipe para 100% de durabilidade
+    setMiners(prev => {
+      const restored = prev.map(m => ({ ...m, durability: 100 }));
+      localStorage.setItem('crypto_miners_team', JSON.stringify(restored));
+      return restored;
+    });
+
+    return true;
+  };
 
   // Limpeza de baús antigos da mina descontinuados
   useEffect(() => {
@@ -342,7 +402,7 @@ export default function App() {
   const [isAdminConfigOpen, setIsAdminConfigOpen] = useState(false);
   const [isStatisticsOpen, setIsStatisticsOpen] = useState(false);
   const [isTeamDrawerOpen, setIsTeamDrawerOpen] = useState(false);
-  const [isNavPinned, setIsNavPinned] = useState(false);
+  const [isNavPinned, setIsNavPinned] = useState(true);
   const [isNavHovered, setIsNavHovered] = useState(false);
   const showNavbar = isNavPinned || isNavHovered;
 
@@ -1070,8 +1130,8 @@ export default function App() {
       else if (rand < 0.99) rarity = 'epic';
       else rarity = 'legendary';
 
-      let matching = Coins_ROSTER.filter(m => m.rarity === rarity);
-      if (matching.length === 0) matching = Coins_ROSTER;
+      let matching = MINERS_ROSTER.filter(m => m.rarity === rarity);
+      if (matching.length === 0) matching = MINERS_ROSTER;
       const picked = matching[Math.floor(Math.random() * matching.length)];
       const name = names[Math.floor(Math.random() * names.length)];
 
@@ -1335,7 +1395,7 @@ export default function App() {
 
     const classPool = ['miner', 'brute', 'goblin', 'engineer', 'mage', 'legendary', 'pirate', 'cowboy', 'fairy', 'spiderman', 'batman'];
     const chosenClass = classPool[Math.floor(Math.random() * classPool.length)];
-    const cInfo = Coins_CLASSES[chosenClass] || Coins_CLASSES.miner;
+    const cInfo = MINER_CLASSES[chosenClass] || MINER_CLASSES.miner;
 
     const newMiner = {
       id: 'miner-altar-' + Date.now(),
@@ -1462,7 +1522,7 @@ export default function App() {
     const classPool = ['miner', 'brute', 'goblin', 'engineer', 'mage', 'legendary', 'pirate', 'cowboy', 'fairy', 'spiderman', 'batman'];
     const updated = miners.map((m, idx) => {
       const newClassId = classPool[idx % classPool.length];
-      const cInfo = Coins_CLASSES[newClassId] || Coins_CLASSES.miner;
+      const cInfo = MINER_CLASSES[newClassId] || MINER_CLASSES.miner;
       return {
         ...m,
         classId: newClassId,
@@ -1595,6 +1655,25 @@ export default function App() {
             <span>ABRIGO</span>
             <span className="px-1 py-0.1 rounded-full bg-blue-500 text-slate-950 text-[9px] font-bold font-mono">
               {minersInHouse.length}/{currentHouse.slots}
+            </span>
+          </button>
+
+          {/* BOTÃO DA SALA DE ARMAS / MESTRE ARMEIRO */}
+          <button
+            onClick={() => setIsArmorerHireOpen(true)}
+            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg font-tech text-xs font-bold transition cursor-pointer shadow-sm ${
+              isArmorerActive
+                ? 'bg-amber-950/60 hover:bg-amber-900/70 text-amber-300 border border-amber-500/40'
+                : 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-400/60 animate-pulse'
+            }`}
+            title="Mestre Armeiro • Sala de Armas (Reparo Automático de Armas)"
+          >
+            <Wrench size={13} className="text-amber-400" />
+            <span>ARMEIRO</span>
+            <span className={`px-1 py-0.1 rounded-full text-[9px] font-bold font-mono ${
+              isArmorerActive ? 'bg-amber-500 text-slate-950' : 'bg-slate-700 text-amber-300'
+            }`}>
+              {isArmorerActive ? 'ATIVO' : 'CONTRATAR'}
             </span>
           </button>
 
@@ -1835,6 +1914,9 @@ export default function App() {
                 houseSlots={currentHouse.slots}
                 recoverySpeedPct={currentHouse.recoverySpeedPct || 100}
                 houseVisualTier={currentHouse}
+                isArmorerActive={isArmorerActive}
+                onOpenArmorerHire={() => setIsArmorerHireOpen(true)}
+                onOpenHouseModal={() => setIsHouseOpen(true)}
                 gameSpeed={gameSpeed}
               />
 
@@ -1868,6 +1950,10 @@ export default function App() {
             onAllWork={handleAllWork}
             onRepairMiner={handleRepairMiner}
             onDiversifyTeam={handleDiversifyTeam}
+            isArmorerActive={isArmorerActive}
+            armorerContract={armorerContract}
+            onOpenArmorerHire={() => setIsArmorerHireOpen(true)}
+            onOpenHouseModal={() => setIsHouseOpen(true)}
           />
         </aside>
 
@@ -1907,6 +1993,22 @@ export default function App() {
         onUpgradeWithFragments={handleUpgradeHouseWithFragments}
         constructionFragments={constructionFragments}
         minerBalance={bcoin}
+        isArmorerActive={isArmorerActive}
+        armorerContract={armorerContract}
+        onOpenArmorerHire={() => {
+          setIsHouseOpen(false);
+          setIsArmorerHireOpen(true);
+        }}
+      />
+
+      {/* MODAL OFICIAL DE CONTRATAÇÃO DO MESTRE ARMEIRO (SALA DE ARMAS) */}
+      <ArmorerHireModal
+        isOpen={isArmorerHireOpen}
+        onClose={() => setIsArmorerHireOpen(false)}
+        coinsBalance={bcoin}
+        usdtBalance={walletState?.usdtBalance || 0}
+        currentContract={armorerContract}
+        onHireArmorer={handleHireArmorer}
       />
 
       {/* MODAL MINT COM BÊNÇÃO DA SORTE PATROCINADA */}
@@ -2144,6 +2246,10 @@ export default function App() {
                 onAllWork={handleAllWork}
                 onRepairMiner={handleRepairMiner}
                 onDiversifyTeam={handleDiversifyTeam}
+                isArmorerActive={isArmorerActive}
+                armorerContract={armorerContract}
+                onOpenArmorerHire={() => setIsArmorerHireOpen(true)}
+                onOpenHouseModal={() => setIsHouseOpen(true)}
               />
             </div>
           </div>

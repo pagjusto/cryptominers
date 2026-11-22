@@ -19,8 +19,10 @@ import {
   drawSpiderman,
   drawBatman,
   drawExecutive,
-  drawRosterHero
+  drawRosterHero,
+  drawArmorerCharacter
 } from './characterRenderers';
+export { drawArmorerCharacter };
 import { HERO_ROSTER, WEAPON_CATALOG, getHeroById, getWeaponById, getRarityConfig } from '../data/heroRoster';
 
 // ============================================================================

@@ -23,6 +23,7 @@ import {
   drawContinuousCaveFloor, 
   drawVectorCartoonRock, 
   drawMinerCharacter,
+  drawArmorerCharacter,
   drawBossGreenFog,
   initCanyonMap,
   initCityMap
@@ -56,6 +57,8 @@ const BASE_HOSPITAL_BEDS = [
   { id: 5, x: 557, y: 277, angle: 0.86 }
 ];
 const DRA_IRIS_POS = { x: 490, y: 386 };
+// Posição oficial do Mestre Armeiro na Sala de Armas do complexo central
+const ARMEIRO_POS = { x: 630, y: 350 };
 
 // Renderiza a Dra. Íris e os heróis internados em tratamento nos leitos do hospital
 function drawBaseInfirmaryAndPatients(ctx, state, now) {
@@ -220,6 +223,11 @@ function drawBaseInfirmaryAndPatients(ctx, state, now) {
       ctx.fillText('+PV', barX + barW + 8, barY + 5);
     }
   });
+
+  // 3. MESTRE ARMEIRO (SALA DE ARMAS DO ABRIGO)
+  // Posicionado na ala leste da base (sala de armas), reparando e forjando equipamentos
+  const isArmorerActive = Boolean(state?.isArmorerActive);
+  drawArmorerCharacter(ctx, ARMEIRO_POS.x, ARMEIRO_POS.y, now, isArmorerActive);
 
   ctx.restore();
 }
@@ -431,6 +439,9 @@ export default function GameBoard({
   onMapCleared,
   onStatsUpdate,
   onDropGear,
+  onOpenArmorerHire,
+  onOpenHouseModal,
+  isArmorerActive = false,
   statsResetTrigger = 0,
   houseSlots = 5,
   recoverySpeedPct = 100,
@@ -506,8 +517,17 @@ export default function GameBoard({
     onMapCleared,
     onStatsUpdate,
     onDropGear,
-    onMinersChange
+    onMinersChange,
+    onOpenArmorerHire,
+    onOpenHouseModal,
+    isArmorerActive: () => Boolean(isArmorerActive)
   };
+
+  useEffect(() => {
+    if (gameStateRef.current) {
+      gameStateRef.current.isArmorerActive = Boolean(isArmorerActive);
+    }
+  }, [isArmorerActive]);
 
   const houseConfigRef = useRef({ houseSlots, recoverySpeedPct });
   houseConfigRef.current = { houseSlots, recoverySpeedPct };
@@ -522,6 +542,7 @@ export default function GameBoard({
     minerStats: {},
     lastStatsEmit: 0,
     bossBattleSessions: {},
+    isArmorerActive: Boolean(isArmorerActive),
     miners: miners,
     floatTexts: [],
     particles: [],
@@ -1055,11 +1076,26 @@ export default function GameBoard({
         }
 
         // REGRA OFICIAL DO USUÁRIO: "e se quebrar interrompe a mineração"
+        // ARMEIRO CONTRATADO: "recuperar as armas automaticamente"
         if (miner.durability !== undefined && miner.durability <= 0) {
-          miner.isMining = false;
-          miner.targetBlock = null;
-          miner.swingTimer = 0;
-          return;
+          const isArmorerOk = Boolean(callbacksRef.current.isArmorerActive?.() || state.isArmorerActive);
+          if (isArmorerOk) {
+            miner.durability = 100;
+            state.floatTexts.push({
+              text: '🔧 REPARO AUTOMÁTICO (ARMEIRO)!',
+              x: miner.x * TILE_SIZE + TILE_SIZE / 2,
+              y: miner.y * TILE_SIZE - 12,
+              color: '#f59e0b',
+              opacity: 1,
+              vy: -35
+            });
+            sfx.playMineAction();
+          } else {
+            miner.isMining = false;
+            miner.targetBlock = null;
+            miner.swingTimer = 0;
+            return;
+          }
         }
 
         // ====================================================================
@@ -1229,20 +1265,35 @@ export default function GameBoard({
               miner.durability = Math.max(0, parseFloat((miner.durability - wearLoss).toFixed(4)));
 
               // REGRA OFICIAL DO USUÁRIO: "e se quebrar interrompe a mineração"
+              // ARMEIRO CONTRATADO: "recuperar as armas automaticamente"
               if (miner.durability <= 0) {
-                miner.durability = 0;
-                miner.isMining = false;
-                miner.targetBlock = null;
-                miner.swingTimer = 0;
-                state.floatTexts.push({
-                  text: '🔧 ARMA QUEBRADA!',
-                  x: miner.x * TILE_SIZE + TILE_SIZE / 2,
-                  y: miner.y * TILE_SIZE - 12,
-                  color: '#ef4444',
-                  opacity: 1,
-                  vy: -30
-                });
-                return;
+                const isArmorerOk = Boolean(callbacksRef.current.isArmorerActive?.() || state.isArmorerActive);
+                if (isArmorerOk) {
+                  miner.durability = 100;
+                  state.floatTexts.push({
+                    text: '🔧 REPARO AUTOMÁTICO (ARMEIRO)!',
+                    x: miner.x * TILE_SIZE + TILE_SIZE / 2,
+                    y: miner.y * TILE_SIZE - 12,
+                    color: '#f59e0b',
+                    opacity: 1,
+                    vy: -35
+                  });
+                  sfx.playMineAction();
+                } else {
+                  miner.durability = 0;
+                  miner.isMining = false;
+                  miner.targetBlock = null;
+                  miner.swingTimer = 0;
+                  state.floatTexts.push({
+                    text: '🔧 ARMA QUEBRADA!',
+                    x: miner.x * TILE_SIZE + TILE_SIZE / 2,
+                    y: miner.y * TILE_SIZE - 12,
+                    color: '#ef4444',
+                    opacity: 1,
+                    vy: -30
+                  });
+                  return;
+                }
               }
 
               // Sem punições intermediárias (100% de capacidade). Apenas se quebrar (0%) é que interrompe a mineração.
@@ -1264,22 +1315,8 @@ export default function GameBoard({
                 ? (curHp > 2 ? 2 : curHp) 
                 : (isBoss ? (curHp > 30 ? 30 : curHp) : curHp);
               
-              // Se a arma estiver danificada (<50%), capacidade reduzida pela metade (50% de chance de causar o dano balístico no zumbi)
-              let hitDamageApplied = (isZombie || isBoss) ? (isCrit ? 2 : 1) : hitDamage;
-              if (isWeaponDamaged && (isZombie || isBoss)) {
-                // Se estiver com <50%, eficácia cai pela metade
-                if (Math.random() < 0.5 && !isCrit) {
-                  hitDamageApplied = 0;
-                  state.floatTexts.push({
-                    text: '⚠️ DANO REDUZIDO (50%)',
-                    x: tx * TILE_SIZE + TILE_SIZE / 2,
-                    y: ty * TILE_SIZE - 8,
-                    color: '#f59e0b',
-                    opacity: 0.9,
-                    vy: -25
-                  });
-                }
-              }
+              // Sem punições intermediárias conforme regra oficial do usuário. Capacidade 100% até quebrar (0%).
+              const hitDamageApplied = (isZombie || isBoss) ? (isCrit ? 2 : 1) : hitDamage;
               const newHp = Math.max(0, effectiveCurHp - hitDamageApplied);
 
               // Textos flutuantes otimizados para manter 60 FPS
@@ -2175,6 +2212,14 @@ export default function GameBoard({
       const coords = getCanvasCoords(e.clientX, e.clientY);
       const towerCoords = window.sirenTowerCoordinates;
 
+      // Feedback do cursor sobre o Armeiro e Dra. Íris no abrigo
+      const distArmorer = Math.hypot(coords.x - ARMEIRO_POS.x, coords.y - ARMEIRO_POS.y);
+      const distIris = Math.hypot(coords.x - DRA_IRIS_POS.x, coords.y - DRA_IRIS_POS.y);
+      if (distArmorer < 38 || distIris < 38) {
+        canvasRef.current.style.cursor = 'pointer';
+        return;
+      }
+
       // Feedback do cursor sobre a torre
       if (!dragStartRef.current && towerCoords && canvasRef.current) {
         const isNearTower = (
@@ -2246,7 +2291,22 @@ export default function GameBoard({
   }, []);
 
   const handleCanvasClick = (e) => {
-    // Carrinho roda exclusivamente pelos trilhos sem conceder bônus (conforme solicitado)
+    if (!canvasRef.current) return;
+    const coords = getCanvasCoords(e.clientX, e.clientY);
+
+    // 1. Clique próximo ao Mestre Armeiro (Sala de Armas)
+    const distArmorer = Math.hypot(coords.x - ARMEIRO_POS.x, coords.y - ARMEIRO_POS.y);
+    if (distArmorer < 38) {
+      callbacksRef.current.onOpenArmorerHire?.();
+      return;
+    }
+
+    // 2. Clique próximo à Dra. Íris (Enfermaria / Leitos)
+    const distIris = Math.hypot(coords.x - DRA_IRIS_POS.x, coords.y - DRA_IRIS_POS.y);
+    if (distIris < 38) {
+      callbacksRef.current.onOpenHouseModal?.();
+      return;
+    }
   };
 
   return (

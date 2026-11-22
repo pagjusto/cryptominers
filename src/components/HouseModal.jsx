@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { X, HeartPulse, Check, Users } from 'lucide-react';
+import { X, HeartPulse, Check, Users, Wrench, ShieldCheck, Sparkles, Clock, AlertTriangle } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { HOUSE_TIERS, resolveHouseTier } from '../data/housesData';
+import { STAFF_PLANS, STAFF_MEMBERS } from '../data/staffCatalog';
 import { sfx } from '../utils/sfx';
 
 export default function HouseModal({ 
@@ -13,8 +14,11 @@ export default function HouseModal({
   onUpgradeWithFragments,
   constructionFragments = 0,
   minerBalance = 0,
+  isArmorerActive = false,
+  armorerContract = null,
+  onOpenArmorerHire
 }) {
-  const [activeTab, setActiveTab] = useState('beds'); // 'beds' | 'upgrade'
+  const [activeTab, setActiveTab] = useState('beds'); // 'beds' | 'armory' | 'upgrade'
 
   if (!isOpen) return null;
 
@@ -96,7 +100,22 @@ export default function HouseModal({
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
-                🩺 Tratamentos ({minersInHouse.length}/{currentHouse.slots})
+                🩺 Enfermaria ({minersInHouse.length}/{currentHouse.slots})
+              </button>
+              <button
+                onClick={() => setActiveTab('armory')}
+                className={`px-3 py-1.5 rounded-xl font-bold transition cursor-pointer flex items-center gap-1.5 ${
+                  activeTab === 'armory'
+                    ? 'bg-amber-500 text-slate-950 shadow-sm'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <span>🔨 Sala de Armas</span>
+                {isArmorerActive ? (
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 inline-block animate-pulse" />
+                ) : (
+                  <span className="w-2 h-2 rounded-full bg-amber-400 inline-block" />
+                )}
               </button>
               <button
                 onClick={() => setActiveTab('upgrade')}
@@ -274,7 +293,147 @@ export default function HouseModal({
           </div>
         )}
 
-        {/* CONTEÚDO DA ABA 2: IMOBILIÁRIA / 4 CASAS OFICIAIS */}
+        {/* CONTEÚDO DA ABA 2: SALA DE ARMAS & OFICINA DO MESTRE ARMEIRO */}
+        {activeTab === 'armory' && (
+          <div className="flex-1 overflow-y-auto no-scrollbar py-4 space-y-4">
+            
+            {/* Banner de Apresentação do Mestre Armeiro */}
+            <div className="p-4 rounded-3xl bg-gradient-to-r from-amber-500/15 via-slate-950 to-orange-500/15 border-2 border-amber-500/40 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="relative">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl border-2 border-amber-400 bg-slate-950 shadow-[0_0_20px_rgba(245,158,11,0.35)] overflow-hidden flex items-center justify-center shrink-0">
+                    <img 
+                      src="/assets/heroes/armeiro.png" 
+                      alt="Mestre Armeiro" 
+                      className="w-full h-full object-contain filter drop-shadow" 
+                    />
+                  </div>
+                  <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-lg bg-amber-500 text-slate-950 flex items-center justify-center text-sm shadow-md border border-amber-300 font-bold">
+                    🔧
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="font-arcade text-base text-amber-400">
+                      Mestre Armeiro
+                    </h3>
+                    <span className="text-[10px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full border border-amber-500/40 font-bold font-mono">
+                      SALA DE ARMAS
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-200 font-medium mt-0.5">
+                    Oficina e Ferraria Central do Abrigo
+                  </p>
+                  <p className="text-[11px] text-slate-400 leading-tight mt-1">
+                    Repara a durabilidade das armas para 100% de forma 100% automática, sem assistir anúncios e sem interromper a mineração da equipe.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto gap-2 border-t sm:border-t-0 border-slate-800 pt-3 sm:pt-0 shrink-0">
+                <span className={`px-3 py-1 rounded-xl text-xs font-mono font-bold border ${
+                  isArmorerActive 
+                    ? 'bg-emerald-950/80 text-emerald-300 border-emerald-500/50 shadow-[0_0_10px_rgba(16,185,129,0.25)]' 
+                    : 'bg-amber-950/60 text-amber-300 border-amber-500/40'
+                }`}>
+                  {isArmorerActive ? '● OFICINA EM OPERAÇÃO' : '○ AGUARDANDO CONTRATAÇÃO'}
+                </span>
+
+                <button
+                  onClick={onOpenArmorerHire}
+                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-arcade text-xs font-bold transition shadow-lg shadow-amber-950/40 cursor-pointer active:scale-95 shrink-0"
+                >
+                  {isArmorerActive ? 'GERENCIAR PLANO' : 'CONTRATAR ARMEIRO'}
+                </button>
+              </div>
+            </div>
+
+            {/* Destaque das Vantagens Oficiais */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800">
+                <div className="flex items-center gap-2 mb-1 text-amber-400 font-bold text-xs font-tech">
+                  <Sparkles size={14} />
+                  <span>REPARO 100% AUTO</span>
+                </div>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  Quando a durabilidade zera (0%), ele restaura instantaneamente para 100% sem o herói parar de minerar.
+                </p>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800">
+                <div className="flex items-center gap-2 mb-1 text-emerald-400 font-bold text-xs font-tech">
+                  <Check size={14} />
+                  <span>ZERO ANÚNCIOS</span>
+                </div>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  Elimina completamente anúncios obrigatórios de reparo manual durante toda a vigência do contrato.
+                </p>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800">
+                <div className="flex items-center gap-2 mb-1 text-sky-400 font-bold text-xs font-tech">
+                  <Clock size={14} />
+                  <span>DURAÇÃO REAL</span>
+                </div>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  Armas lendárias duram ~12h contínuas de mineração e armas comuns ~4h antes do reparo automático agir.
+                </p>
+              </div>
+            </div>
+
+            {/* Planos Oficiais Aprovados (Mesmo Custo que a Dra. Íris) */}
+            <div className="p-4 rounded-3xl bg-slate-950/60 border border-slate-800">
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="font-tech font-bold text-xs text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <Wrench size={14} />
+                  <span>Planos de Contratação (Mesmo Custo da Dra. Íris):</span>
+                </h4>
+                <span className="text-[10px] text-slate-400 font-mono">
+                  Pagamento via Coins ou USDT
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {STAFF_PLANS.map(plan => (
+                  <div
+                    key={plan.id}
+                    onClick={onOpenArmorerHire}
+                    className="p-3.5 rounded-2xl bg-slate-900 border border-slate-700/80 hover:border-amber-400/80 transition cursor-pointer flex flex-col justify-between"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-arcade text-xs text-white">{plan.name}</span>
+                        {plan.discount && (
+                          <span className="text-[9px] bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded font-bold font-mono">
+                            {plan.discount}
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-xs text-slate-400 font-mono block mb-2">{plan.durationDays} dias</span>
+                      <div className="text-base font-black text-amber-400 font-mono">
+                        {plan.costCoins.toLocaleString('pt-BR')} Coins
+                      </div>
+                      <span className="text-[11px] text-slate-400 font-mono block">
+                        ou ${plan.costUsdt.toFixed(2)} USDT
+                      </span>
+                    </div>
+
+                    <button
+                      onClick={onOpenArmorerHire}
+                      className="mt-3 w-full py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500 hover:text-slate-950 text-amber-300 font-tech font-bold text-xs transition border border-amber-500/40"
+                    >
+                      Contratar Plano
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+          </div>
+        )}
+
+        {/* CONTEÚDO DA ABA 3: IMOBILIÁRIA / 4 CASAS OFICIAIS */}
         {activeTab === 'upgrade' && (
           <div className="flex-1 overflow-y-auto no-scrollbar py-4 space-y-3">
             
