@@ -1143,7 +1143,7 @@ export default function GameBoard({
           miner.lockedEnemyId = null;
           miner.swingTimer = 0;
 
-          if (!Number.isFinite(Number(miner.injuryQueueSequence))) {
+          if (miner.injuryQueueSequence == null || !Number.isFinite(Number(miner.injuryQueueSequence))) {
             state.nextInjuryQueueSequence = (Number(state.nextInjuryQueueSequence) || 0) + 1;
             miner.injuryQueueSequence = state.nextInjuryQueueSequence;
           }
