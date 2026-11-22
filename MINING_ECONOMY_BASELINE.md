@@ -232,13 +232,28 @@ Não assumir duração de evento, número de heróis atingidos, ou perda total p
 - O encaminhamento do herói ao ambulatório acontece automaticamente ao atingir 5% de HP.
 - O médico Dra. Íris automatiza o encaminhamento dos heróis feridos ao ambulatório; não acelera a recuperação.
 
-## Velocidade de recuperação por abrigo
+## Tempos de recuperação por abrigo — tabela calculada
 
-- Abrigo Básico: velocidade de referência.
-- Abrigo Reforçado: recuperação 25% mais rápida (125% da velocidade básica).
-- Abrigo Avançado: recuperação 50% mais rápida (150% da velocidade básica).
+A velocidade de recuperação do Abrigo Básico é a referência: **142,5 PV por hora**. Os outros abrigos aumentam a velocidade, e o tempo é inversamente proporcional ao multiplicador:
 
-Os tempos correspondentes são calculados dividindo o HP a recuperar pela velocidade efetiva do abrigo. Não usar tabelas antigas de recuperação que estejam em conflito com a regra de HP e taxa definida nesta seção.
+    tempo_recuperação = HP_a_recuperar ÷ (142,5 × multiplicador_do_abrigo)
+
+- Abrigo Básico: 100% da velocidade (142,5 PV/h).
+- Abrigo Reforçado: 125% da velocidade (178,125 PV/h), ou seja, tempo básico ÷ 1,25.
+- Abrigo Avançado: 150% da velocidade (213,75 PV/h), ou seja, tempo básico ÷ 1,5.
+
+| Raridade | HP a recuperar | Abrigo Básico (100%) | Abrigo Reforçado (125%) | Abrigo Avançado (150%) |
+|---|---:|---:|---:|---:|
+| Comum | 950 | 6h40min | 5h20min | 4h26min40s |
+| Raro | 1.140 | 8h | 6h24min | 5h20min |
+| Super Raro | 1.330 | 9h20min | 7h28min | 6h13min20s |
+| Épico | 1.520 | 10h40min | 8h32min | 7h06min40s |
+| Lendário | 1.710 | 12h | 9h36min | 8h |
+| Super Lendário | 1.900 | 13h20min | 10h40min | 8h53min20s |
+
+Os tempos são calculados para recuperar do limite de resgate (5% do HP máximo) até 100%, sem considerar espera em fila. Manter precisão em segundos/frações internamente; a interface pode exibir horas e minutos. O tempo efetivo de entrada no jogo também depende da disponibilidade das vagas do ambulatório e da fila FIFO.
+
+Não usar tabelas antigas de recuperação que estejam em conflito com os valores de HP e a taxa de recuperação definidos nesta seção.
 
 ## Observações de balanceamento
 
