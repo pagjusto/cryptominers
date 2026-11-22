@@ -175,3 +175,4 @@ A composição acima é **apenas uma simulação de referência do cenário medi
 - A substituição não altera a elegibilidade dos sobreviventes que iniciaram a batalha.
 
 - Se a Dra. Íris estiver contratada, mas não houver sobreviventes disponíveis na reserva, a batalha continua com menos integrantes. Não encerrar a batalha nem retirar outros sobreviventes saudáveis para preencher a vaga.
+- Um sobrevivente que entrou como substituto também pode ser substituído caso fique ferido e seja encaminhado ao ambulatório. A regra de substituição se aplica sucessivamente durante o mesmo Boss; cada novo substituto continua fora do snapshot imutável e não recebe participação no sorteio daquele evento.
