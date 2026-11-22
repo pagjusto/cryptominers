@@ -241,7 +241,8 @@ export const WEAPON_CATALOG = [
     category: 'Rifle Automático', 
     damage: '+3 Poder', 
     critBonus: '+8%', 
-    cadence: 'Muito Rápida', 
+    cadence: 'Muito Rápida',
+    attacksPerSecond: 0.75, 
     range: 'Médio / Longo',
     hero: 'Verdant',
     description: 'Arma padrão de forças especiais. Cadência sustentada e precisão balanceada para varredura de hordas.' 
@@ -268,7 +269,8 @@ export const WEAPON_CATALOG = [
     category: 'Arma Incendiária', 
     damage: '+6 Poder', 
     critBonus: '+15%', 
-    cadence: 'Contínua', 
+    cadence: 'Contínua',
+    attacksPerSecond: 1, 
     range: 'Curto (Cone de Fogo)',
     hero: 'Fênix',
     description: 'Jato contínuo de chamas que queima e incinera múltiplos alvos simultaneamente no campo.' 
@@ -281,7 +283,8 @@ export const WEAPON_CATALOG = [
     category: 'Armamento de Energia', 
     damage: '+5 Poder', 
     critBonus: '+10%', 
-    cadence: 'Média', 
+    cadence: 'Média',
+    attacksPerSecond: 0.375, 
     range: 'Longo',
     hero: 'Nox',
     description: 'Dispara pulsos ionizados de alta densidade que perfuram a couraça de infectados e estruturas.' 
@@ -308,7 +311,8 @@ export const WEAPON_CATALOG = [
     scale: 0.65,
     damage: '+6 Poder', 
     critBonus: '+20%', 
-    cadence: 'Lenta', 
+    cadence: 'Lenta',
+    attacksPerSecond: 0.125, 
     range: 'Médio (Área de Chamas)',
     hero: 'Brasa',
     description: 'Garrafa artesanal de combustível. Na explosão, gera uma poça flamejante contínua no chão.' 
@@ -321,7 +325,8 @@ export const WEAPON_CATALOG = [
     category: 'Rifle Tático', 
     damage: '+4 Poder', 
     critBonus: '+10%', 
-    cadence: 'Rápida', 
+    cadence: 'Rápida',
+    attacksPerSecond: 0.625, 
     range: 'Médio',
     hero: 'Polar',
     description: 'Design compacto para manobras ágeis em corredores urbanos com alto controle de recuo.' 
@@ -348,7 +353,8 @@ export const WEAPON_CATALOG = [
     scale: 0.68,
     damage: '+7 Poder', 
     critBonus: '+25%', 
-    cadence: 'Lenta', 
+    cadence: 'Lenta',
+    attacksPerSecond: 0.125, 
     range: 'Médio (Impacto em Área)',
     hero: 'Tropa de Choque',
     description: 'Estilhaços balísticos e onda de choque devastadora para aniquilar aglomerados de infectados.' 
@@ -361,7 +367,8 @@ export const WEAPON_CATALOG = [
     category: 'Rifle de Precisão', 
     damage: '+7 Poder', 
     critBonus: '+28%', 
-    cadence: 'Lenta', 
+    cadence: 'Lenta',
+    attacksPerSecond: 0.1875, 
     range: 'Extremo (Tiro Certeiro)',
     hero: 'Franco-Atirador',
     description: 'Mira telescópica de alto alcance. Elimina alvos críticos com disparos de altíssimo impacto.' 
@@ -374,7 +381,8 @@ export const WEAPON_CATALOG = [
     category: 'Metralhadora Pesada', 
     damage: '+8 Poder', 
     critBonus: '+14%', 
-    cadence: 'Extrema', 
+    cadence: 'Extrema',
+    attacksPerSecond: 1.25, 
     range: 'Médio / Longo',
     hero: 'Granito',
     description: 'Arma de supressão máxima. Barragem ininterrupta de projéteis de grosso calibre.' 
@@ -387,7 +395,8 @@ export const WEAPON_CATALOG = [
     category: 'Escopeta Pesada', 
     damage: '+5 Poder', 
     critBonus: '+18%', 
-    cadence: 'Média', 
+    cadence: 'Média',
+    attacksPerSecond: 0.375, 
     range: 'Curto (Dispersão de Chumbo)',
     hero: 'Múmia',
     description: 'Dispara múltiplos balotes de chumbo em leque. Devastadora em encontros cara a cara.' 
@@ -400,7 +409,8 @@ export const WEAPON_CATALOG = [
     category: 'Artilharia Pesada', 
     damage: '+10 Poder', 
     critBonus: '+20%', 
-    cadence: 'Lenta', 
+    cadence: 'Lenta',
+    attacksPerSecond: 0.125, 
     range: 'Longo (Explosão Titânica)',
     hero: 'Artilheiro',
     description: 'Projéteis autopropulsados com ogiva explosiva para abater chefões e mutantes colossais.' 
@@ -413,7 +423,8 @@ export const WEAPON_CATALOG = [
     category: 'Carbina Semiautomática', 
     damage: '+5 Poder', 
     critBonus: '+16%', 
-    cadence: 'Rápida', 
+    cadence: 'Rápida',
+    attacksPerSecond: 0.625, 
     range: 'Médio / Longo',
     hero: 'Hunter',
     description: 'Combina leveza de empunhadura e disparos duplos de alta precisão contra mutantes rápidos.' 
@@ -427,7 +438,8 @@ export const WEAPON_CATALOG = [
     scale: 0.58,
     damage: '+4 Poder', 
     critBonus: '+22%', 
-    cadence: 'Média', 
+    cadence: 'Média',
+    attacksPerSecond: 0.5, 
     range: 'Curto / Médio',
     hero: 'Scarlet',
     description: 'Poder de parada impressionante. Cada tiro causa impacto contundente com alta chance crítica.' 
