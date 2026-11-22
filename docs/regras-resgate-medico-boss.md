@@ -75,10 +75,35 @@ Este documento registra as regras de gameplay aprovadas para o sistema de sobrev
 - Quando o plano expira, o médico para instantaneamente. O jogador pode renovar imediatamente, inclusive após o vencimento.
 - O custo do médico deve ser considerado no ROI líquido, sem alterar a taxa bruta de produção de MNC dos sobreviventes.
 
+## Cadência de ataque dos heróis e vida do Boss
+
+A cadência numérica de cada arma é definida em `WEAPON_CATALOG.attacksPerSecond` no código. Os valores aprovados para os 12 heróis do elenco são:
+
+| Herói | Ataques por segundo |
+|---|---:|
+| Granito | 1,25 |
+| Verdant | 0,75 |
+| Polar | 0,625 |
+| Hunter | 0,625 |
+| Scarlet | 0,50 |
+| Nox | 0,375 |
+| Múmia | 0,375 |
+| Fênix | 1,00 |
+| Brasa | 0,125 |
+| Iron | 0,125 |
+| Colosso | 0,125 |
+| Sombra | 0,1875 |
+| **Total da equipe completa** | **6,0625** |
+
+- A cadência total considera os 12 heróis atacando simultaneamente.
+- O Boss possui **30 pontos de vida (PV)**; cada ataque de herói remove **1 PV**.
+- Com todos os 12 heróis atacando sem interrupção, o tempo matemático para derrotar o Boss é **30 ÷ 6,0625 = aproximadamente 4,95 segundos**.
+- O tempo real pode variar por animações, intervalos de disparo, latência ou indisponibilidade de algum herói.
+
 ## Parâmetros do Boss já definidos
 
-- Cada batalha dura 5 minutos.
-- O Boss é encerrado automaticamente ao fim dos 5 minutos.
+- Cada batalha tem duração máxima de 5 minutos caso o Boss não seja derrotado antes.
+- O Boss é encerrado imediatamente quando seus 30 PV chegam a zero; se continuar vivo, o evento termina automaticamente ao fim dos 5 minutos.
 - A regra de participação acima é aplicada ao sorteio de Baú do Boss do evento.
 
 
