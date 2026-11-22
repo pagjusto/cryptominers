@@ -1112,9 +1112,16 @@ export default function GameBoard({
 
       state.miners.forEach((miner, minerIndex) => {
         const maxHealth = Number(miner.maxHealth) > 0 ? Number(miner.maxHealth) : 100;
-        const currentHealth = Number.isFinite(Number(miner.currentHealth)) ? Number(miner.currentHealth) : maxHealth;
+        let currentHealth = Number.isFinite(Number(miner.currentHealth)) ? Number(miner.currentHealth) : maxHealth;
 
-        // REGRA OFICIAL DO USUÁRIO: "veja que tem o medico na equipe e ele nao esta levando pro ambulatorio curar automaticamente"
+        // Desgaste normal: 142,5 PV por hora enquanto o herói está efetivamente trabalhando.
+        // O dano é igual para todas as raridades e não se aplica à reserva, fila ou ambulatório.
+        if (miner.status === 'work' && currentHealth / maxHealth > 0.05) {
+          currentHealth = Math.max(maxHealth * 0.05, currentHealth - (142.5 / 3600) * dt);
+          miner.currentHealth = currentHealth;
+        }
+
+        // REGRA OFICIAL: ao atingir 5% de HP, encaminhar o herói ao ambulatório.
         // Quando um herói é ferido (<= 5% de vida), a Dra. Íris (Médica do Abrigo) resgata e leva o sobrevivente para o ambulatório
         if (miner.status !== 'house' && miner.status !== 'waiting_house' && (miner.status === 'injured' || miner.injuredAwaitingRescue || (currentHealth / maxHealth) * 100 <= 5)) {
           // Se o herói ferido estava na batalha do Boss, sua vaga de mineração original é reservada para o substituto herdar
@@ -1136,6 +1143,10 @@ export default function GameBoard({
           miner.lockedEnemyId = null;
           miner.swingTimer = 0;
 
+          if (!Number.isFinite(Number(miner.injuryQueueSequence))) {
+            state.nextInjuryQueueSequence = (Number(state.nextInjuryQueueSequence) || 0) + 1;
+            miner.injuryQueueSequence = state.nextInjuryQueueSequence;
+          }
           const capacity = houseConfigRef.current?.houseSlots ?? 5;
           const inHouse = state.miners.filter(m => m.status === 'house').length;
 
@@ -1178,8 +1189,10 @@ export default function GameBoard({
 
           // Recuperação contínua de vida baseada na eficiência do abrigo
           const recSpeedPct = houseConfigRef.current?.recoverySpeedPct || 100;
-          const healRatePerSec = (maxHealth * 0.075) * (recSpeedPct / 100); // ~13 segundos para regenerar de 5% a 100%
-          miner.currentHealth = Math.min(maxHealth, (miner.currentHealth || (maxHealth * 0.05)) + healRatePerSec * dt);
+          // Básico: 60% mais rápido que o desgaste (356,25 PV/h).
+          // Reforçado/Avançado aplicam 125%/150% dessa velocidade.
+          const healRatePerSec = (356.25 / 3600) * (recSpeedPct / 100);
+          miner.currentHealth = Math.min(maxHealth, (Number(miner.currentHealth) || (maxHealth * 0.05)) + healRatePerSec * dt);
 
           // Quando atinge 100% de vida: alta médica e retorno à reserva.
           if (miner.currentHealth >= maxHealth) {
@@ -1208,7 +1221,9 @@ export default function GameBoard({
             const capacity = houseConfigRef.current?.houseSlots ?? 5;
             const currentInHouse = state.miners.filter(m => m.status === 'house').length;
             if (currentInHouse < capacity) {
-              const nextInLine = state.miners.find(m => m.status === 'waiting_house');
+              const nextInLine = state.miners
+                .filter(m => m.status === 'waiting_house')
+                .sort((a, b) => (Number(a.injuryQueueSequence) || 0) - (Number(b.injuryQueueSequence) || 0))[0];
               if (nextInLine) {
                 nextInLine.status = 'house';
                 nextInLine.injuredAwaitingRescue = false;
@@ -1227,7 +1242,10 @@ export default function GameBoard({
 
           const capacity = houseConfigRef.current?.houseSlots ?? 5;
           const inHouse = state.miners.filter(m => m.status === 'house').length;
-          if (inHouse < capacity) {
+          const nextInLine = state.miners
+            .filter(m => m.status === 'waiting_house')
+            .sort((a, b) => (Number(a.injuryQueueSequence) || 0) - (Number(b.injuryQueueSequence) || 0))[0];
+          if (inHouse < capacity && nextInLine?.id === miner.id) {
             miner.status = 'house';
             miner.injuredAwaitingRescue = false;
             state.floatTexts.push({
