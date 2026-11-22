@@ -138,48 +138,113 @@ Para cada intervalo entre dois marcos consecutivos, calcular a queda proporciona
 
 Aos 270 dias, o herói chega a 80 anos, tem eficiência-base 0%, HP 0% e se aposenta.
 
-## Dano em batalha e encaminhamento ao ambulatório
+## HP máximo por raridade, desgaste e recuperação — regra definida em 22/11/2026
 
-- Durante a partida, os danos causados pelos Bosses reduzem o HP do personagem.
+Esta seção registra as decisões mais recentes de balanceamento e prevalece sobre valores conflitantes de HP e recuperação que apareçam em tabelas anteriores deste documento. Os valores de HP desta seção são HP máximo-base do herói por raridade; não são os pontos de eficiência/HP percentual usados no envelhecimento.
+
+| Raridade | HP máximo | Limite de resgate (5% do HP) | HP a recuperar (95%) |
+|---|---:|---:|---:|
+| Comum | 1.000 | 50 | 950 |
+| Raro | 1.200 | 60 | 1.140 |
+| Super Raro | 1.400 | 70 | 1.330 |
+| Épico | 1.600 | 80 | 1.520 |
+| Lendário | 1.800 | 90 | 1.710 |
+| Super Lendário | 2.000 | 100 | 1.900 |
+
+### Regra de dano contínuo durante a mineração
+
+O Lendário é a referência de balanceamento: perde 95% do HP máximo em 12 horas de mineração normal, até atingir o limite de resgate de 5%.
+
+    dano_normal_por_segundo = 1.710 ÷ (12 × 3.600)
+    dano_normal_por_segundo = 0,0395833333 PV/s
+    dano_normal_por_hora = 142,5 PV/h
+
+A mesma taxa absoluta de desgaste normal por segundo é aplicada a todas as raridades. Portanto, heróis com menos HP atingem o limite de resgate mais cedo; heróis com mais HP permanecem minerando por mais tempo.
+
+### Tempo de mineração até o resgate e recuperação no Abrigo Básico
+
+A recuperação ocorre à mesma taxa absoluta de 142,5 PV/h. Assim, para esta referência, o tempo de recuperação dos 95% perdidos é igual ao tempo de mineração necessário para perder esses 95%.
+
+| Raridade | Tempo de mineração até 5% | Tempo de recuperação | Ciclo completo |
+|---|---:|---:|---:|
+| Comum | 6h40 | 6h40 | 13h20 |
+| Raro | 8h | 8h | 16h |
+| Super Raro | 9h20 | 9h20 | 18h40 |
+| Épico | 10h40 | 10h40 | 21h20 |
+| Lendário | 12h | 12h | 24h |
+| Super Lendário | 13h20 | 13h20 | 26h40 |
+
+Os tempos acima são a referência do Abrigo Básico, sem fila de espera. Multiplicadores dos abrigos alteram a velocidade de recuperação, não a taxa de desgaste normal.
+
+### Dano durante combate contra o Boss
+
+Foi definida uma taxa de desgaste de combate equivalente a **3× o dano contínuo normal** para heróis que estejam atacando o Boss:
+
+    dano_combate_por_segundo = 0,0395833333 × 3
+    dano_combate_por_segundo = 0,11875 PV/s
+
+Esta taxa é o desgaste contínuo de combate e deve ser contabilizada apenas durante o período em que o herói estiver participando do combate.
+
+### Ataques individuais do Boss e fila circular
+
+Regras definidas na conversa de 22/11/2026:
+
+- O Boss não possui uma barra de HP própria nesta mecânica.
+- O evento de Boss envolve os heróis próximos atacando/participando do combate.
+- O Boss desfere um ataque a cada **2 segundos**.
+- O Boss ataca um herói próximo por vez, seguindo uma fila circular.
+- Ao atingir o último herói próximo, a fila reinicia no primeiro.
+- Exemplo com cinco heróis próximos: H1 → H2 → H3 → H4 → H5 → H1...
+- Cada ataque individual do Boss causa dano equivalente a **1% do HP máximo do herói atingido**.
+
+| Raridade | HP máximo | Dano recebido por ataque do Boss (1%) |
+|---|---:|---:|
+| Comum | 1.000 | 10 PV |
+| Raro | 1.200 | 12 PV |
+| Super Raro | 1.400 | 14 PV |
+| Épico | 1.600 | 16 PV |
+| Lendário | 1.800 | 18 PV |
+| Super Lendário | 2.000 | 20 PV |
+
+O ataque individual de 1% do HP máximo é um evento discreto; não deve ser confundido com a taxa contínua de desgaste de combate de 0,11875 PV/s. Para calcular a perda total durante um evento, contabilizar ambos somente se a implementação mantiver os dois mecanismos ativos.
+
+### Pontos ainda necessários para a simulação cronológica de 24 horas
+
+- Duração efetiva de cada evento de Boss ou quantidade de ciclos de ataque durante o evento.
+- Quantidade de heróis próximos/participantes em cada evento.
+- Confirmação de que o desgaste contínuo de combate 3× e o dano discreto de 1% por ataque são cumulativos na implementação.
+- Regras de ocupação e fila de recuperação aplicadas simultaneamente à equipe real.
+- Os valores de tempo do Abrigo Reforçado e Avançado para as raridades devem ser derivados dos multiplicadores aprovados de 125% e 150% sobre a velocidade de recuperação básica, sem confundir velocidade com duração.
+
+Não assumir duração de evento, número de heróis atingidos, ou perda total por Boss sem esses parâmetros.
+
+## Dano em batalha e encaminhamento ao ambulatório — regra geral
+
 - Quando o HP do personagem chega a **5%**, ele é retirado da partida e encaminhado ao **ambulatório** para recuperação.
 - O personagem não continua lutando depois de atingir esse limite.
 - Esta regra de combate é distinta da redução gradual do HP máximo causada pelo envelhecimento.
-- O método, a duração e o custo da recuperação no ambulatório ainda não foram definidos.
 
-## Recuperação de heróis no ambulatório
-
-**Tabela de recuperação confirmada pelo usuário.** Quando um herói sofre dano durante a partida e seu HP chega a 5%, ele é retirado do combate e encaminhado automaticamente ao ambulatório para recuperar os 95% de HP perdidos.
-
-| Raridade | HP recuperado | Abrigo Básico | Abrigo Reforçado | Abrigo Avançado |
-|---|---:|---:|---:|---:|
-| Comum | 7.579 HP | 2h | 1h36 | 1h20 |
-| Raro | 9.095 HP | 2h24 | 1h55 | 1h36 |
-| Super Raro | 11.368 HP | 3h | 2h24 | 2h |
-| Épico | 12.992 HP | 3h26 | 2h45 | 2h17 |
-| Lendário | 15.158 HP | 4h | Não definido | Não definido |
-| Super Lendário | 18.189 HP | 4h48 | Não definido | Não definido |
-
-### Regras de capacidade e fila
+## Capacidade e fila de recuperação
 
 - A equipe de combate possui **15 vagas**.
 - O ambulatório possui **15 vagas independentes**.
 - Se o ambulatório estiver cheio, os heróis feridos aguardam em fila FIFO (primeiro que entra, primeiro que sai).
 - O encaminhamento do herói ao ambulatório acontece automaticamente ao atingir 5% de HP.
+- O médico Dra. Íris automatiza o encaminhamento dos heróis feridos ao ambulatório; não acelera a recuperação.
 
-### Velocidade de recuperação por abrigo
+## Velocidade de recuperação por abrigo
 
-- Abrigo Básico: tempo de referência.
-- Abrigo Reforçado: recuperação 25% mais rápida.
-- Abrigo Avançado: recuperação 50% mais rápida.
+- Abrigo Básico: velocidade de referência.
+- Abrigo Reforçado: recuperação 25% mais rápida (125% da velocidade básica).
+- Abrigo Avançado: recuperação 50% mais rápida (150% da velocidade básica).
 
-**Pendência de dados:** os tempos para Lendário e Super Lendário nos abrigos Reforçado e Avançado não constavam na tabela recuperada e permanecem sem definição. Não estimar nem preencher esses valores sem aprovação.
+Os tempos correspondentes são calculados dividindo o HP a recuperar pela velocidade efetiva do abrigo. Não usar tabelas antigas de recuperação que estejam em conflito com a regra de HP e taxa definida nesta seção.
 
 ## Observações de balanceamento
 
-- Estes números representam a base do cenário mediano com mineração válida durante 24 horas.
-- Atributos individuais dos heróis e multiplicadores de casa podem ajustar a produção efetiva conforme as regras do jogo.
-- O valor de 480,24 Coins/dia é a referência total da equipe mediana, não uma recompensa por Boss.
-- Os valores de eficiência por idade e o bônus por estrelas são fatores distintos, combinados pela fórmula acima.
+- A produção de 480,24 Coins/dia é a referência total da equipe mediana durante 24 horas de mineração válida, antes das interrupções por dano, recuperação e fila.
+- A produção efetiva deve descontar somente o tempo em que o herói não está minerando.
+- Atributos individuais e multiplicadores de abrigo podem ajustar a produção efetiva conforme as regras do jogo.
 - Não alterar esta base sem uma nova decisão explícita de balanceamento.
 
 ## Tabela comercial de baús de heróis — aprovada em 21/11/2026
