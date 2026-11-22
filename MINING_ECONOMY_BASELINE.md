@@ -191,7 +191,7 @@ Regras definidas na conversa de 22/11/2026:
 
 - O Boss não possui uma barra de HP própria nesta mecânica.
 - O evento de Boss envolve os heróis próximos atacando/participando do combate.
-- O Boss desfere um ataque a cada **2 segundos**.
+- O Boss desfere um ataque a cada **1 segundo**.
 - O Boss ataca um herói próximo por vez, seguindo uma fila circular.
 - Ao atingir o último herói próximo, a fila reinicia no primeiro.
 - Exemplo com cinco heróis próximos: H1 → H2 → H3 → H4 → H5 → H1...
