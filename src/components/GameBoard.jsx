@@ -55,7 +55,7 @@ import { getHeroById, getWeaponById, getDurabilityLossPerStrike } from '../data/
 const BOSS_BATTLE_DURATION_MS = 5 * 60 * 1000;
 
 // Fator econômico aprovado para a produção contínua de mineração (cenário FIFO de 90 dias).
-const MINING_PRODUCTION_MULTIPLIER = 1.7034;
+const MINING_PRODUCTION_MULTIPLIER = 1.7074;
 
 /**
  * Retorna todos os heróis sobreviventes que participaram da batalha contra o Boss
@@ -1153,6 +1153,7 @@ export default function GameBoard({
           if (inHouse < capacity) {
             // Leito livre no ambulatório: internação imediata sob cuidados da Dra. Íris
             miner.status = 'house';
+            miner.injuryQueueSequence = null;
             miner.injuredAwaitingRescue = false;
             state.floatTexts.push({
               text: '🚑 AMBULATÓRIO (DRA. ÍRIS)',
@@ -1226,6 +1227,7 @@ export default function GameBoard({
                 .sort((a, b) => (Number(a.injuryQueueSequence) || 0) - (Number(b.injuryQueueSequence) || 0))[0];
               if (nextInLine) {
                 nextInLine.status = 'house';
+                nextInLine.injuryQueueSequence = null;
                 nextInLine.injuredAwaitingRescue = false;
               }
             }
@@ -1247,6 +1249,7 @@ export default function GameBoard({
             .sort((a, b) => (Number(a.injuryQueueSequence) || 0) - (Number(b.injuryQueueSequence) || 0))[0];
           if (inHouse < capacity && nextInLine?.id === miner.id) {
             miner.status = 'house';
+            miner.injuryQueueSequence = null;
             miner.injuredAwaitingRescue = false;
             state.floatTexts.push({
               text: '🚑 VAGA LIBERADA (AMBULATÓRIO)',
