@@ -63,6 +63,8 @@ Este documento registra as regras de gameplay aprovadas para o sistema de sobrev
 - O custo do médico deve ser considerado no ROI líquido, sem alterar a taxa bruta de produção de MNC dos sobreviventes.
 ## Cadência de ataque dos heróis e vida do Boss
 
+- O Boss desfere um ataque a cada **1 segundo**.
+
 A cadência numérica de cada arma é definida em `WEAPON_CATALOG.attacksPerSecond` no código. Os valores aprovados para os 12 heróis do elenco são:
 
 | Herói | Ataques por segundo |
