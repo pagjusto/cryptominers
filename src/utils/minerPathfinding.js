@@ -8,7 +8,7 @@
 // ============================================================================
 
 import { GRID_COLS, GRID_ROWS, BLOCK_EMPTY, BLOCK_BEDROCK, BLOCK_ZOMBIE, BLOCK_BOSS } from '../data/minersData.js';
-import { isCityBuilding } from './cityMapGeometry.js';
+import { isCityBuilding, isBaseCompound } from './cityMapGeometry.js';
 
 export const COMBAT_RANGE = 2; // Alcance tático de combate com armas de fogo (até 2 blocos de distância, incluindo diagonais)
 
@@ -16,6 +16,7 @@ export const COMBAT_RANGE = 2; // Alcance tático de combate com armas de fogo (
  * Determina se a célula contém um obstáculo intransponível para caminhada física:
  * - Bordas do mapa (rocha matriz perimetral)
  * - Prédios, ruínas, muros, barricadas, carros e outdoor da cidade
+ * - Complexo central da base médica
  * - Rocha matriz indestrutível
  */
 export function isSolidTerrain(x, y, grid, isCanyon = true) {
@@ -23,6 +24,9 @@ export function isSolidTerrain(x, y, grid, isCanyon = true) {
 
   // Prédios, ruínas, muros, cercas, veículos e outdoor da cidade
   if (isCityBuilding(x, y)) return true;
+
+  // Complexo central do abrigo médico
+  if (isBaseCompound(x, y)) return true;
 
   // Paredes rochosas indestrutíveis de borda
   if (grid && grid[y] && grid[y][x] === BLOCK_BEDROCK) return true;
@@ -399,4 +403,70 @@ export function findNextHeroAction(miner, grid, allMiners = [], isCanyon = true,
   }
 
   return { action: 'idle' };
+}
+
+/**
+ * Localiza posições táticas válidas, livres e desobstruídas ao redor do Boss para o transporte automático dos heróis.
+ * - Prioriza o raio de combate COMBAT_RANGE (1 a 2 células, expandindo suavemente até 3 ou 4 se necessário)
+ * - Evita colisão com prédios, abrigo médico, rocha matriz e o próprio Boss
+ * - Garante linha de tiro desobstruída (Line of Sight)
+ * - Garante que cada herói transportado receba uma célula distinta sem sobreposição
+ */
+export function getValidCombatPositionsAroundBoss(bossX, bossY, count, grid, existingMiners = []) {
+  const bx = Math.round(bossX);
+  const by = Math.round(bossY);
+  const candidates = [];
+
+  for (let d = 1; d <= 4; d++) {
+    for (let dy = -d; dy <= d; dy++) {
+      for (let dx = -d; dx <= d; dx++) {
+        if (Math.abs(dx) + Math.abs(dy) === d) {
+          const tx = bx + dx;
+          const ty = by + dy;
+          if (tx >= 1 && tx < GRID_COLS - 1 && ty >= 1 && ty < GRID_ROWS - 1) {
+            if (!isCityBuilding(tx, ty) && !isBaseCompound(tx, ty) && !(tx === bx && ty === by)) {
+              const b = grid && grid[ty] ? grid[ty][tx] : BLOCK_EMPTY;
+              if (b !== BLOCK_BEDROCK) {
+                if (hasClearLineOfSight(tx, ty, bx, by)) {
+                  candidates.push({ x: tx, y: ty, dist: d });
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Ordena por menor distância até o Boss
+  candidates.sort((a, b) => a.dist - b.dist);
+
+  const assigned = [];
+  const usedCoords = new Set();
+
+  // Registra células de outros heróis fixos que não serão substituídos/movidos
+  existingMiners.forEach(m => {
+    if (m && m.status === 'work' && typeof m.x === 'number') {
+      usedCoords.add(`${Math.round(m.x)},${Math.round(m.y)}`);
+    }
+  });
+
+  for (const c of candidates) {
+    const key = `${c.x},${c.y}`;
+    if (!usedCoords.has(key)) {
+      usedCoords.add(key);
+      assigned.push({ x: c.x, y: c.y });
+      if (assigned.length >= count) break;
+    }
+  }
+
+  // Fallback caso a quantidade solicitada seja maior que os espaços estritamente únicos
+  let fallbackIdx = 0;
+  while (assigned.length < count && candidates.length > 0) {
+    const c = candidates[fallbackIdx % candidates.length];
+    assigned.push({ x: c.x, y: c.y });
+    fallbackIdx++;
+  }
+
+  return assigned;
 }

@@ -33,6 +33,7 @@ import { ENTRY_PACKAGES, calculateWithdrawalTax } from './data/investmentData';
 import { INITIAL_MARKET_LISTINGS, MARKETPLACE_FEE_PCT, FEE_SPLIT } from './data/marketplaceData';
 import { MINERS_ROSTER } from './data/minersCatalog';
 import { generateMineMap } from './utils/mapGenerator';
+import { isCityBuilding, isBaseCompound, getSafeHeroSpawn } from './utils/cityMapGeometry';
 import { getPlayerMap, generatePlayerMap, DEFAULT_PLAYER_ID, removeBossFromPlayerMap, spawnBossInPlayerMap } from './utils/individualMapEngine';
 import { evaluateBossSchedule, recordBossDefeatInSchedule, forceBossInvasionNow } from './utils/bossScheduleManager';
 import { sfx } from './utils/sfx';
@@ -142,6 +143,21 @@ export default function App() {
       try {
         let parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
+          // Sanitização de coordenadas: garante que nenhum herói carregado do localStorage permaneça dentro de escombros ou base
+          let hasObstaclePosition = false;
+          parsed = parsed.map((m, idx) => {
+            const mx = Math.round(m.x);
+            const my = Math.round(m.y);
+            if (typeof m.x !== 'number' || typeof m.y !== 'number' || isNaN(m.x) || isNaN(m.y) || isCityBuilding(mx, my) || isBaseCompound(mx, my)) {
+              hasObstaclePosition = true;
+              const safePt = getSafeHeroSpawn(idx);
+              return { ...m, x: safePt.x, y: safePt.y, visualX: safePt.x, visualY: safePt.y };
+            }
+            return m;
+          });
+          if (hasObstaclePosition) {
+            localStorage.setItem('crypto_miners_team', JSON.stringify(parsed));
+          }
           // Migração automática de bailarina para fada com asas
           let hasBallerina = false;
           let migrated = parsed.map(m => {

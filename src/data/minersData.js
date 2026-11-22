@@ -454,7 +454,7 @@ export const INITIAL_MINERS = [
     speed: 1.4,
     status: 'work',
     x: 1,
-    y: 1,
+    y: 3,
     avatar: '🧭',
     color: '#38bdf8'
   },

@@ -43,10 +43,90 @@ import {
   TACTICAL_ZONES,
   CORNER_SPAWN_POINTS 
 } from '../utils/cityMapGeometry';
-import { findNextHeroAction, findNearestFreeHeroCell, COMBAT_RANGE, hasClearLineOfSight } from '../utils/minerPathfinding';
+import { 
+  findNextHeroAction, 
+  findNearestFreeHeroCell, 
+  COMBAT_RANGE, 
+  hasClearLineOfSight,
+  getValidCombatPositionsAroundBoss 
+} from '../utils/minerPathfinding';
 import { getHeroById, getWeaponById, getDurabilityLossPerStrike } from '../data/heroRoster';
 
 const BOSS_BATTLE_DURATION_MS = 5 * 60 * 1000;
+
+/**
+ * Retorna todos os heróis sobreviventes que participaram da batalha contra o Boss
+ * para suas posições originais de mineração pré-combate.
+ * Substitutos retornam à posição da vaga de mineração que herdaram.
+ * Impede retornos duplicados e restaura a atividade de mineração normalmente.
+ */
+function returnHeroesFromBossEvent(state, bossId, onMinersChange = null) {
+  if (!state || !state.activeBossEvent) return;
+  const event = state.activeBossEvent;
+  if (event.returned) return;
+  if (bossId && event.bossId && event.bossId !== bossId) return;
+
+  event.returned = true;
+
+  if (Array.isArray(state.miners)) {
+    state.miners.forEach(miner => {
+      // Apenas heróis ativos que estejam trabalhando e possuam posição original salva
+      // Heróis feridos na enfermaria respeitam integralmente o fluxo de resgate médico da Dra. Íris
+      if (miner.status === 'work' && event.savedPositions?.has(miner.id)) {
+        const orig = event.savedPositions.get(miner.id);
+        let returnX = orig.x;
+        let returnY = orig.y;
+        if (isCityBuilding(returnX, returnY) || isBaseCompound(returnX, returnY)) {
+          const safePt = SAFE_HERO_SPAWN_POINTS.find(p => !isCityBuilding(p.x, p.y) && !isBaseCompound(p.x, p.y)) || { x: 5, y: 2 };
+          returnX = safePt.x;
+          returnY = safePt.y;
+        }
+        miner.x = returnX;
+        miner.y = returnY;
+        miner.visualX = returnX;
+        miner.visualY = returnY;
+        miner.activeMoveTarget = null;
+        miner.moveCooldown = 0.2;
+        miner.isMining = false;
+        miner.lockedEnemyId = null;
+        miner.swingTimer = 0;
+
+        // Se havia um bloco alvo original que ainda exista e tenha vida, retoma-o
+        if (orig.targetBlock) {
+          const k = `${orig.targetBlock.x},${orig.targetBlock.y}`;
+          const hasHp = state.hpMap && state.hpMap[k] !== undefined && state.hpMap[k] > 0;
+          const bType = state.grid && state.grid[orig.targetBlock.y] ? state.grid[orig.targetBlock.y][orig.targetBlock.x] : BLOCK_EMPTY;
+          if (hasHp && bType !== BLOCK_EMPTY && bType !== BLOCK_BEDROCK) {
+            miner.targetBlock = { ...orig.targetBlock };
+          } else {
+            miner.targetBlock = null;
+          }
+        } else {
+          miner.targetBlock = null;
+        }
+
+        if (state.floatTexts) {
+          state.floatTexts.push({
+            text: '↩️ RETORNO À MINERAÇÃO',
+            x: orig.x * TILE_SIZE + TILE_SIZE / 2,
+            y: orig.y * TILE_SIZE - 12,
+            color: '#22c55e',
+            opacity: 0.95,
+            vy: -22
+          });
+        }
+      }
+    });
+
+    if (typeof onMinersChange === 'function') {
+      try {
+        onMinersChange(state.miners.map(m => ({ ...m })));
+      } catch (e) {}
+    }
+  }
+
+  state.activeBossEvent = null;
+}
 
 // Configuração oficial dos 5 leitos hospitalares da base médica e da Dra. Íris
 const BASE_HOSPITAL_BEDS = [
@@ -551,6 +631,7 @@ export default function GameBoard({
     minerStats: {},
     lastStatsEmit: 0,
     bossBattleSessions: {},
+    activeBossEvent: null, // Sistema oficial de transporte e retorno dos heróis no evento Boss
     isIrisActive: Boolean(isIrisActive),
     isArmorerActive: Boolean(isArmorerActive),
     miners: miners,
@@ -585,6 +666,9 @@ export default function GameBoard({
     const isNewMap = !currentKey || currentKey !== lastMapIdRef.current || !gameStateRef.current.grid;
 
     if (isNewMap) {
+      if (gameStateRef.current?.activeBossEvent) {
+        returnHeroesFromBossEvent(gameStateRef.current, gameStateRef.current.activeBossEvent.bossId, callbacksRef.current?.onMinersChange);
+      }
       lastMapIdRef.current = currentKey;
       gameStateRef.current.grid = mapData.grid.map(row => [...row]);
       gameStateRef.current.hpMap = { ...(mapData.hpMap || {}) };
@@ -619,6 +703,9 @@ export default function GameBoard({
       }
     } else {
       lastAlertedBossIdRef.current = null;
+      if (gameStateRef.current?.activeBossEvent) {
+        returnHeroesFromBossEvent(gameStateRef.current, gameStateRef.current.activeBossEvent.bossId, callbacksRef.current?.onMinersChange);
+      }
     }
   }, [mapData, triggerBossAlert]);
 
@@ -721,6 +808,86 @@ export default function GameBoard({
         });
         updateEnemies(state.enemies, state, dt, now, isCanyon);
 
+        // ====================================================================
+        // SISTEMA OFICIAL DE TRANSPORTE AUTOMÁTICO E COMBATE DO EVENTO BOSS
+        // ====================================================================
+        const activeBossEnemy = state.enemies?.find(e => (e.type === 'boss' || e.blockId === BLOCK_BOSS) && (e.hp === undefined || e.hp > 0));
+
+        if (activeBossEnemy) {
+          // Se for o nascimento do Boss ou mudança de Boss:
+          if (!state.activeBossEvent || state.activeBossEvent.bossId !== activeBossEnemy.id) {
+            // Se havia um evento anterior pendente sem retorno, garante o retorno antes de iniciar o novo
+            if (state.activeBossEvent && !state.activeBossEvent.returned) {
+              returnHeroesFromBossEvent(state, state.activeBossEvent.bossId, callbacksRef.current?.onMinersChange);
+            }
+
+            // 1. Ao nascer o Boss: identificar todos os heróis que estiverem efetivamente minerando
+            // Regra: "Não transportar heróis que já estejam na enfermaria, em recuperação ou na reserva"
+            const activeWorkingHeroes = (state.miners || []).filter(m => {
+              const maxHealth = Number(m.maxHealth) > 0 ? Number(m.maxHealth) : 100;
+              const curHealth = Number.isFinite(Number(m.currentHealth)) ? Number(m.currentHealth) : maxHealth;
+              const isInjured = m.status === 'injured' || m.injuredAwaitingRescue || (curHealth / maxHealth) * 100 <= 5;
+              return m.status === 'work' && !isInjured;
+            });
+
+            // 2. Salvar a posição exata de cada herói ANTES de qualquer movimentação
+            const savedPositions = new Map();
+            activeWorkingHeroes.forEach(m => {
+              savedPositions.set(m.id, {
+                x: m.x,
+                y: m.y,
+                targetBlock: m.targetBlock ? { ...m.targetBlock } : null
+              });
+            });
+
+            state.activeBossEvent = {
+              bossId: activeBossEnemy.id,
+              bossX: activeBossEnemy.gx,
+              bossY: activeBossEnemy.gy,
+              savedPositions,
+              vacantOriginalPositions: [],
+              returned: false
+            };
+
+            // 3. Transportar automaticamente todos esses heróis para uma região próxima ao Boss
+            const combatPositions = getValidCombatPositionsAroundBoss(
+              activeBossEnemy.gx,
+              activeBossEnemy.gy,
+              activeWorkingHeroes.length,
+              state.grid,
+              []
+            );
+
+            activeWorkingHeroes.forEach((miner, idx) => {
+              const combatPos = combatPositions[idx] || { x: activeBossEnemy.gx, y: activeBossEnemy.gy };
+              miner.x = combatPos.x;
+              miner.y = combatPos.y;
+              miner.visualX = combatPos.x;
+              miner.visualY = combatPos.y;
+              miner.activeMoveTarget = null;
+              miner.moveCooldown = 0.2;
+              miner.isMining = true;
+              miner.targetBlock = { x: activeBossEnemy.gx, y: activeBossEnemy.gy };
+              miner.lockedEnemyId = activeBossEnemy.id;
+              miner.targetDir = activeBossEnemy.gx < combatPos.x ? -1 : 1;
+              miner.swingTimer = 0.4;
+            });
+
+            state.floatTexts.push({
+              text: '⚡ RALLY BOSS: TRANSPORTE TÁTICO!',
+              x: activeBossEnemy.gx * TILE_SIZE + TILE_SIZE / 2,
+              y: activeBossEnemy.gy * TILE_SIZE - 20,
+              color: '#facc15',
+              opacity: 1.0,
+              vy: -25
+            });
+          }
+        } else if (state.activeBossEvent && !state.activeBossEvent.returned) {
+          // Boss não está mais no campo de batalha (removido, expirado ou cancelado)
+          // Regra 4: "Se o evento terminar sem derrotar o Boss... Nenhum herói deve ficar preso na região do Boss"
+          returnHeroesFromBossEvent(state, state.activeBossEvent.bossId, callbacksRef.current?.onMinersChange);
+        }
+
         // Registra uma única fotografia imutável da equipe que iniciou este Boss.
         const activeBossForSession = state.enemies?.find(e => e.type === 'boss' && (e.hp === undefined || e.hp > 0));
         if (activeBossForSession && !state.bossBattleSessions?.[activeBossForSession.id]) {
@@ -762,6 +929,8 @@ export default function GameBoard({
           if (bossSession && !bossSession.expired && Number.isFinite(startedAtMs) &&
               Date.now() - startedAtMs >= BOSS_BATTLE_DURATION_MS) {
             bossSession.expired = true;
+            // Retorno automático dos heróis caso expire por tempo
+            returnHeroesFromBossEvent(state, activeBossForSession.id, callbacksRef.current?.onMinersChange);
             callbacksRef.current.onBossExpired?.({
               bossId: activeBossForSession.id,
               startedAt: bossSession.startedAt,
@@ -804,6 +973,9 @@ export default function GameBoard({
             // Efeito limpo de abate (removidas as partículas verdes artificiais antigas)
             if (isBoss) {
               sfx.playChestOpen?.();
+
+              // REGRA OFICIAL: Quando o Boss morrer, todos os heróis retornam automaticamente às posições originais de mineração
+              returnHeroesFromBossEvent(state, defeated.id, callbacksRef.current?.onMinersChange);
 
               // O sorteio usa somente os participantes registrados no início e vivos na derrota.
               const battleSession = state.bossBattleSessions?.[defeated.id];
@@ -910,22 +1082,27 @@ export default function GameBoard({
       // Recuperação de emergência: se algum herói estiver dentro de um obstáculo sólido ou da base militar,
       // reposiciona de forma suave e segura para uma coordenada válida do mapa
       state.miners.forEach(m => {
-        if (m.status !== 'work') return;
+        if (m.status === 'house' || m.status === 'waiting_house') return;
         const hx = Math.round(m.x);
         const hy = Math.round(m.y);
-        const isInsideObstacle = isCityBuilding(hx, hy) || isBaseCompound(hx, hy);
+        const vx = Math.round(m.visualX !== undefined ? m.visualX : hx);
+        const vy = Math.round(m.visualY !== undefined ? m.visualY : hy);
+        const isInsideObstacle = isCityBuilding(hx, hy) || isBaseCompound(hx, hy) || isCityBuilding(vx, vy) || isBaseCompound(vx, vy);
 
         if (isInsideObstacle) {
           const fallbackCell = SAFE_HERO_SPAWN_POINTS.find(p => 
             !isCityBuilding(p.x, p.y) && 
             !isBaseCompound(p.x, p.y) && 
             !state.miners.some(other => other.id !== m.id && Math.round(other.x) === p.x && Math.round(other.y) === p.y)
-          ) || { x: 2, y: 5 };
+          ) || { x: 5, y: 2 };
 
           m.x = fallbackCell.x;
           m.y = fallbackCell.y;
           m.visualX = fallbackCell.x;
           m.visualY = fallbackCell.y;
+          m.activeMoveTarget = null;
+          m.targetBlock = null;
+          m.isMining = false;
           m.stuckTimer = 0;
         }
       });
@@ -937,6 +1114,18 @@ export default function GameBoard({
         // REGRA OFICIAL DO USUÁRIO: "veja que tem o medico na equipe e ele nao esta levando pro ambulatorio curar automaticamente"
         // Quando um herói é ferido (<= 5% de vida), a Dra. Íris (Médica do Abrigo) resgata e leva o sobrevivente para o ambulatório
         if (miner.status !== 'house' && miner.status !== 'waiting_house' && (miner.status === 'injured' || miner.injuredAwaitingRescue || (currentHealth / maxHealth) * 100 <= 5)) {
+          // Se o herói ferido estava na batalha do Boss, sua vaga de mineração original é reservada para o substituto herdar
+          if (state.activeBossEvent && !state.activeBossEvent.returned) {
+            if (state.activeBossEvent.savedPositions?.has(miner.id)) {
+              const origPos = state.activeBossEvent.savedPositions.get(miner.id);
+              state.activeBossEvent.savedPositions.delete(miner.id);
+              state.activeBossEvent.vacantOriginalPositions.push({
+                originalHeroId: miner.id,
+                pos: origPos
+              });
+            }
+          }
+
           miner.maxHealth = maxHealth;
           miner.currentHealth = Math.min(currentHealth, maxHealth * 0.05);
           miner.isMining = false;
@@ -1684,6 +1873,12 @@ export default function GameBoard({
               miner.activeMoveTarget = null;
               return;
             }
+            if (isCityBuilding(nextX, nextY) || isBaseCompound(nextX, nextY)) {
+              miner.activeMoveTarget = null;
+              miner.moveCooldown = 0.35;
+              return;
+            }
+
             miner.activeMoveTarget = { x: nextX, y: nextY };
 
             // Movimentação livre: heróis atravessam outros heróis e zumbis sem bloquear ou pausar
@@ -2096,8 +2291,42 @@ export default function GameBoard({
           for (let i = 0; i < Math.min(slotsNeeded, readyCandidates.length); i++) {
             const recruit = readyCandidates[i];
             recruit.status = 'work';
-            if (typeof recruit.x !== 'number' || isNaN(recruit.x)) recruit.x = 2;
-            if (typeof recruit.y !== 'number' || isNaN(recruit.y)) recruit.y = 8;
+
+            // REGRA OFICIAL DO USUÁRIO: Se outro herói assumir vaga durante a batalha,
+            // o substituto herda a posição original de mineração do herói substituído e é transportado para o combate
+            if (state.activeBossEvent && !state.activeBossEvent.returned && state.activeBossEvent.vacantOriginalPositions?.length > 0) {
+              const vacant = state.activeBossEvent.vacantOriginalPositions.shift();
+              state.activeBossEvent.savedPositions.set(recruit.id, vacant.pos);
+
+              const curBoss = state.enemies?.find(e => (e.type === 'boss' || e.blockId === BLOCK_BOSS) && (e.hp === undefined || e.hp > 0));
+              if (curBoss) {
+                const combatSpots = getValidCombatPositionsAroundBoss(curBoss.gx, curBoss.gy, 1, state.grid, state.miners);
+                const spot = combatSpots[0] || { x: curBoss.gx, y: curBoss.gy };
+                recruit.x = spot.x;
+                recruit.y = spot.y;
+                recruit.visualX = spot.x;
+                recruit.visualY = spot.y;
+                recruit.activeMoveTarget = null;
+                recruit.moveCooldown = 0.2;
+                recruit.isMining = true;
+                recruit.targetBlock = { x: curBoss.gx, y: curBoss.gy };
+                recruit.lockedEnemyId = curBoss.id;
+                recruit.targetDir = curBoss.gx < spot.x ? -1 : 1;
+                recruit.swingTimer = 0.4;
+
+                state.floatTexts.push({
+                  text: '🔄 REFORÇO NO COMBATE!',
+                  x: spot.x * TILE_SIZE + TILE_SIZE / 2,
+                  y: spot.y * TILE_SIZE - 12,
+                  color: '#38bdf8',
+                  opacity: 1.0,
+                  vy: -20
+                });
+              }
+            } else {
+              if (typeof recruit.x !== 'number' || isNaN(recruit.x)) recruit.x = 2;
+              if (typeof recruit.y !== 'number' || isNaN(recruit.y)) recruit.y = 8;
+            }
           }
         }
 
@@ -2147,6 +2376,9 @@ export default function GameBoard({
     return () => {
       cancelAnimationFrame(animationId);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      if (gameStateRef.current?.activeBossEvent) {
+        returnHeroesFromBossEvent(gameStateRef.current, gameStateRef.current.activeBossEvent.bossId, callbacksRef.current?.onMinersChange);
+      }
     };
   }, [mine?.id, gameSpeed, spritesReady]);
 
