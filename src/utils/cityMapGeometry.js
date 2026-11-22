@@ -23,17 +23,17 @@ export function isBaseCompound(c, r) {
   // Topo / Ápice Norte (Muro de concreto sob o outdoor):
   if (r === 2 && (c === 7 || c === 8)) return true;
   // Linha 3 (Salas norte e leitos superiores):
-  if (r === 3 && c >= 5 && c <= 10) return true;
+  if (r === 3 && (c >= 5 && c <= 10)) return true;
   // Linha 4 (Torre de vigia oeste até muro leste):
-  if (r === 4 && c >= 3 && c <= 11) return true;
+  if (r === 4 && (c >= 3 && c <= 11)) return true;
   // Linha 5 (Torre de vigia oeste até quina leste):
-  if (r === 5 && c >= 3 && c <= 11) return true;
+  if (r === 5 && (c >= 3 && c <= 11)) return true;
   // Linha 6 (Portão de madeira sudoeste até quina sudeste):
-  if (r === 6 && c >= 4 && c <= 11) return true;
+  if (r === 6 && (c >= 3 && c <= 11)) return true;
   // Linha 7 (Muro sul e portão metálico sudeste):
-  if (r === 7 && c >= 5 && c <= 10) return true;
+  if (r === 7 && (c >= 4 && c <= 11)) return true;
   // Fundo / Ápice Sul (Quina inferior do muro fortificado):
-  if (r === 8 && (c === 7 || c === 8)) return true;
+  if (r === 8 && (c >= 6 && c <= 8)) return true;
   return false;
 }
 
@@ -59,33 +59,45 @@ export function isCityObstacle(c, r) {
   if (c < 0 || c >= GRID_COLS || r < 0 || r >= GRID_ROWS) return true;
 
   // 1. CONSTRUÇÕES - RUÍNA NOROESTE (Prédio de concreto destruído no topo esquerdo)
-  if ((c === 2 || c === 3) && (r === 1 || r === 2)) return true;
+  // Cobre os dois andares e o teto da ruína: c=2..4 em r=0..1
+  if ((r === 0 || r === 1) && (c >= 2 && c <= 4)) return true;
 
   // 2. OUTDOOR / BILLBOARD "CRYPTOZOMBIES" (Norte no gramado)
-  if ((c === 7 || c === 8) && (r === 0 || r === 1)) return true;
+  // Cobre a placa inteira e suportes: c=7..9 em r=0..1
+  if ((r === 0 || r === 1) && (c >= 7 && c <= 9)) return true;
 
   // 3. TORRE DE SIRENE E ALARME DE VIGIA OESTE
+  // Pés e corpo da torre concentrados em c=2: r=3
   if (c === 2 && r === 3) return true;
 
-  // 4. TORRE DE VIGIA NORTE / LESTE (Guarita elevada de madeira)
-  if (c === 11 && r === 3) return true;
+  // 4. RESERVATÓRIO / HIDRANTE METÁLICO OESTE
+  // Silo cilíndrico com base de pedra: c=0 em r=3..4
+  if (c === 0 && (r === 3 || r === 4)) return true;
 
-  // 5. CARROS ABANDONADOS NO ASFALTO (Oeste e Leste)
-  if (c === 1 && r === 5) return true; // Carro na pista oeste
-  if (c === 14 && r === 5) return true; // Carro na pista leste
+  // 5. CARROS ABANDONADOS NO ASFALTO (Oeste)
+  // Carro enferrujado na pista oeste: c=0..1 em r=5
+  if ((c === 0 || c === 1) && r === 5) return true;
 
   // 6. CONSTRUÇÃO CENTRAL - BASE MILITAR & HOSPITAL DE SOBREVIVÊNCIA
   // Perímetro fortificado diamantado demarcado pelo usuário (muros, torre oeste, leitos e armaria)
   if (isBaseCompound(c, r)) return true;
 
-  // 7. CONSTRUÇÕES - RUÍNA SUDESTE (Prédio de concreto destruído no canto inferior direito)
-  if ((c === 12 || c === 13) && (r >= 8 && r <= 10)) return true;
+  // 7. GUARITA ELEVADA DE MADEIRA LESTE (Torre de vigia leste)
+  // Cobre a guarita e pilares de madeira: c=11 em r=2..3 (mantém a estrada c=12 100% livre)
+  if ((r === 2 || r === 3) && c === 11) return true;
 
-  // 8. CONSTRUÇÕES - SILO / RESERVATÓRIO METÁLICO DE COMBUSTÍVEL LESTE
-  if (c === 14 && (r === 3 || r === 4)) return true;
+  // 8. CONSTRUÇÕES - SILO / RESERVATÓRIO METÁLICO DE COMBUSTÍVEL LESTE E GERADORES
+  // Tanque cilíndrico e caixas de baterias: c=13..14 em r=3..4
+  if ((c === 13 || c === 14) && (r === 3 || r === 4)) return true;
 
-  // 9. CONSTRUÇÕES - RESERVATÓRIO / HIDRANTE METÁLICO OESTE
-  if (c === 0 && (r === 3 || r === 4)) return true;
+  // 9. CARRO ABANDONADO LESTE
+  // Carro enferrujado na pista leste: c=13..14 em r=5
+  if ((c === 13 || c === 14) && r === 5) return true;
+
+  // 10. CONSTRUÇÕES - RUÍNA SUDESTE (Prédio de concreto destruído no canto inferior direito)
+  // Prédio em c=13..14 r=8..10 e escombros frontais em c=12 r=9..10 (mantém a estrada c=12 r=8 100% livre)
+  if (r === 8 && (c >= 13 && c <= 14)) return true;
+  if ((r === 9 || r === 10) && (c >= 12 && c <= 14)) return true;
 
   // Todas as demais estradas, caminhos de terra batida e gramados estão 100% livres
   return false;
@@ -120,15 +132,15 @@ export const TACTICAL_ZONES = [
   // 8. Sul - Gramado Central do Portão
   { id: 's_grass_center', name: 'Sul Gramado Central', center: { x: 6, y: 9 } },
   // 9. Sul-Leste - Gramado Dianteiro da Ruína Sudeste
-  { id: 'se_grass_ruin', name: 'Sudeste Gramado Ruína', center: { x: 7, y: 9 } },
+  { id: 'se_grass_ruin', name: 'Sudeste Gramado Ruína', center: { x: 9, y: 9 } },
   // 10. Sul-Leste - Encruzilhada da Ruína Sudeste
-  { id: 'se_crossroad', name: 'Sudeste Encruzilhada', center: { x: 9, y: 9 } },
+  { id: 'se_crossroad', name: 'Sudeste Encruzilhada', center: { x: 10, y: 8 } },
   // 11. Sudeste - Gramado Extremo Leste
-  { id: 'se_grass_corner', name: 'Sudeste Canto Leste', center: { x: 14, y: 8 } },
+  { id: 'se_grass_corner', name: 'Sudeste Canto Leste', center: { x: 14, y: 7 } },
   // 12. Leste - Avenida de Asfalto Leste
   { id: 'e_avenue', name: 'Leste Avenida', center: { x: 12, y: 5 } },
   // 13. Nordeste - Trilha de Terra da Torre
-  { id: 'ne_trail_tower', name: 'Nordeste Trilha Torre', center: { x: 12, y: 2 } },
+  { id: 'ne_trail_tower', name: 'Nordeste Trilha Torre', center: { x: 10, y: 2 } },
   // 14. Nordeste - Gramado Superior da Torre
   { id: 'ne_grass_high', name: 'Nordeste Gramado Alto', center: { x: 13, y: 1 } }
 ];
@@ -138,12 +150,12 @@ export const TACTICAL_ZONES = [
  * Zumbis surgem nas bordas e cantos extremos e caminham para as áreas livres definidas.
  */
 export const CORNER_SPAWN_POINTS = [
-  { x: 1, y: 1, c: 1, r: 1 }, { x: 5, y: 1, c: 5, r: 1 }, { x: 6, y: 1, c: 6, r: 1 },
-  { x: 1, y: 2, c: 1, r: 2 }, { x: 9, y: 1, c: 9, r: 1 }, { x: 6, y: 2, c: 6, r: 2 },
+  { x: 0, y: 1, c: 0, r: 1 }, { x: 5, y: 1, c: 5, r: 1 }, { x: 10, y: 1, c: 10, r: 1 },
+  { x: 1, y: 2, c: 1, r: 2 }, { x: 6, y: 2, c: 6, r: 2 }, { x: 12, y: 1, c: 12, r: 1 },
   { x: 1, y: 7, c: 1, r: 7 }, { x: 1, y: 9, c: 1, r: 9 }, { x: 2, y: 9, c: 2, r: 9 },
   { x: 3, y: 9, c: 3, r: 9 }, { x: 6, y: 9, c: 6, r: 9 }, { x: 7, y: 9, c: 7, r: 9 },
   { x: 9, y: 9, c: 9, r: 9 }, { x: 2, y: 5, c: 2, r: 5 }, { x: 2, y: 6, c: 2, r: 6 },
-  { x: 12, y: 1, c: 12, r: 1 }, { x: 13, y: 1, c: 13, r: 1 }, { x: 14, y: 7, c: 14, r: 7 }
+  { x: 12, y: 5, c: 12, r: 5 }, { x: 13, y: 1, c: 13, r: 1 }, { x: 14, y: 7, c: 14, r: 7 }
 ];
 
 export function getCornerSpawnPoint(index = 0) {
@@ -179,11 +191,11 @@ export function getSpawnZoneCells(cols = GRID_COLS, rows = GRID_ROWS) {
 
 // Heróis nascem em estradas e gramados 100% livres e desimpedidos (fora da base central)
 export const SAFE_HERO_SPAWN_POINTS = [
-  { x: 1, y: 1 }, { x: 5, y: 1 }, { x: 6, y: 1 }, { x: 9, y: 1 }, { x: 6, y: 2 },
+  { x: 0, y: 1 }, { x: 5, y: 1 }, { x: 10, y: 1 }, { x: 12, y: 1 }, { x: 6, y: 2 },
   { x: 1, y: 2 }, { x: 2, y: 5 }, { x: 2, y: 6 }, { x: 1, y: 7 }, { x: 1, y: 8 },
   { x: 1, y: 9 }, { x: 2, y: 9 }, { x: 3, y: 9 }, { x: 5, y: 9 }, { x: 6, y: 9 },
-  { x: 7, y: 9 }, { x: 9, y: 9 }, { x: 12, y: 1 }, { x: 13, y: 1 }, { x: 12, y: 2 },
-  { x: 12, y: 5 }, { x: 14, y: 7 }, { x: 14, y: 8 }
+  { x: 7, y: 9 }, { x: 9, y: 9 }, { x: 10, y: 8 }, { x: 13, y: 1 }, { x: 10, y: 2 },
+  { x: 12, y: 5 }, { x: 14, y: 6 }, { x: 14, y: 7 }
 ];
 
 export function getSafeHeroSpawn(index = 0) {

@@ -60,7 +60,7 @@ export const STAFF_MEMBERS = {
     avatar: '🔧',
     image: '/assets/heroes/armeiro.png',
     weaponImage: '/assets/weapons/armeiro_wrench.png',
-    pos: { x: 630, y: 350 }
+    pos: { x: 666, y: 358 }
   }
 };
 

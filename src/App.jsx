@@ -23,8 +23,7 @@ import {
   Flame,
   Users,
   Pin,
-  ChevronDown,
-  Wrench
+  ChevronDown
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { MINES, INITIAL_MINERS, MINER_CLASSES } from './data/minersData';
@@ -1655,25 +1654,6 @@ export default function App() {
             <span>ABRIGO</span>
             <span className="px-1 py-0.1 rounded-full bg-blue-500 text-slate-950 text-[9px] font-bold font-mono">
               {minersInHouse.length}/{currentHouse.slots}
-            </span>
-          </button>
-
-          {/* BOTÃO DA SALA DE ARMAS / MESTRE ARMEIRO */}
-          <button
-            onClick={() => setIsArmorerHireOpen(true)}
-            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg font-tech text-xs font-bold transition cursor-pointer shadow-sm ${
-              isArmorerActive
-                ? 'bg-amber-950/60 hover:bg-amber-900/70 text-amber-300 border border-amber-500/40'
-                : 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-400/60 animate-pulse'
-            }`}
-            title="Mestre Armeiro • Sala de Armas (Reparo Automático de Armas)"
-          >
-            <Wrench size={13} className="text-amber-400" />
-            <span>ARMEIRO</span>
-            <span className={`px-1 py-0.1 rounded-full text-[9px] font-bold font-mono ${
-              isArmorerActive ? 'bg-amber-500 text-slate-950' : 'bg-slate-700 text-amber-300'
-            }`}>
-              {isArmorerActive ? 'ATIVO' : 'CONTRATAR'}
             </span>
           </button>
 

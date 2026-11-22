@@ -57,8 +57,8 @@ const BASE_HOSPITAL_BEDS = [
   { id: 5, x: 557, y: 277, angle: 0.86 }
 ];
 const DRA_IRIS_POS = { x: 490, y: 386 };
-// Posição oficial do Mestre Armeiro na Sala de Armas do complexo central
-const ARMEIRO_POS = { x: 630, y: 350 };
+// Posição oficial do Mestre Armeiro no piso da Sala de Armas (marcado pelo círculo vermelho do usuário)
+const ARMEIRO_POS = { x: 666, y: 358 };
 
 // Renderiza a Dra. Íris e os heróis internados em tratamento nos leitos do hospital
 function drawBaseInfirmaryAndPatients(ctx, state, now) {

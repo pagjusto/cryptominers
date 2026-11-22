@@ -630,9 +630,9 @@ export function drawEnemyCharacter(ctx, enemy, now) {
     }
   }
 
-  // Zumbis e Boss com escala aumentada suavemente (~15%) conforme solicitação
-  const drawW = isBoss ? Math.floor(TILE_SIZE * 0.82) : Math.floor(TILE_SIZE * 0.60);
-  const drawH = isBoss ? Math.floor(TILE_SIZE * 0.75) : Math.floor(TILE_SIZE * 0.54);
+  // Zumbis dimensionados com o exato mesmo tamanho visível da Dra. Íris e dos heróis (~34px)
+  const drawW = isBoss ? Math.floor(TILE_SIZE * 0.82) : 52;
+  const drawH = isBoss ? Math.floor(TILE_SIZE * 0.75) : 52;
 
   // Calibragem física exata para pés plantados no solo (elimina qualquer efeito de flutuação):
   // No sprite 640x640 do zumbi, a sola da bota está em Y=536 (536/640 = 0.8375)
@@ -817,10 +817,10 @@ export function drawEnemyCharacter(ctx, enemy, now) {
     ctx.restore();
   } else if (hpRatio < 1.0) {
     // Mini Barra de Vida para Zumbis danificados
-    const barW = 18;
-    const barH = 2.5;
+    const barW = 20;
+    const barH = 3;
     const barX = px - barW / 2;
-    const barY = py - drawH * 0.80;
+    const barY = py + dy - 6;
 
     ctx.save();
     ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';

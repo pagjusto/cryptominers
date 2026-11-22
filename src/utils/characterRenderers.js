@@ -4598,8 +4598,9 @@ export function drawArmorerCharacter(ctx, ax, ay, now, isActive = true) {
   }
 
   const bobY = Math.sin((now || 0) * 0.003) * 0.8;
-  const pw = 44; // Proporcional ao tamanho normal dos heróis
-  const ph = 50;
+  // Calibrado para ter o exato mesmo tamanho visual da Dra. Íris e dos outros heróis (~35px de altura)
+  const pw = 26;
+  const ph = 35;
 
   if (armorerLoaded && armorerImg) {
     ctx.save();
@@ -4613,8 +4614,8 @@ export function drawArmorerCharacter(ctx, ax, ay, now, isActive = true) {
     // Se estiver ativo, desenha a chave mecânica empunhada com animação sutil
     if (armorerWrenchLoaded && armorerWrenchImg) {
       ctx.save();
-      const wrenchW = 26;
-      const wrenchH = 26;
+      const wrenchW = 18;
+      const wrenchH = 18;
       const wrenchAngle = 0.2 + Math.sin((now || 0) * 0.0035) * 0.08;
       ctx.translate(pw * 0.28, -ph * 0.35);
       ctx.rotate(wrenchAngle);
