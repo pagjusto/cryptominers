@@ -47,8 +47,16 @@ Este documento registra as regras de gameplay aprovadas para o sistema de sobrev
 
 ## Ambulatório e recuperação
 
+A capacidade do ambulatório depende do nível do abrigo:
+
+| Nível do abrigo | Leitos disponíveis |
+|---|---:|
+| Básico | **5** |
+| Reforçado | **10** |
+| Avançado | **15** |
+
 - A velocidade de recuperação depende exclusivamente do nível do abrigo.
-- Todos os sobreviventes podem recuperar simultaneamente até o limite de leitos disponíveis.
+- Todos os sobreviventes podem recuperar simultaneamente até o limite de leitos disponíveis para o nível atual.
 - Feridos excedentes aguardam em uma fila única.
 - A fila segue a ordem de chegada: primeiro a chegar, primeiro a ser atendido (FIFO).
 - Quando um leito fica livre, o próximo sobrevivente da fila entra automaticamente.
