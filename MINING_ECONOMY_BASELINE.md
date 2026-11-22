@@ -163,16 +163,16 @@ A mesma taxa absoluta de desgaste normal por segundo é aplicada a todas as rari
 
 ### Tempo de mineração até o resgate e recuperação no Abrigo Básico
 
-A recuperação ocorre à mesma taxa absoluta de 142,5 PV/h. Assim, para esta referência, o tempo de recuperação dos 95% perdidos é igual ao tempo de mineração necessário para perder esses 95%.
+A recuperação do Abrigo Básico é 60% mais rápida que o desgaste: o tempo de recuperação corresponde a 40% do tempo de mineração necessário para perder os mesmos 95% de HP.
 
-| Raridade | Tempo de mineração até 5% | Tempo de recuperação | Ciclo completo |
+| Raridade | Tempo de mineração até 5% | Recuperação Básico | Ciclo completo |
 |---|---:|---:|---:|
-| Comum | 6h40 | 6h40 | 13h20 |
-| Raro | 8h | 8h | 16h |
-| Super Raro | 9h20 | 9h20 | 18h40 |
-| Épico | 10h40 | 10h40 | 21h20 |
-| Lendário | 12h | 12h | 24h |
-| Super Lendário | 13h20 | 13h20 | 26h40 |
+| Comum | 6h40 | 2h40 | 9h20 |
+| Raro | 8h | 3h12 | 11h12 |
+| Super Raro | 9h20 | 3h44 | 13h04 |
+| Épico | 10h40 | 4h16 | 14h56 |
+| Lendário | 12h | 4h48 | 16h48 |
+| Super Lendário | 13h20 | 5h20 | 18h40 |
 
 Os tempos acima são a referência do Abrigo Básico, sem fila de espera. Multiplicadores dos abrigos alteram a velocidade de recuperação, não a taxa de desgaste normal.
 
@@ -207,7 +207,7 @@ O ataque individual de 1% do HP máximo é um evento discreto. Não somar dano c
 
 - Capacidade do ambulatório: 5 leitos no Abrigo Básico, 10 no Reforçado e 15 no Avançado.
 - A quantidade de leitos define quantos heróis recuperam simultaneamente; os excedentes aguardam em fila FIFO.
-- Os multiplicadores de recuperação são: Básico 100%, Reforçado 125% e Avançado 150% da velocidade básica.
+- A taxa de cura do Básico é 356,25 PV/h; Reforçado aplica 125% (445,3125 PV/h) e Avançado 150% (534,375 PV/h).
 
 Não assumir duração de evento, número de heróis atingidos, ou perda total por Boss sem esses parâmetros.
 
@@ -235,22 +235,23 @@ A capacidade do ambulatório depende do nível do abrigo:
 
 ## Tempos de recuperação por abrigo — tabela calculada
 
-A velocidade de recuperação do Abrigo Básico é a referência: **142,5 PV por hora**. Os outros abrigos aumentam a velocidade, e o tempo é inversamente proporcional ao multiplicador:
+A velocidade do Abrigo Básico é **356,25 PV por hora**, equivalente a 2,5 vezes o desgaste normal (recuperação 60% mais rápida em duração). Reforçado e Avançado aplicam multiplicadores adicionais:
 
-    tempo_recuperação = HP_a_recuperar ÷ (142,5 × multiplicador_do_abrigo)
+    taxa_recuperação = 356,25 × multiplicador_do_abrigo
+    tempo_recuperação = HP_a_recuperar ÷ taxa_recuperação
 
-- Abrigo Básico: 100% da velocidade (142,5 PV/h).
-- Abrigo Reforçado: 125% da velocidade (178,125 PV/h), ou seja, tempo básico ÷ 1,25.
-- Abrigo Avançado: 150% da velocidade (213,75 PV/h), ou seja, tempo básico ÷ 1,5.
+- Abrigo Básico: 100% da velocidade-base (356,25 PV/h).
+- Abrigo Reforçado: 125% da velocidade-base (445,3125 PV/h).
+- Abrigo Avançado: 150% da velocidade-base (534,375 PV/h).
 
-| Raridade | HP a recuperar | Abrigo Básico (100%) | Abrigo Reforçado (125%) | Abrigo Avançado (150%) |
+| Raridade | HP a recuperar | Abrigo Básico | Abrigo Reforçado | Abrigo Avançado |
 |---|---:|---:|---:|---:|
-| Comum | 950 | 6h40min | 5h20min | 4h26min40s |
-| Raro | 1.140 | 8h | 6h24min | 5h20min |
-| Super Raro | 1.330 | 9h20min | 7h28min | 6h13min20s |
-| Épico | 1.520 | 10h40min | 8h32min | 7h06min40s |
-| Lendário | 1.710 | 12h | 9h36min | 8h |
-| Super Lendário | 1.900 | 13h20min | 10h40min | 8h53min20s |
+| Comum | 950 | 2h40min | 2h08min | 1h46min40s |
+| Raro | 1.140 | 3h12min | 2h33min36s | 2h08min |
+| Super Raro | 1.330 | 3h44min | 2h59min12s | 2h29min20s |
+| Épico | 1.520 | 4h16min | 3h24min48s | 2h50min40s |
+| Lendário | 1.710 | 4h48min | 3h50min24s | 3h12min |
+| Super Lendário | 1.900 | 5h20min | 4h16min | 3h33min20s |
 
 Os tempos são calculados para recuperar do limite de resgate (5% do HP máximo) até 100%, sem considerar espera em fila. Manter precisão em segundos/frações internamente; a interface pode exibir horas e minutos. O tempo efetivo de entrada no jogo também depende da disponibilidade das vagas do ambulatório e da fila FIFO.
 
@@ -310,46 +311,46 @@ Esta é a tabela de preços comerciais definida para os pacotes de 1, 5, 10 e 15
 
 ### Simulação cronológica com fila FIFO
 
-Foi adotada como referência de balanceamento a simulação cronológica de 90 dias informada e aprovada pelo usuário, com a fila FIFO considerada explicitamente:
+Simulação cronológica de eventos para 90 dias, com os 15 heróis iniciando com HP cheio, desgaste normal e fila FIFO:
 
-- Produção bruta de referência antes do multiplicador: **31.406,88 Coins** em 90 dias.
-- Produção média de referência: **348,97 Coins/dia**.
+- Produção bruta antes do multiplicador: **31.334,11 Coins** em 90 dias.
+- Produção média: **348,16 Coins/dia**.
 - Composição: 6 Common, 4 Rare, 4 Epic e 1 Legendary.
-- Capacidade: 5 leitos até o dia 54 e 10 leitos a partir do dia 55.
-- A simulação de referência não inclui ataques do Boss nem envelhecimento, exceto a premissa específica de eficiência de 90% somente no dia 90 usada na projeção econômica.
-- Os resultados de espera e ocupação da fila apresentados na análise foram: 2.911 atendimentos; espera média geral de 5,8 minutos; maior espera registrada de 5h04; ocupação total dos leitos de aproximadamente 57,5%. Esses indicadores são referências da simulação e devem ser revalidados caso a engine ou as premissas operacionais mudem.
+- Capacidade: 5 leitos até o início do dia 55; 10 leitos a partir do dia 55.
+- Desgaste: 142,5 PV/h enquanto minera.
+- Recuperação: Básico 356,25 PV/h; Reforçado 445,3125 PV/h; Avançado 534,375 PV/h.
+- Eficiência de mineração: 100% até o dia 89; 90% somente durante o dia 90.
+- Resultado: **2.907 atendimentos**, espera média de **5min58s** e maior espera de **5h04min**. Não foram incluídos ataques do Boss.
 
-### Fator uniforme de balanceamento aprovado
+### Fator uniforme de balanceamento recalculado
 
-O usuário aprovou definir o fator uniforme de produção em **1,7034×**, preservando as proporções relativas entre as raridades.
+Para alcançar 53.500 Coins brutos e cobrir 10.500 Coins em despesas, o fator recalculado é **1,7074×**, preservando as proporções relativas entre raridades.
 
-    produção_balanceada = produção_simulada_com_FIFO × 1,7034
-    31.406,884 × 1,7034 = 53.498,49 Coins (aprox.)
+    produção_balanceada = 31.334,11488 × 1,7074
+    produção_balanceada = 53.499,87 Coins (aprox.)
 
-O fator corresponde a um aumento de aproximadamente **70,34%** sobre a produção de referência com FIFO.
+O fator corresponde a um aumento de aproximadamente **70,74%** sobre a produção simulada com FIFO.
 
-Taxas diárias resultantes por herói, antes de aplicar o fator de envelhecimento do dia 90:
-
-| Raridade | Produção-base (Coins/herói/dia) | Produção com fator 1,7034× |
+| Raridade | Produção-base (Coins/herói/dia) | Produção com fator 1,7074× |
 |---|---:|---:|
-| Common | 20,88 | 35,5650 |
-| Rare | 31,32 | 53,3475 |
-| Epic | 41,76 | 71,1300 |
-| Legendary | 62,64 | 106,6950 |
+| Common | 20,88 | 35,6486 |
+| Rare | 31,32 | 53,4729 |
+| Epic | 41,76 | 71,2973 |
+| Legendary | 62,64 | 106,9458 |
 
 ### Resultado econômico projetado
 
 | Indicador | Valor |
 |---|---:|
-| Produção bruta simulada com fator 1,7034× | **53.498,49 Coins** |
+| Produção bruta simulada com fator 1,7074× | **53.499,87 Coins** |
 | Dra. Íris — 3 ciclos | 4.500,00 Coins |
 | Armeiro — 3 ciclos | 4.500,00 Coins |
 | Upgrade do Abrigo Reforçado | 1.500,00 Coins |
 | Total de despesas | **10.500,00 Coins** |
-| Saldo líquido projetado | **42.998,49 Coins** |
-| Equivalência a 100 Coins/USDT | **429,98 USDT** |
+| Saldo líquido projetado | **42.999,87 Coins** |
+| Equivalência a 100 Coins/USDT | **430,00 USDT** |
 
-O fator **1,7034×** fica definido como o parâmetro aprovado de balanceamento para este cenário. Por arredondamento, a projeção resulta em aproximadamente 2 Coins abaixo da meta exata de 43.000 Coins líquidos; para fins de planejamento, equivale a aproximadamente 430 USDT.
+O fator **1,7074×** fica definido como parâmetro recalculado para este cenário. Por arredondamento, a projeção fica aproximadamente 0,13 Coin abaixo da meta exata de 43.000 Coins líquidos.
 
 ### Serviços contratados
 
