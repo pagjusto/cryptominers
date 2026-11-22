@@ -180,4 +180,5 @@ A composição acima é **apenas uma simulação de referência do cenário medi
 - Ao concluir 100% da recuperação no ambulatório, o sobrevivente retorna automaticamente à equipe, independentemente de o Boss ainda estar vivo ou já ter sido derrotado, sem exigir ação do jogador.
 - O retorno respeita o limite máximo de 15 sobreviventes na equipe. Se houver vaga, o herói ocupa uma vaga livre; nunca remove nem substitui um sobrevivente saudável que já esteja na equipe.
 - Se a equipe já estiver com 15 sobreviventes quando outro concluir a recuperação, ele permanece aguardando na reserva e retorna automaticamente assim que uma vaga ficar livre, sem ultrapassar o limite de 15.
+- Quando vários sobreviventes estiverem aguardando vaga após a recuperação, o retorno segue a ordem em que concluíram a recuperação: primeiro a recuperar, primeiro a retornar (FIFO).
 - Se o Boss ainda estiver ativo, o retorno não altera o snapshot imutável nem a elegibilidade ao sorteio: sobreviventes da equipe inicial mantêm apenas sua participação original, e sobreviventes que entraram como substitutos continuam inelegíveis naquele Boss. O retorno não cria participação adicional.
