@@ -173,3 +173,5 @@ A composição acima é **apenas uma simulação de referência do cenário medi
 - Sem a Dra. Íris contratada, não ocorre reposição automática; o jogador poderá realizar a substituição manualmente, respeitando a regra de que somente sobreviventes feridos podem ser substituídos durante o Boss.
 - O sobrevivente que entra como substituto pode combater normalmente, mas não passa a integrar o snapshot imutável da batalha e não recebe participação no sorteio do Baú do Boss daquele evento.
 - A substituição não altera a elegibilidade dos sobreviventes que iniciaram a batalha.
+
+- Se a Dra. Íris estiver contratada, mas não houver sobreviventes disponíveis na reserva, a batalha continua com menos integrantes. Não encerrar a batalha nem retirar outros sobreviventes saudáveis para preencher a vaga.
