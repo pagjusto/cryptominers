@@ -23,7 +23,7 @@ Este documento registra as regras de gameplay aprovadas para o sistema de sobrev
 - Durante o Boss, só é permitido substituir um sobrevivente que ficou ferido e foi enviado ao ambulatório.
 - Não é permitido retirar um sobrevivente saudável para colocar outro durante o Boss.
 - A substituição pode ser feita manualmente pelo jogador ou automaticamente pelo médico contratado.
-- O sobrevivente substituto pode combater normalmente, mas não recebe participação no sorteio do Baú do Boss daquele Boss.
+- Todo sobrevivente que entrar como substituto durante o Boss, seja por substituição manual ou automática pela Dra. Íris, pode combater normalmente, mas não recebe participação no sorteio do Baú do Boss daquele evento. A elegibilidade permanece exclusiva dos sobreviventes registrados no snapshot imutável do início da batalha.
 
 ## Participação no sorteio do Boss
 
