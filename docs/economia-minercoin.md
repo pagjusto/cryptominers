@@ -93,6 +93,7 @@ O saque somente será efetivado após a confirmação explícita do jogador ness
 - Primeiro, o jogador revisa os valores e confirma a solicitação na tela do jogo.
 - Em seguida, o sistema envia um e-mail de segurança com os dados do saque, incluindo valor bruto, taxas, valor líquido e carteira de destino, para que o jogador confira as informações.
 - O saque somente será autorizado para processamento depois que o jogador clicar na ação de aprovação do próprio e-mail.
+- O link de aprovação enviado por e-mail terá validade de **30 minutos** a partir do envio.
 - A confirmação no jogo, isoladamente, não autoriza o processamento; da mesma forma, a aprovação por e-mail não substitui a confirmação inicial dentro do jogo.
 - Se a aprovação por e-mail não for concluída, o saque não deve ser enviado à rede Solana e deve permanecer aguardando a segunda confirmação, com estado claramente identificado no histórico.
 - Após as duas confirmações, o saque segue para o processamento e recebe o status **Pendente** até a confirmação da transferência na Solana.
