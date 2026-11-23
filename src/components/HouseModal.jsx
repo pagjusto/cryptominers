@@ -205,10 +205,15 @@ export default function HouseModal({
                   </thead>
                   <tbody>
                     {HOUSE_TIERS.map(tier => {
+                      // Mantém a estimativa idêntica à taxa aplicada pela engine:
+                      // Básico = 356,25 PV/h; Reforçado = 125%; Avançado = 150%.
+                      const healingRatePerHour = 356.25 * (tier.recoverySpeedPct / 100);
                       const fullMinutes = tier.slots > 0
-                        ? 240 / (tier.recoverySpeedPct / 100)
+                        ? (100 / healingRatePerHour) * 60
                         : null;
-                      const injuredMinutes = fullMinutes === null ? null : fullMinutes * 0.95;
+                      const injuredMinutes = tier.slots > 0
+                        ? (95 / healingRatePerHour) * 60
+                        : null;
                       const formatDuration = minutes => {
                         const rounded = Math.round(minutes);
                         const hours = Math.floor(rounded / 60);
@@ -228,7 +233,7 @@ export default function HouseModal({
                 </table>
               </div>
               <p className="mt-2 text-[10px] leading-relaxed text-slate-500">
-                Estimativa com recuperação padrão de 240 min para 100% e velocidade do abrigo. Feridos entram no tratamento com 5% de PV; sem leitos não há tratamento ativo.
+                Estimativa calculada pela mesma taxa de cura usada na partida: 356,25 PV por hora no Abrigo Básico, com multiplicadores de 125% e 150% nos níveis Reforçado e Avançado. Feridos entram com 5% de PV; sem leitos não há tratamento ativo.
               </p>
             </div>
 
