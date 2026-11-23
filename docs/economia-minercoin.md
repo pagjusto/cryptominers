@@ -74,6 +74,19 @@ A taxa é definida pelo tempo de permanência de cada lote de Coins utilizado no
 - O valor líquido enviado ao jogador corresponde ao valor bruto sacado menos a taxa percentual calculada. O gas continua sendo pago pelo projeto, sem desconto adicional ao jogador.
 - Exemplo ilustrativo: se um saque utilizar parcelas de lotes com taxas diferentes, cada parcela terá sua própria taxa; não será aplicada uma taxa única sobre todo o saque.
 
+### Tela de confirmação do saque — decisão aprovada
+
+Antes de confirmar definitivamente um saque, o jogador deverá visualizar uma tela de revisão com o cálculo completo, incluindo:
+
+- Valor bruto solicitado.
+- Quantidade/parcelas de Coins retiradas de cada lote utilizado.
+- Tempo de permanência e taxa percentual aplicada a cada lote.
+- Valor descontado de taxa em cada parcela e total das taxas.
+- Valor líquido final que será enviado ao jogador em USDT.
+- Informação de que o gas da rede Solana é pago pelo projeto e não será descontado novamente do jogador.
+
+O saque somente será efetivado após a confirmação explícita do jogador nessa tela. A tela deve apresentar os valores de forma clara antes da confirmação, sem esconder ou agrupar taxas de lotes diferentes em uma taxa única não explicada.
+
 ## Política de burn
 
 - **Não haverá mecanismo de burn de Coins por enquanto.**
