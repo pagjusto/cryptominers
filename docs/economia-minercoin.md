@@ -87,6 +87,16 @@ Antes de confirmar definitivamente um saque, o jogador deverá visualizar uma te
 
 O saque somente será efetivado após a confirmação explícita do jogador nessa tela. A tela deve apresentar os valores de forma clara antes da confirmação, sem esconder ou agrupar taxas de lotes diferentes em uma taxa única não explicada.
 
+### Dupla confirmação de saque — decisão aprovada
+
+- O jogador deverá realizar **duas confirmações obrigatórias** para autorizar um saque: uma dentro do jogo e outra pelo e-mail cadastrado na conta.
+- Primeiro, o jogador revisa os valores e confirma a solicitação na tela do jogo.
+- Em seguida, o sistema envia um e-mail de segurança com os dados do saque, incluindo valor bruto, taxas, valor líquido e carteira de destino, para que o jogador confira as informações.
+- O saque somente será autorizado para processamento depois que o jogador clicar na ação de aprovação do próprio e-mail.
+- A confirmação no jogo, isoladamente, não autoriza o processamento; da mesma forma, a aprovação por e-mail não substitui a confirmação inicial dentro do jogo.
+- Se a aprovação por e-mail não for concluída, o saque não deve ser enviado à rede Solana e deve permanecer aguardando a segunda confirmação, com estado claramente identificado no histórico.
+- Após as duas confirmações, o saque segue para o processamento e recebe o status **Pendente** até a confirmação da transferência na Solana.
+
 ### Status e conclusão do saque — decisão aprovada
 
 - Após o jogador confirmar a solicitação na tela de revisão, o saque deverá receber o status **Pendente** enquanto aguarda o processamento e a confirmação da transferência na rede Solana.
