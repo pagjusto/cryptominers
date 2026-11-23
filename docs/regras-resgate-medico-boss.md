@@ -100,6 +100,7 @@ A cadência numérica de cada arma é definida em `WEAPON_CATALOG.attacksPerSeco
 
 - Cada batalha tem duração máxima de 5 minutos caso o Boss não seja derrotado antes.
 - O Boss é encerrado imediatamente quando seus 30 PV chegam a zero; se continuar vivo, o evento termina automaticamente ao fim dos 5 minutos.
+- Quando o evento do Boss terminar, os sobreviventes retornam aos locais em que estavam antes do transporte para a batalha. Isso vale tanto para a derrota do Boss quanto para o encerramento por tempo.
 - A regra de participação acima é aplicada ao sorteio de Baú do Boss do evento.
 
 
