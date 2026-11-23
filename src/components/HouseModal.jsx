@@ -188,52 +188,42 @@ export default function HouseModal({
               </span>
             </div>
 
-            {/* Tabela de tempo de tratamento por nível */}
+            {/* Tabela oficial de tempo de recuperação por raridade */}
             <div className="p-3 rounded-2xl bg-slate-950/60 border border-slate-800">
               <h4 className="font-tech font-bold text-xs text-emerald-300 uppercase tracking-wider mb-2">
-                ⏱️ Tempo estimado de tratamento
+                ⏱️ Tempo de recuperação por raridade
               </h4>
               <div className="overflow-x-auto">
                 <table className="w-full text-[11px] text-left">
                   <thead className="text-slate-500 border-b border-slate-800">
                     <tr>
-                      <th className="py-1.5 pr-2">Base</th>
-                      <th className="py-1.5 px-2 text-right">Leitos</th>
-                      <th className="py-1.5 px-2 text-right">0→100%</th>
-                      <th className="py-1.5 pl-2 text-right">5→100%</th>
+                      <th className="py-1.5 pr-2">Herói</th>
+                      <th className="py-1.5 px-2 text-right">Básico</th>
+                      <th className="py-1.5 px-2 text-right">Reforçado</th>
+                      <th className="py-1.5 pl-2 text-right">Avançado</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {HOUSE_TIERS.map(tier => {
-                      // Mantém a estimativa idêntica à taxa aplicada pela engine:
-                      // Básico = 356,25 PV/h; Reforçado = 125%; Avançado = 150%.
-                      const healingRatePerHour = 356.25 * (tier.recoverySpeedPct / 100);
-                      const fullMinutes = tier.slots > 0
-                        ? (100 / healingRatePerHour) * 60
-                        : null;
-                      const injuredMinutes = tier.slots > 0
-                        ? (95 / healingRatePerHour) * 60
-                        : null;
-                      const formatDuration = minutes => {
-                        const rounded = Math.round(minutes);
-                        const hours = Math.floor(rounded / 60);
-                        const mins = rounded % 60;
-                        return hours ? (mins ? `${hours}h ${String(mins).padStart(2, '0')}min` : `${hours}h`) : `${mins}min`;
-                      };
-                      return (
-                        <tr key={tier.id} className={tier.id === currentHouse.id ? 'text-emerald-300' : 'text-slate-300'}>
-                          <td className="py-1.5 pr-2 font-bold">{tier.name}</td>
-                          <td className="py-1.5 px-2 text-right">{tier.slots}</td>
-                          <td className="py-1.5 px-2 text-right font-mono">{fullMinutes === null ? '—' : formatDuration(fullMinutes)}</td>
-                          <td className="py-1.5 pl-2 text-right font-mono">{injuredMinutes === null ? '—' : formatDuration(injuredMinutes)}</td>
-                        </tr>
-                      );
-                    })}
+                    {[
+                      ['Comum', '6h40', '5h20', '4h26min40s'],
+                      ['Raro', '8h', '6h24', '5h20'],
+                      ['Super Raro', '9h20', '7h28', '6h13min20s'],
+                      ['Épico', '10h40', '8h32', '7h06min40s'],
+                      ['Lendário', '12h', '9h36', '8h'],
+                      ['Super Lendário', '13h20', '10h40', '8h53min20s']
+                    ].map(([rarity, basic, reinforced, advanced]) => (
+                      <tr key={rarity} className="text-slate-300">
+                        <td className="py-1.5 pr-2 font-bold">{rarity}</td>
+                        <td className={`py-1.5 px-2 text-right font-mono ${currentHouse.id === 'basic' ? 'text-emerald-300' : ''}`}>{basic}</td>
+                        <td className={`py-1.5 px-2 text-right font-mono ${currentHouse.id === 'reinforced' ? 'text-emerald-300' : ''}`}>{reinforced}</td>
+                        <td className={`py-1.5 pl-2 text-right font-mono ${currentHouse.id === 'advanced' ? 'text-emerald-300' : ''}`}>{advanced}</td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>
               <p className="mt-2 text-[10px] leading-relaxed text-slate-500">
-                Estimativa calculada pela mesma taxa de cura usada na partida: 356,25 PV por hora no Abrigo Básico, com multiplicadores de 125% e 150% nos níveis Reforçado e Avançado. Feridos entram com 5% de PV; sem leitos não há tratamento ativo.
+                Tempos oficiais para recuperação de 5% a 100% de PV. O Abrigo Básico recupera 142,5 PV por hora; o Reforçado aplica 125% e o Avançado 150%. Sem leito disponível, o herói permanece na fila.
               </p>
             </div>
 
