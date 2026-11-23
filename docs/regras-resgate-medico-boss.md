@@ -63,6 +63,25 @@ A capacidade do ambulatório depende do nível do abrigo:
 - Ao atingir 100% de vida, o sobrevivente retorna automaticamente à reserva e libera o leito.
 - O médico resgata todos os feridos mesmo quando não há leitos livres; os excedentes aguardam na fila.
 
+## Tempos oficiais de recuperação por raridade — tabela aprovada em 23/11/2026
+
+A recuperação de feridos começa em 5% de PV e termina em 100%. Os tempos abaixo são os tempos oficiais para cada raridade, conforme o nível do abrigo:
+
+| Raridade | Básico | Reforçado | Avançado |
+|---|---:|---:|---:|
+| Comum | 6h40 | 5h20 | 4h26min40s |
+| Raro | 8h | 6h24 | 5h20 |
+| Super Raro | 9h20 | 7h28 | 6h13min20s |
+| Épico | 10h40 | 8h32 | 7h06min40s |
+| Lendário | 12h | 9h36 | 8h |
+| Super Lendário | 13h20 | 10h40 | 8h53min20s |
+
+- A taxa de recuperação do Abrigo Básico é **142,5 PV por hora**.
+- O Abrigo Reforçado aplica multiplicador de **125%** sobre a taxa Básica; o Abrigo Avançado aplica **150%**.
+- A taxa de recuperação é aplicada continuamente, considerando o PV máximo próprio de cada raridade.
+- Esta tabela substitui a velocidade anterior de 356,25 PV/h no Básico. Não aplicar a redução adicional de 60% sobre os tempos desta tabela: os valores apresentados são os tempos finais oficiais.
+- A capacidade dos leitos, a fila FIFO e as regras de resgate médico permanecem inalteradas.
+
 ## Contratação do médico e ROI
 
 - O custo aprovado da Dra. Íris é de **1.500 Coins por 30 dias**.
