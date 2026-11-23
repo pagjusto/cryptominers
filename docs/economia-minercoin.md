@@ -49,6 +49,14 @@ Os pacotes aprovados são vendidos em USDT, sem bônus ou descontos adicionais:
 - O registro do saque deverá permitir identificar, separadamente, o valor bruto, a taxa percentual cobrada do jogador, o custo de gas pago pelo projeto e o valor líquido recebido pelo jogador.
 - O custo do gas não deve ser somado novamente à cobrança do jogador nem abatido do valor líquido que ele recebe.
 
+### Prazo de permanência dos créditos e ordem de utilização — decisões aprovadas
+
+- Cada crédito de Coins terá seu próprio prazo de permanência, contado individualmente a partir da data e hora em que aquele crédito for registrado na conta do jogador.
+- Créditos realizados em momentos diferentes manterão prazos independentes; um crédito novo não reinicia nem altera o prazo dos créditos anteriores.
+- Em um saque, serão consumidos primeiro os créditos mais antigos, seguindo a ordem **FIFO (First In, First Out)**.
+- Quando um saque utilizar créditos com tempos de permanência diferentes, a taxa aplicável deverá respeitar a idade de cada lote utilizado, em vez de aplicar uma única idade global ao saldo inteiro.
+- Os percentuais e as faixas definitivas da taxa regressiva ainda precisam ser aprovados; esta regra de contagem e ordem de consumo não define esses percentuais.
+
 ## Política de burn
 
 - **Não haverá mecanismo de burn de Coins por enquanto.**
@@ -61,6 +69,7 @@ Os pacotes aprovados são vendidos em USDT, sem bônus ou descontos adicionais:
 - Manter histórico/versionamento das cotações com data e hora de vigência.
 - Registrar em cada operação financeira a cotação aplicada, a quantidade de Coins, o valor em USDT e o momento da operação.
 - Em cada saque, registrar também o valor bruto, a taxa percentual, o custo real de gas pago pelo projeto e o valor líquido recebido pelo jogador.
+- Para os créditos de Coins, manter identificação individual do lote e sua data/hora de crédito, permitindo calcular o prazo de permanência e aplicar FIFO.
 - Não recalcular transações anteriores quando a cotação mudar.
 - Não confundir cotação interna de referência com garantia de preço de mercado após negociação on-chain.
 
