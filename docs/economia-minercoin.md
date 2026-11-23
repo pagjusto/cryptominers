@@ -55,7 +55,24 @@ Os pacotes aprovados são vendidos em USDT, sem bônus ou descontos adicionais:
 - Créditos realizados em momentos diferentes manterão prazos independentes; um crédito novo não reinicia nem altera o prazo dos créditos anteriores.
 - Em um saque, serão consumidos primeiro os créditos mais antigos, seguindo a ordem **FIFO (First In, First Out)**.
 - Quando um saque utilizar créditos com tempos de permanência diferentes, a taxa aplicável deverá respeitar a idade de cada lote utilizado, em vez de aplicar uma única idade global ao saldo inteiro.
-- Os percentuais e as faixas definitivas da taxa regressiva ainda precisam ser aprovados; esta regra de contagem e ordem de consumo não define esses percentuais.
+
+### Taxa regressiva de saque — percentuais e faixas aprovados
+
+A taxa é definida pelo tempo de permanência de cada lote de Coins utilizado no saque:
+
+| Tempo de permanência do lote | Taxa de saque |
+|---|---:|
+| Até 30 dias | **20%** |
+| De 31 a 60 dias | **15%** |
+| De 61 a 90 dias | **10%** |
+| De 91 a 120 dias | **7%** |
+| Acima de 120 dias | **5%** |
+
+- A contagem é individual por lote, desde a data e hora do crédito.
+- A taxa de cada lote é aplicada somente à parcela daquele lote consumida no saque.
+- Se um saque consumir mais de um lote, as taxas são calculadas separadamente sobre cada parcela e somadas para obter o desconto total do saque.
+- O valor líquido enviado ao jogador corresponde ao valor bruto sacado menos a taxa percentual calculada. O gas continua sendo pago pelo projeto, sem desconto adicional ao jogador.
+- Exemplo ilustrativo: se um saque utilizar parcelas de lotes com taxas diferentes, cada parcela terá sua própria taxa; não será aplicada uma taxa única sobre todo o saque.
 
 ## Política de burn
 
@@ -68,13 +85,12 @@ Os pacotes aprovados são vendidos em USDT, sem bônus ou descontos adicionais:
 
 - Manter histórico/versionamento das cotações com data e hora de vigência.
 - Registrar em cada operação financeira a cotação aplicada, a quantidade de Coins, o valor em USDT e o momento da operação.
-- Em cada saque, registrar também o valor bruto, a taxa percentual, o custo real de gas pago pelo projeto e o valor líquido recebido pelo jogador.
+- Em cada saque, registrar também o valor bruto, as parcelas de lotes consumidas, a idade de cada lote, a taxa aplicada a cada parcela, o desconto total, o custo real de gas pago pelo projeto e o valor líquido recebido pelo jogador.
 - Para os créditos de Coins, manter identificação individual do lote e sua data/hora de crédito, permitindo calcular o prazo de permanência e aplicar FIFO.
 - Não recalcular transações anteriores quando a cotação mudar.
 - Não confundir cotação interna de referência com garantia de preço de mercado após negociação on-chain.
 
 ## Itens ainda não definidos neste documento
 
-- Percentuais e faixas definitivas da taxa de saque (a política regressiva precisa ser confirmada antes da implementação).
 - Liquidez disponível e mecanismo efetivo de conversão/execução on-chain.
 - Detalhes técnicos do contrato/token e da integração de USDT na Solana.
