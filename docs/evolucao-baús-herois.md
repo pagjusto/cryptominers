@@ -15,6 +15,7 @@ Este documento registra a tabela atual de evolução por estrelas para as rarida
 
 - Antes de iniciar uma evolução por estrelas, o herói deve ser retirado da mineração e da equipe.
 - O herói não pode permanecer minerando nem integrar a equipe enquanto a evolução é realizada.
+- O envelhecimento do herói continua normalmente durante todo o período de evolução; não há pausa na passagem da idade.
 
 ## Limite final da evolução
 
