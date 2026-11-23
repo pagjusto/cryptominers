@@ -101,6 +101,7 @@ A cadência numérica de cada arma é definida em `WEAPON_CATALOG.attacksPerSeco
 - Cada batalha tem duração máxima de 5 minutos caso o Boss não seja derrotado antes.
 - O Boss é encerrado imediatamente quando seus 30 PV chegam a zero; se continuar vivo, o evento termina automaticamente ao fim dos 5 minutos.
 - Quando o evento do Boss terminar, os sobreviventes retornam aos locais em que estavam antes do transporte para a batalha. Isso vale tanto para a derrota do Boss quanto para o encerramento por tempo.
+- Os sobreviventes que participaram do Boss e não ficaram feridos retornam automaticamente ao estado de mineração ao serem restaurados aos seus locais anteriores, desde que continuem elegíveis e a posição esteja disponível.
 - Sobreviventes que ficaram feridos e foram encaminhados ao ambulatório durante o Boss permanecem no ambulatório após o fim do evento, até concluírem 100% da recuperação. Depois, seguem as regras de retorno à equipe: automático com a Dra. Íris contratada e ativa, ou manual pelo jogador sem a médica, sempre respeitando o limite de 15 sobreviventes.
 - A regra de participação acima é aplicada ao sorteio de Baú do Boss do evento.
 
