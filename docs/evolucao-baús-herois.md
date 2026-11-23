@@ -23,6 +23,7 @@ Este documento registra a tabela atual de evolução por estrelas para as rarida
 - Não haverá evolução para ★★★★ por enquanto; portanto, não devem ser definidos nem estimados custos para uma quarta estrela.
 - A aposentadoria ocorre quando o herói reúne as duas condições: atingir ★★★ e completar 80 anos. Apenas uma dessas condições, isoladamente, não determina a aposentadoria.
 - Após a aposentadoria, o herói permanece visível no jogo como aposentado, mas não pode mais minerar nem participar de batalhas contra Boss.
+- O herói aposentado continua aparecendo na coleção e no histórico do jogador, preservando sua raridade, quantidade de estrelas e idade final.
 - Após atingir ★★★, o herói não poderá passar por novas evoluções nem rejuvenescimentos.
 - Qualquer sistema posterior de evolução ou rejuvenescimento fica reservado para uma atualização futura e dependerá de nova definição e aprovação explícita do usuário.
 
