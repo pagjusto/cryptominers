@@ -54,7 +54,7 @@ Os pacotes aprovados são vendidos em USDT, sem bônus ou descontos adicionais:
 - Cada crédito de Coins terá seu próprio prazo de permanência, contado individualmente a partir da data e hora em que aquele crédito for registrado na conta do jogador.
 - Créditos realizados em momentos diferentes manterão prazos independentes; um crédito novo não reinicia nem altera o prazo dos créditos anteriores.
 - Em um saque, serão consumidos primeiro os créditos mais antigos, seguindo a ordem **FIFO (First In, First Out)**.
-- Quando um saque utilizar créditos com tempos de permanência diferentes, a taxa aplicável deverá respeitar a idade de cada lote utilizado, em vez de aplicar uma única idade global ao saldo inteiro.
+- Quando um saque utilizar créditos com tempos de permanência diferentes, a taxa aplicável deverá respeitar a idade de cada lote, em vez de aplicar uma única idade global ao saldo inteiro.
 
 ### Taxa regressiva de saque — percentuais e faixas aprovados
 
@@ -87,6 +87,13 @@ Antes de confirmar definitivamente um saque, o jogador deverá visualizar uma te
 
 O saque somente será efetivado após a confirmação explícita do jogador nessa tela. A tela deve apresentar os valores de forma clara antes da confirmação, sem esconder ou agrupar taxas de lotes diferentes em uma taxa única não explicada.
 
+### Status e conclusão do saque — decisão aprovada
+
+- Após o jogador confirmar a solicitação na tela de revisão, o saque deverá receber o status **Pendente** enquanto aguarda o processamento e a confirmação da transferência na rede Solana.
+- O saque somente poderá receber o status **Concluído** depois que a transferência de USDT for efetivamente confirmada na rede Solana.
+- A confirmação da solicitação pelo jogador, por si só, não significa que o saque foi concluído.
+- O histórico do jogador deverá apresentar o status atual do saque de forma clara.
+
 ## Política de burn
 
 - **Não haverá mecanismo de burn de Coins por enquanto.**
@@ -98,7 +105,7 @@ O saque somente será efetivado após a confirmação explícita do jogador ness
 
 - Manter histórico/versionamento das cotações com data e hora de vigência.
 - Registrar em cada operação financeira a cotação aplicada, a quantidade de Coins, o valor em USDT e o momento da operação.
-- Em cada saque, registrar também o valor bruto, as parcelas de lotes consumidas, a idade de cada lote, a taxa aplicada a cada parcela, o desconto total, o custo real de gas pago pelo projeto e o valor líquido recebido pelo jogador.
+- Em cada saque, registrar também o valor bruto, as parcelas de lotes consumidas, a idade de cada lote, a taxa aplicada a cada parcela, o desconto total, o custo real de gas pago pelo projeto, o valor líquido recebido pelo jogador e o status do processamento.
 - Para os créditos de Coins, manter identificação individual do lote e sua data/hora de crédito, permitindo calcular o prazo de permanência e aplicar FIFO.
 - Não recalcular transações anteriores quando a cotação mudar.
 - Não confundir cotação interna de referência com garantia de preço de mercado após negociação on-chain.
