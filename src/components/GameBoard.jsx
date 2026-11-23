@@ -1233,11 +1233,11 @@ export default function GameBoard({
           miner.lockedEnemyId = null;
           miner.swingTimer = 0;
 
-          // Recuperação contínua de vida baseada na eficiência do abrigo
+          // Recuperação contínua oficial: Básico = 142,5 PV/h.
+          // Reforçado e Avançado aplicam 125% e 150%, respectivamente.
+          // A taxa é calibrada para cumprir os tempos oficiais por raridade.
           const recSpeedPct = houseConfigRef.current?.recoverySpeedPct || 100;
-          // Básico: 60% mais rápido que o desgaste (356,25 PV/h).
-          // Reforçado/Avançado aplicam 125%/150% dessa velocidade.
-          const healRatePerSec = (356.25 / 3600) * (recSpeedPct / 100);
+          const healRatePerSec = (142.5 / 3600) * (recSpeedPct / 100);
           miner.currentHealth = Math.min(maxHealth, (Number(miner.currentHealth) || (maxHealth * 0.05)) + healRatePerSec * dt);
 
           // Quando atinge 100% de vida: alta médica e retorno à reserva.
