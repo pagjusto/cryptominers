@@ -109,6 +109,14 @@ O saque somente será efetivado após a confirmação explícita do jogador ness
 
 ### Carteira operacional exclusiva para saques — decisão aprovada
 
+### Abastecimento automático da carteira operacional — decisão aprovada
+
+- O sistema deverá monitorar o saldo da carteira operacional exclusiva de saques.
+- Quando esse saldo atingir o limite mínimo configurado, o sistema deverá solicitar/realizar automaticamente a transferência de fundos da carteira principal para a carteira operacional.
+- O abastecimento deverá manter a separação entre a carteira principal e a carteira operacional; a carteira principal será a origem dos fundos de reposição.
+- O limite mínimo que dispara o abastecimento e o valor-alvo de reposição ainda precisam ser definidos.
+- O mecanismo automático deverá registrar cada reposição, com data, valor e identificador da transação na Solana.
+
 - As transferências automáticas de saques deverão utilizar uma **carteira operacional exclusiva**, separada da carteira principal e dos fundos de reserva do projeto.
 - A carteira operacional deverá manter apenas o saldo necessário para executar os pagamentos de saques e custear o gas, conforme a política operacional do projeto.
 - Os fundos principais do projeto não deverão ficar diretamente expostos ao mecanismo automático de envio de saques.
