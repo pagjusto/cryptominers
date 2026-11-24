@@ -33,8 +33,21 @@ import { rockSpriteManager } from '../utils/rockSprites';
 import { characterSpriteManager } from '../utils/characterSprites';
 import { rollMiningGearDrop } from '../data/gearData';
 import { sfx } from '../utils/sfx';
+import MapCollisionEditorToolbar from './MapCollisionEditorToolbar';
 import { 
   isCityBuilding, 
+  isCityObstacle,
+  SUB_GRID_SCALE,
+  SUB_TILE_SIZE,
+  SUB_GRID_COLS,
+  SUB_GRID_ROWS,
+  TOTAL_SUB_CELLS,
+  isSubCellBlocked,
+  setCustomObstacleCell,
+  blockAllCustomObstacles,
+  clearAllCustomObstacles,
+  resetCustomObstacles,
+  getActiveObstaclesCount,
   getSafeHeroSpawn, 
   SAFE_HERO_SPAWN_POINTS,
   isCanyonTrackOrTunnel, 
@@ -549,6 +562,167 @@ function drawBaseShelterVisual(ctx, house, miners, now) {
   ctx.restore();
 }
 
+/**
+ * Renderiza a máscara visual de desenho de colisões sobre o mapa do jogo.
+ * - Células bloqueadas: preenchimento e bordas vermelhas com marcador de barreira
+ * - Células livres: grade discreta verde (opcional)
+ * - Coordenadas (c, r) em cada célula (opcional)
+ * - Destaque brilhante interativo na célula sob o cursor
+ */
+/**
+ * RENDERIZADOR DA MÁSCARA INTERATIVA DE DESENHO DE BLOQUEIOS DO MAPA
+ * 
+ * REGRA DO USUÁRIO:
+ * "faça quadradinhos menores, fica mais facil de enquadrar so oq precisa"
+ * "coloque por todo o mapa os quadrados"
+ * "quadrados bem menores"
+ * 
+ * - Grade de 60 colunas x 44 linhas de 19px por 19px cobrindo 100% de todo o mapa (1140x836)
+ * - Quadradinhos bloqueados: preenchimento vermelho e bordas destacadas
+ * - Quadradinhos livres: grade nítida de alta visibilidade sobre grama, terra e asfalto
+ * - Linhas mestras a cada setor principal (76px = 4 quadradinhos)
+ * - Pincel de tamanho configurável (19px, 38px, 76px)
+ * - Destaque luminoso com etiqueta de coordenadas sob o cursor
+ */
+function drawCollisionEditorOverlay(ctx, logicalWidth, logicalHeight, showGrid, showCoordinates, hoverCell, activeTool, brushSize = 1) {
+  ctx.save();
+
+  // 1. Preenchimento e contorno individual de CADA quadradinho bloqueado (19px x 19px)
+  // Cada quadradinho recebe borda própria para que a malha fina seja perfeitamente visível
+  ctx.fillStyle = 'rgba(239, 68, 68, 0.42)';
+  ctx.strokeStyle = 'rgba(239, 68, 68, 0.95)';
+  ctx.lineWidth = 1;
+
+  for (let sr = 0; sr < SUB_GRID_ROWS; sr++) {
+    for (let sc = 0; sc < SUB_GRID_COLS; sc++) {
+      if (isSubCellBlocked(sc, sr)) {
+        const x = sc * SUB_TILE_SIZE;
+        const y = sr * SUB_TILE_SIZE;
+        ctx.fillRect(x + 0.5, y + 0.5, SUB_TILE_SIZE - 1, SUB_TILE_SIZE - 1);
+        ctx.strokeRect(x + 0.5, y + 0.5, SUB_TILE_SIZE - 1, SUB_TILE_SIZE - 1);
+      }
+    }
+  }
+
+  // 2. Grade fina de altíssima visibilidade cobrindo 100% de TODO o mapa (60 colunas x 44 linhas = 2.640 quadradinhos)
+  if (showGrid) {
+    // Linha escura de contraste para legibilidade em grama clara e estradas
+    ctx.beginPath();
+    for (let sc = 0; sc <= SUB_GRID_COLS; sc++) {
+      const x = sc * SUB_TILE_SIZE;
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, logicalHeight);
+    }
+    for (let sr = 0; sr <= SUB_GRID_ROWS; sr++) {
+      const y = sr * SUB_TILE_SIZE;
+      ctx.moveTo(0, y);
+      ctx.lineTo(logicalWidth, y);
+    }
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.35)';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+
+    // Linhas finas brancas nítidas de 19px sobrepostas
+    ctx.beginPath();
+    for (let sc = 0; sc <= SUB_GRID_COLS; sc++) {
+      const x = sc * SUB_TILE_SIZE;
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, logicalHeight);
+    }
+    for (let sr = 0; sr <= SUB_GRID_ROWS; sr++) {
+      const y = sr * SUB_TILE_SIZE;
+      ctx.moveTo(0, y);
+      ctx.lineTo(logicalWidth, y);
+    }
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.65)';
+    ctx.lineWidth = 0.8;
+    ctx.stroke();
+
+    // Linhas mestras de setor (a cada 4 quadradinhos) desenhadas discretamente em âmbar
+    ctx.beginPath();
+    for (let c = 0; c <= GRID_COLS; c++) {
+      const x = c * TILE_SIZE;
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, logicalHeight);
+    }
+    for (let r = 0; r <= GRID_ROWS; r++) {
+      const y = r * TILE_SIZE;
+      ctx.moveTo(0, y);
+      ctx.lineTo(logicalWidth, y);
+    }
+    ctx.strokeStyle = 'rgba(251, 191, 36, 0.45)';
+    ctx.lineWidth = 1.0;
+    ctx.stroke();
+  }
+
+  // 3. Coordenadas de referência por setores
+  if (showCoordinates) {
+    ctx.font = 'bold 9px monospace';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+    ctx.shadowColor = '#000000';
+    ctx.shadowBlur = 3;
+    for (let r = 0; r < GRID_ROWS; r++) {
+      for (let c = 0; c < GRID_COLS; c++) {
+        const x = c * TILE_SIZE + 3;
+        const y = r * TILE_SIZE + 3;
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+        ctx.fillText(`${c},${r}`, x, y);
+      }
+    }
+    ctx.shadowBlur = 0;
+  }
+
+  // 4. Highlight interativo na célula e pincel sob o cursor do mouse
+  if (hoverCell && hoverCell.subCol >= 0 && hoverCell.subCol < SUB_GRID_COLS && hoverCell.subRow >= 0 && hoverCell.subRow < SUB_GRID_ROWS) {
+    const sc = hoverCell.subCol;
+    const sr = hoverCell.subRow;
+    const size = Math.max(1, Math.min(8, Math.round(brushSize)));
+    const hx = sc * SUB_TILE_SIZE;
+    const hy = sr * SUB_TILE_SIZE;
+    const hw = Math.min(size * SUB_TILE_SIZE, logicalWidth - hx);
+    const hh = Math.min(size * SUB_TILE_SIZE, logicalHeight - hy);
+    const isBlockMode = activeTool === 'block';
+
+    ctx.save();
+    ctx.fillStyle = isBlockMode ? 'rgba(239, 68, 68, 0.38)' : 'rgba(16, 185, 129, 0.38)';
+    ctx.fillRect(hx, hy, hw, hh);
+
+    ctx.strokeStyle = isBlockMode ? '#ef4444' : '#10b981';
+    ctx.lineWidth = 2.0;
+    ctx.shadowColor = isBlockMode ? '#ef4444' : '#10b981';
+    ctx.shadowBlur = 8;
+    ctx.strokeRect(hx + 0.5, hy + 0.5, hw - 1, hh - 1);
+    ctx.shadowBlur = 0;
+
+    // Etiqueta flutuante ao lado do cursor
+    const brushLabel = size === 1 ? '19px' : (size === 2 ? '38px' : '76px');
+    const tagText = `${isBlockMode ? '🟥 Bloquear' : '🟩 Liberar'} [${sc},${sr}] (${brushLabel})`;
+    ctx.font = 'bold 11px -apple-system, BlinkMacSystemFont, sans-serif';
+    const tagW = ctx.measureText(tagText).width + 16;
+    const tagH = 22;
+    const tagX = Math.max(6, Math.min(logicalWidth - tagW - 6, hx + hw / 2 - tagW / 2));
+    const tagY = hy >= 28 ? (hy - 6) : (hy + hh + 24);
+
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.95)';
+    ctx.beginPath();
+    ctx.roundRect(tagX, tagY - tagH, tagW, tagH, 6);
+    ctx.fill();
+    ctx.strokeStyle = isBlockMode ? '#ef4444' : '#10b981';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(tagText, tagX + tagW / 2, tagY - tagH / 2);
+
+    ctx.restore();
+  }
+
+  ctx.restore();
+}
+
 export default function GameBoard({ 
   mine, 
   mapData, 
@@ -571,12 +745,48 @@ export default function GameBoard({
   houseSlots = 5,
   recoverySpeedPct = 100,
   houseVisualTier = null,
-  gameSpeed = 1 
+  gameSpeed = 1,
+  isCollisionEditorOpen = false,
+  collisionEditorTool = 'block',
+  onSelectCollisionTool = null,
+  collisionBrushSize = 1,
+  onSelectBrushSize = null,
+  showCollisionGrid = true,
+  onToggleCollisionGrid = null,
+  showCollisionCoordinates = true,
+  onToggleCollisionCoordinates = null,
+  onCloseCollisionEditor = null,
+  onResetCollision = null,
+  onCollisionUpdated = null
 }) {
   const canvasRef = useRef(null);
   const mapDataRef = useRef(mapData);
   mapDataRef.current = mapData;
   const [spritesReady, setSpritesReady] = useState(false);
+  const [toolbarDock, setToolbarDock] = useState('top');
+
+  // Editor interativo de colisão e desenho de bloqueios no mapa
+  const editorPropsRef = useRef({
+    isCollisionEditorOpen,
+    collisionEditorTool,
+    collisionBrushSize,
+    showCollisionGrid,
+    showCollisionCoordinates,
+    onCollisionUpdated
+  });
+  editorPropsRef.current = {
+    isCollisionEditorOpen,
+    collisionEditorTool,
+    collisionBrushSize,
+    showCollisionGrid,
+    showCollisionCoordinates,
+    onCollisionUpdated
+  };
+
+  const isPaintingRef = useRef(false);
+  const paintActionRef = useRef(true);
+  const lastPaintedCellRef = useRef(null);
+  const hoverCellRef = useRef(null);
   
   // REGRA OFICIAL DO USUÁRIO: "quando aparecer o boss coloca um aviso na tela dizendo ALERTA BOSS PISCANDO UMAS 4 VEZES"
   const [bossAlert, setBossAlert] = useState(false);
@@ -645,6 +855,13 @@ export default function GameBoard({
     onMinersChange,
     onOpenArmorerHire,
     onOpenHouseModal,
+    onSelectCollisionTool,
+    onSelectBrushSize,
+    onToggleCollisionGrid,
+    onToggleCollisionCoordinates,
+    onCloseCollisionEditor,
+    onResetCollision,
+    onCollisionUpdated,
     isIrisActive: () => Boolean(isIrisActive),
     isArmorerActive: () => Boolean(isArmorerActive)
   };
@@ -2331,6 +2548,20 @@ export default function GameBoard({
         ctx.restore();
       });
 
+      // MÁSCARA INTERATIVA DE DESENHO E EDIÇÃO DE BLOQUEIOS NO MAPA
+      if (editorPropsRef.current.isCollisionEditorOpen) {
+        drawCollisionEditorOverlay(
+          ctx, 
+          logicalWidth, 
+          logicalHeight, 
+          editorPropsRef.current.showCollisionGrid, 
+          editorPropsRef.current.showCollisionCoordinates, 
+          hoverCellRef.current, 
+          editorPropsRef.current.collisionEditorTool,
+          editorPropsRef.current.collisionBrushSize || 1
+        );
+      }
+
       ctx.restore();
 
       // Rotação Automática Inteligente da Mina & Gestão de Vagas da Casa
@@ -2458,8 +2689,8 @@ export default function GameBoard({
     const canvas = canvasRef.current;
     if (!canvas) return { x: 0, y: 0 };
     const rect = canvas.getBoundingClientRect();
-    const logicalWidth = 15 * 48; // 720 (coordenadas lógicas do jogo)
-    const logicalHeight = 11 * 48; // 528
+    const logicalWidth = GRID_COLS * TILE_SIZE; // 1140 (coordenadas lógicas do jogo)
+    const logicalHeight = GRID_ROWS * TILE_SIZE; // 836
     return {
       x: ((clientX - rect.left) / rect.width) * logicalWidth,
       y: ((clientY - rect.top) / rect.height) * logicalHeight
@@ -2469,6 +2700,23 @@ export default function GameBoard({
   const handleCanvasMouseDown = (e) => {
     if (typeof window === 'undefined') return;
     const coords = getCanvasCoords(e.clientX, e.clientY);
+
+    // MODO DE DESENHO DE BLOQUEIOS DO MAPA (Botão esquerdo pinta, botão direito apaga)
+    if (editorPropsRef.current.isCollisionEditorOpen) {
+      const subCol = Math.max(0, Math.min(SUB_GRID_COLS - 1, Math.floor(coords.x / SUB_TILE_SIZE)));
+      const subRow = Math.max(0, Math.min(SUB_GRID_ROWS - 1, Math.floor(coords.y / SUB_TILE_SIZE)));
+      if (subCol >= 0 && subCol < SUB_GRID_COLS && subRow >= 0 && subRow < SUB_GRID_ROWS) {
+        const shouldBlock = e.button === 2 ? false : (editorPropsRef.current.collisionEditorTool === 'block');
+        isPaintingRef.current = true;
+        paintActionRef.current = shouldBlock;
+        lastPaintedCellRef.current = `${subCol},${subRow}`;
+        setCustomObstacleCell(subCol, subRow, shouldBlock, editorPropsRef.current.collisionBrushSize || 1);
+        editorPropsRef.current.onCollisionUpdated?.();
+        e.preventDefault();
+        return;
+      }
+    }
+
     const towerCoords = window.sirenTowerCoordinates || {
       baseX: 174,
       baseY: 335,
@@ -2521,6 +2769,27 @@ export default function GameBoard({
     const handleGlobalMouseMove = (e) => {
       if (typeof window === 'undefined') return;
       const coords = getCanvasCoords(e.clientX, e.clientY);
+
+      // Tratamento especial quando o editor de bloqueios estiver ativo
+      if (editorPropsRef.current.isCollisionEditorOpen) {
+        const subCol = Math.max(0, Math.min(SUB_GRID_COLS - 1, Math.floor(coords.x / SUB_TILE_SIZE)));
+        const subRow = Math.max(0, Math.min(SUB_GRID_ROWS - 1, Math.floor(coords.y / SUB_TILE_SIZE)));
+        hoverCellRef.current = { subCol, subRow, x: coords.x, y: coords.y };
+
+        if (isPaintingRef.current && subCol >= 0 && subCol < SUB_GRID_COLS && subRow >= 0 && subRow < SUB_GRID_ROWS) {
+          const cellKey = `${subCol},${subRow}`;
+          if (cellKey !== lastPaintedCellRef.current) {
+            lastPaintedCellRef.current = cellKey;
+            setCustomObstacleCell(subCol, subRow, paintActionRef.current, editorPropsRef.current.collisionBrushSize || 1);
+            editorPropsRef.current.onCollisionUpdated?.();
+          }
+        }
+        if (canvasRef.current) {
+          canvasRef.current.style.cursor = 'crosshair';
+        }
+        return;
+      }
+
       const towerCoords = window.sirenTowerCoordinates;
 
       // Feedback do cursor sobre John Armeiro e Dra. Íris no abrigo (somente quando visíveis e ativos)
@@ -2587,6 +2856,10 @@ export default function GameBoard({
     };
 
     const handleGlobalMouseUp = () => {
+      if (isPaintingRef.current) {
+        isPaintingRef.current = false;
+        lastPaintedCellRef.current = null;
+      }
       if (dragStartRef.current) {
         dragStartRef.current = null;
         if (typeof window !== 'undefined') {
@@ -2608,6 +2881,8 @@ export default function GameBoard({
 
   const handleCanvasClick = (e) => {
     if (!canvasRef.current) return;
+    if (editorPropsRef.current.isCollisionEditorOpen) return;
+
     const coords = getCanvasCoords(e.clientX, e.clientY);
     const curLvl = gameStateRef.current?.shelterLevel || 1;
     const curIrisPos = getShelterSpecialistPos(curLvl, 'iris');
@@ -2635,7 +2910,41 @@ export default function GameBoard({
         className="block max-w-full max-h-[calc(100vh-24px)] w-auto h-auto object-contain select-none"
         onClick={handleCanvasClick}
         onMouseDown={handleCanvasMouseDown}
+        onContextMenu={(e) => {
+          if (editorPropsRef.current.isCollisionEditorOpen) e.preventDefault();
+        }}
       />
+
+      {/* BARRA FLUTUANTE DE DESENHO DE BLOQUEIOS DO MAPA */}
+      {isCollisionEditorOpen && (
+        <div className={`absolute ${toolbarDock === 'top' ? 'top-2' : 'bottom-2'} left-1/2 -translate-x-1/2 z-40 w-[96%] max-w-4xl pointer-events-auto transition-all`}>
+          <MapCollisionEditorToolbar
+            isOpen={isCollisionEditorOpen}
+            onClose={() => callbacksRef.current.onCloseCollisionEditor?.()}
+            tool={collisionEditorTool}
+            onSelectTool={(t) => callbacksRef.current.onSelectCollisionTool?.(t)}
+            brushSize={collisionBrushSize}
+            onSelectBrushSize={(s) => callbacksRef.current.onSelectBrushSize?.(s)}
+            showGrid={showCollisionGrid}
+            onToggleGrid={() => callbacksRef.current.onToggleCollisionGrid?.()}
+            showCoordinates={showCollisionCoordinates}
+            onToggleCoordinates={() => callbacksRef.current.onToggleCollisionCoordinates?.()}
+            onReset={() => callbacksRef.current.onResetCollision?.()}
+            onBlockAll={() => {
+              blockAllCustomObstacles();
+              callbacksRef.current.onCollisionUpdated?.();
+            }}
+            onClearAll={() => {
+              clearAllCustomObstacles();
+              callbacksRef.current.onCollisionUpdated?.();
+            }}
+            dockPosition={toolbarDock}
+            onToggleDock={() => setToolbarDock(d => d === 'top' ? 'bottom' : 'top')}
+            blockedCount={getActiveObstaclesCount()}
+            totalCells={TOTAL_SUB_CELLS}
+          />
+        </div>
+      )}
 
       {bossRemainingSeconds !== null && (
         <div className="absolute top-3 left-1/2 -translate-x-1/2 z-30 pointer-events-none rounded-xl border border-red-500/60 bg-red-950/90 px-4 py-2 text-center shadow-[0_0_18px_rgba(239,68,68,0.45)]">

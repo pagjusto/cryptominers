@@ -57,6 +57,8 @@ import AdminConfigModal from './components/AdminConfigModal';
 import StatisticsModal from './components/StatisticsModal';
 import TowerCalibrationModal from './components/TowerCalibrationModal';
 import BillboardCalibrationModal from './components/BillboardCalibrationModal';
+import MapCollisionEditorToolbar from './components/MapCollisionEditorToolbar';
+import { getActiveObstaclesCount, resetCustomObstacles } from './utils/cityMapGeometry';
 import { getCryptoZombiesConfig } from './data/cryptoZombiesConfig';
 import { 
   DEFAULT_CONSTRUCTION_CHEST_CONFIG,
@@ -777,6 +779,12 @@ export default function App() {
   const [isStatsModalOpen, setIsStatsModalOpen] = useState(false);
   const [isTowerModalOpen, setIsTowerModalOpen] = useState(false);
   const [isBillboardModalOpen, setIsBillboardModalOpen] = useState(false);
+  const [isCollisionEditorOpen, setIsCollisionEditorOpen] = useState(false);
+  const [collisionEditorTool, setCollisionEditorTool] = useState('block'); // 'block' | 'clear'
+  const [collisionBrushSize, setCollisionBrushSize] = useState(1); // 1 = 19px (Fino), 2 = 38px (Médio), 4 = 76px (Grande)
+  const [showCollisionGrid, setShowCollisionGrid] = useState(true);
+  const [showCollisionCoordinates, setShowCollisionCoordinates] = useState(false);
+  const [collisionVersion, setCollisionVersion] = useState(0);
   const [statsData, setStatsData] = useState({
     remainingHp: 2800,
     totalHp: 3200,
@@ -1773,6 +1781,20 @@ export default function App() {
             <RefreshCw size={15} />
           </button>
 
+          {/* BOTÃO DESENHAR BLOQUEIOS NO MAPA */}
+          <button
+            onClick={() => setIsCollisionEditorOpen(prev => !prev)}
+            title="Desenhar Bloqueios e Caminhos no Mapa (Clique e Arraste com o Mouse)"
+            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg font-tech text-xs font-bold border transition cursor-pointer shadow-md active:scale-95 ${
+              isCollisionEditorOpen
+                ? 'bg-amber-500 text-slate-950 border-amber-300 ring-2 ring-amber-400/60 shadow-[0_0_15px_rgba(245,158,11,0.6)]'
+                : 'bg-amber-950/80 hover:bg-amber-900/90 text-amber-300 border-amber-500/50'
+            }`}
+          >
+            <span>🧱</span>
+            <span className="hidden sm:inline">BLOQUEIOS</span>
+          </button>
+
           {/* Taxa de Mineração Atual da Equipe */}
           <div 
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-950/80 border border-amber-500/30 text-[11px] font-mono shrink-0 cursor-help"
@@ -1904,6 +1926,18 @@ export default function App() {
                 >
                   🪧 Sombra Outdoor
                 </button>
+
+                <button
+                  onClick={() => setIsCollisionEditorOpen(prev => !prev)}
+                  className={`text-[11px] ${
+                    isCollisionEditorOpen 
+                      ? 'bg-amber-600 text-white border-amber-300 ring-2 ring-amber-400/50 shadow-[0_0_12px_rgba(245,158,11,0.6)]' 
+                      : 'bg-amber-950/90 hover:bg-amber-900 border-amber-500/60 text-amber-200 hover:text-white'
+                  } border px-2 py-0.5 rounded-md cursor-pointer transition-all active:scale-95 flex items-center gap-1 font-bold shadow`}
+                  title="Desenhar bloqueios e caminhos diretamente no mapa (Clique e arraste)"
+                >
+                  🧱 Desenhar Bloqueios
+                </button>
               </div>
 
               <GameBoard
@@ -1938,6 +1972,21 @@ export default function App() {
                 onOpenArmorerHire={() => setIsArmorerHireOpen(true)}
                 onOpenHouseModal={() => setIsHouseOpen(true)}
                 gameSpeed={gameSpeed}
+                isCollisionEditorOpen={isCollisionEditorOpen}
+                collisionEditorTool={collisionEditorTool}
+                onSelectCollisionTool={setCollisionEditorTool}
+                collisionBrushSize={collisionBrushSize}
+                onSelectBrushSize={setCollisionBrushSize}
+                showCollisionGrid={showCollisionGrid}
+                onToggleCollisionGrid={() => setShowCollisionGrid(prev => !prev)}
+                showCoordinates={showCollisionCoordinates}
+                onToggleCollisionCoordinates={() => setShowCollisionCoordinates(prev => !prev)}
+                onCloseCollisionEditor={() => setIsCollisionEditorOpen(false)}
+                onResetCollision={() => {
+                  resetCustomObstacles();
+                  setCollisionVersion(v => v + 1);
+                }}
+                onCollisionUpdated={() => setCollisionVersion(v => v + 1)}
               />
 
               {/* NOTIFICAÇÃO DE MAPA LIMPO */}
