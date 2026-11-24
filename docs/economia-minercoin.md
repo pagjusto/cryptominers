@@ -100,6 +100,13 @@ O saque somente será efetivado após a confirmação explícita do jogador ness
 - Se a aprovação por e-mail não for concluída, o saque não deve ser enviado à rede Solana e deve permanecer aguardando a segunda confirmação, com estado claramente identificado no histórico.
 - Após as duas confirmações, o saque segue para o processamento e recebe o status **Pendente** até a confirmação da transferência na Solana.
 
+### Envio on-chain do saque — decisão aprovada
+
+- Depois das duas confirmações obrigatórias (no jogo e por e-mail), o sistema deverá **processar e enviar o saque automaticamente** pela rede Solana, sem exigir que o administrador realize manualmente cada transferência.
+- A automação deverá enviar o valor líquido aprovado para a carteira de destino confirmada pelo jogador.
+- O saque permanece **Pendente** enquanto a transferência automática está sendo processada e até que a transação seja confirmada na Solana.
+- O sistema deverá registrar o identificador/hash da transação para consulta e auditoria.
+
 ### Status e conclusão do saque — decisão aprovada
 
 - Após o jogador confirmar a solicitação na tela de revisão, o saque deverá receber o status **Pendente** enquanto aguarda o processamento e a confirmação da transferência na rede Solana.
