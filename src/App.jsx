@@ -780,6 +780,7 @@ export default function App() {
   const [isTowerModalOpen, setIsTowerModalOpen] = useState(false);
   const [isBillboardModalOpen, setIsBillboardModalOpen] = useState(false);
   const [isCollisionEditorOpen, setIsCollisionEditorOpen] = useState(false);
+  const [isFullPageMap, setIsFullPageMap] = useState(false);
   const [collisionEditorTool, setCollisionEditorTool] = useState('block'); // 'block' | 'clear'
   const [collisionBrushSize, setCollisionBrushSize] = useState(1); // 1 = 19px (Fino), 2 = 38px (Médio), 4 = 76px (Grande)
   const [showCollisionGrid, setShowCollisionGrid] = useState(true);
@@ -1795,6 +1796,20 @@ export default function App() {
             <span className="hidden sm:inline">BLOQUEIOS</span>
           </button>
 
+          {/* BOTÃO PÁGINA TODA / TELA CHEIA */}
+          <button
+            onClick={() => setIsFullPageMap(prev => !prev)}
+            title={isFullPageMap ? "Voltar ao modo normal com lista de heróis" : "Expandir mapa para a página toda (tela cheia)"}
+            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg font-tech text-xs font-bold border transition cursor-pointer shadow-md active:scale-95 ${
+              isFullPageMap
+                ? 'bg-indigo-600 text-white border-indigo-300 ring-2 ring-indigo-400/60 shadow-[0_0_15px_rgba(99,102,241,0.6)]'
+                : 'bg-indigo-950/80 hover:bg-indigo-900/90 text-indigo-300 border-indigo-500/50'
+            }`}
+          >
+            <span>{isFullPageMap ? '🗗' : '🖥️'}</span>
+            <span className="hidden sm:inline">{isFullPageMap ? 'PAINEL NORMAL' : 'PÁGINA TODA'}</span>
+          </button>
+
           {/* Taxa de Mineração Atual da Equipe */}
           <div 
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-950/80 border border-amber-500/30 text-[11px] font-mono shrink-0 cursor-help"
@@ -1839,11 +1854,11 @@ export default function App() {
         </div>
       </header>
 
-      {/* ÁREA DO JOGO (MAPA À ESQUERDA + EQUIPE AO LADO À DIREITA) */}
-      <main className="flex-1 w-full h-screen flex flex-row items-start justify-start pt-0 px-2 pb-1 gap-3 overflow-hidden relative select-none">
+      {/* ÁREA DO JOGO (MAPA À ESQUERDA + EQUIPE AO LADO À DIREITA OU PÁGINA TODA) */}
+      <main className={`flex-1 w-full h-screen flex flex-row items-start justify-start pt-0 ${isFullPageMap ? 'p-0 gap-0' : 'px-2 pb-1 gap-3'} overflow-hidden relative select-none`}>
         
-        {/* ÁREA DO TABULEIRO: JOGADO TODO PARA A ESQUERDA */}
-        <div className="shrink-0 flex flex-col items-start justify-start h-full">
+        {/* ÁREA DO TABULEIRO: JOGADO TODO PARA A ESQUERDA OU PÁGINA TODA */}
+        <div className={`${isFullPageMap ? 'w-full h-full flex-1' : 'shrink-0'} flex flex-col items-center justify-center h-full`}>
           {boardMode === 'tactical' ? (
             <div className="w-full flex flex-col items-start pt-2">
               {/* Seletor quando no modo tático */}
@@ -1938,6 +1953,18 @@ export default function App() {
                 >
                   🧱 Desenhar Bloqueios
                 </button>
+
+                <button
+                  onClick={() => setIsFullPageMap(prev => !prev)}
+                  className={`text-[11px] ${
+                    isFullPageMap 
+                      ? 'bg-indigo-600 text-white border-indigo-300 ring-2 ring-indigo-400/50 shadow-[0_0_12px_rgba(99,102,241,0.6)]' 
+                      : 'bg-indigo-950/90 hover:bg-indigo-900 border-indigo-500/60 text-indigo-200 hover:text-white'
+                  } border px-2 py-0.5 rounded-md cursor-pointer transition-all active:scale-95 flex items-center gap-1 font-bold shadow`}
+                  title={isFullPageMap ? "Restaurar layout normal com lista de heróis" : "Expandir mapa para a página toda (tela cheia)"}
+                >
+                  {isFullPageMap ? '🗗 Painel Normal' : '🖥️ Página Toda'}
+                </button>
               </div>
 
               <GameBoard
@@ -1945,6 +1972,8 @@ export default function App() {
                 mapData={mapData}
                 miners={miners}
                 playerId={activePlayerId}
+                isFullPageMap={isFullPageMap}
+                onToggleFullPage={() => setIsFullPageMap(prev => !prev)}
                 onDepositBroken={(res) => {
                   if (res?.currentMap) {
                     setMapData(res.currentMap);
@@ -2010,22 +2039,24 @@ export default function App() {
         </div>
 
         {/* PAINEL DA EQUIPE DE SOBREVIVENTES DE VOLTA AO LADO DO MAPA */}
-        <aside className="flex-1 h-[calc(100vh-16px)] flex flex-col shrink min-w-[340px] max-w-[620px] overflow-hidden pt-0.5">
-          <HeroList
-            miners={miners}
-            gold={bcoin}
-            onUpgradeMiner={handleUpgradeMiner}
-            onToggleStatus={handleToggleStatus}
-            onAllWork={handleAllWork}
-            onRepairMiner={handleRepairMiner}
-            onDiversifyTeam={handleDiversifyTeam}
-            isIrisActive={isIrisActive}
-            isArmorerActive={isArmorerActive}
-            armorerContract={armorerContract}
-            onOpenArmorerHire={() => setIsArmorerHireOpen(true)}
-            onOpenHouseModal={() => setIsHouseOpen(true)}
-          />
-        </aside>
+        {!isFullPageMap && (
+          <aside className="flex-1 h-[calc(100vh-16px)] flex flex-col shrink min-w-[340px] max-w-[620px] overflow-hidden pt-0.5">
+            <HeroList
+              miners={miners}
+              gold={bcoin}
+              onUpgradeMiner={handleUpgradeMiner}
+              onToggleStatus={handleToggleStatus}
+              onAllWork={handleAllWork}
+              onRepairMiner={handleRepairMiner}
+              onDiversifyTeam={handleDiversifyTeam}
+              isIrisActive={isIrisActive}
+              isArmorerActive={isArmorerActive}
+              armorerContract={armorerContract}
+              onOpenArmorerHire={() => setIsArmorerHireOpen(true)}
+              onOpenHouseModal={() => setIsHouseOpen(true)}
+            />
+          </aside>
+        )}
 
       </main>
 

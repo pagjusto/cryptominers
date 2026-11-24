@@ -43,6 +43,8 @@ export default function MapCollisionEditorToolbar({
   onClearAll,
   dockPosition = 'top',
   onToggleDock,
+  isFullPage = false,
+  onToggleFullPage,
   blockedCount = 0,
   totalCells = TOTAL_SUB_CELLS || 2640
 }) {
@@ -231,6 +233,23 @@ export default function MapCollisionEditorToolbar({
         >
           {dockPosition === 'top' ? '⬇️ Descer' : '⬆️ Subir'}
         </button>
+
+        {/* Alternar Tela Cheia / Página Toda */}
+        {onToggleFullPage && (
+          <button
+            type="button"
+            onClick={onToggleFullPage}
+            className={`px-2 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1 border ${
+              isFullPage
+                ? 'bg-indigo-600 text-white border-indigo-400 ring-2 ring-indigo-400/50 shadow-[0_0_10px_rgba(99,102,241,0.5)]'
+                : 'bg-indigo-950/70 hover:bg-indigo-900 text-indigo-200 border-indigo-500/40'
+            }`}
+            title={isFullPage ? "Restaurar layout normal com lista de heróis" : "Expandir mapa para a página toda (tela cheia)"}
+          >
+            <Maximize2 className="w-3 h-3" />
+            <span>{isFullPage ? '🗗 Painel Normal' : '🖥️ Página Toda'}</span>
+          </button>
+        )}
 
         {/* Toggles de Visualização */}
         <div className="flex items-center gap-1 bg-slate-950/80 p-1 rounded-xl border border-slate-800">

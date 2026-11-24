@@ -747,6 +747,8 @@ export default function GameBoard({
   houseVisualTier = null,
   gameSpeed = 1,
   isCollisionEditorOpen = false,
+  isFullPageMap = false,
+  onToggleFullPage = null,
   collisionEditorTool = 'block',
   onSelectCollisionTool = null,
   collisionBrushSize = 1,
@@ -2904,10 +2906,18 @@ export default function GameBoard({
   };
 
   return (
-    <div className="relative inline-flex items-center justify-center border-4 border-amber-950/60 rounded-3xl overflow-hidden shadow-[0_0_90px_rgba(0,0,0,0.95)] bg-slate-950 ring-2 ring-amber-500/20 max-h-[calc(100vh-16px)] max-w-full">
+    <div className={`relative inline-flex items-center justify-center ${
+      isFullPageMap 
+        ? 'w-full h-full max-w-full max-h-screen rounded-none border-0 ring-0 shadow-none bg-slate-950 overflow-hidden' 
+        : 'border-4 border-amber-950/60 rounded-3xl overflow-hidden shadow-[0_0_90px_rgba(0,0,0,0.95)] bg-slate-950 ring-2 ring-amber-500/20 max-h-[calc(100vh-16px)] max-w-full'
+    }`}>
       <canvas 
         ref={canvasRef} 
-        className="block max-w-full max-h-[calc(100vh-24px)] w-auto h-auto object-contain select-none"
+        className={`block select-none ${
+          isFullPageMap 
+            ? 'w-full h-full max-w-full max-h-screen object-contain' 
+            : 'max-w-full max-h-[calc(100vh-24px)] w-auto h-auto object-contain'
+        }`}
         onClick={handleCanvasClick}
         onMouseDown={handleCanvasMouseDown}
         onContextMenu={(e) => {
@@ -2940,6 +2950,8 @@ export default function GameBoard({
             }}
             dockPosition={toolbarDock}
             onToggleDock={() => setToolbarDock(d => d === 'top' ? 'bottom' : 'top')}
+            isFullPage={isFullPageMap}
+            onToggleFullPage={onToggleFullPage}
             blockedCount={getActiveObstaclesCount()}
             totalCells={TOTAL_SUB_CELLS}
           />
