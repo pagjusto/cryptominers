@@ -107,6 +107,13 @@ O saque somente será efetivado após a confirmação explícita do jogador ness
 - O saque permanece **Pendente** enquanto a transferência automática está sendo processada e até que a transação seja confirmada na Solana.
 - O sistema deverá registrar o identificador/hash da transação para consulta e auditoria.
 
+### Carteira operacional exclusiva para saques — decisão aprovada
+
+- As transferências automáticas de saques deverão utilizar uma **carteira operacional exclusiva**, separada da carteira principal e dos fundos de reserva do projeto.
+- A carteira operacional deverá manter apenas o saldo necessário para executar os pagamentos de saques e custear o gas, conforme a política operacional do projeto.
+- Os fundos principais do projeto não deverão ficar diretamente expostos ao mecanismo automático de envio de saques.
+- A falta de saldo na carteira operacional mantém o saque Pendente, conforme a regra de insuficiência de saldo, até que ela seja abastecida.
+
 ### Saldo insuficiente para pagar o gas — decisão aprovada
 
 - Se a carteira operacional do projeto não tiver USDT/SOL suficiente para custear o gas necessário à transferência, o saque deverá **permanecer Pendente**, sem ser cancelado.
