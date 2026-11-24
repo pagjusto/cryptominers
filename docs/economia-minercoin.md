@@ -113,7 +113,9 @@ O saque somente será efetivado após a confirmação explícita do jogador ness
 - As tentativas deverão ocorrer com **intervalos entre elas**, evitando reenvios contínuos imediatos.
 - O saque permanecerá **Pendente** durante as tentativas e só será marcado como **Concluído** após confirmação da transferência na Solana.
 - O sistema deverá verificar o resultado da tentativa anterior antes de iniciar outra, para evitar transferências duplicadas caso a primeira tenha sido processada, mas a confirmação ainda não tenha sido recebida.
-- A duração dos intervalos e a quantidade máxima de tentativas ainda precisam ser definidas na implementação.
+- O sistema deverá continuar realizando novas tentativas automaticamente **sem limite máximo de tentativas**, até que a transferência seja confirmada ou uma intervenção técnica seja necessária por uma condição excepcional de segurança.
+- A automação deverá manter controles de idempotência e verificar o estado das transações anteriores antes de cada reenvio, para evitar pagamentos duplicados.
+- Os intervalos entre tentativas ainda deverão ser definidos na implementação.
 
 ### Status e conclusão do saque — decisão aprovada
 
