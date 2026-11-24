@@ -107,6 +107,13 @@ O saque somente será efetivado após a confirmação explícita do jogador ness
 - O saque permanece **Pendente** enquanto a transferência automática está sendo processada e até que a transação seja confirmada na Solana.
 - O sistema deverá registrar o identificador/hash da transação para consulta e auditoria.
 
+### Saldo insuficiente para pagar o gas — decisão aprovada
+
+- Se a carteira operacional do projeto não tiver USDT/SOL suficiente para custear o gas necessário à transferência, o saque deverá **permanecer Pendente**, sem ser cancelado.
+- O sistema deverá aguardar a disponibilidade de saldo suficiente na carteira operacional e retomar automaticamente o processamento e as tentativas de envio.
+- O jogador não deverá pagar nem sofrer desconto adicional por essa insuficiência de saldo; o custo de gas continua sendo responsabilidade do projeto.
+- Enquanto aguarda, o saque deverá permanecer identificado no histórico como pendente por indisponibilidade de saldo operacional para a taxa de rede.
+
 ### Falhas e novas tentativas automáticas — decisão aprovada
 
 - Se uma transferência automática falhar, o sistema deverá **tentar novamente automaticamente**, sem exigir intervenção manual do administrador para cada falha.
