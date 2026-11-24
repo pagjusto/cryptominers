@@ -136,7 +136,9 @@ A cadência numérica de cada arma é definida em `WEAPON_CATALOG.attacksPerSeco
 - Ao abrir cada Baú do Boss, o resultado das recompensas principais segue uma única distribuição: **45% de chance de receber 1 Fragmento de Construção**, **45% de chance de receber 1 Poção do Rejuvenecimento** e **10% de chance de receber 1 Fragmento de Construção e 1 Poção do Rejuvenecimento juntos**.
 - Portanto, toda abertura concede pelo menos uma recompensa principal; no resultado de 10%, as duas são concedidas na mesma abertura.
 - A chance de obter um **Baú de Herói** permanece em **5%**, em um sorteio separado e independente. Assim, o Baú de Herói pode sair junto com qualquer um dos três resultados principais ou não sair.
-- Ficam sem efeito as regras anteriores de sorteio independente de poções, inclusive a chance por raridade e o limite diário de 4 poções associado àquele sorteio. Eventuais limites de recebimento por abertura ou por dia deverão ser definidos para o conteúdo do baú.
+- Ficam sem efeito as regras anteriores de sorteio independente de poções, inclusive a chance por raridade e o limite diário de 4 poções associado àquele sorteio.
+- **Não haverá limite diário de recebimento de Fragmentos de Construção ou Poções do Rejuvenescimento** provenientes da abertura dos Baús do Boss; a quantidade recebida seguirá os resultados dos baús abertos.
+- Esta decisão considera a regra informada pelo usuário de **2 eventos de Boss por dia**. Ela não altera o limite já definido para obtenção de Baús do Boss nem as probabilidades de recompensa por abertura.
 
 ## Chances por raridade — Baú do Boss
 
