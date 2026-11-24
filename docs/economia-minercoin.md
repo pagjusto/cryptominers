@@ -107,6 +107,14 @@ O saque somente será efetivado após a confirmação explícita do jogador ness
 - O saque permanece **Pendente** enquanto a transferência automática está sendo processada e até que a transação seja confirmada na Solana.
 - O sistema deverá registrar o identificador/hash da transação para consulta e auditoria.
 
+### Falhas e novas tentativas automáticas — decisão aprovada
+
+- Se uma transferência automática falhar, o sistema deverá **tentar novamente automaticamente**, sem exigir intervenção manual do administrador para cada falha.
+- As tentativas deverão ocorrer com **intervalos entre elas**, evitando reenvios contínuos imediatos.
+- O saque permanecerá **Pendente** durante as tentativas e só será marcado como **Concluído** após confirmação da transferência na Solana.
+- O sistema deverá verificar o resultado da tentativa anterior antes de iniciar outra, para evitar transferências duplicadas caso a primeira tenha sido processada, mas a confirmação ainda não tenha sido recebida.
+- A duração dos intervalos e a quantidade máxima de tentativas ainda precisam ser definidas na implementação.
+
 ### Status e conclusão do saque — decisão aprovada
 
 - Após o jogador confirmar a solicitação na tela de revisão, o saque deverá receber o status **Pendente** enquanto aguarda o processamento e a confirmação da transferência na rede Solana.
