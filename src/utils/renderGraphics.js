@@ -37,11 +37,11 @@ let billboardLoaded = false;
 let billboardShadowCanvas = null;
 
 export const DEFAULT_BILLBOARD_CONFIG = {
-  // Posição e dimensões do outdoor no gramado norte
-  x: 512,
-  y: 32,
-  width: 216,
-  height: 122,
+  // Posição e dimensões do outdoor no gramado norte (escalado para mapa 1444x1064)
+  x: 649,
+  y: 41,
+  width: 274,
+  height: 155,
 
   // Sombra Projetada no Solo (Calibrada pelo Usuário em 2026-11-20)
   // REGRA OFICIAL DO USUÁRIO: "sombra do outdor esta redondaa quando deveria refletir a forma do outdor retangular"
@@ -50,8 +50,8 @@ export const DEFAULT_BILLBOARD_CONFIG = {
   shadowScaleX: 1.08,
   shadowScaleY: 0.74,
   shadowRotDeg: -7,
-  shadowOffsetX: 23,
-  shadowOffsetY: 83,
+  shadowOffsetX: 29,
+  shadowOffsetY: 106,
   shadowOpacity: 0.60,
   shadowBlur: 0,
   
@@ -63,7 +63,7 @@ export const billboardConfig = { ...DEFAULT_BILLBOARD_CONFIG };
 
 if (typeof window !== 'undefined') {
   try {
-    const saved = localStorage.getItem('crypto_zombies_billboard_calibration');
+    const saved = localStorage.getItem('crypto_zombies_billboard_calibration_v2');
     if (saved) {
       Object.assign(billboardConfig, JSON.parse(saved));
     }
@@ -73,7 +73,7 @@ if (typeof window !== 'undefined') {
   window.saveBillboardConfig = (cfg) => {
     Object.assign(window.billboardConfig, cfg);
     try {
-      localStorage.setItem('crypto_zombies_billboard_calibration', JSON.stringify(window.billboardConfig));
+      localStorage.setItem('crypto_zombies_billboard_calibration_v2', JSON.stringify(window.billboardConfig));
     } catch (e) {}
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('cryptozombies_billboard_config_updated', { detail: window.billboardConfig }));
@@ -84,7 +84,7 @@ if (typeof window !== 'undefined') {
   window.resetBillboardConfig = () => {
     Object.assign(window.billboardConfig, DEFAULT_BILLBOARD_CONFIG);
     try {
-      localStorage.removeItem('crypto_zombies_billboard_calibration');
+      localStorage.removeItem('crypto_zombies_billboard_calibration_v2');
     } catch (e) {}
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('cryptozombies_billboard_config_updated', { detail: window.billboardConfig }));
@@ -154,14 +154,14 @@ export function initBillboard(onLoaded) {
 // Configuração Oficial da Torre de Vigia e de sua Sombra Projetada (Calibrada pelo Usuário)
 // REGRA OFICIAL DO USUÁRIO: A FRENTE DA TORRE É A PERNA DO MEIO (e deve deitar sentido a frente / Sul).
 export const DEFAULT_TOWER_CONFIG = {
-  topDeltaX: -4,
-  topDeltaY: 13,
+  topDeltaX: -5,
+  topDeltaY: 17,
   scaleX: -1.5,
   scaleY: 1.18,
   rotDeg: 0.4,
   yawDeg: -180,
-  offsetX: -21,
-  offsetY: -12,
+  offsetX: -27,
+  offsetY: -15,
 
   shadowRotDeg: -35.5,
   shadowYawDeg: 4,
@@ -171,8 +171,8 @@ export const DEFAULT_TOWER_CONFIG = {
   shadowScaleX: 1,
   shadowScaleY: 1,
   shadowOpacity: 0.85,
-  shadowOffsetX: -19,
-  shadowOffsetY: -6,
+  shadowOffsetX: -24,
+  shadowOffsetY: -8,
 
   leanSouth: 0.35,
   leanFront: 0.8,
@@ -186,7 +186,7 @@ export const towerTiltConfig = { ...DEFAULT_TOWER_CONFIG };
 
 if (typeof window !== 'undefined') {
   try {
-    const saved = localStorage.getItem('crypto_zombies_tower_calibration');
+    const saved = localStorage.getItem('crypto_zombies_tower_calibration_v2');
     if (saved) {
       Object.assign(towerTiltConfig, JSON.parse(saved));
     }
@@ -196,7 +196,7 @@ if (typeof window !== 'undefined') {
   window.saveTowerConfig = (cfg) => {
     Object.assign(window.towerTiltConfig, cfg);
     try {
-      localStorage.setItem('crypto_zombies_tower_calibration', JSON.stringify(window.towerTiltConfig));
+      localStorage.setItem('crypto_zombies_tower_calibration_v2', JSON.stringify(window.towerTiltConfig));
     } catch (e) {}
     return window.towerTiltConfig;
   };
@@ -204,7 +204,7 @@ if (typeof window !== 'undefined') {
   window.resetTowerConfig = () => {
     Object.assign(window.towerTiltConfig, DEFAULT_TOWER_CONFIG);
     try {
-      localStorage.removeItem('crypto_zombies_tower_calibration');
+      localStorage.removeItem('crypto_zombies_tower_calibration_v2');
     } catch (e) {}
     return window.towerTiltConfig;
   };
@@ -1016,11 +1016,11 @@ export function drawSirenTower(ctx, now, isBossAlive = false) {
   }
   if (!sirenTowerLoaded || !sirenTowerImg) return;
 
-  // Imagem oficial recortada em alta definição (682x1024)
-  const tW = 108;
-  const tH = 162;
-  const tX = 121;
-  const tY = 183;
+  // Imagem oficial recortada em alta definição (682x1024), escalada para o mapa 1444x1064
+  const tW = 137;
+  const tH = 206;
+  const tX = 153;
+  const tY = 233;
 
   // Coordenadas físicas exatas da base de cada uma das sapatas metálicas da torre (medidas no sprite oficial 682x1024)
   const footLeftX = tX + tW * (235 / 682);       // ~158.2
