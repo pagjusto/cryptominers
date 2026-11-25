@@ -161,7 +161,7 @@ export function isSubCellBlocked(subC, subR) {
   return isDefaultCityObstacle(baseCol, baseRow) || isDefaultBaseCompound(baseCol, baseRow);
 }
 
-const STORAGE_KEY_SUBGRID = 'crypto_zombies_custom_subgrid_v7';
+const STORAGE_KEY_SUBGRID = 'crypto_zombies_custom_subgrid_v9';
 
 export function initCustomObstacles() {
   if (typeof window !== 'undefined') {
