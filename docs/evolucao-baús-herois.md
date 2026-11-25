@@ -17,6 +17,14 @@ Este documento registra a tabela atual de evolução por estrelas para as rarida
 - O herói não pode permanecer minerando nem integrar a equipe enquanto a evolução é realizada.
 - O envelhecimento do herói continua normalmente durante todo o período de evolução; não há pausa na passagem da idade.
 
+## Bônus de produção por estrelas
+
+- ★: bônus de **5% na produção**.
+- ★★: bônus de **10% na produção**.
+- ★★★: bônus de **15% na produção**.
+- A evolução por estrelas **não concede bônus de poder de combate**.
+- Os percentuais acima representam o bônus total correspondente ao estágio de estrelas, não acréscimos acumulativos entre estágios.
+
 ## Aparência durante a evolução
 
 - A evolução por estrelas **não altera a aparência visual nem o nome do herói**. O herói mantém sua identidade visual original em todos os estágios de evolução.
