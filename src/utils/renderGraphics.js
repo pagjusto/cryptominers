@@ -807,20 +807,23 @@ export function drawMinerCharacter(ctx, mx, my, miner, classInfo, now, swingProg
     ctx.shadowColor = 'transparent';
   }
 
-  // 5. Barra de Estamina Nítida com Contorno Escuro
-  const barW = 32;
-  const barH = 5;
-  const pct = Math.max(0, miner.currentStamina / miner.maxStamina);
+  // 5. Barra de Estamina Nítida com Contorno Escuro (oculta para especialistas estacionados e heróis nos leitos)
+  const hasValidStamina = Number.isFinite(miner.currentStamina) && Number.isFinite(miner.maxStamina) && miner.maxStamina > 0;
+  if (miner.status !== 'stationed' && miner.status !== 'house' && !miner.hideStatusBar && hasValidStamina) {
+    const barW = 32;
+    const barH = 5;
+    const pct = Math.max(0, Math.min(1, miner.currentStamina / miner.maxStamina));
 
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.9)';
-  ctx.beginPath();
-  ctx.roundRect(-barW / 2 - 1, -42, barW + 2, barH + 2, 2.5);
-  ctx.fill();
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.9)';
+    ctx.beginPath();
+    ctx.roundRect(-barW / 2 - 1, -42, barW + 2, barH + 2, 2.5);
+    ctx.fill();
 
-  ctx.fillStyle = pct > 0.4 ? '#22c55e' : (pct > 0.15 ? '#f59e0b' : '#ef4444');
-  ctx.beginPath();
-  ctx.roundRect(-barW / 2, -41, barW * pct, barH, 2);
-  ctx.fill();
+    ctx.fillStyle = pct > 0.4 ? '#22c55e' : (pct > 0.15 ? '#f59e0b' : '#ef4444');
+    ctx.beginPath();
+    ctx.roundRect(-barW / 2, -41, barW * pct, barH, 2);
+    ctx.fill();
+  }
 
   // 6. Estrelas de Fusão do Herói (★) exibidas acima da barra
   const stars = miner.stars || 1;

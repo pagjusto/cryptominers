@@ -35,6 +35,9 @@ import { rollMiningGearDrop } from '../data/gearData';
 import { sfx } from '../utils/sfx';
 import MapCollisionEditorToolbar from './MapCollisionEditorToolbar';
 import { 
+  GRID_COLS as CITY_GRID_COLS,
+  GRID_ROWS as CITY_GRID_ROWS,
+  TILE_SIZE as CITY_TILE_SIZE,
   isCityBuilding, 
   isCityObstacle,
   SUB_GRID_SCALE,
@@ -156,38 +159,39 @@ export const BASE_HOSPITAL_BEDS_TIERS = {
     { id: 5, x: 557, y: 277, angle: 0.86 }
   ],
   2: [
-    { id: 1, x: 343, y: 398, angle: 0.86 },
-    { id: 2, x: 388, y: 370, angle: 0.86 },
-    { id: 3, x: 432, y: 345, angle: 0.86 },
-    { id: 4, x: 471, y: 321, angle: 0.86 },
-    { id: 5, x: 509, y: 298, angle: 0.86 },
-    { id: 6, x: 380, y: 457, angle: 0.86 },
-    { id: 7, x: 425, y: 429, angle: 0.86 },
-    { id: 8, x: 469, y: 404, angle: 0.86 },
-    { id: 9, x: 508, y: 380, angle: 0.86 },
-    { id: 10, x: 546, y: 357, angle: 0.86 }
+    { id: 1, x: 391, y: 377, angle: 0.86 },
+    { id: 2, x: 436, y: 349, angle: 0.86 },
+    { id: 3, x: 480, y: 324, angle: 0.86 },
+    { id: 4, x: 519, y: 300, angle: 0.86 },
+    { id: 5, x: 557, y: 277, angle: 0.86 },
+    { id: 6, x: 428, y: 436, angle: 0.86 },
+    { id: 7, x: 473, y: 408, angle: 0.86 },
+    { id: 8, x: 517, y: 383, angle: 0.86 },
+    { id: 9, x: 556, y: 359, angle: 0.86 },
+    { id: 10, x: 594, y: 336, angle: 0.86 }
   ],
   3: [
-    { id: 1, x: 343, y: 398, angle: 0.86 },
-    { id: 2, x: 388, y: 370, angle: 0.86 },
-    { id: 3, x: 432, y: 345, angle: 0.86 },
-    { id: 4, x: 471, y: 321, angle: 0.86 },
-    { id: 5, x: 509, y: 298, angle: 0.86 },
-    { id: 6, x: 380, y: 457, angle: 0.86 },
-    { id: 7, x: 425, y: 429, angle: 0.86 },
-    { id: 8, x: 469, y: 404, angle: 0.86 },
-    { id: 9, x: 508, y: 380, angle: 0.86 },
-    { id: 10, x: 546, y: 357, angle: 0.86 },
-    { id: 11, x: 417, y: 516, angle: 0.86 },
-    { id: 12, x: 462, y: 488, angle: 0.86 },
-    { id: 13, x: 506, y: 463, angle: 0.86 },
-    { id: 14, x: 545, y: 439, angle: 0.86 },
-    { id: 15, x: 583, y: 416, angle: 0.86 }
+    { id: 1, x: 391, y: 377, angle: 0.86 },
+    { id: 2, x: 436, y: 349, angle: 0.86 },
+    { id: 3, x: 480, y: 324, angle: 0.86 },
+    { id: 4, x: 519, y: 300, angle: 0.86 },
+    { id: 5, x: 557, y: 277, angle: 0.86 },
+    { id: 6, x: 428, y: 436, angle: 0.86 },
+    { id: 7, x: 473, y: 408, angle: 0.86 },
+    { id: 8, x: 517, y: 383, angle: 0.86 },
+    { id: 9, x: 556, y: 359, angle: 0.86 },
+    { id: 10, x: 594, y: 336, angle: 0.86 },
+    { id: 11, x: 465, y: 495, angle: 0.86 },
+    { id: 12, x: 510, y: 467, angle: 0.86 },
+    { id: 13, x: 554, y: 442, angle: 0.86 },
+    { id: 14, x: 593, y: 418, angle: 0.86 },
+    { id: 15, x: 631, y: 395, angle: 0.86 }
   ]
 };
 
 // Renderiza a Dra. Íris e os heróis internados em tratamento nos leitos do hospital
 function drawBaseInfirmaryAndPatients(ctx, state, now) {
+  ctx.save();
   const shelterLevel = state?.shelterLevel || 1;
   const irisPos = getShelterSpecialistPos(shelterLevel, 'iris');
   const armorerPos = getShelterSpecialistPos(shelterLevel, 'armorer');
@@ -246,67 +250,48 @@ function drawBaseInfirmaryAndPatients(ctx, state, now) {
 
   // 2. HERÓIS EM RECUPERAÇÃO NOS LEITOS (m.status === 'house')
   const recoveringHeroes = (state.miners || []).filter(m => m.status === 'house');
+  const bedScaleX = (CITY_GRID_COLS * CITY_TILE_SIZE) / 1140;
+  const bedScaleY = (CITY_GRID_ROWS * CITY_TILE_SIZE) / 836;
 
   beds.forEach((bed, bedIdx) => {
     const patient = recoveringHeroes[bedIdx];
     if (!patient) return; // Leito vazio permanece com a arte do mapa
+
+    const bx = Math.round(bed.x * bedScaleX);
+    const by = Math.round(bed.y * bedScaleY);
 
     const maxHp = Number(patient.maxHealth) || 100;
     const curHp = Number(patient.currentHealth ?? maxHp * 0.05);
     const hpPct = Math.max(0, Math.min(100, Math.round((curHp / maxHp) * 100)));
 
     ctx.save();
-    ctx.translate(bed.x, bed.y);
-    ctx.rotate(bed.angle - Math.PI / 2); // Alinha o paciente ao longo do leito
+    ctx.translate(bx, by);
+    ctx.rotate(bed.angle - Math.PI / 2); // Alinha o próprio herói deitado ao longo do leito
+    ctx.scale(0.82, 0.82);
 
     // Respiração suave do paciente deitado
     const breath = Math.sin((now || 0) * 0.0035 + bedIdx) * 0.8;
 
-    // Cabeça no travesseiro
-    ctx.fillStyle = '#f1c7a5';
-    ctx.beginPath();
-    ctx.arc(0, -11, 5, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Cabelo / característica visual do herói
-    const heroColor = patient.color || '#38bdf8';
-    ctx.fillStyle = heroColor;
-    ctx.beginPath();
-    ctx.arc(0, -13, 5, Math.PI, Math.PI * 2);
-    ctx.fill();
-
-    // Olhos fechados descansando (- -)
-    ctx.strokeStyle = '#475569';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(-3, -11);
-    ctx.lineTo(-1, -11);
-    ctx.moveTo(1, -11);
-    ctx.lineTo(3, -11);
-    ctx.stroke();
-
-    // Tronco / Cobertor hospitalar azul com dobra branca
-    ctx.fillStyle = '#1e40af';
-    ctx.beginPath();
-    ctx.roundRect(-6, -6 + breath, 12, 18, 3);
-    ctx.fill();
-
-    // Dobra do lençol branco hospitalar no peito
-    ctx.fillStyle = '#f8fafc';
-    ctx.fillRect(-6, -6 + breath, 12, 3);
-
-    // Cruz vermelha no cobertor
-    ctx.fillStyle = '#ef4444';
-    ctx.fillRect(-1, 0 + breath, 2, 6);
-    ctx.fillRect(-3, 2 + breath, 6, 2);
+    // Renderiza o PRÓPRIO herói (spritesheet/modelo oficial do catálogo) deitado no leito
+    drawMinerCharacter(
+      ctx,
+      0,
+      breath,
+      { ...patient, status: 'house', isMining: false },
+      null,
+      now,
+      0,
+      1,
+      bedIdx
+    );
 
     ctx.restore();
 
     // Partículas de sono "zZ" subindo da cabeça
     const zCycle = ((now || 0) * 0.025 + bedIdx * 25) % 45;
     const zAlpha = Math.max(0, 1 - zCycle / 45);
-    const headCanvasX = bed.x - Math.cos(bed.angle) * 12;
-    const headCanvasY = bed.y - Math.sin(bed.angle) * 12 - zCycle * 0.45;
+    const headCanvasX = bx - Math.cos(bed.angle) * 14;
+    const headCanvasY = by - Math.sin(bed.angle) * 14 - zCycle * 0.45;
 
     ctx.save();
     ctx.font = 'bold 9px monospace';
@@ -317,10 +302,10 @@ function drawBaseInfirmaryAndPatients(ctx, state, now) {
     ctx.restore();
 
     // Barra de Vida e Nome do Herói Acima do Leito
-    const barW = 38;
+    const barW = 42;
     const barH = 5;
-    const barX = bed.x - barW / 2;
-    const barY = bed.y - 24;
+    const barX = bx - barW / 2;
+    const barY = by - 28;
 
     // Fundo da barra
     ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
@@ -337,7 +322,7 @@ function drawBaseInfirmaryAndPatients(ctx, state, now) {
     ctx.textBaseline = 'middle';
     ctx.fillStyle = '#f8fafc';
     const heroName = (patient.name || patient.classId || `Herói ${bedIdx + 1}`).substring(0, 8);
-    ctx.fillText(`${heroName} • L${bed.id}`, bed.x, barY - 4);
+    ctx.fillText(`${heroName} • L${bed.id}`, bx, barY - 4);
 
     // Trilho da barra
     ctx.fillStyle = '#334155';
@@ -640,13 +625,13 @@ function drawCollisionEditorOverlay(ctx, logicalWidth, logicalHeight, showGrid, 
 
     // Linhas mestras de setor (a cada 4 quadradinhos) desenhadas discretamente em âmbar
     ctx.beginPath();
-    for (let c = 0; c <= GRID_COLS; c++) {
-      const x = c * TILE_SIZE;
+    for (let c = 0; c <= CITY_GRID_COLS; c++) {
+      const x = c * CITY_TILE_SIZE;
       ctx.moveTo(x, 0);
       ctx.lineTo(x, logicalHeight);
     }
-    for (let r = 0; r <= GRID_ROWS; r++) {
-      const y = r * TILE_SIZE;
+    for (let r = 0; r <= CITY_GRID_ROWS; r++) {
+      const y = r * CITY_TILE_SIZE;
       ctx.moveTo(0, y);
       ctx.lineTo(logicalWidth, y);
     }
@@ -655,17 +640,17 @@ function drawCollisionEditorOverlay(ctx, logicalWidth, logicalHeight, showGrid, 
     ctx.stroke();
   }
 
-  // 3. Coordenadas de referência por setores
+  // 3. Coordenadas de referência por setores cobrindo 100% de todo o mapa (0..18, 0..13)
   if (showCoordinates) {
     ctx.font = 'bold 9px monospace';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'top';
     ctx.shadowColor = '#000000';
     ctx.shadowBlur = 3;
-    for (let r = 0; r < GRID_ROWS; r++) {
-      for (let c = 0; c < GRID_COLS; c++) {
-        const x = c * TILE_SIZE + 3;
-        const y = r * TILE_SIZE + 3;
+    for (let r = 0; r < CITY_GRID_ROWS; r++) {
+      for (let c = 0; c < CITY_GRID_COLS; c++) {
+        const x = c * CITY_TILE_SIZE + 3;
+        const y = r * CITY_TILE_SIZE + 3;
         ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
         ctx.fillText(`${c},${r}`, x, y);
       }
@@ -673,8 +658,44 @@ function drawCollisionEditorOverlay(ctx, logicalWidth, logicalHeight, showGrid, 
     ctx.shadowBlur = 0;
   }
 
-  // 4. Highlight interativo na célula e pincel sob o cursor do mouse
-  if (hoverCell && hoverCell.subCol >= 0 && hoverCell.subCol < SUB_GRID_COLS && hoverCell.subRow >= 0 && hoverCell.subRow < SUB_GRID_ROWS) {
+  // 4. Highlight interativo na célula e pincel sob o cursor do mouse (ou contorno do outdoor no modo 'billboard')
+  if (activeTool === 'billboard') {
+    const cfg = (typeof window !== 'undefined' && window.billboardConfig) || {};
+    const bx = cfg.x ?? 512;
+    const by = cfg.y ?? 32;
+    const bw = cfg.width ?? 216;
+    const bh = cfg.height ?? 122;
+
+    ctx.save();
+    ctx.strokeStyle = '#38bdf8';
+    ctx.fillStyle = 'rgba(56, 189, 248, 0.14)';
+    ctx.lineWidth = 2.5;
+    ctx.setLineDash([6, 4]);
+    ctx.fillRect(bx, by, bw, bh);
+    ctx.strokeRect(bx, by, bw, bh);
+    ctx.setLineDash([]);
+
+    const tagText = `🪧 Arraste o Outdoor (x: ${Math.round(bx)}, y: ${Math.round(by)})`;
+    ctx.font = 'bold 11px -apple-system, BlinkMacSystemFont, sans-serif';
+    const tagW = ctx.measureText(tagText).width + 16;
+    const tagH = 22;
+    const tagX = Math.max(6, Math.min(logicalWidth - tagW - 6, bx + bw / 2 - tagW / 2));
+    const tagY = by >= 28 ? (by - 6) : (by + bh + 24);
+
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.95)';
+    ctx.beginPath();
+    ctx.roundRect(tagX, tagY - tagH, tagW, tagH, 6);
+    ctx.fill();
+    ctx.strokeStyle = '#38bdf8';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(tagText, tagX + tagW / 2, tagY - tagH / 2);
+    ctx.restore();
+  } else if (hoverCell && hoverCell.subCol >= 0 && hoverCell.subCol < SUB_GRID_COLS && hoverCell.subRow >= 0 && hoverCell.subRow < SUB_GRID_ROWS) {
     const sc = hoverCell.subCol;
     const sr = hoverCell.subRow;
     const size = Math.max(1, Math.min(8, Math.round(brushSize)));
@@ -1036,8 +1057,8 @@ export default function GameBoard({
     const ctx = canvas.getContext('2d');
 
     const dpr = window.devicePixelRatio || 1;
-    const logicalWidth = GRID_COLS * TILE_SIZE;
-    const logicalHeight = GRID_ROWS * TILE_SIZE;
+    const logicalWidth = CITY_GRID_COLS * CITY_TILE_SIZE; // 19 * 76 = 1444 (cobre 100% do mapa)
+    const logicalHeight = CITY_GRID_ROWS * CITY_TILE_SIZE; // 14 * 76 = 1064 (cobre 100% do mapa)
 
     canvas.width = logicalWidth * dpr;
     canvas.height = logicalHeight * dpr;
@@ -2691,8 +2712,8 @@ export default function GameBoard({
     const canvas = canvasRef.current;
     if (!canvas) return { x: 0, y: 0 };
     const rect = canvas.getBoundingClientRect();
-    const logicalWidth = GRID_COLS * TILE_SIZE; // 1140 (coordenadas lógicas do jogo)
-    const logicalHeight = GRID_ROWS * TILE_SIZE; // 836
+    const logicalWidth = CITY_GRID_COLS * CITY_TILE_SIZE; // 1444 (cobre 100% de todo o mapa)
+    const logicalHeight = CITY_GRID_ROWS * CITY_TILE_SIZE; // 1064 (cobre 100% de todo o mapa)
     return {
       x: ((clientX - rect.left) / rect.width) * logicalWidth,
       y: ((clientY - rect.top) / rect.height) * logicalHeight
@@ -2703,8 +2724,21 @@ export default function GameBoard({
     if (typeof window === 'undefined') return;
     const coords = getCanvasCoords(e.clientX, e.clientY);
 
-    // MODO DE DESENHO DE BLOQUEIOS DO MAPA (Botão esquerdo pinta, botão direito apaga)
+    // MODO DE DESENHO DE BLOQUEIOS / MOVER OUTDOOR DO MAPA
     if (editorPropsRef.current.isCollisionEditorOpen) {
+      if (editorPropsRef.current.collisionEditorTool === 'billboard') {
+        const bCfg = window.billboardConfig || {};
+        dragStartRef.current = {
+          mode: 'billboard',
+          startMouseX: coords.x,
+          startMouseY: coords.y,
+          startX: bCfg.x ?? 512,
+          startY: bCfg.y ?? 32
+        };
+        if (canvasRef.current) canvasRef.current.style.cursor = 'grabbing';
+        e.preventDefault();
+        return;
+      }
       const subCol = Math.max(0, Math.min(SUB_GRID_COLS - 1, Math.floor(coords.x / SUB_TILE_SIZE)));
       const subRow = Math.max(0, Math.min(SUB_GRID_ROWS - 1, Math.floor(coords.y / SUB_TILE_SIZE)));
       if (subCol >= 0 && subCol < SUB_GRID_COLS && subRow >= 0 && subRow < SUB_GRID_ROWS) {
@@ -2774,6 +2808,26 @@ export default function GameBoard({
 
       // Tratamento especial quando o editor de bloqueios estiver ativo
       if (editorPropsRef.current.isCollisionEditorOpen) {
+        if (dragStartRef.current?.mode === 'billboard') {
+          const { startMouseX, startMouseY, startX, startY } = dragStartRef.current;
+          const bCfg = window.billboardConfig || {};
+          const bw = bCfg.width ?? 216;
+          const bh = bCfg.height ?? 122;
+          const maxW = CITY_GRID_COLS * CITY_TILE_SIZE;
+          const maxH = CITY_GRID_ROWS * CITY_TILE_SIZE;
+          const nextX = Math.max(-20, Math.min(maxW - bw + 20, Math.round(startX + (coords.x - startMouseX))));
+          const nextY = Math.max(-20, Math.min(maxH - bh + 20, Math.round(startY + (coords.y - startMouseY))));
+          if (window.saveBillboardConfig) {
+            window.saveBillboardConfig({ x: nextX, y: nextY });
+          }
+          if (canvasRef.current) canvasRef.current.style.cursor = 'grabbing';
+          return;
+        }
+        if (editorPropsRef.current.collisionEditorTool === 'billboard') {
+          if (canvasRef.current) canvasRef.current.style.cursor = 'grab';
+          return;
+        }
+
         const subCol = Math.max(0, Math.min(SUB_GRID_COLS - 1, Math.floor(coords.x / SUB_TILE_SIZE)));
         const subRow = Math.max(0, Math.min(SUB_GRID_ROWS - 1, Math.floor(coords.y / SUB_TILE_SIZE)));
         hoverCellRef.current = { subCol, subRow, x: coords.x, y: coords.y };

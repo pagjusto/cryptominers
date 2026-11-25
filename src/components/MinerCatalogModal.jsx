@@ -54,7 +54,7 @@ export default function MinerCatalogModal({ isOpen, onClose, onOpenMintModal }) 
           </div>
         </div>
 
-        {/* ABAS DO CATÁLOGO: COMBATENTES vs ARSENAL DE ARMAS */}
+        {/* ABAS DO CATÁLOGO: COMBATENTES */}
         <div className="flex items-center gap-2 pt-3 pb-2 border-b border-slate-800 shrink-0">
           <button
             onClick={() => setActiveTab('heroes')}
@@ -66,18 +66,6 @@ export default function MinerCatalogModal({ isOpen, onClose, onOpenMintModal }) 
           >
             <span>🧑‍🚀</span>
             <span>COMBATENTES ({MINER_ROSTER.length})</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('weapons')}
-            className={`px-4 py-2 rounded-xl font-arcade text-xs transition flex items-center gap-2 cursor-pointer ${
-              activeTab === 'weapons'
-                ? 'bg-amber-500 text-slate-950 font-bold shadow-md'
-                : 'bg-slate-800/80 text-slate-400 hover:text-white hover:bg-slate-800'
-            }`}
-          >
-            <span>🔫</span>
-            <span>ARSENAL DE ARMAS ({WEAPON_CATALOG.length})</span>
           </button>
         </div>
 

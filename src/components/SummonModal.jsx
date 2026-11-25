@@ -411,29 +411,14 @@ export default function SummonModal({
               </div>
             </div>
 
-            {/* ABAS (MINT POR BAÚS VS CONTRATO DIRETO) */}
+            {/* ABA: LOJA DE BAÚS */}
             <div className="flex bg-slate-950 p-1 rounded-2xl border border-slate-800 mb-3 shrink-0">
               <button
                 onClick={() => setActiveTab('mint')}
-                className={`flex-1 py-1.5 rounded-xl font-tech text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
-                  activeTab === 'mint'
-                    ? 'bg-amber-500 text-slate-950 shadow-md'
-                    : 'text-slate-400 hover:text-white'
-                }`}
+                className="flex-1 py-1.5 rounded-xl font-tech text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer bg-amber-500 text-slate-950 shadow-md"
               >
                 <Package size={14} />
                 <span>Loja de Baús (1, 5, 10 ou 15 Heróis)</span>
-              </button>
-              <button
-                onClick={() => setActiveTab('tavern')}
-                className={`flex-1 py-1.5 rounded-xl font-tech text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
-                  activeTab === 'tavern'
-                    ? 'bg-amber-500 text-slate-950 shadow-md'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                <UserPlus size={14} />
-                <span>Contrato Direto (Especialistas)</span>
               </button>
             </div>
 

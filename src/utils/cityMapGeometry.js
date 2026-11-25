@@ -8,21 +8,23 @@
  * Grid: 15 Colunas x 11 Linhas (720px largura x 528px altura, blocos de 48x48)
  */
 
-export const GRID_COLS = 15;
-export const GRID_ROWS = 11;
+import { OFFICIAL_BLOCKED_SUBCELLS } from '../data/officialCitySubgrid.js';
+
+export const GRID_COLS = 19;
+export const GRID_ROWS = 14;
 export const TILE_SIZE = 76;
 
 /**
  * SUB-GRADE DE ALTA PRECISÃO (QUADRADINHOS BEM MENORES):
- * Divisão de 4x4 por tile = blocos exatos de 19px x 19px (1140 / 60 = 19, 836 / 44 = 19).
+ * Divisão de 4x4 por tile = blocos exatos de 19px x 19px (1444 / 76 = 19, 1064 / 56 = 19).
  * Permite contornar escombros, ruínas e quinas de muros sem bloquear as ruas.
- * Total: 60 colunas x 44 linhas = 2.640 quadradinhos cobrindo 100% do mapa.
+ * Total: 76 colunas x 56 linhas = 4.256 quadradinhos cobrindo 100% de todo o mapa de ponta a ponta.
  */
 export const SUB_GRID_SCALE = 4;
 export const SUB_TILE_SIZE = 19;
-export const SUB_GRID_COLS = GRID_COLS * SUB_GRID_SCALE; // 60 colunas
-export const SUB_GRID_ROWS = GRID_ROWS * SUB_GRID_SCALE; // 44 linhas
-export const TOTAL_SUB_CELLS = SUB_GRID_COLS * SUB_GRID_ROWS; // 2.640 células
+export const SUB_GRID_COLS = GRID_COLS * SUB_GRID_SCALE; // 76 colunas
+export const SUB_GRID_ROWS = GRID_ROWS * SUB_GRID_SCALE; // 56 linhas
+export const TOTAL_SUB_CELLS = SUB_GRID_COLS * SUB_GRID_ROWS; // 4.256 células
 
 /**
  * Geometria padrão oficial do perímetro fortificado da Base Militar e Hospital.
@@ -32,21 +34,15 @@ export function isDefaultBaseCompound(col, row) {
   const c = Math.round(col);
   const r = Math.round(row);
 
-  // Complexo militar fortificado & Hospital: todo o perímetro fortificado demarcado pelo usuário (muros, torre oeste, leitos, caixas e armaria)
-  // Topo / Ápice Norte (Muro de concreto sob o outdoor):
-  if (r === 2 && (c === 7 || c === 8)) return true;
-  // Linha 3 (Salas norte e leitos superiores):
-  if (r === 3 && (c >= 5 && c <= 10)) return true;
-  // Linha 4 (Torre de vigia oeste até muro leste):
-  if (r === 4 && (c >= 3 && c <= 11)) return true;
-  // Linha 5 (Torre de vigia oeste até quina leste):
-  if (r === 5 && (c >= 3 && c <= 11)) return true;
-  // Linha 6 (Portão de madeira sudoeste até quina sudeste):
-  if (r === 6 && (c >= 3 && c <= 11)) return true;
-  // Linha 7 (Muro sul e portão metálico sudeste):
-  if (r === 7 && (c >= 4 && c <= 11)) return true;
-  // Fundo / Ápice Sul (Quina inferior do muro fortificado):
-  if (r === 8 && (c >= 6 && c <= 9)) return true;
+  // Complexo militar fortificado & Hospital no grid 19x14:
+  if (r === 2 && (c >= 8 && c <= 10)) return true;
+  if (r === 3 && (c >= 6 && c <= 12)) return true;
+  if (r === 4 && (c >= 4 && c <= 13)) return true;
+  if (r === 5 && (c >= 4 && c <= 15)) return true;
+  if (r === 6 && (c >= 4 && c <= 15)) return true;
+  if (r === 7 && (c >= 4 && c <= 14)) return true;
+  if (r === 8 && (c >= 5 && c <= 13)) return true;
+  if (r === 9 && (c >= 7 && c <= 11)) return true;
   return false;
 }
 
@@ -59,28 +55,28 @@ export function isDefaultBaseCompound(col, row) {
 export function isBaseCompound(c, r) {
   if (typeof c !== 'number' || typeof r !== 'number' || isNaN(c) || isNaN(r)) return false;
 
+  const col = Math.round(c);
+  const row = Math.round(r);
+  if (col >= 0 && col < GRID_COLS && row >= 0 && row < GRID_ROWS && isDefaultBaseCompound(col, row)) {
+    return true;
+  }
+
   // Se o usuário personalizou os obstáculos desenhando no mapa com a sub-grade:
   if (customObstacles !== null) {
     if (c >= GRID_COLS || r >= GRID_ROWS) {
-      if (!isSubCellBlocked(c, r)) return false;
+      return isSubCellBlocked(c, r);
     } else if (!Number.isInteger(c) || !Number.isInteger(r)) {
       const sc = Math.floor(c * SUB_GRID_SCALE);
       const sr = Math.floor(r * SUB_GRID_SCALE);
-      if (!isSubCellBlocked(sc, sr)) return false;
+      return isSubCellBlocked(sc, sr);
     } else {
-      const col = Math.round(c);
-      const row = Math.round(r);
       const sc1 = col * SUB_GRID_SCALE + 1;
       const sr1 = row * SUB_GRID_SCALE + 1;
-      if (!isSubCellBlocked(sc1, sr1) && !isSubCellBlocked(sc1 + 1, sr1 + 1)) return false;
+      return isSubCellBlocked(sc1, sr1) || isSubCellBlocked(sc1 + 1, sr1 + 1);
     }
   }
 
-  const col = Math.round(c);
-  const row = Math.round(r);
-  if (col < 0 || col >= GRID_COLS || row < 0 || row >= GRID_ROWS) return false;
-
-  return isDefaultBaseCompound(col, row);
+  return false;
 }
 
 /**
@@ -107,55 +103,42 @@ export function isDefaultCityObstacle(col, row) {
   // Limites exteriores do mapa (fora do grid de combate)
   if (col < 0 || col >= GRID_COLS || row < 0 || row >= GRID_ROWS) return true;
 
-  // 1. CONSTRUÇÕES - RUÍNA NOROESTE (Prédio de concreto destruído no topo esquerdo + todos os escombros, caixote e lajes)
-  // Cobre os dois andares, teto da ruína, escombros caídos à esquerda e à direita e lajes da entrada:
-  if (row === 0 && (col >= 1 && col <= 5)) return true;
-  if (row === 1 && (col >= 1 && col <= 5)) return true; // Cobre pedras col=1, corpo do prédio e escombros laterais col=4..5
-  if (row === 2 && (col >= 1 && col <= 4)) return true; // Cobre caixote de madeira col=1, escombros e rampa col=2..4
+  // 1. CONSTRUÇÕES - RUÍNA NOROESTE (Prédio de concreto destruído no topo esquerdo + escombros e lajes)
+  if (row <= 2 && (col >= 1 && col <= 5)) return true;
 
   // 2. OUTDOOR / BILLBOARD "CRYPTOZOMBIES" (Norte no gramado)
-  // Cobre a placa inteira e suportes: col=7..9 em row=0..1
-  if ((row === 0 || row === 1) && (col >= 7 && col <= 9)) return true;
+  if ((row === 0 || row === 1) && (col >= 8 && col <= 11)) return true;
 
   // 3. TORRE DE SIRENE E ALARME DE VIGIA OESTE
-  // Pés e corpo da torre concentrados em col=2: row=3
-  if (col === 2 && row === 3) return true;
+  if (row === 4 && col === 2) return true;
 
   // 4. RESERVATÓRIO / HIDRANTE METÁLICO OESTE
-  // Silo cilíndrico com base de pedra: col=0 em row=3..4
-  if (col === 0 && (row === 3 || row === 4)) return true;
+  if ((row === 4 || row === 5) && col === 0) return true;
 
   // 5. CARROS ABANDONADOS NO ASFALTO (Oeste)
-  // Carro enferrujado na pista oeste: col=0..1 em row=5
-  if ((col === 0 || col === 1) && row === 5) return true;
+  if (row === 6 && (col >= 0 && col <= 1)) return true;
 
   // 6. CONSTRUÇÃO CENTRAL - BASE MILITAR & HOSPITAL DE SOBREVIVÊNCIA
-  // Perímetro fortificado diamantado demarcado pelo usuário (muros, torre oeste, leitos e armaria)
   if (isDefaultBaseCompound(col, row)) return true;
 
   // 7. GUARITA ELEVADA DE MADEIRA LESTE (Torre de vigia leste)
-  // Cobre a guarita e pilares de madeira: col=11 em row=2..3 (mantém a estrada col=12 100% livre)
-  if ((row === 2 || row === 3) && col === 11) return true;
+  if ((row === 3 || row === 4) && col === 14) return true;
 
-  // 8. CONSTRUÇÕES - SILO / RESERVATÓRIO METÁLICO DE COMBUSTÍVEL LESTE E GERADORES
-  // Tanque cilíndrico e caixas de baterias: col=13..14 em row=3..4
-  if ((col === 13 || col === 14) && (row === 3 || row === 4)) return true;
+  // 8. CONSTRUÇÕES - SILO / RESERVATÓRIO METÁLICO DE COMBUSTÍVEL LESTE
+  if ((row >= 2 && row <= 5) && (col >= 16 && col <= 18)) return true;
 
   // 9. CARRO ABANDONADO LESTE
-  // Carro enferrujado na pista leste: col=13..14 em row=5
-  if ((col === 13 || col === 14) && row === 5) return true;
+  if (row === 6 && (col >= 16 && col <= 18)) return true;
 
   // 10. CONSTRUÇÕES - RUÍNA SUDESTE (Prédio de concreto destruído no canto inferior direito + escombros caídos)
-  // Prédio em col=13..14 row=8..10, escombros em col=12 row=8..10 e pedras caídas col=11 row=9..10
-  if (row === 8 && (col >= 12 && col <= 14)) return true;
-  if ((row === 9 || row === 10) && (col >= 11 && col <= 14)) return true;
+  if (row >= 9 && row <= 13 && col >= 13 && col <= 18) return true;
 
   // Todas as demais estradas, caminhos de terra batida e gramados estão 100% livres
   return false;
 }
 
 // Armazena e gerencia o grid interativo de colisão customizado pelo usuário (desenho manual no mapa)
-// Escala de alta precisão 60x44 (blocos de 19px x 19px)
+// Escala de alta precisão 76x56 (blocos de 19px x 19px cobrindo 100% de todo o mapa)
 let customObstacles = null;
 
 export function isSubCellBlocked(subC, subR) {
@@ -170,9 +153,7 @@ export function isSubCellBlocked(subC, subR) {
 
   if (customObstacles !== null) {
     const key = `${sc},${sr}`;
-    if (customObstacles[key] !== undefined) {
-      return Boolean(customObstacles[key]);
-    }
+    return Boolean(customObstacles[key]);
   }
 
   const baseCol = Math.floor(sc / SUB_GRID_SCALE);
@@ -180,48 +161,33 @@ export function isSubCellBlocked(subC, subR) {
   return isDefaultCityObstacle(baseCol, baseRow) || isDefaultBaseCompound(baseCol, baseRow);
 }
 
+const STORAGE_KEY_SUBGRID = 'crypto_zombies_custom_subgrid_v6';
+
 export function initCustomObstacles() {
-  if (typeof window === 'undefined') return;
-  try {
-    const savedV2 = localStorage.getItem('crypto_zombies_custom_subgrid_v2');
-    if (savedV2) {
-      customObstacles = JSON.parse(savedV2);
-      return;
-    }
-  } catch (e) {}
+  if (typeof window !== 'undefined') {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_SUBGRID);
+      if (saved) {
+        customObstacles = JSON.parse(saved);
+        return;
+      }
+    } catch (e) {}
+  }
 
-  // Inicializa mapa populado na escala de sub-grade 60x44 (19px)
+  // Inicializa mapa oficial na escala de sub-grade 76x56 (19px = 4.256 células)
   const initialMap = {};
-  for (let sr = 0; sr < SUB_GRID_ROWS; sr++) {
-    for (let sc = 0; sc < SUB_GRID_COLS; sc++) {
-      const baseC = Math.floor(sc / SUB_GRID_SCALE);
-      const baseR = Math.floor(sr / SUB_GRID_SCALE);
-      
-      let blocked = false;
-      if (isDefaultBaseCompound(baseC, baseR)) {
-        blocked = true;
-      } else if (isDefaultCityObstacle(baseC, baseR)) {
-        // Refinamento de sub-célula para as ruínas e estradas:
-        // Na ruína Noroeste (baseC=1..4, baseR=0..2), a estrada de terra cruza o canto inferior
-        // (sr >= 10 e sc >= 10..15). Deixamos a estrada livre por padrão!
-        if (baseR === 2 && sr >= 10 && sc >= 10) {
-          blocked = false;
-        } else {
-          blocked = true;
-        }
-      }
-
-      if (blocked) {
-        initialMap[`${sc},${sr}`] = true;
-      }
-    }
+  for (let i = 0; i < OFFICIAL_BLOCKED_SUBCELLS.length; i++) {
+    const [sc, sr] = OFFICIAL_BLOCKED_SUBCELLS[i];
+    initialMap[`${sc},${sr}`] = true;
   }
 
   customObstacles = initialMap;
 
-  try {
-    localStorage.setItem('crypto_zombies_custom_subgrid_v2', JSON.stringify(customObstacles));
-  } catch (e) {}
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.setItem(STORAGE_KEY_SUBGRID, JSON.stringify(customObstacles));
+    } catch (e) {}
+  }
 }
 
 export function getCustomObstacles() {
@@ -236,14 +202,8 @@ export function setCustomObstacleCell(c, r, isBlocked, brushSize = 1) {
     initCustomObstacles();
   }
 
-  let subCol = Math.round(c);
-  let subRow = Math.round(r);
-
-  // Se c e r foram passados em escala de base (15x11), converte para sub-grid (60x44)
-  if (c < GRID_COLS && r < GRID_ROWS && Number.isInteger(c) && Number.isInteger(r) && brushSize === 4) {
-    subCol = c * SUB_GRID_SCALE;
-    subRow = r * SUB_GRID_SCALE;
-  }
+  const subCol = Math.round(c);
+  const subRow = Math.round(r);
 
   // Aplica o pincel com o tamanho selecionado (1x1 = 19px, 2x2 = 38px, 4x4 = 76px)
   const size = Math.max(1, Math.min(8, Math.round(brushSize)));
@@ -263,7 +223,7 @@ export function setCustomObstacleCell(c, r, isBlocked, brushSize = 1) {
   }
 
   try {
-    localStorage.setItem('crypto_zombies_custom_subgrid_v2', JSON.stringify(customObstacles));
+    localStorage.setItem(STORAGE_KEY_SUBGRID, JSON.stringify(customObstacles));
   } catch (e) {}
 
   if (typeof window !== 'undefined') {
@@ -280,7 +240,7 @@ export function blockAllCustomObstacles() {
   }
   customObstacles = map;
   try {
-    localStorage.setItem('crypto_zombies_custom_subgrid_v2', JSON.stringify(customObstacles));
+    localStorage.setItem(STORAGE_KEY_SUBGRID, JSON.stringify(customObstacles));
   } catch (e) {}
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new CustomEvent('cryptozombies_collision_updated', { detail: customObstacles }));
@@ -296,7 +256,7 @@ export function clearAllCustomObstacles() {
   }
   customObstacles = map;
   try {
-    localStorage.setItem('crypto_zombies_custom_subgrid_v2', JSON.stringify(customObstacles));
+    localStorage.setItem(STORAGE_KEY_SUBGRID, JSON.stringify(customObstacles));
   } catch (e) {}
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new CustomEvent('cryptozombies_collision_updated', { detail: customObstacles }));
@@ -306,6 +266,8 @@ export function clearAllCustomObstacles() {
 export function resetCustomObstacles() {
   customObstacles = null;
   try {
+    localStorage.removeItem(STORAGE_KEY_SUBGRID);
+    localStorage.removeItem('crypto_zombies_custom_subgrid_v3');
     localStorage.removeItem('crypto_zombies_custom_subgrid_v2');
     localStorage.removeItem('crypto_zombies_custom_collision_grid');
   } catch (e) {}
@@ -506,5 +468,11 @@ export const SHELTER_SPECIALISTS_CONFIG = {
 export function getShelterSpecialistPos(level = 1, role = 'iris') {
   const lvl = Math.max(1, Math.min(3, Number(level) || 1));
   const cfg = SHELTER_SPECIALISTS_CONFIG[lvl] || SHELTER_SPECIALISTS_CONFIG[1];
-  return cfg[role] || (role === 'armorer' ? cfg.armorer : cfg.iris);
+  const base = cfg[role] || (role === 'armorer' ? cfg.armorer : cfg.iris);
+  const scaleX = (GRID_COLS * TILE_SIZE) / 1140;
+  const scaleY = (GRID_ROWS * TILE_SIZE) / 836;
+  return {
+    x: Math.round(base.x * scaleX),
+    y: Math.round(base.y * scaleY)
+  };
 }

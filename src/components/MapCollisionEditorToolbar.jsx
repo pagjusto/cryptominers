@@ -46,7 +46,7 @@ export default function MapCollisionEditorToolbar({
   isFullPage = false,
   onToggleFullPage,
   blockedCount = 0,
-  totalCells = TOTAL_SUB_CELLS || 2640
+  totalCells = TOTAL_SUB_CELLS || 4256
 }) {
   const [copied, setCopied] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
@@ -85,6 +85,14 @@ export default function MapCollisionEditorToolbar({
           className={`px-2 py-0.5 rounded text-xs font-bold ${tool === 'clear' ? 'bg-emerald-600 text-white' : 'text-emerald-300'}`}
         >
           🟩
+        </button>
+        <button
+          type="button"
+          onClick={() => onSelectTool('billboard')}
+          className={`px-2 py-0.5 rounded text-xs font-bold ${tool === 'billboard' ? 'bg-sky-600 text-white' : 'text-sky-300'}`}
+          title="Arrastar Outdoor"
+        >
+          🪧
         </button>
         <button
           type="button"
@@ -153,6 +161,19 @@ export default function MapCollisionEditorToolbar({
           >
             <Eraser className="w-3.5 h-3.5" />
             <span>🟩 Liberar</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onSelectTool('billboard')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+              tool === 'billboard'
+                ? 'bg-sky-600 text-white shadow-[0_0_14px_rgba(14,165,233,0.6)] ring-2 ring-sky-400'
+                : 'text-sky-300 hover:bg-sky-950/50 hover:text-white'
+            }`}
+            title="Mover Outdoor: clique e arraste o outdoor CryptoZombies para qualquer lugar do mapa"
+          >
+            <span>🪧 Mover Outdoor</span>
           </button>
         </div>
 
