@@ -141,6 +141,7 @@ A cadência numérica de cada arma é definida em `WEAPON_CATALOG.attacksPerSeco
 - Se o jogador retirar um herói da equipe, ele retorna ao inventário como **herói recrutado** e poderá ser adicionado novamente à equipe sem custo, respeitando o limite de 15 sobreviventes.
 - O jogador pode retirar heróis da equipe a qualquer momento, **exceto durante uma batalha contra o Boss**.
 - O envelhecimento do herói fica **pausado enquanto ele estiver no inventário**; o tempo de idade volta a correr quando ele estiver novamente ativo fora do inventário.
+- A **Poção do Rejuvenecimento pode ser usada em um herói que esteja no inventário, mesmo antes de ele ser recrutado**.
 - Se o Baú de Herói revelar um herói que o jogador já possui, o jogador recebe outro exemplar desse herói. Heróis duplicados são permitidos; não converter automaticamente em fragmentos nem rerrolar o resultado.
 - Ao abrir cada Baú do Boss, o resultado das recompensas principais segue uma única distribuição: **45% de chance de receber 1 Fragmento de Construção**, **45% de chance de receber 1 Poção do Rejuvenecimento** e **10% de chance de receber 1 Fragmento de Construção e 1 Poção do Rejuvenecimento juntos**.
 - Portanto, toda abertura concede pelo menos uma recompensa principal; no resultado de 10%, as duas são concedidas na mesma abertura.
