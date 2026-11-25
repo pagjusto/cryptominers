@@ -29,8 +29,8 @@ for (let r = 1; r < map.grid.length - 1; r++) {
 console.log(`Jazidas ativas restantes no mapa fora do bolsão: ${remainingActive}`);
 
 // 4. Instancia o Homem-Aranha e o Robô nas posições abertas da avenida e gramado
-const spiderman = { id: 'spiderman', name: 'Homem-Aranha', x: 1, y: 3, speed: 1.2, targetDir: 1, isMining: false, targetBlock: null };
-const robot = { id: 'robot', name: 'Bomb-Bot', x: 2, y: 3, speed: 1.0, targetDir: 1, isMining: false, targetBlock: null };
+const spiderman = { id: 'spiderman', name: 'Homem-Aranha', x: 3, y: 3, speed: 1.2, targetDir: 1, isMining: false, targetBlock: null };
+const robot = { id: 'robot', name: 'Bomb-Bot', x: 3, y: 4, speed: 1.0, targetDir: 1, isMining: false, targetBlock: null };
 
 const allMiners = [spiderman, robot];
 
