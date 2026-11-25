@@ -134,6 +134,7 @@ A cadência numérica de cada arma é definida em `WEAPON_CATALOG.attacksPerSeco
 - A **Poção do Rejuvenecimento não é concedida por um sorteio independente após a batalha**; ela é uma possível recompensa na abertura do Baú do Boss.
 - A chance de obter um **Baú de Herói** na abertura é de **5%**, em um sorteio independente da equipe utilizada pelo jogador e da raridade ou quantidade de sobreviventes elegíveis.
 - Quando um Baú de Herói for obtido na abertura do Baú do Boss, ele será enviado ao inventário como um baú separado. O jogador poderá abri-lo quando quiser; não haverá abertura automática nem revelação imediata do herói.
+- Ao abrir o Baú de Herói, o herói revelado vai para o inventário como **herói não recrutado**. Ele não entra automaticamente na equipe; o jogador decide quando recrutá-lo/adicioná-lo à equipe.
 - Se o Baú de Herói revelar um herói que o jogador já possui, o jogador recebe outro exemplar desse herói. Heróis duplicados são permitidos; não converter automaticamente em fragmentos nem rerrolar o resultado.
 - Ao abrir cada Baú do Boss, o resultado das recompensas principais segue uma única distribuição: **45% de chance de receber 1 Fragmento de Construção**, **45% de chance de receber 1 Poção do Rejuvenecimento** e **10% de chance de receber 1 Fragmento de Construção e 1 Poção do Rejuvenecimento juntos**.
 - Portanto, toda abertura concede pelo menos uma recompensa principal; no resultado de 10%, as duas são concedidas na mesma abertura.
