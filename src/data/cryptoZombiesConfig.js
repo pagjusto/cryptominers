@@ -318,6 +318,14 @@ export function getCryptoZombiesConfig() {
       ? Number(parsed.minerCoinUsdtRate)
       : 0.01;
 
+    const {
+      heroBaseUpgradeCost: _legacyHeroBaseUpgradeCost,
+      heroUpgradeMultiplier: _legacyHeroUpgradeMultiplier,
+      heroPowerBonusPerLevelPct: _legacyHeroPowerBonusPerLevelPct,
+      heroProductionBonusPerLevelPct: _legacyHeroProductionBonusPerLevelPct,
+      ...savedUpgradesConfig
+    } = parsed.upgradesConfig || {};
+
     return {
       ...DEFAULT_CRYPTO_ZOMBIES_CONFIG,
       ...parsed,
@@ -327,7 +335,7 @@ export function getCryptoZombiesConfig() {
       rarityAttributes: { ...DEFAULT_CRYPTO_ZOMBIES_CONFIG.rarityAttributes, ...(parsed.rarityAttributes || {}) },
       upgradesConfig: {
         ...DEFAULT_CRYPTO_ZOMBIES_CONFIG.upgradesConfig,
-        ...(parsed.upgradesConfig || {}),
+        ...savedUpgradesConfig,
         heroProductionBonusByStarPct: DEFAULT_CRYPTO_ZOMBIES_CONFIG.upgradesConfig.heroProductionBonusByStarPct
       },
       adsConfig: { ...DEFAULT_CRYPTO_ZOMBIES_CONFIG.adsConfig, ...(parsed.adsConfig || {}) },
