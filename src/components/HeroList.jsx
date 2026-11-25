@@ -94,19 +94,8 @@ export default function HeroList({
         </div>
       </div>
 
-      {/* 2. RECURSOS RPG: FUSÃO (QUEIMA DE HERÓIS) & RELÍQUIAS MÍSTICAS (BLOQUEADOS) */}
-      <div className="grid grid-cols-2 gap-2.5 mb-3 shrink-0">
-        <button
-          type="button"
-          disabled
-          title="Fusão de Heróis (Recurso bloqueado)"
-          className="flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-slate-900/60 border border-slate-800 text-slate-500 font-tech text-xs font-bold shadow-sm cursor-not-allowed opacity-60 select-none"
-        >
-          <Lock size={12} className="text-amber-500/60 shrink-0" />
-          <Flame size={13} className="text-slate-500 shrink-0" />
-          <span>FUSÃO (BLOQUEADO)</span>
-        </button>
-
+      {/* 2. RELÍQUIAS MÍSTICAS (RECURSO BLOQUEADO) */}
+      <div className="grid grid-cols-1 gap-2.5 mb-3 shrink-0">
         <button
           type="button"
           disabled
