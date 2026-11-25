@@ -345,10 +345,12 @@ export const MINT_CHEST_TYPES = [
     icon: '🎖️',
     color: '#38bdf8',
     chances: [
-      { rarity: 'Comum', pct: '70%' },
-      { rarity: 'Raro', pct: '20%' },
-      { rarity: 'Épico', pct: '8%' },
-      { rarity: 'Lendário', pct: '2%' }
+      { rarity: 'Comum', pct: '82,87%' },
+      { rarity: 'Raro', pct: '10,36%' },
+      { rarity: 'Super Raro', pct: '5,18%' },
+      { rarity: 'Épico', pct: '1,04%' },
+      { rarity: 'Lendário', pct: '0,51%' },
+      { rarity: 'Super Lendário', pct: '0,04%' }
     ]
   },
   {
@@ -362,10 +364,12 @@ export const MINT_CHEST_TYPES = [
     icon: '🗺️',
     color: '#22c55e',
     chances: [
-      { rarity: 'Comum', pct: '55%' },
-      { rarity: 'Raro', pct: '27%' },
-      { rarity: 'Épico', pct: '14%' },
-      { rarity: 'Lendário', pct: '4%' }
+      { rarity: 'Comum', pct: '82,87%' },
+      { rarity: 'Raro', pct: '10,36%' },
+      { rarity: 'Super Raro', pct: '5,18%' },
+      { rarity: 'Épico', pct: '1,04%' },
+      { rarity: 'Lendário', pct: '0,51%' },
+      { rarity: 'Super Lendário', pct: '0,04%' }
     ]
   },
   {
@@ -378,10 +382,12 @@ export const MINT_CHEST_TYPES = [
     icon: '🛡️',
     color: '#a855f7',
     chances: [
-      { rarity: 'Comum', pct: '40%' },
-      { rarity: 'Raro', pct: '30%' },
-      { rarity: 'Épico', pct: '22%' },
-      { rarity: 'Lendário', pct: '8%' }
+      { rarity: 'Comum', pct: '82,87%' },
+      { rarity: 'Raro', pct: '10,36%' },
+      { rarity: 'Super Raro', pct: '5,18%' },
+      { rarity: 'Épico', pct: '1,04%' },
+      { rarity: 'Lendário', pct: '0,51%' },
+      { rarity: 'Super Lendário', pct: '0,04%' }
     ]
   },
   {
@@ -395,10 +401,12 @@ export const MINT_CHEST_TYPES = [
     icon: '👑',
     color: '#f59e0b',
     chances: [
-      { rarity: 'Comum', pct: '25%' },
-      { rarity: 'Raro', pct: '30%' },
-      { rarity: 'Épico', pct: '30%' },
-      { rarity: 'Lendário', pct: '15%' }
+      { rarity: 'Comum', pct: '82,87%' },
+      { rarity: 'Raro', pct: '10,36%' },
+      { rarity: 'Super Raro', pct: '5,18%' },
+      { rarity: 'Épico', pct: '1,04%' },
+      { rarity: 'Lendário', pct: '0,51%' },
+      { rarity: 'Super Lendário', pct: '0,04%' }
     ]
   }
 ];
