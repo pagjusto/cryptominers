@@ -24,22 +24,22 @@ export const DEFAULT_CRYPTO_ZOMBIES_CONFIG = {
       color: '#38bdf8',
       description: 'Entrega 1 herói minerador. Ideal para iniciar sua jornada na mina subterrânea.',
       normalProbabilities: {
-        common: 80,
-        rare: 15,
-        epic: 4,
-        legendary: 1
-      },
-      adBonusProbabilities: {
-        common: 74,
-        rare: 17,
-        epic: 7,
+        common: 70,
+        rare: 20,
+        epic: 8,
         legendary: 2
       },
+      adBonusProbabilities: {
+        common: 64,
+        rare: 22,
+        epic: 11,
+        legendary: 3
+      },
       probabilities: {
-        common: 80,
-        rare: 15,
-        epic: 4,
-        legendary: 1
+        common: 70,
+        rare: 20,
+        epic: 8,
+        legendary: 2
       }
     },
     explorer: {
@@ -54,22 +54,22 @@ export const DEFAULT_CRYPTO_ZOMBIES_CONFIG = {
       popular: true,
       description: 'Entrega 5 heróis combatentes com chances elevadas de heróis Raros e Épicos. Não concede recompensa em moedas, apenas heróis.',
       normalProbabilities: {
-        common: 76,
-        rare: 16,
-        epic: 6,
-        legendary: 2
-      },
-      adBonusProbabilities: {
-        common: 69,
-        rare: 18,
-        epic: 9,
+        common: 55,
+        rare: 27,
+        epic: 14,
         legendary: 4
       },
+      adBonusProbabilities: {
+        common: 48,
+        rare: 29,
+        epic: 17,
+        legendary: 6
+      },
       probabilities: {
-        common: 76,
-        rare: 16,
-        epic: 6,
-        legendary: 2
+        common: 55,
+        rare: 27,
+        epic: 14,
+        legendary: 4
       }
     },
     elite: {
@@ -83,22 +83,22 @@ export const DEFAULT_CRYPTO_ZOMBIES_CONFIG = {
       color: '#a855f7',
       description: 'Entrega 10 heróis mineradores. Probabilidade expressiva de Épicos e Lendários com desconto no pacote.',
       normalProbabilities: {
-        common: 72,
-        rare: 17,
-        epic: 8,
-        legendary: 3
+        common: 40,
+        rare: 30,
+        epic: 22,
+        legendary: 8
       },
       adBonusProbabilities: {
-        common: 64,
-        rare: 19,
-        epic: 11,
-        legendary: 6
+        common: 32,
+        rare: 32,
+        epic: 25,
+        legendary: 11
       },
       probabilities: {
-        common: 72,
-        rare: 17,
-        epic: 8,
-        legendary: 3
+        common: 40,
+        rare: 30,
+        epic: 22,
+        legendary: 8
       }
     },
     legendary: {
@@ -113,22 +113,22 @@ export const DEFAULT_CRYPTO_ZOMBIES_CONFIG = {
       badge: 'TIME COMPLETO (15)',
       description: 'Entrega 15 heróis mineradores (capacidade máxima de trabalho simultâneo). Maior chance de Lendários do jogo!',
       normalProbabilities: {
-        common: 68,
-        rare: 18,
-        epic: 9,
-        legendary: 5
+        common: 25,
+        rare: 30,
+        epic: 30,
+        legendary: 15
       },
       adBonusProbabilities: {
-        common: 59,
-        rare: 20,
-        epic: 13,
-        legendary: 8
+        common: 16,
+        rare: 34,
+        epic: 33,
+        legendary: 17
       },
       probabilities: {
-        common: 68,
-        rare: 18,
-        epic: 9,
-        legendary: 5
+        common: 25,
+        rare: 30,
+        epic: 30,
+        legendary: 15
       }
     }
   },
