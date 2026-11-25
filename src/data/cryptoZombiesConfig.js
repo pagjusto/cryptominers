@@ -269,10 +269,7 @@ export const DEFAULT_CRYPTO_ZOMBIES_CONFIG = {
       { id: 'tier2', label: '+30% Vel. Recuperação', bonusPct: 30, costMiner: 35 },
       { id: 'tier3', label: '+50% Vel. Recuperação', bonusPct: 50, costMiner: 65 }
     ],
-    heroBaseUpgradeCost: 2.5,
-    heroUpgradeMultiplier: 1.6,
-    heroPowerBonusPerLevelPct: 25,
-    heroProductionBonusPerLevelPct: 20
+    heroProductionBonusByStarPct: { 1: 5, 2: 10, 3: 15 }
   },
 
   // 5. SISTEMA DE MONETIZAÇÃO, ANÚNCIOS RECOMPENSADOS & FUNDO DE SUSTENTABILIDADE
@@ -328,7 +325,11 @@ export function getCryptoZombiesConfig() {
       chests: { ...DEFAULT_CRYPTO_ZOMBIES_CONFIG.chests, ...(parsed.chests || {}) },
       houses: { ...DEFAULT_CRYPTO_ZOMBIES_CONFIG.houses, ...(parsed.houses || {}) },
       rarityAttributes: { ...DEFAULT_CRYPTO_ZOMBIES_CONFIG.rarityAttributes, ...(parsed.rarityAttributes || {}) },
-      upgradesConfig: { ...DEFAULT_CRYPTO_ZOMBIES_CONFIG.upgradesConfig, ...(parsed.upgradesConfig || {}) },
+      upgradesConfig: {
+        ...DEFAULT_CRYPTO_ZOMBIES_CONFIG.upgradesConfig,
+        ...(parsed.upgradesConfig || {}),
+        heroProductionBonusByStarPct: DEFAULT_CRYPTO_ZOMBIES_CONFIG.upgradesConfig.heroProductionBonusByStarPct
+      },
       adsConfig: { ...DEFAULT_CRYPTO_ZOMBIES_CONFIG.adsConfig, ...(parsed.adsConfig || {}) },
       constructionChestConfig: {
         ...DEFAULT_CRYPTO_ZOMBIES_CONFIG.constructionChestConfig,
