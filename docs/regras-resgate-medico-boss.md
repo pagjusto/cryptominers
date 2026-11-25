@@ -145,6 +145,7 @@ A cadência numérica de cada arma é definida em `WEAPON_CATALOG.attacksPerSeco
 - O inventário de heróis não possui limite de capacidade: o jogador pode armazenar quantos heróis desejar.
 - Ao abrir um Baú de Herói, o resultado é sorteado aleatoriamente entre **todos os heróis disponíveis no jogo**, respeitando as raridades e probabilidades já definidas. Heróis que o jogador já possui continuam elegíveis; portanto, duplicatas podem ser obtidas.
 - Se o Baú de Herói revelar um herói que o jogador já possui, o jogador recebe outro exemplar desse herói. Heróis duplicados são permitidos; não converter automaticamente em fragmentos nem rerrolar o resultado.
+- Cada exemplar duplicado possui **identidade própria e independente**. Cada cópia mantém sua própria idade, envelhecimento, histórico e evolução; alterações ou evolução de um exemplar não afetam os demais exemplares do mesmo herói.
 - Ao abrir cada Baú do Boss, o resultado das recompensas principais segue uma única distribuição: **45% de chance de receber 1 Fragmento de Construção**, **45% de chance de receber 1 Poção do Rejuvenecimento** e **10% de chance de receber 1 Fragmento de Construção e 1 Poção do Rejuvenecimento juntos**.
 - Portanto, toda abertura concede pelo menos uma recompensa principal; no resultado de 10%, as duas são concedidas na mesma abertura.
 - A chance de obter um **Baú de Herói** permanece em **5%**, em um sorteio separado e independente. Assim, o Baú de Herói pode sair junto com qualquer um dos três resultados principais ou não sair.
