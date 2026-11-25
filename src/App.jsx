@@ -85,7 +85,6 @@ import { getStaffContract, saveStaffContract } from './data/staffCatalog';
 import InvestmentModal from './components/InvestmentModal';
 import MarketplaceModal from './components/MarketplaceModal';
 import MiningStatsModal from './components/MiningStatsModal';
-import HeroFusionModal from './components/HeroFusionModal';
 import GearInventoryModal from './components/GearInventoryModal';
 import CampaignMapModal from './components/CampaignMapModal';
 import { INITIAL_GEAR_STASH } from './data/gearData';
@@ -829,9 +828,6 @@ export default function App() {
     onGranted: null
   });
 
-  // 🧬 Sistema de Fusão de Heróis (Hero Fusion / Queima de Heróis)
-  const [isFusionModalOpen, setIsFusionModalOpen] = useState(false);
-
   // 🛡️ Sistema de Equipamentos e Relíquias (Artifacts & Gears)
   const [isGearModalOpen, setIsGearModalOpen] = useState(false);
   const [gearStash, setGearStash] = useState(() => {
@@ -844,27 +840,6 @@ export default function App() {
     }
     return INITIAL_GEAR_STASH;
   });
-
-  // 🧬 FUSÃO DE HERÓIS: Queima 2 heróis da mesma raridade para elevar estrelas (★) e Poder
-  const handleFuseHeroes = ({ targetId, sacrificeIds, newStars, newPower }) => {
-    setMiners(prev => {
-      // 1. Remove os 2 heróis sacrificados (queima permanente de NFTs)
-      const afterBurn = prev.filter(m => !sacrificeIds.includes(m.id));
-      // 2. Eleva as estrelas e o poder do herói alvo
-      const updated = afterBurn.map(m => {
-        if (m.id === targetId) {
-          return {
-            ...m,
-            stars: newStars,
-            power: newPower
-          };
-        }
-        return m;
-      });
-      localStorage.setItem('crypto_miners_team', JSON.stringify(updated));
-      return updated;
-    });
-  };
 
   // 🛡️ EQUIPAR ITEM NO HERÓI
   const handleEquipGear = (minerId, gearItem) => {
@@ -2271,14 +2246,6 @@ export default function App() {
       <BillboardCalibrationModal
         isOpen={isBillboardModalOpen}
         onClose={() => setIsBillboardModalOpen(false)}
-      />
-
-      {/* MODAL DE FUSÃO & QUEIMA DE HERÓIS (ESTRELAS & PODER) */}
-      <HeroFusionModal
-        isOpen={isFusionModalOpen}
-        onClose={() => setIsFusionModalOpen(false)}
-        miners={miners}
-        onFuseHeroes={handleFuseHeroes}
       />
 
       {/* MODAL DE EQUIPAMENTOS & RELÍQUIAS MÍSTICAS */}
