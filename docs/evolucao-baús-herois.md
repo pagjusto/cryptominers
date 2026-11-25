@@ -17,6 +17,10 @@ Este documento registra a tabela atual de evolução por estrelas para as rarida
 - O herói não pode permanecer minerando nem integrar a equipe enquanto a evolução é realizada.
 - O envelhecimento do herói continua normalmente durante todo o período de evolução; não há pausa na passagem da idade.
 
+## Aparência durante a evolução
+
+- A evolução por estrelas **não altera a aparência visual nem o nome do herói**. O herói mantém sua identidade visual original em todos os estágios de evolução.
+
 ## Limite final da evolução
 
 - ★★★ é o último estágio de evolução nesta versão.
