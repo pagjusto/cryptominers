@@ -129,9 +129,9 @@ export default function LandingPage({
         />
         <div className="absolute inset-0 bg-gradient-to-b from-[#041b11]/90 via-[#062417]/80 to-[#020d08]/95 backdrop-blur-[2px]" />
         {/* Névoa atmosférica verde */}
-        <div className="absolute -top-24 -left-24 w-[620px] h-[420px] rounded-full bg-emerald-500/15 blur-[120px] animate-pulse" />
-        <div className="absolute top-1/3 -right-24 w-[580px] h-[460px] rounded-full bg-lime-500/10 blur-[130px] animate-pulse" />
-        <div className="absolute bottom-0 inset-x-0 h-72 bg-gradient-to-t from-emerald-950/80 via-emerald-900/25 to-transparent blur-xl" />
+        <div className="absolute -top-24 -left-24 w-[660px] h-[460px] rounded-full bg-emerald-500/20 blur-[120px] animate-pulse" />
+        <div className="absolute top-1/3 -right-24 w-[620px] h-[500px] rounded-full bg-lime-500/15 blur-[130px] animate-pulse" />
+        <div className="absolute bottom-0 inset-x-0 h-80 bg-gradient-to-t from-emerald-950/85 via-emerald-900/35 to-transparent blur-xl" />
       </div>
 
       {/* NAVBAR SUPERIOR COM LOGIN/CADASTRO NO CANTO */}
@@ -329,7 +329,7 @@ export default function LandingPage({
 
       {/* SEÇÃO LORE: HISTÓRIA DO JOGO */}
       {activeTab === 'lore' && (
-      <section id="lore" className="border-b border-slate-800/80 bg-slate-950/75">
+      <section id="lore" className="border-b border-emerald-900/50 bg-[#04160e]/55">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 space-y-8">
           <div className="space-y-2">
             <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-amber-400">
@@ -628,7 +628,7 @@ export default function LandingPage({
         };
 
         return (
-          <section id="personagens" className="border-t border-slate-800/80 bg-slate-900/30">
+          <section id="personagens" className="border-t border-emerald-900/50 bg-[#04160e]/40">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 space-y-10">
               <div className="space-y-2">
                 <span className="text-xs font-bold uppercase tracking-widest text-emerald-400">
@@ -759,7 +759,7 @@ export default function LandingPage({
 
       {/* SEÇÃO 3: RATES & BAÚS */}
       {activeTab === 'rates' && (
-      <section id="rates" className="border-t border-slate-800/80 max-w-7xl mx-auto px-4 sm:px-6 py-16 space-y-12">
+      <section id="rates" className="border-t border-emerald-900/50 max-w-7xl mx-auto px-4 sm:px-6 py-16 space-y-12">
         {/* Tabela de Atributos por Raridade */}
         <div className="space-y-6">
           <div className="space-y-2">
@@ -954,7 +954,7 @@ export default function LandingPage({
 
       {/* SEÇÃO 4: ABRIGOS */}
       {activeTab === 'bases' && (
-      <section id="abrigos" className="border-t border-slate-800/80 bg-slate-900/30">
+      <section id="abrigos" className="border-t border-emerald-900/50 bg-[#04160e]/40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 space-y-8">
           <div className="space-y-2">
             <span className="text-xs font-bold uppercase tracking-widest text-sky-400">
@@ -1023,7 +1023,7 @@ export default function LandingPage({
 
       {/* SEÇÃO: EVOLUÇÃO DE HERÓIS */}
       {activeTab === 'evolution' && (
-      <section id="evolucao" className="border-t border-slate-800/80 bg-slate-900/30">
+      <section id="evolucao" className="border-t border-emerald-900/50 bg-[#04160e]/40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 space-y-10">
           <div className="space-y-2">
             <span className="text-xs font-bold uppercase tracking-widest text-purple-400">
@@ -1199,7 +1199,7 @@ export default function LandingPage({
 
       {/* SEÇÃO: INDIQUE E GANHE */}
       {activeTab === 'referral' && (
-      <section id="indique-e-ganhe" className="border-t border-slate-800/80 bg-slate-900/30">
+      <section id="indique-e-ganhe" className="border-t border-emerald-900/50 bg-[#04160e]/40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 space-y-10">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="space-y-2">
@@ -1290,7 +1290,7 @@ export default function LandingPage({
       </main>
 
       {/* FOOTER */}
-      <footer className="border-t border-slate-800 bg-slate-950 py-8">
+      <footer className="border-t border-emerald-900/50 bg-[#020d08]/95 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
           <div className="flex items-center gap-2">
             <Skull size={16} className="text-amber-400" />
