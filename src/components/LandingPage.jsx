@@ -1043,13 +1043,13 @@ export default function LandingPage({
             <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-2">
               <div className="text-xs font-arcade text-purple-300">2. ITENS NECESSÁRIOS</div>
               <p className="text-xs text-slate-300 leading-relaxed">
-                A evolução consome apenas <b>Poção de Rejuvenescimento</b> e <b>Coins</b> — não exige Fragmentos de Construção (exclusivos das Bases).
+                A evolução consome <b>Baús</b> e <b>Poções de Rejuvenescimento</b> conforme a raridade do herói — sem Fragmentos de Construção.
               </p>
             </div>
             <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-2">
               <div className="text-xs font-arcade text-emerald-300">3. O QUE AUMENTA</div>
               <p className="text-xs text-slate-300 leading-relaxed">
-                O herói ganha <b>+5% a +10%</b> de Poder e Produção por estrela, remove todas as penalidades de idade, restaura <b>100%</b> da energia/arma e <b>renova o ciclo para 0/80 dias</b>.
+                O herói ganha <b>+5%</b> de Poder e Produção por estrela (até <b>+15%</b> em 3★), remove penalidades de idade, restaura <b>100%</b> da energia/arma e <b>renova o ciclo para 0/80 dias</b>.
               </p>
             </div>
           </div>
@@ -1100,132 +1100,57 @@ export default function LandingPage({
             </div>
           </div>
 
-          {/* Níveis de Evolução (0★ -> 1★ -> 2★ -> 3★) */}
-          <div className="grid md:grid-cols-3 gap-5">
-            {/* 0★ -> 1★ */}
-            <div className="p-5 rounded-3xl bg-slate-900/95 border border-sky-500/40 space-y-4 shadow-xl">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-3.5">
-                <div>
-                  <span className="text-[11px] uppercase tracking-wider text-sky-300 font-bold">
-                    Nível 1 de Evolução
-                  </span>
-                  <h3 className="font-arcade text-base text-white">0★ ➔ 1★</h3>
-                </div>
-                <span className="px-2.5 py-1 rounded-xl bg-amber-500/15 border border-amber-400/40 font-arcade text-xs text-amber-300">
-                  ★
+          {/* Tabela Oficial de Evolução por Raridade */}
+          <div className="p-6 rounded-3xl bg-slate-900/95 border border-purple-500/40 space-y-5 shadow-xl">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-4">
+              <div>
+                <span className="text-[11px] uppercase tracking-wider text-purple-300 font-bold">
+                  Requisitos por Raridade (80 Dias Ativos)
                 </span>
+                <h3 className="font-arcade text-base sm:text-lg text-white">
+                  TABELA OFICIAL DE EVOLUÇÃO (0★ ➔ ★★★)
+                </h3>
               </div>
-
-              <div className="space-y-2 text-xs">
-                <div className="font-bold uppercase tracking-wider text-slate-400 text-[11px]">
-                  O que precisa:
-                </div>
-                <div className="flex justify-between p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">
-                  <span className="text-slate-300">Tempo Ativo</span>
-                  <b className="font-mono text-amber-300">80 dias</b>
-                </div>
-                <div className="flex justify-between p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">
-                  <span className="text-slate-300">Poção de Rejuvenescimento</span>
-                  <b className="font-mono text-purple-300">1x Poção</b>
-                </div>
-                <div className="flex justify-between p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">
-                  <span className="text-slate-300">Taxa em Coins</span>
-                  <b className="font-mono text-amber-300">250 Coins</b>
-                </div>
-              </div>
-
-              <div className="p-3.5 rounded-2xl bg-emerald-950/30 border border-emerald-500/35 space-y-1 text-xs">
-                <div className="font-bold uppercase tracking-wider text-emerald-300 text-[11px]">
-                  O que aumenta:
-                </div>
-                <p className="text-slate-200">• <b>+5% de Poder e Produção</b> permanente</p>
-                <p className="text-slate-200">• <b>Novo ciclo de 80 dias</b> (0/80d)</p>
-                <p className="text-slate-200">• <b>100% Energia e Arma</b> restauradas</p>
-              </div>
+              <span className="text-xs text-slate-400">
+                * Heróis <b>Comuns</b> não possuem evolução de estrelas.
+              </span>
             </div>
 
-            {/* 1★ -> 2★ */}
-            <div className="p-5 rounded-3xl bg-slate-900/95 border border-purple-500/40 space-y-4 shadow-xl">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-3.5">
-                <div>
-                  <span className="text-[11px] uppercase tracking-wider text-purple-300 font-bold">
-                    Nível 2 de Evolução
-                  </span>
-                  <h3 className="font-arcade text-base text-white">1★ ➔ 2★</h3>
-                </div>
-                <span className="px-2.5 py-1 rounded-xl bg-amber-500/15 border border-amber-400/40 font-arcade text-xs text-amber-300">
-                  ★★
-                </span>
-              </div>
-
-              <div className="space-y-2 text-xs">
-                <div className="font-bold uppercase tracking-wider text-slate-400 text-[11px]">
-                  O que precisa:
-                </div>
-                <div className="flex justify-between p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">
-                  <span className="text-slate-300">Tempo Ativo em 1★</span>
-                  <b className="font-mono text-amber-300">80 dias</b>
-                </div>
-                <div className="flex justify-between p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">
-                  <span className="text-slate-300">Poção de Rejuvenescimento</span>
-                  <b className="font-mono text-purple-300">2x Poções</b>
-                </div>
-                <div className="flex justify-between p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">
-                  <span className="text-slate-300">Taxa em Coins</span>
-                  <b className="font-mono text-amber-300">500 Coins</b>
-                </div>
-              </div>
-
-              <div className="p-3.5 rounded-2xl bg-purple-950/30 border border-purple-500/35 space-y-1 text-xs">
-                <div className="font-bold uppercase tracking-wider text-purple-300 text-[11px]">
-                  O que aumenta:
-                </div>
-                <p className="text-slate-200">• <b>+5% adicionais</b> (total <b>+10%</b>)</p>
-                <p className="text-slate-200">• <b>Novo ciclo de 80 dias</b> (0/80d)</p>
-                <p className="text-slate-200">• <b>100% Energia e Arma</b> restauradas</p>
-              </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr className="border-b border-slate-800 text-slate-400 uppercase tracking-wider text-[11px]">
+                    <th className="py-3 px-4">Raridade</th>
+                    <th className="py-3 px-4">Evolução para ★</th>
+                    <th className="py-3 px-4">Evolução para ★★</th>
+                    <th className="py-3 px-4">Evolução para ★★★</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800/80">
+                  {[
+                    { name: 'Raro', color: '#38bdf8', s1: '1 baú / 10 poções', s2: '2 baús / 20 poções', s3: '3 baús / 30 poções' },
+                    { name: 'Super Raro', color: '#a855f7', s1: '2 baús / 20 poções', s2: '3 baús / 30 poções', s3: '4 baús / 40 poções' },
+                    { name: 'Épico', color: '#ec4899', s1: '3 baús / 30 poções', s2: '4 baús / 40 poções', s3: '5 baús / 50 poções' },
+                    { name: 'Lendário', color: '#f59e0b', s1: '4 baús / 40 poções', s2: '5 baús / 50 poções', s3: '6 baús / 60 poções' },
+                    { name: 'Super Lendário', color: '#ef4444', s1: '5 baús / 50 poções', s2: '6 baús / 60 poções', s3: '7 baús / 70 poções' },
+                  ].map((row) => (
+                    <tr key={row.name} className="hover:bg-slate-950/60 transition">
+                      <td className="py-3.5 px-4 font-arcade text-xs" style={{ color: row.color }}>
+                        {row.name}
+                      </td>
+                      <td className="py-3.5 px-4 font-mono text-slate-200">{row.s1}</td>
+                      <td className="py-3.5 px-4 font-mono text-purple-200">{row.s2}</td>
+                      <td className="py-3.5 px-4 font-mono text-amber-300 font-bold">{row.s3}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
 
-            {/* 2★ -> 3★ */}
-            <div className="p-5 rounded-3xl bg-slate-900/95 border border-amber-500/45 space-y-4 shadow-xl">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-3.5">
-                <div>
-                  <span className="text-[11px] uppercase tracking-wider text-amber-300 font-bold">
-                    Nível 3 (Máximo)
-                  </span>
-                  <h3 className="font-arcade text-base text-white">2★ ➔ 3★</h3>
-                </div>
-                <span className="px-2.5 py-1 rounded-xl bg-amber-500/20 border border-amber-400/50 font-arcade text-xs text-amber-300">
-                  ★★★
-                </span>
-              </div>
-
-              <div className="space-y-2 text-xs">
-                <div className="font-bold uppercase tracking-wider text-slate-400 text-[11px]">
-                  O que precisa:
-                </div>
-                <div className="flex justify-between p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">
-                  <span className="text-slate-300">Tempo Ativo em 2★</span>
-                  <b className="font-mono text-amber-300">80 dias</b>
-                </div>
-                <div className="flex justify-between p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">
-                  <span className="text-slate-300">Poção de Rejuvenescimento</span>
-                  <b className="font-mono text-purple-300">3x Poções</b>
-                </div>
-                <div className="flex justify-between p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">
-                  <span className="text-slate-300">Taxa em Coins</span>
-                  <b className="font-mono text-amber-300">750 Coins</b>
-                </div>
-              </div>
-
-              <div className="p-3.5 rounded-2xl bg-amber-950/30 border border-amber-500/35 space-y-1 text-xs">
-                <div className="font-bold uppercase tracking-wider text-amber-300 text-[11px]">
-                  O que aumenta:
-                </div>
-                <p className="text-slate-200">• <b>+5% adicionais</b> (total <b>+15%</b>)</p>
-                <p className="text-slate-200">• <b>Novo ciclo de 80 dias</b> (0/80d)</p>
-                <p className="text-slate-200">• <b>100% Energia e Arma</b> restauradas</p>
-              </div>
+            <div className="p-4 rounded-2xl bg-emerald-950/30 border border-emerald-500/35 text-xs text-slate-200 flex flex-wrap items-center justify-between gap-2">
+              <span>
+                <b>O que aumenta a cada evolução:</b> +5% de Poder e Produção (até +15% em ★★★), idade zerada para <b>0/80 dias</b> e 100% de energia/arma restauradas.
+              </span>
             </div>
           </div>
 
@@ -1248,13 +1173,17 @@ export default function LandingPage({
             </div>
 
             <div className="p-5 rounded-2xl bg-slate-900/90 border border-amber-500/35 flex items-center gap-4">
-              <div className="w-16 h-16 rounded-2xl bg-slate-950 border border-amber-500/40 flex items-center justify-center shrink-0">
-                <Coins size={28} className="text-amber-300" />
+              <div className="w-16 h-16 rounded-2xl bg-slate-950 border border-amber-500/40 p-2 flex items-center justify-center shrink-0">
+                <img
+                  src="/items/hero_chest.png"
+                  alt="Baús de Herói"
+                  className="w-full h-full object-contain"
+                />
               </div>
               <div className="space-y-1">
-                <h4 className="font-arcade text-xs sm:text-sm text-white">Coins (Mineração Diária)</h4>
+                <h4 className="font-arcade text-xs sm:text-sm text-white">Baús de Herói</h4>
                 <p className="text-xs text-slate-300 leading-relaxed">
-                  Obtidos pelos heróis ao minerar no mapa. Fragmentos de Construção são usados apenas na evolução das Bases Médicas.
+                  Adquiridos na loja (MINT) ou em recompensas especiais de Bosses. Guardados no Inventário para usar na evolução.
                 </p>
               </div>
             </div>

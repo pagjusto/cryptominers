@@ -811,12 +811,12 @@ export default function App() {
     return true;
   };
 
-  // Evolução de heróis com 80 dias de serviço ativo: Poções + Coins.
+  // Evolução de heróis com 80 dias de serviço ativo: Baús + Poções por raridade.
   const handleEvolveHero = (heroId, recipe) => {
     if (!heroId || !recipe) return false;
     if (
-      rejuvenationPotions < recipe.potions ||
-      bcoin < recipe.coins
+      purchasedChests.length < recipe.chests ||
+      rejuvenationPotions < recipe.potions
     ) {
       return false;
     }
@@ -844,10 +844,12 @@ export default function App() {
 
     if (!evolved) return false;
 
+    setPurchasedChests((prev) => {
+      const next = prev.slice(recipe.chests);
+      localStorage.setItem('crypto_miners_purchased_chests', JSON.stringify(next));
+      return next;
+    });
     setRejuvenationPotions((prev) => Math.max(0, prev - recipe.potions));
-    const nextMnc = parseFloat(Math.max(0, bcoin - recipe.coins).toFixed(3));
-    setBcoin(nextMnc);
-    localStorage.setItem('crypto_miners_bcoin', nextMnc.toString());
     try { sfx.levelUp(); } catch (e) {}
     return true;
   };
@@ -2503,8 +2505,7 @@ export default function App() {
         isOpen={isEvolutionModalOpen}
         onClose={() => setIsEvolutionModalOpen(false)}
         miners={miners}
-        bcoin={bcoin}
-        constructionFragments={constructionFragments}
+        purchasedChests={purchasedChests}
         rejuvenationPotions={rejuvenationPotions}
         onEvolveHero={handleEvolveHero}
       />

@@ -7,37 +7,30 @@ import {
   AlertTriangle,
   Star,
   Lock,
-  Coins,
 } from 'lucide-react';
 import { getRarityConfig } from '../data/heroRoster';
 
 const EVOLUTION_REQUIRED_DAYS = 80;
 
-const getEvolutionRecipe = (currentStars = 0) => {
-  if (currentStars >= 2) {
-    return {
-      nextStars: 3,
-      potions: 3,
-      coins: 750,
-      powerBonusPct: 5,
-      totalBonusPct: 15,
-    };
-  }
-  if (currentStars === 1) {
-    return {
-      nextStars: 2,
-      potions: 2,
-      coins: 500,
-      powerBonusPct: 5,
-      totalBonusPct: 10,
-    };
-  }
+const RARITY_EVOLUTION_BASE = {
+  rare: 1,
+  super_rare: 2,
+  epic: 3,
+  legendary: 4,
+  super_legend: 5,
+};
+
+export const getEvolutionRecipe = (rarity = 'common', currentStars = 0) => {
+  const base = RARITY_EVOLUTION_BASE[rarity];
+  if (!base || currentStars >= 3) return null;
+  const starOffset = Math.max(0, Math.min(2, currentStars));
+  const chests = base + starOffset;
+  const potions = chests * 10;
   return {
-    nextStars: 1,
-    potions: 1,
-    coins: 250,
+    nextStars: currentStars + 1,
+    chests,
+    potions,
     powerBonusPct: 5,
-    totalBonusPct: 5,
   };
 };
 
@@ -56,8 +49,7 @@ export default function HeroEvolutionModal({
   isOpen,
   onClose,
   miners = [],
-  bcoin = 0,
-  constructionFragments = 0,
+  purchasedChests = [],
   rejuvenationPotions = 0,
   onEvolveHero,
 }) {
@@ -68,13 +60,15 @@ export default function HeroEvolutionModal({
     return miners.map((m) => {
       const activeDays = getMinerActiveDays(m);
       const stars = m.stars ?? 0;
+      const isCommon = !RARITY_EVOLUTION_BASE[m.rarity];
       const isMaxStars = stars >= 3;
       const hasEnoughDays = activeDays >= EVOLUTION_REQUIRED_DAYS;
-      const isEligible = hasEnoughDays && !isMaxStars;
+      const isEligible = !isCommon && hasEnoughDays && !isMaxStars;
       return {
         ...m,
         activeDays,
         stars,
+        isCommon,
         isMaxStars,
         hasEnoughDays,
         isEligible,
@@ -88,20 +82,24 @@ export default function HeroEvolutionModal({
   }, [enrichedMiners, selectedHeroId]);
 
   const recipe = useMemo(() => {
-    return getEvolutionRecipe(selectedHero?.stars ?? 0);
+    if (!selectedHero) {
+      return getEvolutionRecipe('rare', 0);
+    }
+    return getEvolutionRecipe(selectedHero.rarity, selectedHero.stars);
   }, [selectedHero]);
 
   if (!isOpen) return null;
 
-  const hasPotions = rejuvenationPotions >= recipe.potions;
-  const hasCoins = bcoin >= recipe.coins;
-  const hasAllItems = hasPotions && hasCoins;
+  const chestsCount = purchasedChests.length;
+  const hasChests = recipe ? chestsCount >= recipe.chests : false;
+  const hasPotions = recipe ? rejuvenationPotions >= recipe.potions : false;
+  const hasAllItems = Boolean(recipe && hasChests && hasPotions);
   const canEvolve = Boolean(selectedHero?.isEligible && hasAllItems);
 
   const eligibleCount = enrichedMiners.filter((m) => m.isEligible).length;
 
   const handleConfirmEvolution = () => {
-    if (!selectedHero || !canEvolve) return;
+    if (!selectedHero || !canEvolve || !recipe) return;
     if (onEvolveHero) {
       const ok = onEvolveHero(selectedHero.id, recipe);
       if (ok) {
@@ -128,7 +126,7 @@ export default function HeroEvolutionModal({
                 EVOLUÇÃO DE HERÓIS (80 DIAS)
               </h2>
               <p className="text-[11px] text-slate-400">
-                Selecione um herói com {EVOLUTION_REQUIRED_DAYS} dias ativos e os itens necessários para evoluir.
+                Selecione um herói (Raro a Super Lendário) com {EVOLUTION_REQUIRED_DAYS} dias ativos e os baús/poções necessários.
               </p>
             </div>
           </div>
@@ -222,7 +220,11 @@ export default function HeroEvolutionModal({
                       </div>
 
                       <div className="text-right shrink-0">
-                        {miner.isMaxStars ? (
+                        {miner.isCommon ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-slate-800 border border-slate-700 text-[10px] font-bold text-slate-400">
+                            <Lock size={10} /> Não evolui
+                          </span>
+                        ) : miner.isMaxStars ? (
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-amber-500/15 border border-amber-500/30 text-[10px] font-bold text-amber-300">
                             <Star size={10} /> Máx (3★)
                           </span>
@@ -244,77 +246,81 @@ export default function HeroEvolutionModal({
           </div>
 
           {/* Passo 2: Itens Necessários */}
-          <div className="space-y-3">
-            <h3 className="font-arcade text-xs text-amber-300 uppercase">
-              2. Itens Necessários para Evolução {selectedHero ? `(${selectedHero.stars}★ ➔ ${recipe.nextStars}★)` : '(0★ ➔ 1★)'}
-            </h3>
+          {recipe && (
+            <div className="space-y-3">
+              <h3 className="font-arcade text-xs text-amber-300 uppercase">
+                2. Itens Necessários ({selectedHero ? `${getRarityConfig(selectedHero.rarity).name} • ${selectedHero.stars}★ ➔ ${recipe.nextStars}★` : 'Exemplo Raro • 0★ ➔ 1★'})
+              </h3>
 
-            <div className="grid sm:grid-cols-2 gap-3">
-              {/* Poção de Rejuvenescimento */}
-              <div
-                className={`p-3.5 rounded-2xl border flex items-center gap-3 ${
-                  hasPotions
-                    ? 'bg-emerald-950/25 border-emerald-500/35'
-                    : 'bg-rose-950/20 border-rose-500/35'
-                }`}
-              >
-                <img
-                  src="/items/rejuvenation_potion.png"
-                  alt="Poção de Rejuvenescimento"
-                  className="w-10 h-10 object-contain shrink-0"
-                />
-                <div className="min-w-0">
-                  <div className="text-[11px] font-bold text-white leading-tight">
-                    Poção de Rejuvenescimento
+              <div className="grid sm:grid-cols-2 gap-3">
+                {/* Baús de Herói */}
+                <div
+                  className={`p-3.5 rounded-2xl border flex items-center gap-3 ${
+                    hasChests
+                      ? 'bg-emerald-950/25 border-emerald-500/35'
+                      : 'bg-rose-950/20 border-rose-500/35'
+                  }`}
+                >
+                  <img
+                    src="/items/hero_chest.png"
+                    alt="Baús"
+                    className="w-10 h-10 object-contain shrink-0"
+                  />
+                  <div className="min-w-0">
+                    <div className="text-[11px] font-bold text-white leading-tight">
+                      Baús
+                    </div>
+                    <div
+                      className={`text-xs font-mono font-bold mt-0.5 ${
+                        hasChests ? 'text-emerald-400' : 'text-rose-400'
+                      }`}
+                    >
+                      {chestsCount} / {recipe.chests}
+                    </div>
                   </div>
-                  <div
-                    className={`text-xs font-mono font-bold mt-0.5 ${
-                      hasPotions ? 'text-emerald-400' : 'text-rose-400'
-                    }`}
-                  >
-                    {rejuvenationPotions} / {recipe.potions}
+                </div>
+
+                {/* Poções de Rejuvenescimento */}
+                <div
+                  className={`p-3.5 rounded-2xl border flex items-center gap-3 ${
+                    hasPotions
+                      ? 'bg-emerald-950/25 border-emerald-500/35'
+                      : 'bg-rose-950/20 border-rose-500/35'
+                  }`}
+                >
+                  <img
+                    src="/items/rejuvenation_potion.png"
+                    alt="Poção de Rejuvenescimento"
+                    className="w-10 h-10 object-contain shrink-0"
+                  />
+                  <div className="min-w-0">
+                    <div className="text-[11px] font-bold text-white leading-tight">
+                      Poções de Rejuvenescimento
+                    </div>
+                    <div
+                      className={`text-xs font-mono font-bold mt-0.5 ${
+                        hasPotions ? 'text-emerald-400' : 'text-rose-400'
+                      }`}
+                    >
+                      {rejuvenationPotions} / {recipe.potions}
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Coins */}
-              <div
-                className={`p-3.5 rounded-2xl border flex items-center gap-3 ${
-                  hasCoins
-                    ? 'bg-emerald-950/25 border-emerald-500/35'
-                    : 'bg-rose-950/20 border-rose-500/35'
-                }`}
-              >
-                <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-400/30 flex items-center justify-center text-amber-300 shrink-0">
-                  <Coins size={20} />
-                </div>
-                <div className="min-w-0">
-                  <div className="text-[11px] font-bold text-white leading-tight">
-                    Coins
-                  </div>
-                  <div
-                    className={`text-xs font-mono font-bold mt-0.5 ${
-                      hasCoins ? 'text-emerald-400' : 'text-rose-400'
-                    }`}
-                  >
-                    {Math.floor(bcoin).toLocaleString('pt-BR')} / {recipe.coins.toLocaleString('pt-BR')}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 text-[11px] text-slate-300 flex flex-wrap items-center justify-between gap-2">
-              <span>
-                Bônus da evolução: <b className="text-purple-300">+{recipe.powerBonusPct}% Poder/Produção</b> e{' '}
-                <b className="text-emerald-300">Ciclo de 80 dias renovado</b>.
-              </span>
-              {!selectedHero && (
-                <span className="text-amber-300 flex items-center gap-1">
-                  <AlertTriangle size={12} /> Selecione um herói com 80 dias acima
+              <div className="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 text-[11px] text-slate-300 flex flex-wrap items-center justify-between gap-2">
+                <span>
+                  Bônus da evolução: <b className="text-purple-300">+{recipe.powerBonusPct}% Poder/Produção</b> e{' '}
+                  <b className="text-emerald-300">Ciclo de 80 dias renovado (0/80d)</b>.
                 </span>
-              )}
+                {!selectedHero && (
+                  <span className="text-amber-300 flex items-center gap-1">
+                    <AlertTriangle size={12} /> Selecione um herói com 80 dias acima
+                  </span>
+                )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Footer */}
