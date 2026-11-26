@@ -18,7 +18,6 @@ const getEvolutionRecipe = (currentStars = 1) => {
     return {
       nextStars: 3,
       potions: 2,
-      fragments: 10,
       coins: 500,
       powerBonusPct: 10,
     };
@@ -26,7 +25,6 @@ const getEvolutionRecipe = (currentStars = 1) => {
   return {
     nextStars: 2,
     potions: 1,
-    fragments: 5,
     coins: 250,
     powerBonusPct: 5,
   };
@@ -85,9 +83,8 @@ export default function HeroEvolutionModal({
   if (!isOpen) return null;
 
   const hasPotions = rejuvenationPotions >= recipe.potions;
-  const hasFragments = constructionFragments >= recipe.fragments;
   const hasCoins = bcoin >= recipe.coins;
-  const hasAllItems = hasPotions && hasFragments && hasCoins;
+  const hasAllItems = hasPotions && hasCoins;
   const canEvolve = Boolean(selectedHero?.isEligible && hasAllItems);
 
   const eligibleCount = enrichedMiners.filter((m) => m.isEligible).length;
@@ -235,7 +232,7 @@ export default function HeroEvolutionModal({
               2. Itens Necessários para Evolução {selectedHero ? `(${selectedHero.stars}★ ➔ ${recipe.nextStars}★)` : '(1★ ➔ 2★)'}
             </h3>
 
-            <div className="grid sm:grid-cols-3 gap-3">
+            <div className="grid sm:grid-cols-2 gap-3">
               {/* Poção de Rejuvenescimento */}
               <div
                 className={`p-3.5 rounded-2xl border flex items-center gap-3 ${
@@ -259,33 +256,6 @@ export default function HeroEvolutionModal({
                     }`}
                   >
                     {rejuvenationPotions} / {recipe.potions}
-                  </div>
-                </div>
-              </div>
-
-              {/* Fragmentos de Construção */}
-              <div
-                className={`p-3.5 rounded-2xl border flex items-center gap-3 ${
-                  hasFragments
-                    ? 'bg-emerald-950/25 border-emerald-500/35'
-                    : 'bg-rose-950/20 border-rose-500/35'
-                }`}
-              >
-                <img
-                  src="/items/construction_fragment.png"
-                  alt="Fragmento de Construção"
-                  className="w-10 h-10 object-contain shrink-0"
-                />
-                <div className="min-w-0">
-                  <div className="text-[11px] font-bold text-white leading-tight">
-                    Fragmentos de Construção
-                  </div>
-                  <div
-                    className={`text-xs font-mono font-bold mt-0.5 ${
-                      hasFragments ? 'text-emerald-400' : 'text-rose-400'
-                    }`}
-                  >
-                    {constructionFragments} / {recipe.fragments}
                   </div>
                 </div>
               </div>

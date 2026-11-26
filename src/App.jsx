@@ -811,12 +811,11 @@ export default function App() {
     return true;
   };
 
-  // Evolução de heróis com 80 dias de serviço ativo: Poções + Fragmentos + Coins.
+  // Evolução de heróis com 80 dias de serviço ativo: Poções + Coins.
   const handleEvolveHero = (heroId, recipe) => {
     if (!heroId || !recipe) return false;
     if (
       rejuvenationPotions < recipe.potions ||
-      constructionFragments < recipe.fragments ||
       bcoin < recipe.coins
     ) {
       return false;
@@ -846,9 +845,6 @@ export default function App() {
     if (!evolved) return false;
 
     setRejuvenationPotions((prev) => Math.max(0, prev - recipe.potions));
-    const nextFragments = Math.max(0, constructionFragments - recipe.fragments);
-    saveStoredConstructionFragments(nextFragments);
-    setConstructionFragments(nextFragments);
     const nextMnc = parseFloat(Math.max(0, bcoin - recipe.coins).toFixed(3));
     setBcoin(nextMnc);
     localStorage.setItem('crypto_miners_bcoin', nextMnc.toString());

@@ -1043,14 +1043,60 @@ export default function LandingPage({
             <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-2">
               <div className="text-xs font-arcade text-purple-300">2. ITENS NECESSÁRIOS</div>
               <p className="text-xs text-slate-300 leading-relaxed">
-                A evolução consome <b>Poção de Rejuvenescimento</b>, <b>Fragmentos de Construção</b> e <b>Coins</b>, criando demanda contínua pelos recursos do jogo.
+                A evolução consome apenas <b>Poção de Rejuvenescimento</b> e <b>Coins</b> — não exige Fragmentos de Construção (exclusivos das Bases).
               </p>
             </div>
             <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-2">
               <div className="text-xs font-arcade text-emerald-300">3. O QUE AUMENTA</div>
               <p className="text-xs text-slate-300 leading-relaxed">
-                O herói ganha <b>+5% a +10%</b> de Poder e Produção por estrela, restaura <b>100%</b> da energia/arma e <b>renova o ciclo para 0/80 dias</b>.
+                O herói ganha <b>+5% a +10%</b> de Poder e Produção por estrela, remove todas as penalidades de idade, restaura <b>100%</b> da energia/arma e <b>renova o ciclo para 0/80 dias</b>.
               </p>
+            </div>
+          </div>
+
+          {/* História da Idade & Penalidades por Idade */}
+          <div className="p-6 rounded-3xl bg-gradient-to-br from-rose-950/35 via-slate-900/95 to-slate-950 border border-rose-500/35 space-y-5 shadow-xl">
+            <div className="space-y-2">
+              <span className="text-[11px] font-bold uppercase tracking-widest text-rose-400">
+                Desgaste na Zona Infestada
+              </span>
+              <h3 className="font-arcade text-base sm:text-lg text-white">
+                A HISTÓRIA DA IDADE & PENALIDADES POR IDADE
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-4xl">
+                Cada expedição nas minas subterrâneas expõe os sobreviventes à radiação dos cristais e aos esporos tóxicos dos zumbis mutantes. Com o passar das semanas, o corpo do herói acumula fadiga biológica: até os <b>49 dias</b> ele luta em seu auge físico, mas a partir do <b>50º dia</b> sua eficiência cai progressivamente até atingir <b>80 dias</b> — momento em que somente a <b>Poção de Rejuvenescimento</b> restaura sua vitalidade, zera a idade para <b>0/80 dias</b> e libera sua próxima estrela.
+              </p>
+            </div>
+
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+              <div className="p-4 rounded-2xl bg-emerald-950/30 border border-emerald-500/40 space-y-1">
+                <div className="font-arcade text-xs text-emerald-300">0 a 49 Dias</div>
+                <div className="font-bold text-white">Ápice Físico</div>
+                <p className="text-[11px] text-slate-300">
+                  <b>0% de penalidade.</b> Produção de Coins e velocidade de recuperação em 100%.
+                </p>
+              </div>
+              <div className="p-4 rounded-2xl bg-amber-950/30 border border-amber-500/40 space-y-1">
+                <div className="font-arcade text-xs text-amber-300">50 a 69 Dias</div>
+                <div className="font-bold text-white">Desgaste Inicial</div>
+                <p className="text-[11px] text-slate-300">
+                  <b>-15%</b> na produção de Coins e <b>-10%</b> na velocidade de recuperação de energia.
+                </p>
+              </div>
+              <div className="p-4 rounded-2xl bg-orange-950/35 border border-orange-500/40 space-y-1">
+                <div className="font-arcade text-xs text-orange-300">70 a 79 Dias</div>
+                <div className="font-bold text-white">Fadiga Crítica</div>
+                <p className="text-[11px] text-slate-300">
+                  <b>-30%</b> na produção de Coins e <b>-20%</b> na recuperação de energia.
+                </p>
+              </div>
+              <div className="p-4 rounded-2xl bg-rose-950/40 border border-rose-500/45 space-y-1">
+                <div className="font-arcade text-xs text-rose-300">80+ Dias</div>
+                <div className="font-bold text-white">Ciclo Esgotado</div>
+                <p className="text-[11px] text-slate-300">
+                  <b>-50%</b> na produção de Coins até evoluir com a <b>Poção de Rejuvenescimento</b>.
+                </p>
+              </div>
             </div>
           </div>
 
@@ -1081,10 +1127,6 @@ export default function LandingPage({
                 <div className="flex justify-between p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">
                   <span className="text-slate-300">Poção de Rejuvenescimento</span>
                   <b className="font-mono text-purple-300">1x Poção</b>
-                </div>
-                <div className="flex justify-between p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">
-                  <span className="text-slate-300">Fragmentos de Construção</span>
-                  <b className="font-mono text-emerald-300">5x Fragmentos</b>
                 </div>
                 <div className="flex justify-between p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">
                   <span className="text-slate-300">Taxa em Coins</span>
@@ -1129,10 +1171,6 @@ export default function LandingPage({
                   <b className="font-mono text-purple-300">2x Poções</b>
                 </div>
                 <div className="flex justify-between p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">
-                  <span className="text-slate-300">Fragmentos de Construção</span>
-                  <b className="font-mono text-emerald-300">10x Fragmentos</b>
-                </div>
-                <div className="flex justify-between p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">
                   <span className="text-slate-300">Taxa em Coins</span>
                   <b className="font-mono text-amber-300">500 Coins</b>
                 </div>
@@ -1167,18 +1205,14 @@ export default function LandingPage({
               </div>
             </div>
 
-            <div className="p-5 rounded-2xl bg-slate-900/90 border border-emerald-500/35 flex items-center gap-4">
-              <div className="w-16 h-16 rounded-2xl bg-slate-950 border border-emerald-500/40 p-2 flex items-center justify-center shrink-0">
-                <img
-                  src="/items/construction_fragment.png"
-                  alt="Fragmento de Construção"
-                  className="w-full h-full object-contain"
-                />
+            <div className="p-5 rounded-2xl bg-slate-900/90 border border-amber-500/35 flex items-center gap-4">
+              <div className="w-16 h-16 rounded-2xl bg-slate-950 border border-amber-500/40 flex items-center justify-center shrink-0">
+                <Coins size={28} className="text-amber-300" />
               </div>
               <div className="space-y-1">
-                <h4 className="font-arcade text-xs sm:text-sm text-white">Fragmento de Construção</h4>
+                <h4 className="font-arcade text-xs sm:text-sm text-white">Coins (Mineração Diária)</h4>
                 <p className="text-xs text-slate-300 leading-relaxed">
-                  Obtido em Bosses e Baús de Construção. Utilizado na evolução das Bases Médicas e dos Heróis.
+                  Obtidos pelos heróis ao minerar no mapa. Fragmentos de Construção são usados apenas na evolução das Bases Médicas.
                 </p>
               </div>
             </div>
