@@ -121,17 +121,21 @@ export default function LandingPage({
 
   return (
     <div className="relative min-h-screen w-full flex flex-col text-slate-100 font-tech selection:bg-amber-500/30 selection:text-amber-200 overflow-x-hidden">
-      {/* PLANO DE FUNDO ATMOSFÉRICO DO SITE */}
-      <div className="fixed inset-0 -z-10 pointer-events-none">
+      {/* PLANO DE FUNDO ATMOSFÉRICO DO SITE (VERDE COM NÉVOA) */}
+      <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden bg-[#03110b]">
         <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat scale-105 opacity-40"
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat scale-105 opacity-35"
           style={{ backgroundImage: "url('/city_map_lvl3.webp?v=3')" }}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-950/85 via-slate-950/80 to-slate-950/95 backdrop-blur-[2px]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#041b11]/90 via-[#062417]/80 to-[#020d08]/95 backdrop-blur-[2px]" />
+        {/* Névoa atmosférica verde */}
+        <div className="absolute -top-24 -left-24 w-[620px] h-[420px] rounded-full bg-emerald-500/15 blur-[120px] animate-pulse" />
+        <div className="absolute top-1/3 -right-24 w-[580px] h-[460px] rounded-full bg-lime-500/10 blur-[130px] animate-pulse" />
+        <div className="absolute bottom-0 inset-x-0 h-72 bg-gradient-to-t from-emerald-950/80 via-emerald-900/25 to-transparent blur-xl" />
       </div>
 
       {/* NAVBAR SUPERIOR COM LOGIN/CADASTRO NO CANTO */}
-      <header className="sticky top-0 z-50 border-b border-slate-800/90 bg-slate-950/90 backdrop-blur-md">
+      <header className="sticky top-0 z-50 border-b border-emerald-900/50 bg-[#03120b]/90 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
           {/* Logo */}
           <div className="flex items-center gap-2.5 shrink-0">
@@ -248,7 +252,8 @@ export default function LandingPage({
       <main className="flex-1">
       {/* HERO BANNER (ABA INÍCIO) */}
       {activeTab === 'home' && (
-      <section className="relative overflow-hidden border-b border-slate-800/80 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-amber-950/35 via-slate-950/60 to-slate-950/85">
+      <section className="relative overflow-hidden border-b border-emerald-900/50 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-900/35 via-[#04180f]/55 to-[#03110b]/80">
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#03110b]/85 via-emerald-950/25 to-transparent blur-md" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 grid lg:grid-cols-12 gap-10 items-center">
           <div className="lg:col-span-7 space-y-6">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-bold uppercase tracking-wider">
