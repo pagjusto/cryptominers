@@ -1064,7 +1064,7 @@ export default function LandingPage({
                 A HISTÓRIA DA IDADE & PENALIDADES POR IDADE
               </h3>
               <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-4xl">
-                Cada expedição nas minas subterrâneas expõe os sobreviventes à radiação dos cristais e aos esporos tóxicos dos zumbis mutantes. Com o passar das semanas, o corpo do herói acumula fadiga biológica: até os <b>49 dias</b> ele luta em seu auge físico, mas a partir do <b>50º dia</b> sua eficiência cai progressivamente até atingir <b>80 dias</b> — momento em que somente a <b>Poção de Rejuvenescimento</b> restaura sua vitalidade, zera a idade para <b>0/80 dias</b> e libera sua próxima estrela.
+                Proteger a base expõe os sobreviventes à radiação dos esporos tóxicos dos zumbis mutantes. Com o passar das semanas, o corpo do herói acumula fadiga biológica: até os <b>49 dias</b> ele luta em seu auge físico, mas a partir do <b>50º dia</b> sua eficiência cai progressivamente até atingir <b>80 dias</b> — momento em que somente a <b>Poção de Rejuvenescimento</b> restaura sua vitalidade, zera a idade para <b>0/80 dias</b> e libera sua próxima estrela.
               </p>
             </div>
 
