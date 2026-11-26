@@ -1028,7 +1028,7 @@ export default function LandingPage({
               EVOLUÇÃO DE HERÓIS (80 DIAS)
             </h2>
             <p className="text-sm text-slate-400 max-w-2xl">
-              Entenda como funciona o ciclo de 80 dias, quais itens são necessários e o que aumenta ao evoluir seus heróis de 1★ até 3★.
+              Entenda como funciona o ciclo de 80 dias, quais itens são necessários e o que aumenta ao evoluir seus heróis de 0★ (sem estrelas) até 3★.
             </p>
           </div>
 
@@ -1037,7 +1037,7 @@ export default function LandingPage({
             <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-2">
               <div className="text-xs font-arcade text-amber-300">1. CICLO DE 80 DIAS</div>
               <p className="text-xs text-slate-300 leading-relaxed">
-                Todo herói inicia em <b>1★</b> e cumpre um ciclo útil de <b>80 dias ativos</b>. Ao atingir 80 dias, ele fica pronto para evoluir no botão <b>Evolução</b> dentro do jogo.
+                Todo herói inicia <b>sem estrelas (0★)</b> e cumpre um ciclo útil de <b>80 dias ativos</b>. Ao atingir 80 dias, ele fica pronto para evoluir no botão <b>Evolução</b> dentro do jogo.
               </p>
             </div>
             <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-2">
@@ -1100,28 +1100,28 @@ export default function LandingPage({
             </div>
           </div>
 
-          {/* Níveis de Evolução */}
-          <div className="grid md:grid-cols-2 gap-6">
-            {/* 1★ -> 2★ */}
-            <div className="p-6 rounded-3xl bg-slate-900/95 border border-purple-500/40 space-y-5 shadow-xl">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+          {/* Níveis de Evolução (0★ -> 1★ -> 2★ -> 3★) */}
+          <div className="grid md:grid-cols-3 gap-5">
+            {/* 0★ -> 1★ */}
+            <div className="p-5 rounded-3xl bg-slate-900/95 border border-sky-500/40 space-y-4 shadow-xl">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-3.5">
                 <div>
-                  <span className="text-[11px] uppercase tracking-wider text-purple-300 font-bold">
+                  <span className="text-[11px] uppercase tracking-wider text-sky-300 font-bold">
                     Nível 1 de Evolução
                   </span>
-                  <h3 className="font-arcade text-lg text-white">1★ ➔ 2★ (Veterano)</h3>
+                  <h3 className="font-arcade text-base text-white">0★ ➔ 1★</h3>
                 </div>
-                <span className="px-3 py-1 rounded-xl bg-amber-500/15 border border-amber-400/40 font-arcade text-xs text-amber-300">
-                  ★★
+                <span className="px-2.5 py-1 rounded-xl bg-amber-500/15 border border-amber-400/40 font-arcade text-xs text-amber-300">
+                  ★
                 </span>
               </div>
 
-              <div className="space-y-2.5 text-xs">
+              <div className="space-y-2 text-xs">
                 <div className="font-bold uppercase tracking-wider text-slate-400 text-[11px]">
                   O que precisa:
                 </div>
                 <div className="flex justify-between p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">
-                  <span className="text-slate-300">Tempo Ativo do Herói</span>
+                  <span className="text-slate-300">Tempo Ativo</span>
                   <b className="font-mono text-amber-300">80 dias</b>
                 </div>
                 <div className="flex justify-between p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">
@@ -1134,36 +1134,36 @@ export default function LandingPage({
                 </div>
               </div>
 
-              <div className="p-4 rounded-2xl bg-emerald-950/30 border border-emerald-500/35 space-y-1.5 text-xs">
+              <div className="p-3.5 rounded-2xl bg-emerald-950/30 border border-emerald-500/35 space-y-1 text-xs">
                 <div className="font-bold uppercase tracking-wider text-emerald-300 text-[11px]">
                   O que aumenta:
                 </div>
-                <p className="text-slate-200">• <b>+5% de Poder e Produção de Coins</b> permanente</p>
-                <p className="text-slate-200">• <b>Novo ciclo de 80 dias</b> (zera o contador para 0/80d)</p>
-                <p className="text-slate-200">• <b>100% de Energia e Durabilidade da Arma</b> restauradas</p>
+                <p className="text-slate-200">• <b>+5% de Poder e Produção</b> permanente</p>
+                <p className="text-slate-200">• <b>Novo ciclo de 80 dias</b> (0/80d)</p>
+                <p className="text-slate-200">• <b>100% Energia e Arma</b> restauradas</p>
               </div>
             </div>
 
-            {/* 2★ -> 3★ */}
-            <div className="p-6 rounded-3xl bg-slate-900/95 border border-amber-500/45 space-y-5 shadow-xl">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+            {/* 1★ -> 2★ */}
+            <div className="p-5 rounded-3xl bg-slate-900/95 border border-purple-500/40 space-y-4 shadow-xl">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-3.5">
                 <div>
-                  <span className="text-[11px] uppercase tracking-wider text-amber-300 font-bold">
-                    Nível 2 de Evolução (Máximo)
+                  <span className="text-[11px] uppercase tracking-wider text-purple-300 font-bold">
+                    Nível 2 de Evolução
                   </span>
-                  <h3 className="font-arcade text-lg text-white">2★ ➔ 3★ (Lenda)</h3>
+                  <h3 className="font-arcade text-base text-white">1★ ➔ 2★</h3>
                 </div>
-                <span className="px-3 py-1 rounded-xl bg-amber-500/20 border border-amber-400/50 font-arcade text-xs text-amber-300">
-                  ★★★
+                <span className="px-2.5 py-1 rounded-xl bg-amber-500/15 border border-amber-400/40 font-arcade text-xs text-amber-300">
+                  ★★
                 </span>
               </div>
 
-              <div className="space-y-2.5 text-xs">
+              <div className="space-y-2 text-xs">
                 <div className="font-bold uppercase tracking-wider text-slate-400 text-[11px]">
                   O que precisa:
                 </div>
                 <div className="flex justify-between p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">
-                  <span className="text-slate-300">Tempo Ativo em 2★</span>
+                  <span className="text-slate-300">Tempo Ativo em 1★</span>
                   <b className="font-mono text-amber-300">80 dias</b>
                 </div>
                 <div className="flex justify-between p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">
@@ -1176,13 +1176,55 @@ export default function LandingPage({
                 </div>
               </div>
 
-              <div className="p-4 rounded-2xl bg-amber-950/30 border border-amber-500/35 space-y-1.5 text-xs">
+              <div className="p-3.5 rounded-2xl bg-purple-950/30 border border-purple-500/35 space-y-1 text-xs">
+                <div className="font-bold uppercase tracking-wider text-purple-300 text-[11px]">
+                  O que aumenta:
+                </div>
+                <p className="text-slate-200">• <b>+5% adicionais</b> (total <b>+10%</b>)</p>
+                <p className="text-slate-200">• <b>Novo ciclo de 80 dias</b> (0/80d)</p>
+                <p className="text-slate-200">• <b>100% Energia e Arma</b> restauradas</p>
+              </div>
+            </div>
+
+            {/* 2★ -> 3★ */}
+            <div className="p-5 rounded-3xl bg-slate-900/95 border border-amber-500/45 space-y-4 shadow-xl">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-3.5">
+                <div>
+                  <span className="text-[11px] uppercase tracking-wider text-amber-300 font-bold">
+                    Nível 3 (Máximo)
+                  </span>
+                  <h3 className="font-arcade text-base text-white">2★ ➔ 3★</h3>
+                </div>
+                <span className="px-2.5 py-1 rounded-xl bg-amber-500/20 border border-amber-400/50 font-arcade text-xs text-amber-300">
+                  ★★★
+                </span>
+              </div>
+
+              <div className="space-y-2 text-xs">
+                <div className="font-bold uppercase tracking-wider text-slate-400 text-[11px]">
+                  O que precisa:
+                </div>
+                <div className="flex justify-between p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">
+                  <span className="text-slate-300">Tempo Ativo em 2★</span>
+                  <b className="font-mono text-amber-300">80 dias</b>
+                </div>
+                <div className="flex justify-between p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">
+                  <span className="text-slate-300">Poção de Rejuvenescimento</span>
+                  <b className="font-mono text-purple-300">3x Poções</b>
+                </div>
+                <div className="flex justify-between p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">
+                  <span className="text-slate-300">Taxa em Coins</span>
+                  <b className="font-mono text-amber-300">750 Coins</b>
+                </div>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-amber-950/30 border border-amber-500/35 space-y-1 text-xs">
                 <div className="font-bold uppercase tracking-wider text-amber-300 text-[11px]">
                   O que aumenta:
                 </div>
-                <p className="text-slate-200">• <b>+10% adicionais de Poder e Produção</b> (total <b>+15%</b>)</p>
-                <p className="text-slate-200">• <b>Novo ciclo de 80 dias</b> (zera o contador para 0/80d)</p>
-                <p className="text-slate-200">• <b>100% de Energia e Durabilidade da Arma</b> restauradas</p>
+                <p className="text-slate-200">• <b>+5% adicionais</b> (total <b>+15%</b>)</p>
+                <p className="text-slate-200">• <b>Novo ciclo de 80 dias</b> (0/80d)</p>
+                <p className="text-slate-200">• <b>100% Energia e Arma</b> restauradas</p>
               </div>
             </div>
           </div>

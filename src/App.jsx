@@ -825,7 +825,7 @@ export default function App() {
     setMiners((prev) =>
       prev.map((m) => {
         if (m.id !== heroId) return m;
-        const currentStars = m.stars || 1;
+        const currentStars = m.stars ?? 0;
         if (currentStars >= 3) return m;
         evolved = true;
         const bonusFactor = 1 + (recipe.powerBonusPct || 5) / 100;

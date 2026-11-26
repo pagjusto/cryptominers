@@ -301,7 +301,7 @@ export default function HeroList({
                     >
                       {rarityConfig.name}
                     </span>
-                    {miner.stars && miner.stars > 1 && (
+                    {miner.stars > 0 && (
                       <span className="text-[9px] px-1 py-0.2 rounded-md bg-amber-500/20 text-amber-400 font-bold border border-amber-500/40 shrink-0">
                         {'★'.repeat(miner.stars)}
                       </span>

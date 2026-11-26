@@ -13,20 +13,31 @@ import { getRarityConfig } from '../data/heroRoster';
 
 const EVOLUTION_REQUIRED_DAYS = 80;
 
-const getEvolutionRecipe = (currentStars = 1) => {
+const getEvolutionRecipe = (currentStars = 0) => {
   if (currentStars >= 2) {
     return {
       nextStars: 3,
+      potions: 3,
+      coins: 750,
+      powerBonusPct: 5,
+      totalBonusPct: 15,
+    };
+  }
+  if (currentStars === 1) {
+    return {
+      nextStars: 2,
       potions: 2,
       coins: 500,
-      powerBonusPct: 10,
+      powerBonusPct: 5,
+      totalBonusPct: 10,
     };
   }
   return {
-    nextStars: 2,
+    nextStars: 1,
     potions: 1,
     coins: 250,
     powerBonusPct: 5,
+    totalBonusPct: 5,
   };
 };
 
@@ -56,7 +67,7 @@ export default function HeroEvolutionModal({
   const enrichedMiners = useMemo(() => {
     return miners.map((m) => {
       const activeDays = getMinerActiveDays(m);
-      const stars = m.stars || 1;
+      const stars = m.stars ?? 0;
       const isMaxStars = stars >= 3;
       const hasEnoughDays = activeDays >= EVOLUTION_REQUIRED_DAYS;
       const isEligible = hasEnoughDays && !isMaxStars;
@@ -77,7 +88,7 @@ export default function HeroEvolutionModal({
   }, [enrichedMiners, selectedHeroId]);
 
   const recipe = useMemo(() => {
-    return getEvolutionRecipe(selectedHero?.stars || 1);
+    return getEvolutionRecipe(selectedHero?.stars ?? 0);
   }, [selectedHero]);
 
   if (!isOpen) return null;
@@ -194,9 +205,15 @@ export default function HeroEvolutionModal({
                         <div className="min-w-0">
                           <div className="text-xs font-bold text-white truncate flex items-center gap-1.5">
                             <span>{miner.name}</span>
-                            <span className="text-[10px] text-amber-300">
-                              {'★'.repeat(miner.stars)}
-                            </span>
+                            {miner.stars > 0 ? (
+                              <span className="text-[10px] text-amber-300">
+                                {'★'.repeat(miner.stars)}
+                              </span>
+                            ) : (
+                              <span className="text-[9px] text-slate-400 font-normal">
+                                (Sem estrelas)
+                              </span>
+                            )}
                           </div>
                           <div className="text-[10px] font-bold" style={{ color: rarity.color }}>
                             {rarity.name}
@@ -229,7 +246,7 @@ export default function HeroEvolutionModal({
           {/* Passo 2: Itens Necessários */}
           <div className="space-y-3">
             <h3 className="font-arcade text-xs text-amber-300 uppercase">
-              2. Itens Necessários para Evolução {selectedHero ? `(${selectedHero.stars}★ ➔ ${recipe.nextStars}★)` : '(1★ ➔ 2★)'}
+              2. Itens Necessários para Evolução {selectedHero ? `(${selectedHero.stars}★ ➔ ${recipe.nextStars}★)` : '(0★ ➔ 1★)'}
             </h3>
 
             <div className="grid sm:grid-cols-2 gap-3">
