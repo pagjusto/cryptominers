@@ -98,6 +98,7 @@ export default function LandingPage({
     { id: 'heroes', label: 'Personagens' },
     { id: 'rates', label: 'Rates & Baús' },
     { id: 'bases', label: 'Bases' },
+    { id: 'evolution', label: 'Evolução' },
     { id: 'roi', label: 'Simulador ROI' }
   ];
   const chests = Object.values(config?.chests || DEFAULT_CRYPTO_ZOMBIES_CONFIG.chests);
@@ -999,6 +1000,177 @@ export default function LandingPage({
               </div>
               );
             })}
+          </div>
+        </div>
+      </section>
+      )}
+
+      {/* SEÇÃO: EVOLUÇÃO DE HERÓIS */}
+      {activeTab === 'evolution' && (
+      <section id="evolucao" className="border-t border-slate-800/80 bg-slate-900/30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 space-y-10">
+          <div className="space-y-2">
+            <span className="text-xs font-bold uppercase tracking-widest text-purple-400">
+              Progressão & Rejuvenescimento
+            </span>
+            <h2 className="font-arcade text-2xl sm:text-3xl text-white">
+              EVOLUÇÃO DE HERÓIS (80 DIAS)
+            </h2>
+            <p className="text-sm text-slate-400 max-w-2xl">
+              Entenda como funciona o ciclo de 80 dias, quais itens são necessários e o que aumenta ao evoluir seus heróis de 1★ até 3★.
+            </p>
+          </div>
+
+          {/* Como Funciona (3 passos) */}
+          <div className="grid sm:grid-cols-3 gap-4">
+            <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-2">
+              <div className="text-xs font-arcade text-amber-300">1. CICLO DE 80 DIAS</div>
+              <p className="text-xs text-slate-300 leading-relaxed">
+                Todo herói inicia em <b>1★</b> e cumpre um ciclo útil de <b>80 dias ativos</b>. Ao atingir 80 dias, ele fica pronto para evoluir no botão <b>Evolução</b> dentro do jogo.
+              </p>
+            </div>
+            <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-2">
+              <div className="text-xs font-arcade text-purple-300">2. ITENS NECESSÁRIOS</div>
+              <p className="text-xs text-slate-300 leading-relaxed">
+                A evolução consome <b>Poção de Rejuvenescimento</b>, <b>Fragmentos de Construção</b> e <b>Coins</b>, criando demanda contínua pelos recursos do jogo.
+              </p>
+            </div>
+            <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-2">
+              <div className="text-xs font-arcade text-emerald-300">3. O QUE AUMENTA</div>
+              <p className="text-xs text-slate-300 leading-relaxed">
+                O herói ganha <b>+5% a +10%</b> de Poder e Produção por estrela, restaura <b>100%</b> da energia/arma e <b>renova o ciclo para 0/80 dias</b>.
+              </p>
+            </div>
+          </div>
+
+          {/* Níveis de Evolução */}
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* 1★ -> 2★ */}
+            <div className="p-6 rounded-3xl bg-slate-900/95 border border-purple-500/40 space-y-5 shadow-xl">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+                <div>
+                  <span className="text-[11px] uppercase tracking-wider text-purple-300 font-bold">
+                    Nível 1 de Evolução
+                  </span>
+                  <h3 className="font-arcade text-lg text-white">1★ ➔ 2★ (Veterano)</h3>
+                </div>
+                <span className="px-3 py-1 rounded-xl bg-amber-500/15 border border-amber-400/40 font-arcade text-xs text-amber-300">
+                  ★★
+                </span>
+              </div>
+
+              <div className="space-y-2.5 text-xs">
+                <div className="font-bold uppercase tracking-wider text-slate-400 text-[11px]">
+                  O que precisa:
+                </div>
+                <div className="flex justify-between p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">
+                  <span className="text-slate-300">Tempo Ativo do Herói</span>
+                  <b className="font-mono text-amber-300">80 dias</b>
+                </div>
+                <div className="flex justify-between p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">
+                  <span className="text-slate-300">Poção de Rejuvenescimento</span>
+                  <b className="font-mono text-purple-300">1x Poção</b>
+                </div>
+                <div className="flex justify-between p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">
+                  <span className="text-slate-300">Fragmentos de Construção</span>
+                  <b className="font-mono text-emerald-300">5x Fragmentos</b>
+                </div>
+                <div className="flex justify-between p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">
+                  <span className="text-slate-300">Taxa em Coins</span>
+                  <b className="font-mono text-amber-300">250 Coins</b>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-emerald-950/30 border border-emerald-500/35 space-y-1.5 text-xs">
+                <div className="font-bold uppercase tracking-wider text-emerald-300 text-[11px]">
+                  O que aumenta:
+                </div>
+                <p className="text-slate-200">• <b>+5% de Poder e Produção de Coins</b> permanente</p>
+                <p className="text-slate-200">• <b>Novo ciclo de 80 dias</b> (zera o contador para 0/80d)</p>
+                <p className="text-slate-200">• <b>100% de Energia e Durabilidade da Arma</b> restauradas</p>
+              </div>
+            </div>
+
+            {/* 2★ -> 3★ */}
+            <div className="p-6 rounded-3xl bg-slate-900/95 border border-amber-500/45 space-y-5 shadow-xl">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+                <div>
+                  <span className="text-[11px] uppercase tracking-wider text-amber-300 font-bold">
+                    Nível 2 de Evolução (Máximo)
+                  </span>
+                  <h3 className="font-arcade text-lg text-white">2★ ➔ 3★ (Lenda)</h3>
+                </div>
+                <span className="px-3 py-1 rounded-xl bg-amber-500/20 border border-amber-400/50 font-arcade text-xs text-amber-300">
+                  ★★★
+                </span>
+              </div>
+
+              <div className="space-y-2.5 text-xs">
+                <div className="font-bold uppercase tracking-wider text-slate-400 text-[11px]">
+                  O que precisa:
+                </div>
+                <div className="flex justify-between p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">
+                  <span className="text-slate-300">Tempo Ativo em 2★</span>
+                  <b className="font-mono text-amber-300">80 dias</b>
+                </div>
+                <div className="flex justify-between p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">
+                  <span className="text-slate-300">Poção de Rejuvenescimento</span>
+                  <b className="font-mono text-purple-300">2x Poções</b>
+                </div>
+                <div className="flex justify-between p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">
+                  <span className="text-slate-300">Fragmentos de Construção</span>
+                  <b className="font-mono text-emerald-300">10x Fragmentos</b>
+                </div>
+                <div className="flex justify-between p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">
+                  <span className="text-slate-300">Taxa em Coins</span>
+                  <b className="font-mono text-amber-300">500 Coins</b>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-amber-950/30 border border-amber-500/35 space-y-1.5 text-xs">
+                <div className="font-bold uppercase tracking-wider text-amber-300 text-[11px]">
+                  O que aumenta:
+                </div>
+                <p className="text-slate-200">• <b>+10% adicionais de Poder e Produção</b> (total <b>+15%</b>)</p>
+                <p className="text-slate-200">• <b>Novo ciclo de 80 dias</b> (zera o contador para 0/80d)</p>
+                <p className="text-slate-200">• <b>100% de Energia e Durabilidade da Arma</b> restauradas</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Onde obter os itens */}
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div className="p-5 rounded-2xl bg-slate-900/90 border border-purple-500/35 flex items-center gap-4">
+              <div className="w-16 h-16 rounded-2xl bg-slate-950 border border-purple-500/40 p-2 flex items-center justify-center shrink-0">
+                <img
+                  src="/items/rejuvenation_potion.png"
+                  alt="Poção de Rejuvenescimento"
+                  className="w-full h-full object-contain"
+                />
+              </div>
+              <div className="space-y-1">
+                <h4 className="font-arcade text-xs sm:text-sm text-white">Poção de Rejuvenescimento</h4>
+                <p className="text-xs text-slate-300 leading-relaxed">
+                  Drop especial ao derrotar Bosses e abrir Baús de Construção. Essencial para renovar o ciclo de 80 dias.
+                </p>
+              </div>
+            </div>
+
+            <div className="p-5 rounded-2xl bg-slate-900/90 border border-emerald-500/35 flex items-center gap-4">
+              <div className="w-16 h-16 rounded-2xl bg-slate-950 border border-emerald-500/40 p-2 flex items-center justify-center shrink-0">
+                <img
+                  src="/items/construction_fragment.png"
+                  alt="Fragmento de Construção"
+                  className="w-full h-full object-contain"
+                />
+              </div>
+              <div className="space-y-1">
+                <h4 className="font-arcade text-xs sm:text-sm text-white">Fragmento de Construção</h4>
+                <p className="text-xs text-slate-300 leading-relaxed">
+                  Obtido em Bosses e Baús de Construção. Utilizado na evolução das Bases Médicas e dos Heróis.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
