@@ -67,3 +67,26 @@ canvas.pixelated {
   transform-origin: center center;
   animation: bossFlashCycle 1.05s ease-in-out 4 forwards;
 }
+
+/* Moldura enferrujada e desgastada para cards do portal */
+.landing-rusty-theme [class*="bg-slate-900"] {
+  background-color: rgba(24, 19, 15, 0.94) !important;
+  background-image:
+    radial-gradient(circle at 8% 12%, rgba(180, 83, 9, 0.16), transparent 36%),
+    radial-gradient(circle at 92% 88%, rgba(124, 45, 18, 0.22), transparent 40%),
+    linear-gradient(155deg, rgba(31, 23, 18, 0.95) 0%, rgba(17, 18, 14, 0.97) 58%, rgba(28, 16, 11, 0.96) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(217, 119, 6, 0.22),
+    inset 0 0 22px rgba(120, 53, 15, 0.3),
+    0 10px 24px rgba(0, 0, 0, 0.55);
+}
+
+.landing-rusty-theme [class*="bg-slate-950"]:not(input):not(select):not(textarea) {
+  background-color: rgba(15, 13, 10, 0.92) !important;
+  box-shadow: inset 0 0 14px rgba(92, 41, 14, 0.22);
+}
+
+.landing-rusty-theme [class*="border-slate-800"],
+.landing-rusty-theme [class*="border-slate-700"] {
+  border-color: rgba(146, 74, 34, 0.62) !important;
+}

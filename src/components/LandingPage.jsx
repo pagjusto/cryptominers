@@ -120,7 +120,7 @@ export default function LandingPage({
     'Comandante';
 
   return (
-    <div className="relative min-h-screen w-full flex flex-col text-slate-100 font-tech selection:bg-amber-500/30 selection:text-amber-200 overflow-x-hidden">
+    <div className="landing-rusty-theme relative min-h-screen w-full flex flex-col text-slate-100 font-tech selection:bg-amber-500/30 selection:text-amber-200 overflow-x-hidden">
       {/* PLANO DE FUNDO ATMOSFÉRICO DO SITE (VERDE COM NÉVOA) */}
       <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden bg-[#03110b]">
         <div
