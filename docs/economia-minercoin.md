@@ -146,6 +146,10 @@ O saque somente será efetivado após a confirmação explícita do jogador ness
 - A confirmação da solicitação pelo jogador, por si só, não significa que o saque foi concluído.
 - O histórico do jogador deverá apresentar o status atual do saque de forma clara.
 
+### Limite de saques — decisão aprovada
+
+- **Não haverá limite diário de saques por jogador.** O jogador poderá solicitar mais de um saque no mesmo dia, desde que cada solicitação respeite o saque mínimo, as taxas aplicáveis, as confirmações obrigatórias e as demais regras vigentes.
+
 ## Política de burn
 
 - **Não haverá mecanismo de burn de Coins por enquanto.**
