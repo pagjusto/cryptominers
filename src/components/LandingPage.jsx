@@ -136,10 +136,10 @@ export default function LandingPage({
 
       {/* NAVBAR SUPERIOR COM LOGIN/CADASTRO NO CANTO */}
       <header className="sticky top-0 z-50 border-b border-emerald-900/50 bg-[#03120b]/90 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+        <div className="max-w-[1440px] mx-auto px-3 sm:px-5 h-16 flex items-center justify-between gap-2">
           {/* Logo */}
-          <div className="flex items-center gap-2.5 shrink-0">
-            <div className="w-11 h-11 flex items-center justify-center shrink-0">
+          <div className="flex items-center gap-2 shrink-0">
+            <div className="w-10 h-10 flex items-center justify-center shrink-0">
               <img
                 src="/assets/cryptozombies_logo.png"
                 alt="CryptoZombies"
@@ -147,17 +147,17 @@ export default function LandingPage({
               />
             </div>
             <div className="leading-tight">
-              <span className="font-arcade text-sm sm:text-base text-amber-400 tracking-wider block">
+              <span className="font-arcade text-xs sm:text-sm text-amber-400 tracking-wider block whitespace-nowrap">
                 CRYPTOZOMBIES
               </span>
-              <span className="text-[10px] uppercase tracking-widest text-slate-400 block">
+              <span className="hidden xl:block text-[9px] uppercase tracking-widest text-slate-400 whitespace-nowrap">
                 Sobrevivência & Coleta de recursos
               </span>
             </div>
           </div>
 
           {/* Abas de navegação (Desktop) */}
-          <nav className="hidden lg:flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider">
+          <nav className="hidden lg:flex items-center gap-1 text-[11px] font-bold uppercase tracking-wide overflow-x-auto no-scrollbar">
             {tabs.map((tab) => {
               const TabIcon = tab.icon;
               return (
@@ -165,13 +165,13 @@ export default function LandingPage({
                   key={tab.id}
                   type="button"
                   onClick={() => setActiveTab(tab.id)}
-                  className={`px-3 py-1.5 rounded-xl border transition cursor-pointer inline-flex items-center gap-1.5 ${
+                  className={`px-2.5 py-1.5 rounded-xl border transition cursor-pointer inline-flex items-center gap-1 whitespace-nowrap shrink-0 ${
                     activeTab === tab.id
                       ? 'bg-amber-500/20 border-amber-400/60 text-amber-300 shadow-sm'
                       : 'border-transparent text-slate-300 hover:text-amber-300 hover:bg-slate-900/70'
                   }`}
                 >
-                  {TabIcon && <TabIcon size={14} className="text-amber-400 shrink-0" />}
+                  {TabIcon && <TabIcon size={13} className="text-amber-400 shrink-0" />}
                   <span>{tab.label}</span>
                 </button>
               );
@@ -179,19 +179,19 @@ export default function LandingPage({
           </nav>
 
           {/* Ações no canto direito */}
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-1.5 shrink-0">
             {authUser ? (
               <>
-                <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-300">
+                <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-[11px] text-slate-300 whitespace-nowrap">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span className="truncate max-w-[140px]">{displayName}</span>
+                  <span className="truncate max-w-[110px]">{displayName}</span>
                 </span>
                 <button
                   type="button"
                   onClick={onEnterGame}
-                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-arcade text-[11px] font-bold uppercase tracking-wider shadow-lg shadow-emerald-500/20 transition cursor-pointer"
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-arcade text-[10px] font-bold uppercase tracking-wider shadow-lg shadow-emerald-500/20 transition cursor-pointer whitespace-nowrap"
                 >
-                  <Play size={14} />
+                  <Play size={13} />
                   <span>Jogar</span>
                 </button>
                 <button
@@ -200,7 +200,7 @@ export default function LandingPage({
                   title="Sair da conta"
                   className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-rose-400 transition cursor-pointer"
                 >
-                  <LogOut size={16} />
+                  <LogOut size={15} />
                 </button>
               </>
             ) : (
@@ -208,17 +208,17 @@ export default function LandingPage({
                 <button
                   type="button"
                   onClick={() => onOpenAuth('register')}
-                  className="hidden sm:flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 text-xs font-bold uppercase tracking-wider transition cursor-pointer"
+                  className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 text-[11px] font-bold uppercase tracking-wider transition cursor-pointer whitespace-nowrap"
                 >
-                  <UserPlus size={14} className="text-emerald-400" />
+                  <UserPlus size={13} className="text-emerald-400" />
                   <span>Cadastrar</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => onOpenAuth('login')}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-arcade text-[11px] font-bold uppercase tracking-wider shadow-lg shadow-amber-500/20 transition cursor-pointer"
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-arcade text-[10px] font-bold uppercase tracking-wider shadow-lg shadow-amber-500/20 transition cursor-pointer whitespace-nowrap"
                 >
-                  <LogIn size={14} />
+                  <LogIn size={13} />
                   <span>Entrar</span>
                 </button>
               </>
