@@ -16,13 +16,15 @@ import {
   Sparkles,
   ChevronRight,
   Users,
-  BookOpen
+  BookOpen,
+  Gift
 } from 'lucide-react';
 import { HERO_ROSTER, RARITY_CONFIG, getRarityConfig, getWeaponById } from '../data/heroRoster';
 import { DEFAULT_CRYPTO_ZOMBIES_CONFIG } from '../data/cryptoZombiesConfig';
 import { getHeroBaseHP } from '../utils/heroHealth';
 import { ENEMIES } from '../data/enemiesCatalog';
 import { HOUSE_TIERS } from '../data/housesData';
+import { REFERRAL_COMMISSION_PCT, getUserReferralCode } from '../services/referralService';
 import RoiSimulatorTab from './RoiSimulatorTab';
 
 const OFFICIAL_RARITY_RATES = [
@@ -99,6 +101,7 @@ export default function LandingPage({
     { id: 'rates', label: 'Rates & Baús' },
     { id: 'bases', label: 'Bases' },
     { id: 'evolution', label: 'Evolução' },
+    { id: 'referral', label: 'Indique e Ganhe', icon: Gift },
     { id: 'roi', label: 'Simulador ROI' }
   ];
   const chests = Object.values(config?.chests || DEFAULT_CRYPTO_ZOMBIES_CONFIG.chests);
@@ -151,20 +154,24 @@ export default function LandingPage({
 
           {/* Abas de navegação (Desktop) */}
           <nav className="hidden lg:flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id)}
-                className={`px-3 py-1.5 rounded-xl border transition cursor-pointer ${
-                  activeTab === tab.id
-                    ? 'bg-amber-500/20 border-amber-400/60 text-amber-300 shadow-sm'
-                    : 'border-transparent text-slate-300 hover:text-amber-300 hover:bg-slate-900/70'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
+            {tabs.map((tab) => {
+              const TabIcon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`px-3 py-1.5 rounded-xl border transition cursor-pointer inline-flex items-center gap-1.5 ${
+                    activeTab === tab.id
+                      ? 'bg-amber-500/20 border-amber-400/60 text-amber-300 shadow-sm'
+                      : 'border-transparent text-slate-300 hover:text-amber-300 hover:bg-slate-900/70'
+                  }`}
+                >
+                  {TabIcon && <TabIcon size={14} className="text-amber-400 shrink-0" />}
+                  <span>{tab.label}</span>
+                </button>
+              );
+            })}
           </nav>
 
           {/* Ações no canto direito */}
@@ -217,20 +224,24 @@ export default function LandingPage({
 
         {/* Barra de abas mobile/tablet */}
         <div className="lg:hidden border-t border-slate-800/80 px-4 py-2 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setActiveTab(tab.id)}
-              className={`px-3 py-1.5 rounded-lg border text-[11px] font-bold uppercase tracking-wider shrink-0 transition cursor-pointer ${
-                activeTab === tab.id
-                  ? 'bg-amber-500/20 border-amber-400/60 text-amber-300'
-                  : 'border-slate-800 bg-slate-900/60 text-slate-300'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+          {tabs.map((tab) => {
+            const TabIcon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                className={`px-3 py-1.5 rounded-lg border text-[11px] font-bold uppercase tracking-wider shrink-0 transition cursor-pointer inline-flex items-center gap-1.5 ${
+                  activeTab === tab.id
+                    ? 'bg-amber-500/20 border-amber-400/60 text-amber-300'
+                    : 'border-slate-800 bg-slate-900/60 text-slate-300'
+                }`}
+              >
+                {TabIcon && <TabIcon size={13} className="text-amber-400 shrink-0" />}
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
         </div>
       </header>
 
@@ -1170,6 +1181,94 @@ export default function LandingPage({
                   Obtido em Bosses e Baús de Construção. Utilizado na evolução das Bases Médicas e dos Heróis.
                 </p>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      )}
+
+      {/* SEÇÃO: INDIQUE E GANHE */}
+      {activeTab === 'referral' && (
+      <section id="indique-e-ganhe" className="border-t border-slate-800/80 bg-slate-900/30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 space-y-10">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-2">
+              <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-amber-400">
+                <Gift size={15} />
+                <span>Programa de Afiliados</span>
+              </span>
+              <h2 className="font-arcade text-2xl sm:text-3xl text-white">
+                INDIQUE E GANHE {REFERRAL_COMMISSION_PCT}% EM COINS
+              </h2>
+              <p className="text-sm text-slate-400 max-w-2xl">
+                Convide novos comandantes para o CryptoZombies e receba <b className="text-amber-300">{REFERRAL_COMMISSION_PCT}% de comissão em Coins</b> sobre todas as compras de Baús em USDT feitas pelos seus indicados.
+              </p>
+            </div>
+
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-500/20 to-purple-500/20 border border-amber-400/40 flex items-center justify-center shrink-0 shadow-lg">
+              <Gift size={32} className="text-amber-300" />
+            </div>
+          </div>
+
+          {/* Como funciona */}
+          <div className="grid sm:grid-cols-3 gap-4">
+            <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-2">
+              <div className="text-xs font-arcade text-emerald-300">1. TENHA 1+ HERÓI</div>
+              <p className="text-xs text-slate-300 leading-relaxed">
+                Para liberar seu link exclusivo de divulgação, é obrigatório possuir pelo menos <b>1 herói</b> ativo na sua conta.
+              </p>
+            </div>
+            <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-2">
+              <div className="text-xs font-arcade text-purple-300">2. COMPARTILHE SEU LINK</div>
+              <p className="text-xs text-slate-300 leading-relaxed">
+                Copie seu link na aba <b>Indicações</b> do Perfil dentro do jogo e envie para seus amigos se cadastrarem por ele.
+              </p>
+            </div>
+            <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-2">
+              <div className="text-xs font-arcade text-amber-300">3. GANHE {REFERRAL_COMMISSION_PCT}% EM COINS</div>
+              <p className="text-xs text-slate-300 leading-relaxed">
+                Sempre que um indicado comprar um Baú em USDT, <b>{REFERRAL_COMMISSION_PCT}% do valor</b> é creditado automaticamente em <b>Coins</b> para você.
+              </p>
+            </div>
+          </div>
+
+          {/* Exemplo e CTA */}
+          <div className="p-6 rounded-3xl bg-slate-900/95 border border-amber-500/40 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-xl">
+            <div className="space-y-2">
+              <div className="text-xs font-bold uppercase tracking-wider text-amber-300">
+                Exemplo de Comissão
+              </div>
+              <p className="text-sm text-slate-200">
+                Seu indicado compra um Baú de <b className="text-white">US$ 100,00</b> ➔ Você recebe{' '}
+                <b className="text-amber-300">100 Coins</b> (equivalente a US$ 1,00 na cotação oficial de 1 Coin = US$ {minerRate.toFixed(2)}).
+              </p>
+              {authUser && (
+                <p className="text-xs text-slate-400">
+                  Seu código de indicação: <b className="font-mono text-emerald-300">{getUserReferralCode(authUser)}</b> (acesse <b>Perfil ➔ Indicações</b> no jogo para copiar seu link).
+                </p>
+              )}
+            </div>
+
+            <div className="flex flex-wrap gap-3 shrink-0">
+              {authUser ? (
+                <button
+                  type="button"
+                  onClick={onEnterGame}
+                  className="px-5 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-arcade text-xs flex items-center gap-2 shadow-lg cursor-pointer"
+                >
+                  <Gift size={15} />
+                  <span>ACESSAR INDICAÇÕES NO JOGO</span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => onOpenAuth('register')}
+                  className="px-5 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-arcade text-xs flex items-center gap-2 shadow-lg cursor-pointer"
+                >
+                  <Gift size={15} />
+                  <span>CRIAR CONTA PARA INDICAR</span>
+                </button>
+              )}
             </div>
           </div>
         </div>
