@@ -700,7 +700,9 @@ export default function LandingPage({
                             <img
                               src={sup.image}
                               alt={sup.name}
-                              className="w-full h-full object-contain drop-shadow"
+                              className={`w-full h-full object-contain drop-shadow ${
+                                sup.id === 'iris' ? 'scale-[1.35]' : ''
+                              }`}
                             />
                           </div>
                           <div className="min-w-0">
