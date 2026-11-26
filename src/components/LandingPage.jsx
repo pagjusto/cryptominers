@@ -124,7 +124,7 @@ export default function LandingPage({
       {/* PLANO DE FUNDO ATMOSFÉRICO DO SITE (VERDE COM NÉVOA) */}
       <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden bg-[#03110b]">
         <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat scale-105 opacity-35"
+          className="absolute inset-0 bg-contain bg-center bg-no-repeat opacity-35"
           style={{ backgroundImage: "url('/city_map_lvl3.webp?v=3')" }}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-[#041b11]/90 via-[#062417]/80 to-[#020d08]/95 backdrop-blur-[2px]" />
