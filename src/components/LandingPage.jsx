@@ -609,7 +609,9 @@ export default function LandingPage({
                         backgroundRepeat: 'no-repeat',
                         backgroundSize: '572px 25px',
                         backgroundPosition: `-${(heroWeapon?.sourceIndex ?? 0) * 44}px center`,
-                        transform: 'scaleX(-1) scale(1.15)',
+                        transform: [0, 1, 3, 4, 8, 9, 10].includes(heroWeapon?.sourceIndex ?? 0)
+                          ? 'scaleX(-1) scale(1.15)'
+                          : 'scale(1.15)',
                         imageRendering: 'pixelated',
                         filter: 'drop-shadow(0 0 1px rgba(255, 255, 255, 0.65))'
                       }}
