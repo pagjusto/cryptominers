@@ -3,6 +3,7 @@
 // ============================================================================
 
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
+import { getStoredReferralCode } from './referralService';
 
 const LOCAL_AUTH_FALLBACK_KEY = 'crypto_zombies_local_auth_user_v1';
 
@@ -116,12 +117,15 @@ export async function signUpWithEmail(email, password, playerName) {
     throw new Error('Autenticação em nuvem não configurada neste ambiente.');
   }
 
+  const pendingRef = getStoredReferralCode();
+
   const { data, error } = await supabase.auth.signUp({
     email: cleanEmail,
     password,
     options: {
       data: {
-        player_name: cleanName
+        player_name: cleanName,
+        ...(pendingRef ? { referred_by: pendingRef } : {})
       }
     }
   });

@@ -3,11 +3,17 @@ import {
   X, User, Wallet, ArrowDownToLine, History, CheckCircle2, 
   AlertCircle, Copy, ExternalLink, ShieldCheck, Zap, Sparkles, 
   ArrowRight, Coins, RefreshCw, Edit3, Check, DollarSign,
-  TrendingUp, Award, Home, Pickaxe
+  TrendingUp, Award, Home, Pickaxe, Users, Share2, Lock
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { sfx } from '../utils/sfx';
 import { getCryptoZombiesConfig } from '../data/cryptoZombiesConfig';
+import {
+  REFERRAL_COMMISSION_PCT,
+  getUserReferralCode,
+  getUserReferralLink,
+  fetchReferralSummary
+} from '../services/referralService';
 
 // Avatares temáticos disponíveis para o jogador
 export const PLAYER_AVATARS = [
@@ -38,10 +44,18 @@ export default function UserProfileModal({
   currentHouse = { name: 'Abrigo Básico', slots: 5 },
   currentMine = { name: 'Mina do Cânion' },
   constructionFragments = 0,
-  constructionChests = []
+  constructionChests = [],
+  authUser = null
 }) {
   const [activeTab, setActiveTab] = useState(initialTab);
   const [copied, setCopied] = useState(false);
+  const [refCopied, setRefCopied] = useState(false);
+  const [referralSummary, setReferralSummary] = useState({
+    referralCode: getUserReferralCode(authUser),
+    referredCount: 0,
+    totalCoinsEarned: 0,
+    rewards: []
+  });
   const [connectingType, setConnectingType] = useState(null);
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -84,8 +98,23 @@ export default function UserProfileModal({
       } else {
         setWithdrawAmount(minWithdrawMnc.toString());
       }
+      fetchReferralSummary(authUser).then((summary) => {
+        if (summary) setReferralSummary(summary);
+      });
     }
-  }, [isOpen, initialTab, bcoinBalance]);
+  }, [isOpen, initialTab, bcoinBalance, authUser]);
+
+  const hasHeroToPromote = (miners?.length || 0) >= 1;
+  const referralLink = getUserReferralLink(authUser);
+
+  const handleCopyReferralLink = () => {
+    if (!hasHeroToPromote) return;
+    try {
+      navigator.clipboard.writeText(referralLink);
+      setRefCopied(true);
+      setTimeout(() => setRefCopied(false), 2000);
+    } catch (e) {}
+  };
 
   if (!isOpen) return null;
 
@@ -324,6 +353,21 @@ export default function UserProfileModal({
                 {withdrawHistory.length}
               </span>
             )}
+          </button>
+
+          <button
+            onClick={() => { setActiveTab('referrals'); setWithdrawSuccessReceipt(null); }}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-t-xl font-tech text-xs font-bold transition border-b-2 cursor-pointer ${
+              activeTab === 'referrals'
+                ? 'bg-slate-900 text-purple-400 border-purple-400 shadow-sm'
+                : 'text-slate-400 border-transparent hover:text-slate-200'
+            }`}
+          >
+            <Users size={15} />
+            <span>INDICAÇÕES</span>
+            <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/40">
+              {REFERRAL_COMMISSION_PCT}% Coins
+            </span>
           </button>
         </div>
 
@@ -1088,6 +1132,128 @@ export default function UserProfileModal({
                 </div>
               )}
 
+            </div>
+          )}
+
+          {/* ========================================================= */}
+          {/* ABA 5: SISTEMA DE INDICAÇÕES (1% EM COINS) */}
+          {/* ========================================================= */}
+          {activeTab === 'referrals' && (
+            <div className="space-y-5">
+              <div className="p-5 rounded-2xl bg-gradient-to-br from-purple-950/60 via-slate-900 to-slate-950 border border-purple-500/40 space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <h3 className="font-arcade text-sm sm:text-base text-white flex items-center gap-2">
+                      <Share2 size={16} className="text-purple-400" />
+                      <span>PROGRAMA DE INDICAÇÃO</span>
+                    </h3>
+                    <p className="text-xs text-slate-300 mt-1">
+                      Ganhe <b className="text-amber-300">{REFERRAL_COMMISSION_PCT}% em Coins</b> sobre todas as compras de Baús em USDT feitas pelos seus indicados.
+                    </p>
+                  </div>
+                  <span className="px-3 py-1 rounded-xl bg-amber-500/15 border border-amber-400/40 font-mono text-xs font-bold text-amber-300">
+                    Comissão: {REFERRAL_COMMISSION_PCT}% Coins
+                  </span>
+                </div>
+
+                {!hasHeroToPromote ? (
+                  <div className="p-4 rounded-xl bg-rose-950/40 border border-rose-500/40 flex items-start gap-3">
+                    <Lock size={18} className="text-rose-400 shrink-0 mt-0.5" />
+                    <div className="space-y-1 text-xs">
+                      <div className="font-bold text-rose-200">
+                        Divulgação bloqueada: é necessário ter pelo menos 1 herói
+                      </div>
+                      <p className="text-slate-300 leading-relaxed">
+                        Para liberar seu link exclusivo de indicação e receber {REFERRAL_COMMISSION_PCT}% em Coins, adquira ou invoque pelo menos <b>1 herói</b> no seu esquadrão.
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <label className="text-[11px] font-bold uppercase tracking-wider text-purple-300 block">
+                      Seu Link Exclusivo de Indicação (Código: {referralSummary.referralCode})
+                    </label>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <input
+                        type="text"
+                        readOnly
+                        value={referralLink}
+                        className="flex-1 px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-xs font-mono text-emerald-300 select-all focus:outline-none"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleCopyReferralLink}
+                        className="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-arcade text-xs flex items-center justify-center gap-2 transition cursor-pointer shrink-0"
+                      >
+                        {refCopied ? <Check size={14} /> : <Copy size={14} />}
+                        <span>{refCopied ? 'COPIADO!' : 'COPIAR LINK'}</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Cards de Resumo */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="p-4 rounded-2xl bg-slate-950/90 border border-slate-800 space-y-1">
+                  <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold">
+                    Indicados Cadastrados
+                  </span>
+                  <div className="font-arcade text-xl text-white">
+                    {referralSummary.referredCount}
+                  </div>
+                </div>
+                <div className="p-4 rounded-2xl bg-slate-950/90 border border-slate-800 space-y-1">
+                  <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold">
+                    Total Ganho em Coins
+                  </span>
+                  <div className="font-arcade text-xl text-amber-300">
+                    {referralSummary.totalCoinsEarned.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </div>
+                </div>
+                <div className="p-4 rounded-2xl bg-slate-950/90 border border-slate-800 space-y-1">
+                  <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold">
+                    Status de Divulgação
+                  </span>
+                  <div className={`font-arcade text-sm ${hasHeroToPromote ? 'text-emerald-400' : 'text-rose-400'}`}>
+                    {hasHeroToPromote ? 'LIBERADO (1+ Herói)' : 'BLOQUEADO (0 Heróis)'}
+                  </div>
+                </div>
+              </div>
+
+              {/* Histórico de Comissões */}
+              <div className="space-y-2.5">
+                <h4 className="font-arcade text-xs text-slate-300 uppercase">
+                  Histórico de Comissões Recebidas
+                </h4>
+                {referralSummary.rewards.length === 0 ? (
+                  <div className="p-6 rounded-2xl bg-slate-950/70 border border-slate-800 text-center text-xs text-slate-400">
+                    Nenhuma comissão registrada ainda. Compartilhe seu link após liberar com 1+ herói!
+                  </div>
+                ) : (
+                  <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+                    {referralSummary.rewards.map((item, idx) => (
+                      <div
+                        key={item.id || idx}
+                        className="p-3 rounded-xl bg-slate-950/90 border border-slate-800 flex items-center justify-between gap-3 text-xs"
+                      >
+                        <div>
+                          <div className="font-bold text-white">
+                            {item.referred_name || 'Comandante'} • {item.package_id || 'Baú USDT'}
+                          </div>
+                          <div className="text-[10px] text-slate-400">
+                            Compra: US$ {Number(item.purchase_usdt || 0).toFixed(2)} •{' '}
+                            {item.created_at ? new Date(item.created_at).toLocaleDateString('pt-BR') : 'Hoje'}
+                          </div>
+                        </div>
+                        <div className="font-mono font-bold text-amber-300 shrink-0">
+                          +{Number(item.coins_rewarded || 0).toFixed(2)} Coins
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           )}
 

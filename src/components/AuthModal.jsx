@@ -15,6 +15,7 @@ import {
   Skull
 } from 'lucide-react';
 import { signInWithEmail, signUpWithEmail } from '../services/authService';
+import { getStoredReferralCode } from '../services/referralService';
 
 export default function AuthModal({
   isOpen,
@@ -159,6 +160,15 @@ export default function AuthModal({
             <div className="flex items-start gap-2.5 p-3 rounded-xl bg-emerald-950/70 border border-emerald-500/40 text-emerald-200 text-xs">
               <CheckCircle2 size={16} className="text-emerald-400 shrink-0 mt-0.5" />
               <span>{successMsg}</span>
+            </div>
+          )}
+
+          {mode === 'register' && getStoredReferralCode() && (
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 text-xs">
+              <CheckCircle2 size={15} className="text-emerald-400 shrink-0" />
+              <span>
+                Indicação aplicada: <b className="font-mono text-white">{getStoredReferralCode()}</b>
+              </span>
             </div>
           )}
 

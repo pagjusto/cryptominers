@@ -59,6 +59,11 @@ import LandingPage from './components/LandingPage';
 import AuthModal from './components/AuthModal';
 import SpawnZonesModal from './components/SpawnZonesModal';
 import { getCurrentAuthUser, subscribeAuthChanges, signOutUser } from './services/authService';
+import {
+  captureReferralFromUrl,
+  syncPendingReferralToProfile,
+  recordReferralPurchaseReward
+} from './services/referralService';
 import ConstructionChestFoundModal from './components/ConstructionChestFoundModal';
 import RoiSimulatorModal from './components/RoiSimulatorModal';
 import AdminConfigModal from './components/AdminConfigModal';
@@ -475,12 +480,19 @@ export default function App() {
   const [isSpawnZonesOpen, setIsSpawnZonesOpen] = useState(false);
 
   useEffect(() => {
+    captureReferralFromUrl();
     let mounted = true;
     getCurrentAuthUser().then((user) => {
-      if (mounted) setAuthUser(user);
+      if (mounted) {
+        setAuthUser(user);
+        if (user) syncPendingReferralToProfile(user);
+      }
     });
     const unsubscribe = subscribeAuthChanges((user) => {
-      if (mounted) setAuthUser(user);
+      if (mounted) {
+        setAuthUser(user);
+        if (user) syncPendingReferralToProfile(user);
+      }
     });
     return () => {
       mounted = false;
@@ -1403,6 +1415,12 @@ export default function App() {
         return next;
       });
       setTotalInvested(prev => parseFloat((prev + costUsdt).toFixed(3)));
+      recordReferralPurchaseReward({
+        authUser,
+        packageId: chest.name || chest.id,
+        purchaseUsdt: costUsdt,
+        minerRate: currentMinerRate
+      });
     }
 
     const newPurchased = {
@@ -2281,6 +2299,7 @@ export default function App() {
         currentMine={currentMine}
         constructionFragments={constructionFragments}
         constructionChests={constructionChests}
+        authUser={authUser}
       />
 
       {/* NOVO MENU: ESTATÍSTICAS & SIMULADOR DE UPGRADES — CRYPTOZOMBIES */}
