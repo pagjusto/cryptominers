@@ -17,7 +17,8 @@ import {
   ChevronRight,
   Users,
   BookOpen,
-  Gift
+  Gift,
+  Globe
 } from 'lucide-react';
 import { HERO_ROSTER, RARITY_CONFIG, getRarityConfig, getWeaponById } from '../data/heroRoster';
 import { DEFAULT_CRYPTO_ZOMBIES_CONFIG } from '../data/cryptoZombiesConfig';
@@ -25,6 +26,7 @@ import { getHeroBaseHP } from '../utils/heroHealth';
 import { ENEMIES } from '../data/enemiesCatalog';
 import { HOUSE_TIERS } from '../data/housesData';
 import { REFERRAL_COMMISSION_PCT, getUserReferralCode } from '../services/referralService';
+import { SITE_TRANSLATIONS, SITE_LANG_STORAGE_KEY, getStoredSiteLang } from '../data/siteTranslations';
 import RoiSimulatorTab from './RoiSimulatorTab';
 
 const OFFICIAL_RARITY_RATES = [
@@ -92,17 +94,27 @@ export default function LandingPage({
   config = DEFAULT_CRYPTO_ZOMBIES_CONFIG
 }) {
   const [activeTab, setActiveTab] = useState('home');
+  const [lang, setLang] = useState(() => getStoredSiteLang());
+  const t = SITE_TRANSLATIONS[lang] || SITE_TRANSLATIONS.pt;
+
+  const handleToggleLang = (nextLang) => {
+    const resolved = nextLang === 'en' ? 'en' : 'pt';
+    setLang(resolved);
+    try {
+      localStorage.setItem(SITE_LANG_STORAGE_KEY, resolved);
+    } catch (e) {}
+  };
 
   const tabs = [
-    { id: 'home', label: 'Início' },
-    { id: 'lore', label: 'História' },
-    { id: 'gameplay', label: 'Jogabilidade' },
-    { id: 'heroes', label: 'Heróis' },
-    { id: 'rates', label: 'Rates & Baús' },
-    { id: 'bases', label: 'Bases' },
-    { id: 'evolution', label: 'Evolução' },
-    { id: 'referral', label: 'Indique e Ganhe', icon: Gift },
-    { id: 'roi', label: 'Simulador ROI' }
+    { id: 'home', label: t.tabs.home },
+    { id: 'lore', label: t.tabs.lore },
+    { id: 'gameplay', label: t.tabs.gameplay },
+    { id: 'heroes', label: t.tabs.heroes },
+    { id: 'rates', label: t.tabs.rates },
+    { id: 'bases', label: t.tabs.bases },
+    { id: 'evolution', label: t.tabs.evolution },
+    { id: 'referral', label: t.tabs.referral, icon: Gift },
+    { id: 'roi', label: t.tabs.roi }
   ];
   const chests = Object.values(config?.chests || DEFAULT_CRYPTO_ZOMBIES_CONFIG.chests);
   const houses = Object.values(config?.houses || DEFAULT_CRYPTO_ZOMBIES_CONFIG.houses).filter(
@@ -151,7 +163,7 @@ export default function LandingPage({
                 CRYPTOZOMBIES
               </span>
               <span className="hidden xl:block text-[9px] uppercase tracking-widest text-slate-400 whitespace-nowrap">
-                Sobrevivência & Coleta de recursos
+                {t.brandSubtitle}
               </span>
             </div>
           </div>
@@ -180,6 +192,32 @@ export default function LandingPage({
 
           {/* Ações no canto direito */}
           <div className="flex items-center gap-1.5 shrink-0">
+            {/* Seletor de Idioma PT / EN */}
+            <div
+              className="inline-flex items-center rounded-xl bg-slate-900 border border-slate-700 p-0.5 text-[10px] font-bold uppercase shrink-0"
+              title={lang === 'pt' ? 'Mudar idioma para Inglês' : 'Switch language to Portuguese'}
+            >
+              <Globe size={12} className="text-emerald-400 mx-1.5 shrink-0" />
+              <button
+                type="button"
+                onClick={() => handleToggleLang('pt')}
+                className={`px-1.5 py-1 rounded-lg transition cursor-pointer ${
+                  lang === 'pt' ? 'bg-amber-500 text-slate-950' : 'text-slate-300 hover:text-white'
+                }`}
+              >
+                PT
+              </button>
+              <button
+                type="button"
+                onClick={() => handleToggleLang('en')}
+                className={`px-1.5 py-1 rounded-lg transition cursor-pointer ${
+                  lang === 'en' ? 'bg-amber-500 text-slate-950' : 'text-slate-300 hover:text-white'
+                }`}
+              >
+                EN
+              </button>
+            </div>
+
             {authUser ? (
               <>
                 <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-[11px] text-slate-300 whitespace-nowrap">
@@ -192,12 +230,12 @@ export default function LandingPage({
                   className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-arcade text-[10px] font-bold uppercase tracking-wider shadow-lg shadow-emerald-500/20 transition cursor-pointer whitespace-nowrap"
                 >
                   <Play size={13} />
-                  <span>Jogar</span>
+                  <span>{t.nav.play}</span>
                 </button>
                 <button
                   type="button"
                   onClick={onSignOut}
-                  title="Sair da conta"
+                  title={t.nav.signOut}
                   className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-rose-400 transition cursor-pointer"
                 >
                   <LogOut size={15} />
@@ -211,7 +249,7 @@ export default function LandingPage({
                   className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 text-[11px] font-bold uppercase tracking-wider transition cursor-pointer whitespace-nowrap"
                 >
                   <UserPlus size={13} className="text-emerald-400" />
-                  <span>Cadastrar</span>
+                  <span>{t.nav.register}</span>
                 </button>
                 <button
                   type="button"
@@ -219,7 +257,7 @@ export default function LandingPage({
                   className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-arcade text-[10px] font-bold uppercase tracking-wider shadow-lg shadow-amber-500/20 transition cursor-pointer whitespace-nowrap"
                 >
                   <LogIn size={13} />
-                  <span>Entrar</span>
+                  <span>{t.nav.login}</span>
                 </button>
               </>
             )}
@@ -258,20 +296,20 @@ export default function LandingPage({
           <div className="lg:col-span-7 space-y-6">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-bold uppercase tracking-wider">
               <Sparkles size={14} />
-              <span>Site Oficial • Sobrevivência Tática & Coleta de recursos</span>
+              <span>{t.home.badge}</span>
             </div>
 
             <h1 className="font-arcade text-3xl sm:text-5xl leading-tight text-white">
-              COMANDE SEU ESQUADRÃO.{' '}
+              {t.home.titleLine1}{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">
-                DOMINE A CIDADE.
+                {t.home.titleLine2}
               </span>
             </h1>
 
             <p className="text-slate-300 text-base sm:text-lg max-w-2xl leading-relaxed">
-              Recrute sobreviventes de diferentes raridades, equipe armamentos exclusivos,
-              defenda o abrigo contra hordas e Bosses e converta suas{' '}
-              <span className="text-amber-300 font-bold">Coins</span> mineradas em recompensas reais.
+              {t.home.descriptionPrefix}{' '}
+              <span className="text-amber-300 font-bold">{t.home.descriptionHighlight}</span>{' '}
+              {t.home.descriptionSuffix}
             </p>
 
             <div className="flex flex-wrap items-center gap-3 pt-2">
@@ -282,7 +320,7 @@ export default function LandingPage({
                   className="flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-arcade text-xs sm:text-sm font-bold uppercase tracking-wider shadow-xl shadow-emerald-500/25 transition cursor-pointer"
                 >
                   <Play size={18} />
-                  <span>Entrar no Jogo Agora</span>
+                  <span>{t.home.ctaPlay}</span>
                 </button>
               ) : (
                 <>
@@ -292,7 +330,7 @@ export default function LandingPage({
                     className="flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-arcade text-xs sm:text-sm font-bold uppercase tracking-wider shadow-xl shadow-amber-500/25 transition cursor-pointer"
                   >
                     <UserPlus size={18} />
-                    <span>Criar Conta Grátis</span>
+                    <span>{t.home.ctaCreate}</span>
                   </button>
                   <button
                     type="button"
@@ -300,7 +338,7 @@ export default function LandingPage({
                     className="flex items-center gap-2 px-5 py-3.5 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-white text-sm font-bold transition cursor-pointer"
                   >
                     <LogIn size={17} className="text-amber-400" />
-                    <span>Já tenho conta</span>
+                    <span>{t.home.ctaLogin}</span>
                   </button>
                 </>
               )}
@@ -309,7 +347,7 @@ export default function LandingPage({
                 onClick={() => setActiveTab('rates')}
                 className="flex items-center gap-1.5 px-4 py-3.5 rounded-2xl text-slate-300 hover:text-amber-300 text-sm font-bold transition cursor-pointer"
               >
-                <span>Ver Rates & Economia</span>
+                <span>{t.home.ctaRates}</span>
                 <ChevronRight size={16} />
               </button>
             </div>
@@ -334,52 +372,44 @@ export default function LandingPage({
           <div className="space-y-2">
             <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-amber-400">
               <BookOpen size={14} />
-              <span>Crônicas do Distrito</span>
+              <span>{t.lore.eyebrow}</span>
             </span>
             <h2 className="font-arcade text-2xl sm:text-3xl text-white">
-              A HISTÓRIA DE CRYPTOZOMBIES
+              {t.lore.title}
             </h2>
             <p className="text-sm sm:text-base text-slate-300 max-w-3xl leading-relaxed">
-              Após o colapso energético que liberou a névoa mutagênica sobre a zona industrial,
-              as ruas, ruínas e antigas reservas de mineração foram tomadas por hordas incessantes.
-              No centro do caos, um último posto fortificado resiste — e você assume o comando.
+              {t.lore.subtitle}
             </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-5">
             <div className="p-6 rounded-2xl bg-slate-900/85 border border-slate-800 space-y-3">
               <div className="text-xs font-arcade text-amber-400 uppercase tracking-wider">
-                Capítulo I • O Surto
+                {t.lore.ch1Tag}
               </div>
-              <h3 className="font-arcade text-base text-white">A Cidade Infectada</h3>
+              <h3 className="font-arcade text-base text-white">{t.lore.ch1Title}</h3>
               <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                Com as linhas de suprimento cortadas, depósitos de <b className="text-amber-300">Coins</b> ficaram
-                espalhados entre carros abandonados e prédios em ruínas. Apenas esquadrões táticos
-                equipados o suficiente conseguem avançar pelas estradas e limpar os setores infestados.
+                {t.lore.ch1Body}
               </p>
             </div>
 
             <div className="p-6 rounded-2xl bg-slate-900/85 border border-slate-800 space-y-3">
               <div className="text-xs font-arcade text-sky-400 uppercase tracking-wider">
-                Capítulo II • O Refúgio
+                {t.lore.ch2Tag}
               </div>
-              <h3 className="font-arcade text-base text-white">Base Médica & Armeiro</h3>
+              <h3 className="font-arcade text-base text-white">{t.lore.ch2Title}</h3>
               <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                Dentro dos muros da Base Militar, a cirurgiã <b className="text-sky-300">Dra. Íris</b> mantém
-                os leitos ativos para resgatar combatentes feridos, enquanto <b className="text-orange-300">John Armeiro</b>{' '}
-                repara armamentos desgastados para que o pelotão nunca perca poder de fogo.
+                {t.lore.ch2Body}
               </p>
             </div>
 
             <div className="p-6 rounded-2xl bg-slate-900/85 border border-slate-800 space-y-3">
               <div className="text-xs font-arcade text-rose-400 uppercase tracking-wider">
-                Capítulo III • A Invasão
+                {t.lore.ch3Tag}
               </div>
-              <h3 className="font-arcade text-base text-white">Bosses & Evolução</h3>
+              <h3 className="font-arcade text-base text-white">{t.lore.ch3Title}</h3>
               <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                Duas vezes ao dia, chefões mutantes surgem no perímetro. Derrotá-los em combate
-                conjunto rende <b className="text-emerald-300">Baús de Construção</b> e{' '}
-                <b className="text-emerald-300">Fragmentos</b> raros para expandir a Base de 5 até 15 leitos.
+                {t.lore.ch3Body}
               </p>
             </div>
           </div>
@@ -1029,34 +1059,34 @@ export default function LandingPage({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 space-y-10">
           <div className="space-y-2">
             <span className="text-xs font-bold uppercase tracking-widest text-purple-400">
-              Progressão & Rejuvenescimento
+              {t.evolution.eyebrow}
             </span>
             <h2 className="font-arcade text-2xl sm:text-3xl text-white">
-              EVOLUÇÃO DE HERÓIS (80 DIAS)
+              {t.evolution.title}
             </h2>
             <p className="text-sm text-slate-400 max-w-2xl">
-              Entenda como funciona o ciclo de 80 dias, quais itens são necessários e o que aumenta ao evoluir seus heróis de 0★ (sem estrelas) até 3★.
+              {t.evolution.subtitle}
             </p>
           </div>
 
           {/* Como Funciona (3 passos) */}
           <div className="grid sm:grid-cols-3 gap-4">
             <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-2">
-              <div className="text-xs font-arcade text-amber-300">1. CICLO DE 80 DIAS</div>
+              <div className="text-xs font-arcade text-amber-300">{t.evolution.step1Title}</div>
               <p className="text-xs text-slate-300 leading-relaxed">
-                Todo herói inicia <b>sem estrelas (0★)</b> e cumpre um ciclo útil de <b>80 dias ativos</b>. Ao atingir 80 dias, ele fica pronto para evoluir no botão <b>Evolução</b> dentro do jogo.
+                {t.evolution.step1Body}
               </p>
             </div>
             <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-2">
-              <div className="text-xs font-arcade text-purple-300">2. ITENS NECESSÁRIOS</div>
+              <div className="text-xs font-arcade text-purple-300">{t.evolution.step2Title}</div>
               <p className="text-xs text-slate-300 leading-relaxed">
-                A evolução consome <b>Baús</b> e <b>Poções de Rejuvenescimento</b> conforme a raridade do herói — sem Fragmentos de Construção.
+                {t.evolution.step2Body}
               </p>
             </div>
             <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-2">
-              <div className="text-xs font-arcade text-emerald-300">3. O QUE AUMENTA</div>
+              <div className="text-xs font-arcade text-emerald-300">{t.evolution.step3Title}</div>
               <p className="text-xs text-slate-300 leading-relaxed">
-                O herói ganha <b>+5%</b> de Poder e Produção por estrela (até <b>+15%</b> em 3★), remove penalidades de idade, restaura <b>100%</b> da energia/arma e <b>renova o ciclo para 0/80 dias</b>.
+                {t.evolution.step3Body}
               </p>
             </div>
           </div>
@@ -1065,13 +1095,13 @@ export default function LandingPage({
           <div className="p-6 rounded-3xl bg-gradient-to-br from-rose-950/35 via-slate-900/95 to-slate-950 border border-rose-500/35 space-y-5 shadow-xl">
             <div className="space-y-2">
               <span className="text-[11px] font-bold uppercase tracking-widest text-rose-400">
-                Desgaste na Zona Infestada
+                {t.evolution.ageEyebrow}
               </span>
               <h3 className="font-arcade text-base sm:text-lg text-white">
-                A HISTÓRIA DA IDADE & PENALIDADES POR IDADE
+                {t.evolution.ageTitle}
               </h3>
               <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-4xl">
-                Proteger a base expõe os sobreviventes à radiação dos esporos tóxicos dos zumbis mutantes. Com o passar das semanas, o corpo do herói acumula fadiga biológica: até os <b>49 dias</b> ele luta em seu auge físico, mas a partir do <b>50º dia</b> sua eficiência cai progressivamente até atingir <b>80 dias</b> — momento em que somente a <b>Poção de Rejuvenescimento</b> restaura sua vitalidade, zera a idade para <b>0/80 dias</b> e libera sua próxima estrela.
+                {t.evolution.ageStory}
               </p>
             </div>
 
@@ -1207,13 +1237,13 @@ export default function LandingPage({
             <div className="space-y-2">
               <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-amber-400">
                 <Gift size={15} />
-                <span>Programa de Afiliados</span>
+                <span>{t.referral.eyebrow}</span>
               </span>
               <h2 className="font-arcade text-2xl sm:text-3xl text-white">
-                INDIQUE E GANHE {REFERRAL_COMMISSION_PCT}% EM COINS
+                {t.referral.title}
               </h2>
               <p className="text-sm text-slate-400 max-w-2xl">
-                Convide novos comandantes para o CryptoZombies e receba <b className="text-amber-300">{REFERRAL_COMMISSION_PCT}% de comissão em Coins</b> sobre todas as compras de Baús em USDT feitas pelos seus indicados.
+                {t.referral.subtitle}
               </p>
             </div>
 
@@ -1225,21 +1255,21 @@ export default function LandingPage({
           {/* Como funciona */}
           <div className="grid sm:grid-cols-3 gap-4">
             <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-2">
-              <div className="text-xs font-arcade text-emerald-300">1. TENHA 1+ HERÓI</div>
+              <div className="text-xs font-arcade text-emerald-300">{t.referral.step1Title}</div>
               <p className="text-xs text-slate-300 leading-relaxed">
-                Para liberar seu link exclusivo de divulgação, é obrigatório possuir pelo menos <b>1 herói</b> ativo na sua conta.
+                {t.referral.step1Body}
               </p>
             </div>
             <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-2">
-              <div className="text-xs font-arcade text-purple-300">2. COMPARTILHE SEU LINK</div>
+              <div className="text-xs font-arcade text-purple-300">{t.referral.step2Title}</div>
               <p className="text-xs text-slate-300 leading-relaxed">
-                Copie seu link na aba <b>Indicações</b> do Perfil dentro do jogo e envie para seus amigos se cadastrarem por ele.
+                {t.referral.step2Body}
               </p>
             </div>
             <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-2">
-              <div className="text-xs font-arcade text-amber-300">3. GANHE {REFERRAL_COMMISSION_PCT}% EM COINS</div>
+              <div className="text-xs font-arcade text-amber-300">{t.referral.step3Title}</div>
               <p className="text-xs text-slate-300 leading-relaxed">
-                Sempre que um indicado comprar um Baú em USDT, <b>{REFERRAL_COMMISSION_PCT}% do valor</b> é creditado automaticamente em <b>Coins</b> para você.
+                {t.referral.step3Body}
               </p>
             </div>
           </div>
@@ -1288,7 +1318,7 @@ export default function LandingPage({
       )}
 
       {/* SEÇÃO 5: SIMULADOR DE ROI */}
-      {activeTab === 'roi' && <RoiSimulatorTab config={config} />}
+      {activeTab === 'roi' && <RoiSimulatorTab config={config} lang={lang} />}
       </main>
 
       {/* FOOTER */}
@@ -1297,7 +1327,7 @@ export default function LandingPage({
           <div className="flex items-center gap-2">
             <Skull size={16} className="text-amber-400" />
             <span className="font-arcade text-slate-300">CRYPTOZOMBIES</span>
-            <span>• Portal Oficial</span>
+            <span>• {t.footer.portal}</span>
           </div>
           <div className="flex items-center gap-3">
             {!authUser ? (

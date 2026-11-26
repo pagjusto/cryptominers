@@ -20,6 +20,7 @@ import { HERO_ROSTER, getHeroById, getRarityConfig } from '../data/heroRoster';
 import { DEFAULT_CRYPTO_ZOMBIES_CONFIG } from '../data/cryptoZombiesConfig';
 import { HOUSE_TIERS } from '../data/housesData';
 import { STAFF_PLANS } from '../data/staffCatalog';
+import { SITE_TRANSLATIONS } from '../data/siteTranslations';
 
 const RARITY_AVG_COINS_HOUR = {
   common: 1.4,
@@ -43,7 +44,8 @@ const SORTED_HERO_ROSTER = [...HERO_ROSTER].sort(
   (a, b) => (RARITY_ORDER[a.rarity] ?? 99) - (RARITY_ORDER[b.rarity] ?? 99)
 );
 
-export default function RoiSimulatorTab() {
+export default function RoiSimulatorTab({ lang = 'pt' }) {
+  const tr = (SITE_TRANSLATIONS[lang] || SITE_TRANSLATIONS.pt).roi;
   const chests = useMemo(
     () => Object.values(DEFAULT_CRYPTO_ZOMBIES_CONFIG.chests),
     []
@@ -208,14 +210,13 @@ export default function RoiSimulatorTab() {
       <div className="space-y-2">
         <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-purple-400">
           <Calculator size={14} />
-          <span>Planejamento Financeiro</span>
+          <span>{tr.eyebrow}</span>
         </span>
         <h2 className="font-arcade text-2xl sm:text-3xl text-white">
-          SIMULADOR DE INVESTIMENTO & ROI
+          {tr.title}
         </h2>
         <p className="text-sm text-slate-300 max-w-3xl">
-          Escolha o baú (1, 5, 10 ou 15 heróis), selecione os heróis e suas quantidades (até 15 no total),
-          defina a Base Médica e os suportes para calcular seu investimento total e retorno em dias.
+          {tr.subtitle}
         </p>
       </div>
 
@@ -544,9 +545,9 @@ export default function RoiSimulatorTab() {
           <div className="flex items-center justify-between border-b border-slate-800 pb-4">
             <div>
               <span className="text-[11px] uppercase tracking-wider text-purple-300 font-bold">
-                Resumo da Simulação
+                {tr.summaryLabel}
               </span>
-              <h3 className="font-arcade text-lg text-white">INVESTIMENTO & ROI</h3>
+              <h3 className="font-arcade text-lg text-white">{tr.summaryTitle}</h3>
             </div>
             <div className="px-3 py-1 rounded-xl bg-amber-500/15 border border-amber-400/40 text-xs font-mono text-amber-300 font-bold">
               1 Coin = US$ {minerRate.toFixed(2)}
@@ -554,7 +555,7 @@ export default function RoiSimulatorTab() {
           </div>
 
           <div className="px-3.5 py-2.5 rounded-xl bg-amber-500/10 border border-amber-500/35 text-[11px] text-amber-200 leading-relaxed">
-            <b className="text-amber-300">Importante:</b> Baseado em valores aproximados de retorno e não valores reais.
+            <b className="text-amber-300">{tr.importantLabel}</b> {tr.importantText}
           </div>
 
           {/* Detalhamento do Investimento */}
@@ -586,7 +587,7 @@ export default function RoiSimulatorTab() {
             </div>
 
             <div className="pt-3 border-t border-slate-800 flex items-center justify-between">
-              <span className="font-arcade text-xs text-slate-200">INVESTIMENTO TOTAL</span>
+              <span className="font-arcade text-xs text-slate-200">{tr.totalInvestment}</span>
               <span className="font-arcade text-xl text-emerald-400">
                 US$ {simulation.totalInvestedUsdt.toFixed(2)}
               </span>
@@ -598,29 +599,29 @@ export default function RoiSimulatorTab() {
             <div className="p-4 rounded-2xl bg-slate-950/90 border border-slate-800 space-y-1">
               <div className="flex items-center gap-1.5 text-[11px] text-amber-400 font-bold uppercase">
                 <Coins size={14} />
-                <span>Produção / Dia</span>
+                <span>{tr.dailyProduction}</span>
               </div>
               <div className="font-arcade text-base text-white">
                 {simulation.dailyCoins.toFixed(1)} Coins
               </div>
               <div className="text-xs font-mono text-emerald-400 font-bold">
-                ≈ US$ {simulation.dailyUsdt.toFixed(2)} / dia
+                ≈ US$ {simulation.dailyUsdt.toFixed(2)} / {lang === 'en' ? 'day' : 'dia'}
               </div>
             </div>
 
             <div className="p-4 rounded-2xl bg-purple-950/40 border border-purple-500/40 space-y-1">
               <div className="flex items-center gap-1.5 text-[11px] text-purple-300 font-bold uppercase">
                 <Clock size={14} />
-                <span>ROI (Payback)</span>
+                <span>{tr.roiPayback}</span>
               </div>
               <div className="font-arcade text-xl text-amber-300">
-                ~{simulation.roiDays} dias
+                ~{simulation.roiDays} {lang === 'en' ? 'days' : 'dias'}
               </div>
               <div className="text-xs font-mono text-purple-200">
-                {simulation.dailyRoiPct.toFixed(2)}% ao dia
+                {simulation.dailyRoiPct.toFixed(2)}% {lang === 'en' ? 'per day' : 'ao dia'}
               </div>
               <div className="text-[10px] text-amber-200/85 font-medium pt-0.5 leading-tight">
-                * Valor antes das taxas de saque
+                {tr.beforeFees}
               </div>
             </div>
           </div>
@@ -629,7 +630,7 @@ export default function RoiSimulatorTab() {
           <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-2.5">
             <div className="flex items-center gap-1.5 text-xs font-bold text-slate-300 uppercase">
               <TrendingUp size={14} className="text-emerald-400" />
-              <span>Projeção Acumulada</span>
+              <span>{tr.accumulated}</span>
             </div>
             <div className="grid grid-cols-3 gap-2 text-center text-xs">
               <div className="p-2 rounded-xl bg-slate-900 border border-slate-800">
