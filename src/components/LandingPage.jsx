@@ -97,7 +97,7 @@ export default function LandingPage({
     { id: 'home', label: 'Início' },
     { id: 'lore', label: 'História' },
     { id: 'gameplay', label: 'Jogabilidade' },
-    { id: 'heroes', label: 'Personagens' },
+    { id: 'heroes', label: 'Heróis' },
     { id: 'rates', label: 'Rates & Baús' },
     { id: 'bases', label: 'Bases' },
     { id: 'evolution', label: 'Evolução' },
@@ -635,7 +635,7 @@ export default function LandingPage({
                   Elenco Oficial
                 </span>
                 <h2 className="font-arcade text-2xl sm:text-3xl text-white">
-                  PERSONAGENS, CLASSES & AMEAÇAS
+                  HERÓIS, CLASSES & AMEAÇAS
                 </h2>
                 <p className="text-sm text-slate-400 max-w-2xl">
                   Os sobreviventes combatentes por raridade, os especialistas de suporte da Base e os inimigos do distrito.
