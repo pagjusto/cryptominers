@@ -1696,7 +1696,7 @@ export default function GameBoard({
 
         // 3. Se o herói está sem alvo ou não está minerando, busca a próxima criatura taticamente
         if (!miner.targetBlock || !miner.isMining) {
-          const decision = findNextHeroAction(miner, state.grid, state.miners, isCanyon);
+          const decision = findNextHeroAction(miner, state.grid, state.miners, isCanyon, state.enemies);
           if (decision.action === 'mine' && decision.targetBlock) {
             miner.targetBlock = decision.targetBlock;
             miner.targetDir = decision.targetDir;

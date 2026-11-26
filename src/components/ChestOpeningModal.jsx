@@ -38,8 +38,16 @@ export default function ChestOpeningModal({
   const chestConfig = config.chests[chest.id] || config.chests.miner;
   const heroesToMint = chestConfig.heroesCount || chest.heroesCount || 1;
 
-  const normalProbs = chestConfig.normalProbabilities || chestConfig.probabilities || { common: 80, rare: 15, epic: 4, legendary: 1 };
-  const adProbs = chestConfig.adBonusProbabilities || { common: 74, rare: 17, epic: 7, legendary: 2 };
+  const defaultProbs = {
+    common: 82.87,
+    rare: 10.36,
+    super_rare: 5.18,
+    epic: 1.04,
+    legendary: 0.51,
+    super_legend: 0.04
+  };
+  const normalProbs = chestConfig.normalProbabilities || chestConfig.probabilities || defaultProbs;
+  const adProbs = chestConfig.adBonusProbabilities || defaultProbs;
 
   const randomName = () => {
     const names = [

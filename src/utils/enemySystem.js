@@ -630,9 +630,9 @@ export function drawEnemyCharacter(ctx, enemy, now) {
     }
   }
 
-  // Zumbis dimensionados com o exato mesmo tamanho visível da Dra. Íris e dos heróis (~34px)
-  const drawW = isBoss ? Math.floor(TILE_SIZE * 0.82) : 52;
-  const drawH = isBoss ? Math.floor(TILE_SIZE * 0.75) : 52;
+  // Zumbis dimensionados com o exato mesmo tamanho visível da Dra. Íris e dos heróis (~34px); Boss 3x maior
+  const drawW = isBoss ? Math.floor(TILE_SIZE * 0.82 * 3) : 52;
+  const drawH = isBoss ? Math.floor(TILE_SIZE * 0.75 * 3) : 52;
 
   // Calibragem física exata para pés plantados no solo (elimina qualquer efeito de flutuação):
   // No sprite 640x640 do zumbi, a sola da bota está em Y=536 (536/640 = 0.8375)
@@ -648,8 +648,8 @@ export function drawEnemyCharacter(ctx, enemy, now) {
   ctx.translate(px + lungeX * 0.35, py);
   const shadowY = groundY;
   // Sombra compacta ajustada à largura das botas do zumbi (não parece poça nem aura)
-  const shadowRx = isBoss ? 20.0 : 11.0;
-  const shadowRy = isBoss ? 5.8 : 3.6;
+  const shadowRx = isBoss ? 54.0 : 11.0;
+  const shadowRy = isBoss ? 14.0 : 3.6;
 
   // Camada 1: Penumbra difusa suave
   ctx.beginPath();
@@ -670,8 +670,8 @@ export function drawEnemyCharacter(ctx, enemy, now) {
     ctx.save();
     ctx.translate(px + lungeX * 0.35, py);
     const auraPulse = 0.96 + Math.sin(now * 0.005) * 0.08;
-    const auraRx = 33 * auraPulse;
-    const auraRy = 26 * auraPulse;
+    const auraRx = 92 * auraPulse;
+    const auraRy = 72 * auraPulse;
 
     // Centrada no torso (y = -3), emanando estritamente por TRÁS do sprite opaco do Boss
     const bodyAura = ctx.createRadialGradient(0, -3, 4, 0, -3, auraRx);
@@ -790,8 +790,8 @@ export function drawEnemyCharacter(ctx, enemy, now) {
 
   if (isBoss) {
     // BARRA DE VIDA DO BOSS (Imponente no topo com ícone de caveira)
-    const barW = 38;
-    const barH = 4;
+    const barW = 84;
+    const barH = 6;
     const barX = px - barW / 2;
     const barY = py - drawH * 0.85;
 

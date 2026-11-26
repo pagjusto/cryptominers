@@ -334,72 +334,65 @@ export const MINER_ROSTER = [
   }
 ];
 
+const OFFICIAL_CHEST_CHANCES = [
+  { rarity: 'Comum', pct: '82,87%' },
+  { rarity: 'Raro', pct: '10,36%' },
+  { rarity: 'Super Raro', pct: '5,18%' },
+  { rarity: 'Épico', pct: '1,04%' },
+  { rarity: 'Lendário', pct: '0,51%' },
+  { rarity: 'Super Lendário', pct: '0,04%' }
+];
+
 export const MINT_CHEST_TYPES = [
   {
     id: 'miner',
-    name: 'Baú Sobrevivente',
+    name: 'Baú de Herói',
     heroesCount: 1,
     costUsdt: 31.31,
     costBcoin: 3131,
     description: 'Entrega 1 combatente sobrevivente. Ideal para iniciar sua equipe de defesa contra a horda.',
     icon: '🎖️',
+    image: '/items/hero_chest.png',
     color: '#38bdf8',
-    chances: [
-      { rarity: 'Comum', pct: '70%' },
-      { rarity: 'Raro', pct: '20%' },
-      { rarity: 'Épico', pct: '8%' },
-      { rarity: 'Lendário', pct: '2%' }
-    ]
+    chances: OFFICIAL_CHEST_CHANCES
   },
   {
     id: 'explorer',
-    name: 'Baú de Herói',
+    name: 'Baú de Herói 5x',
     heroesCount: 5,
     costUsdt: 156.57,
     costBcoin: 15657,
     popular: true,
-    description: 'Entrega 5 combatentes sobreviventes com chances elevadas de Raros e Épicos. Não concede moedas, apenas heróis.',
+    description: 'Entrega 5 combatentes sobreviventes com chances oficiais de drop. Não concede moedas, apenas heróis.',
     icon: '🗺️',
+    image: '/items/hero_chest.png',
     color: '#22c55e',
-    chances: [
-      { rarity: 'Comum', pct: '55%' },
-      { rarity: 'Raro', pct: '27%' },
-      { rarity: 'Épico', pct: '14%' },
-      { rarity: 'Lendário', pct: '4%' }
-    ]
+    chances: OFFICIAL_CHEST_CHANCES
   },
   {
     id: 'elite',
-    name: 'Baú Força de Elite',
+    name: 'Baú de Herói 10x',
     heroesCount: 10,
     costUsdt: 300.61,
     costBcoin: 30061,
-    description: 'Entrega 10 combatentes de elite. Probabilidade expressiva de Épicos e Lendários com desconto no pacote.',
+    description: 'Entrega 10 combatentes de elite com chances oficiais de drop e desconto no pacote.',
     icon: '🛡️',
+    image: '/items/hero_chest.png',
     color: '#a855f7',
-    chances: [
-      { rarity: 'Comum', pct: '40%' },
-      { rarity: 'Raro', pct: '30%' },
-      { rarity: 'Épico', pct: '22%' },
-      { rarity: 'Lendário', pct: '8%' }
-    ]
+    chances: OFFICIAL_CHEST_CHANCES
   },
   {
     id: 'legendary',
-    name: 'Baú Esquadrão Lendário',
+    name: 'Baú de Herói 15x',
     heroesCount: 15,
     costUsdt: 432.13,
     costBcoin: 43213,
     badge: 'TIME COMPLETO (15)',
-    description: 'Entrega 15 combatentes (capacidade máxima da equipe de defesa). Maior chance de Lendários do jogo!',
+    description: 'Entrega 15 combatentes (capacidade máxima da equipe de defesa) com chances oficiais de drop.',
     icon: '👑',
+    image: '/items/hero_chest.png',
     color: '#f59e0b',
-    chances: [
-      { rarity: 'Comum', pct: '25%' },
-      { rarity: 'Raro', pct: '30%' },
-      { rarity: 'Épico', pct: '30%' },
-      { rarity: 'Lendário', pct: '15%' }
-    ]
+    chances: OFFICIAL_CHEST_CHANCES
   }
 ];
 

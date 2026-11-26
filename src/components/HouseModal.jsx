@@ -223,7 +223,7 @@ export default function HouseModal({
                 </table>
               </div>
               <p className="mt-2 text-[10px] leading-relaxed text-slate-500">
-                Tempos oficiais para recuperação de 5% a 100% de PV. O Abrigo Básico recupera 142,5 PV por hora; o Reforçado aplica 125% e o Avançado 150%. Sem leito disponível, o herói permanece na fila.
+                Tempos oficiais para recuperação de 5% a 100% de PV. A Base Básica recupera 142,5 PV por hora; a Reforçada aplica 125% e a Avançada 150%. Sem leito disponível, o herói permanece na fila.
               </p>
             </div>
 
@@ -491,7 +491,7 @@ export default function HouseModal({
               A evolução é permanente e sequencial. Cada nível aumenta os leitos visíveis e a capacidade real do ambulatório.
             </p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {HOUSE_TIERS.filter(h => h.id !== 'none').map(house => {
                 const targetIndex = HOUSE_TIERS.findIndex(h => h.id === house.id);
                 const isOwned = currentHouse.id === house.id;
@@ -511,7 +511,7 @@ export default function HouseModal({
                   >
                     <div>
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-3xl">{house.icon}</span>
+                        <span className="text-xl">{house.icon}</span>
                         <span 
                           className="font-arcade text-xs font-bold px-2.5 py-0.5 rounded-lg border"
                           style={{
@@ -523,6 +523,16 @@ export default function HouseModal({
                           {house.slots} LEITOS • NÍVEL {house.level}
                         </span>
                       </div>
+
+                      {house.image && (
+                        <div className="w-full h-44 rounded-2xl bg-slate-900/90 border border-slate-800 p-1.5 mb-2.5 flex items-center justify-center overflow-hidden">
+                          <img
+                            src={house.image}
+                            alt={house.name}
+                            className="w-full h-full object-contain drop-shadow-lg scale-105"
+                          />
+                        </div>
+                      )}
 
                       <h4 className="font-tech font-bold text-sm text-white mb-1">
                         {house.name}
@@ -545,7 +555,7 @@ export default function HouseModal({
 
                       {isOwned ? (
                         <span className="text-xs font-tech font-bold text-emerald-400 flex items-center justify-center gap-1 py-1.5 bg-emerald-950/40 rounded-xl border border-emerald-500/30">
-                          <Check size={14} /> Casa Ativa do Jogador
+                          <Check size={14} /> Base Ativa do Jogador
                         </span>
                       ) : isPast ? (
                         <span className="text-xs font-tech text-slate-500 text-center block py-1.5 bg-slate-900/50 rounded-xl">

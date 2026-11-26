@@ -16,8 +16,9 @@ export const HOUSE_TIERS = [
   {
     id: 'basic',
     level: 1,
-    name: 'Abrigo Básico',
+    name: 'Base Básica',
     icon: '🛖',
+    image: '/assets/bases/base_basic.png',
     slots: 5,
     recoverySpeedPct: 100,
     fragmentCost: 0,
@@ -28,8 +29,9 @@ export const HOUSE_TIERS = [
   {
     id: 'reinforced',
     level: 2,
-    name: 'Abrigo Reforçado',
+    name: 'Base Reforçada',
     icon: '🏡',
+    image: '/assets/bases/base_reinforced.png',
     slots: 10,
     recoverySpeedPct: 125,
     fragmentCost: 20,
@@ -40,8 +42,9 @@ export const HOUSE_TIERS = [
   {
     id: 'advanced',
     level: 3,
-    name: 'Abrigo Avançado',
+    name: 'Base Avançada',
     icon: '🏠',
+    image: '/assets/bases/base_advanced.png',
     slots: 15,
     recoverySpeedPct: 150,
     fragmentCost: 40,

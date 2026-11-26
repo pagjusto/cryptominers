@@ -26,7 +26,8 @@ export default function HeroList({
   isArmorerActive = false,
   armorerContract = null,
   onOpenArmorerHire,
-  onOpenHouseModal
+  onOpenHouseModal,
+  onOpenEvolutionModal
 }) {
   const workingCount = miners.filter(m => m.status === 'work').length;
   const injuredCount = miners.filter(m => m.status === 'injured' || m.injuredAwaitingRescue).length;
@@ -94,17 +95,27 @@ export default function HeroList({
         </div>
       </div>
 
-      {/* 2. RELÍQUIAS MÍSTICAS (RECURSO BLOQUEADO) */}
-      <div className="grid grid-cols-1 gap-2.5 mb-3 shrink-0">
+      {/* 2. RELÍQUIAS MÍSTICAS (EM BREVE) & EVOLUÇÃO (80 DIAS) */}
+      <div className="grid grid-cols-2 gap-2 mb-3 shrink-0">
         <button
           type="button"
           disabled
-          title="Relíquias & Itens (Recurso bloqueado)"
-          className="flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-slate-900/60 border border-slate-800 text-slate-500 font-tech text-xs font-bold shadow-sm cursor-not-allowed opacity-60 select-none"
+          title="Relíquias & Itens (Em Breve)"
+          className="flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl bg-slate-900/60 border border-slate-800 text-slate-500 font-tech text-[11px] font-bold shadow-sm cursor-not-allowed opacity-60 select-none"
         >
           <Lock size={12} className="text-amber-500/60 shrink-0" />
           <Shield size={13} className="text-slate-500 shrink-0" />
-          <span>RELÍQUIAS (BLOQUEADO)</span>
+          <span className="truncate">RELÍQUIAS (Em Breve)</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={onOpenEvolutionModal}
+          title="Evolução & Rejuvenescimento de Heróis (80 dias)"
+          className="flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl bg-gradient-to-r from-purple-900/50 to-amber-900/35 hover:from-purple-800/60 hover:to-amber-800/50 border border-purple-500/45 text-purple-200 hover:text-white font-tech text-[11px] font-bold shadow-sm transition cursor-pointer"
+        >
+          <Sparkles size={13} className="text-amber-400 shrink-0" />
+          <span className="truncate">EVOLUÇÃO</span>
         </button>
       </div>
 
@@ -156,15 +167,15 @@ export default function HeroList({
         {/* JOHN ARMEIRO: SALA DE ARMAS & REPARO AUTOMÁTICO */}
         <div 
           onClick={onOpenArmorerHire}
-          className="p-2.5 sm:p-3 rounded-2xl bg-gradient-to-r from-amber-500/15 via-orange-500/15 to-amber-500/15 border border-amber-500/40 hover:border-amber-400 transition flex items-center justify-between group shadow-sm cursor-pointer"
+          className="p-2.5 sm:p-3 rounded-2xl bg-gradient-to-r from-emerald-500/15 via-teal-500/15 to-emerald-500/15 border border-emerald-500/40 hover:border-emerald-400 transition flex items-center justify-between group shadow-sm cursor-pointer"
         >
           <div className="flex items-center gap-3">
             <div 
               className="w-[46px] h-[46px] sm:w-[50px] sm:h-[50px] rounded-2xl border-2 shadow-lg shrink-0 bg-slate-950 flex items-center justify-center overflow-hidden transition-all duration-300"
               title="John Armeiro (Sala de Armas)"
               style={{
-                borderColor: '#f59e0b',
-                boxShadow: '0 0 12px rgba(245, 158, 11, 0.45)'
+                borderColor: '#ffffff',
+                boxShadow: '0 0 10px rgba(255, 255, 255, 0.45)'
               }}
             >
               <img 
@@ -175,10 +186,10 @@ export default function HeroList({
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-tech font-bold text-xs sm:text-sm text-amber-300">
+                <span className="font-tech font-bold text-xs sm:text-sm text-emerald-300">
                   John Armeiro • Sala de Armas
                 </span>
-                <span className="text-[9px] bg-amber-400/20 text-amber-300 px-1.5 py-0.2 rounded-full border border-amber-400/40 font-bold font-mono">
+                <span className="text-[9px] bg-emerald-400/20 text-emerald-300 px-1.5 py-0.2 rounded-full border border-emerald-400/40 font-bold font-mono">
                   SALA DE ARMAS
                 </span>
               </div>
@@ -197,11 +208,11 @@ export default function HeroList({
             }}
             className={`px-2.5 py-1.5 rounded-xl font-mono font-bold text-[10px] shrink-0 transition cursor-pointer flex items-center gap-1.5 shadow-md ${
               isArmorerActive
-                ? 'bg-amber-950/90 text-amber-300 border border-amber-500/60 hover:bg-amber-900/90'
-                : 'bg-amber-500 hover:bg-amber-400 text-slate-950 border border-amber-300 font-tech font-bold animate-pulse'
+                ? 'bg-emerald-950/90 text-emerald-300 border border-emerald-500/60 hover:bg-emerald-900/90'
+                : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 border border-emerald-300 font-tech font-bold animate-pulse'
             }`}
           >
-            <Wrench size={11} className={isArmorerActive ? 'text-amber-400' : 'text-slate-950'} />
+            <Wrench size={11} className={isArmorerActive ? 'text-emerald-400' : 'text-slate-950'} />
             <span>{isArmorerActive ? `OFICINA (${armorerDaysLeft}d)` : 'CONTRATAR'}</span>
           </button>
         </div>

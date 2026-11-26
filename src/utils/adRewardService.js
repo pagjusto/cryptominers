@@ -197,28 +197,41 @@ export function getAdminAuditLogs(limit = 20) {
 // 7. SORTEIO SEGURO DE RARIDADE (INDIVIDUAL POR HERÓI)
 // Aplica as tabelas oficiais de Probabilidades Normais vs. Com Anúncio
 export function rollHeroRarity(chestId = 'miner', isAdBonus = false, config = {}) {
+  const defaultProbs = {
+    common: 82.87,
+    rare: 10.36,
+    super_rare: 5.18,
+    epic: 1.04,
+    legendary: 0.51,
+    super_legend: 0.04
+  };
   const chest = config?.chests?.[chestId] || {
-    normalProbabilities: { common: 80, rare: 15, epic: 4, legendary: 1 },
-    adBonusProbabilities: { common: 74, rare: 17, epic: 7, legendary: 2 }
+    normalProbabilities: defaultProbs,
+    adBonusProbabilities: defaultProbs
   };
 
-  const probs = isAdBonus 
-    ? (chest.adBonusProbabilities || chest.probabilities) 
-    : (chest.normalProbabilities || chest.probabilities);
+  const probs = isAdBonus
+    ? (chest.adBonusProbabilities || chest.probabilities || defaultProbs)
+    : (chest.normalProbabilities || chest.probabilities || defaultProbs);
 
-  const pLeg = Number(probs.legendary) || 1;
-  const pEpic = Number(probs.epic) || 4;
-  const pRare = Number(probs.rare) || 15;
-  // common é o restante
+  const pSuperLeg = Number(probs.super_legend ?? 0.04);
+  const pLeg = Number(probs.legendary ?? 0.51);
+  const pEpic = Number(probs.epic ?? 1.04);
+  const pSuperRare = Number(probs.super_rare ?? 5.18);
+  const pRare = Number(probs.rare ?? 10.36);
 
-  // Sorteio com aleatoriedade segura
+  // Sorteio com aleatoriedade segura (0..100)
   const rand = Math.random() * 100;
 
-  if (rand < pLeg) {
+  if (rand < pSuperLeg) {
+    return 'super_legend';
+  } else if (rand < pSuperLeg + pLeg) {
     return 'legendary';
-  } else if (rand < (pLeg + pEpic)) {
+  } else if (rand < pSuperLeg + pLeg + pEpic) {
     return 'epic';
-  } else if (rand < (pLeg + pEpic + pRare)) {
+  } else if (rand < pSuperLeg + pLeg + pEpic + pSuperRare) {
+    return 'super_rare';
+  } else if (rand < pSuperLeg + pLeg + pEpic + pSuperRare + pRare) {
     return 'rare';
   }
   return 'common';

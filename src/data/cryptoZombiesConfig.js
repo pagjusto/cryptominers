@@ -15,7 +15,7 @@ export const DEFAULT_CRYPTO_ZOMBIES_CONFIG = {
   chests: {
     miner: {
       id: 'miner',
-      name: 'Baú Miner',
+      name: 'Baú de Herói',
       tagline: 'Recrutamento Individual',
       heroesCount: 1,
       costUsdt: 31.31,
@@ -24,27 +24,33 @@ export const DEFAULT_CRYPTO_ZOMBIES_CONFIG = {
       color: '#38bdf8',
       description: 'Entrega 1 herói minerador. Ideal para iniciar sua jornada na mina subterrânea.',
       normalProbabilities: {
-        common: 80,
-        rare: 15,
-        epic: 4,
-        legendary: 1
+        common: 82.87,
+        rare: 10.36,
+        super_rare: 5.18,
+        epic: 1.04,
+        legendary: 0.51,
+        super_legend: 0.04
       },
       adBonusProbabilities: {
-        common: 74,
-        rare: 17,
-        epic: 7,
-        legendary: 2
+        common: 82.87,
+        rare: 10.36,
+        super_rare: 5.18,
+        epic: 1.04,
+        legendary: 0.51,
+        super_legend: 0.04
       },
       probabilities: {
-        common: 80,
-        rare: 15,
-        epic: 4,
-        legendary: 1
+        common: 82.87,
+        rare: 10.36,
+        super_rare: 5.18,
+        epic: 1.04,
+        legendary: 0.51,
+        super_legend: 0.04
       }
     },
     explorer: {
       id: 'explorer',
-      name: 'Baú de Herói',
+      name: 'Baú de Herói 5x',
       tagline: 'Esquadrão de Heróis',
       heroesCount: 5,
       costUsdt: 156.57,
@@ -52,58 +58,70 @@ export const DEFAULT_CRYPTO_ZOMBIES_CONFIG = {
       image: '/items/hero_chest.png',
       color: '#22c55e',
       popular: true,
-      description: 'Entrega 5 heróis combatentes com chances elevadas de heróis Raros e Épicos. Não concede recompensa em moedas, apenas heróis.',
+      description: 'Entrega 5 heróis combatentes com chances oficiais de drop. Não concede recompensa em moedas, apenas heróis.',
       normalProbabilities: {
-        common: 76,
-        rare: 16,
-        epic: 6,
-        legendary: 2
+        common: 82.87,
+        rare: 10.36,
+        super_rare: 5.18,
+        epic: 1.04,
+        legendary: 0.51,
+        super_legend: 0.04
       },
       adBonusProbabilities: {
-        common: 69,
-        rare: 18,
-        epic: 9,
-        legendary: 4
+        common: 82.87,
+        rare: 10.36,
+        super_rare: 5.18,
+        epic: 1.04,
+        legendary: 0.51,
+        super_legend: 0.04
       },
       probabilities: {
-        common: 76,
-        rare: 16,
-        epic: 6,
-        legendary: 2
+        common: 82.87,
+        rare: 10.36,
+        super_rare: 5.18,
+        epic: 1.04,
+        legendary: 0.51,
+        super_legend: 0.04
       }
     },
     elite: {
       id: 'elite',
-      name: 'Baú Elite',
+      name: 'Baú de Herói 10x',
       tagline: 'Companhia de Elite',
       heroesCount: 10,
       costUsdt: 300.61,
       icon: '🛡️',
       image: '/items/hero_chest.png',
       color: '#a855f7',
-      description: 'Entrega 10 heróis mineradores. Probabilidade expressiva de Épicos e Lendários com desconto no pacote.',
+      description: 'Entrega 10 heróis mineradores com chances oficiais de drop e desconto no pacote.',
       normalProbabilities: {
-        common: 72,
-        rare: 17,
-        epic: 8,
-        legendary: 3
+        common: 82.87,
+        rare: 10.36,
+        super_rare: 5.18,
+        epic: 1.04,
+        legendary: 0.51,
+        super_legend: 0.04
       },
       adBonusProbabilities: {
-        common: 64,
-        rare: 19,
-        epic: 11,
-        legendary: 6
+        common: 82.87,
+        rare: 10.36,
+        super_rare: 5.18,
+        epic: 1.04,
+        legendary: 0.51,
+        super_legend: 0.04
       },
       probabilities: {
-        common: 72,
-        rare: 17,
-        epic: 8,
-        legendary: 3
+        common: 82.87,
+        rare: 10.36,
+        super_rare: 5.18,
+        epic: 1.04,
+        legendary: 0.51,
+        super_legend: 0.04
       }
     },
     legendary: {
       id: 'legendary',
-      name: 'Baú Legendary',
+      name: 'Baú de Herói 15x',
       tagline: 'Full Team (Mina Completa 15/15)',
       heroesCount: 15,
       costUsdt: 432.13,
@@ -111,24 +129,30 @@ export const DEFAULT_CRYPTO_ZOMBIES_CONFIG = {
       image: '/items/hero_chest.png',
       color: '#f59e0b',
       badge: 'TIME COMPLETO (15)',
-      description: 'Entrega 15 heróis mineradores (capacidade máxima de trabalho simultâneo). Maior chance de Lendários do jogo!',
+      description: 'Entrega 15 heróis mineradores (capacidade máxima de trabalho simultâneo) com chances oficiais de drop.',
       normalProbabilities: {
-        common: 68,
-        rare: 18,
-        epic: 9,
-        legendary: 5
+        common: 82.87,
+        rare: 10.36,
+        super_rare: 5.18,
+        epic: 1.04,
+        legendary: 0.51,
+        super_legend: 0.04
       },
       adBonusProbabilities: {
-        common: 59,
-        rare: 20,
-        epic: 13,
-        legendary: 8
+        common: 82.87,
+        rare: 10.36,
+        super_rare: 5.18,
+        epic: 1.04,
+        legendary: 0.51,
+        super_legend: 0.04
       },
       probabilities: {
-        common: 68,
-        rare: 18,
-        epic: 9,
-        legendary: 5
+        common: 82.87,
+        rare: 10.36,
+        super_rare: 5.18,
+        epic: 1.04,
+        legendary: 0.51,
+        super_legend: 0.04
       }
     }
   },
@@ -147,45 +171,37 @@ export const DEFAULT_CRYPTO_ZOMBIES_CONFIG = {
     },
     basic: {
       id: 'basic',
-      name: 'Abrigo Básico',
+      name: 'Base Básica',
       slots: 5,
       recoverySpeedMultiplier: 1.0, // 100% de velocidade base
       costUsdt: 25,
       icon: '🛖',
+      image: '/assets/bases/base_basic.png',
       color: '#38bdf8',
       description: 'Acomoda até 5 sobreviventes em tratamento simultaneamente com 100% da velocidade padrão.'
     },
     reinforced: {
       id: 'reinforced',
-      name: 'Abrigo Reforçado',
+      name: 'Base Reforçada',
       slots: 10,
       recoverySpeedMultiplier: 1.25, // 125%
       costUsdt: 50,
       icon: '🏡',
+      image: '/assets/bases/base_reinforced.png',
       color: '#22c55e',
       description: 'Acomoda até 10 personagens com recuperação 125% (+25% mais veloz que a básica).'
     },
     advanced: {
       id: 'advanced',
-      name: 'Abrigo Avançado',
+      name: 'Base Avançada',
       slots: 15,
       recoverySpeedMultiplier: 1.50, // 150%
       costUsdt: 85,
       icon: '🏠',
+      image: '/assets/bases/base_advanced.png',
       color: '#f59e0b',
       popular: true,
       description: 'Acomoda até 15 personagens com recuperação 150% (+50% mais rápida). Ideal para esquadrões ativos.'
-    },
-    legendary: {
-      id: 'legendary',
-      name: 'Abrigo Lendário',
-      slots: 20,
-      recoverySpeedMultiplier: 2.00, // 200% (2x mais veloz)
-      costUsdt: 135,
-      icon: '🏰',
-      color: '#ec4899',
-      badge: 'MÁXIMO (2.0x)',
-      description: 'Acomoda até 20 personagens. Recuperação 200% (o dobro da velocidade da casa básica).'
     }
   },
 
@@ -219,6 +235,20 @@ export const DEFAULT_CRYPTO_ZOMBIES_CONFIG = {
       baseRecoveryMinutes: 400,
       badge: 'RARO'
     },
+    super_rare: {
+      rarityName: 'Super Raro',
+      color: '#38bdf8',
+      basePowerMin: 5.5,
+      basePowerMax: 9.5,
+      coinsPerHourMin: 2.90,
+      coinsPerHourMax: 3.40,
+      maxEnergy: 130,
+      energyDrainPerHour: 12,
+      energyDrainPerMinute: 0.20,
+      recoveryPerHourReinforced: 19,
+      baseRecoveryMinutes: 400,
+      badge: 'SUPER RARO'
+    },
     epic: {
       rarityName: 'Épico',
       color: '#a855f7',
@@ -246,6 +276,20 @@ export const DEFAULT_CRYPTO_ZOMBIES_CONFIG = {
       recoveryPerHourReinforced: 24, // Regra Oficial Abrigo Reforçado: 24/h
       baseRecoveryMinutes: 400,
       badge: 'LENDÁRIO'
+    },
+    super_legend: {
+      rarityName: 'Super Lendário',
+      color: '#ef4444',
+      basePowerMin: 22.0,
+      basePowerMax: 32.0,
+      coinsPerHourMin: 7.80,
+      coinsPerHourMax: 9.20,
+      maxEnergy: 180,
+      energyDrainPerHour: 12,
+      energyDrainPerMinute: 0.20,
+      recoveryPerHourReinforced: 26,
+      baseRecoveryMinutes: 400,
+      badge: 'SUPER LENDÁRIO'
     }
   },
 
@@ -330,8 +374,32 @@ export function getCryptoZombiesConfig() {
       ...DEFAULT_CRYPTO_ZOMBIES_CONFIG,
       ...parsed,
       minerCoinUsdtRate: effectiveRate,
-      chests: { ...DEFAULT_CRYPTO_ZOMBIES_CONFIG.chests, ...(parsed.chests || {}) },
-      houses: { ...DEFAULT_CRYPTO_ZOMBIES_CONFIG.houses, ...(parsed.houses || {}) },
+      chests: Object.keys(DEFAULT_CRYPTO_ZOMBIES_CONFIG.chests).reduce((acc, key) => {
+        const defChest = DEFAULT_CRYPTO_ZOMBIES_CONFIG.chests[key];
+        const savedChest = parsed.chests?.[key] || {};
+        acc[key] = {
+          ...defChest,
+          ...savedChest,
+          name: defChest.name,
+          image: defChest.image,
+          normalProbabilities: defChest.normalProbabilities,
+          adBonusProbabilities: defChest.adBonusProbabilities,
+          probabilities: defChest.probabilities
+        };
+        return acc;
+      }, {}),
+      houses: Object.keys(DEFAULT_CRYPTO_ZOMBIES_CONFIG.houses).reduce((acc, key) => {
+        const defHouse = DEFAULT_CRYPTO_ZOMBIES_CONFIG.houses[key];
+        const savedHouse = parsed.houses?.[key] || {};
+        acc[key] = {
+          ...defHouse,
+          ...savedHouse,
+          name: defHouse.name,
+          image: defHouse.image,
+          description: defHouse.description
+        };
+        return acc;
+      }, {}),
       rarityAttributes: { ...DEFAULT_CRYPTO_ZOMBIES_CONFIG.rarityAttributes, ...(parsed.rarityAttributes || {}) },
       upgradesConfig: {
         ...DEFAULT_CRYPTO_ZOMBIES_CONFIG.upgradesConfig,

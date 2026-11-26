@@ -167,8 +167,12 @@ export default function SummonModal({
         {/* FEEDBACK PÓS-COMPRA: BAÚ ENVIADO AO INVENTÁRIO */}
         {justPurchasedChest ? (
           <div className="py-6 flex flex-col items-center justify-center text-center animate-scaleUp max-w-lg mx-auto">
-            <div className="w-24 h-24 rounded-3xl bg-amber-500/15 border-2 border-amber-400/50 flex items-center justify-center text-5xl mb-4 shadow-xl animate-bounce">
-              {justPurchasedChest.icon || '📦'}
+            <div className="w-24 h-24 rounded-3xl bg-amber-500/15 border-2 border-amber-400/50 p-2 flex items-center justify-center mb-4 shadow-xl animate-bounce">
+              <img
+                src={justPurchasedChest.image || '/items/hero_chest.png'}
+                alt={justPurchasedChest.name || 'Baú de Herói'}
+                className="w-full h-full object-contain drop-shadow-lg"
+              />
             </div>
 
             <span className="inline-block px-3 py-1 rounded-full text-xs font-bold font-arcade uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 mb-2">
@@ -461,7 +465,13 @@ export default function SummonModal({
                       >
                         <div>
                           <div className="flex items-center justify-between mb-1.5">
-                            <span className="text-2xl">{chest.icon}</span>
+                            <div className="w-11 h-11 rounded-xl bg-amber-500/15 border border-amber-500/30 p-1 flex items-center justify-center shrink-0">
+                              <img
+                                src={chest.image || '/items/hero_chest.png'}
+                                alt={chest.name}
+                                className="w-full h-full object-contain drop-shadow"
+                              />
+                            </div>
                             <span className="font-arcade text-xs font-bold px-2 py-0.5 rounded-md border text-emerald-300 bg-emerald-500/20 border-emerald-500/30">
                               {paymentCurrency === 'miner' ? `${costMiner.toLocaleString('pt-BR')} Coins` : `$${costUsdt} USDT`}
                             </span>

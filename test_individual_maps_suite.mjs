@@ -144,8 +144,8 @@ if (
 console.log('\nTESTE 8: Compatibilidade com 15 heróis minerando simultaneamente...');
 // Verifica se o mapa possui células suficientes e não bloqueia 15 heróis
 const validGridCells = sampleMap.deposits.length;
-if (validGridCells === MAX_DEPOSITS_PER_MAP && sampleMap.grid.length === 11 && sampleMap.grid[0].length === 15) {
-  console.log(`✅ TESTE 8 APROVADO: Grid 15x11 e ${MAX_DEPOSITS_PER_MAP} jazidas distribuídas comportam 15 heróis em escavação simultânea.`);
+if (validGridCells === MAX_DEPOSITS_PER_MAP && sampleMap.grid.length === 14 && sampleMap.grid[0].length === 19) {
+  console.log(`✅ TESTE 8 APROVADO: Grid 19x14 e ${MAX_DEPOSITS_PER_MAP} jazidas distribuídas comportam 15 heróis em escavação simultânea.`);
   passedTests++;
 } else {
   console.error('❌ TESTE 8 FALHOU');

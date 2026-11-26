@@ -23,7 +23,10 @@ import {
   Flame,
   Users,
   Pin,
-  ChevronDown
+  ChevronDown,
+  LogOut,
+  Globe,
+  Crosshair
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { MINES, INITIAL_MINERS, MINER_CLASSES } from './data/minersData';
@@ -48,9 +51,14 @@ import {
 import GameBoard from './components/GameBoard';
 import ZombieSurvivalBoard from './components/ZombieSurvivalBoard';
 import HeroList from './components/HeroList';
+import HeroEvolutionModal from './components/HeroEvolutionModal';
 import SummonModal from './components/SummonModal';
 import WalletModal from './components/WalletModal';
 import UserProfileModal from './components/UserProfileModal';
+import LandingPage from './components/LandingPage';
+import AuthModal from './components/AuthModal';
+import SpawnZonesModal from './components/SpawnZonesModal';
+import { getCurrentAuthUser, subscribeAuthChanges, signOutUser } from './services/authService';
 import ConstructionChestFoundModal from './components/ConstructionChestFoundModal';
 import RoiSimulatorModal from './components/RoiSimulatorModal';
 import AdminConfigModal from './components/AdminConfigModal';
@@ -341,6 +349,7 @@ export default function App() {
     return resolveHouseTier(savedHouseId).id;
   });
   const [isHouseOpen, setIsHouseOpen] = useState(false);
+  const [isEvolutionModalOpen, setIsEvolutionModalOpen] = useState(false);
 
   // John Armeiro (Sala de Armas & Manutenção Automática de Armas)
   const [armorerContract, setArmorerContract] = useState(() => getStaffContract('armeiro'));
@@ -459,7 +468,49 @@ export default function App() {
   }, [isNavPinned]);
   const [cryptoZombiesConfig, setCryptoZombiesConfig] = useState(() => getCryptoZombiesConfig());
   const [walletState, setWalletState] = useState(() => getSavedWalletState());
-  const activePlayerId = walletState?.address || DEFAULT_PLAYER_ID;
+  const [authUser, setAuthUser] = useState(null);
+  const [showGameView, setShowGameView] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authModalMode, setAuthModalMode] = useState('login');
+  const [isSpawnZonesOpen, setIsSpawnZonesOpen] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+    getCurrentAuthUser().then((user) => {
+      if (mounted) setAuthUser(user);
+    });
+    const unsubscribe = subscribeAuthChanges((user) => {
+      if (mounted) setAuthUser(user);
+    });
+    return () => {
+      mounted = false;
+      unsubscribe();
+    };
+  }, []);
+
+  const handleOpenAuth = (mode = 'login') => {
+    setAuthModalMode(mode);
+    setIsAuthModalOpen(true);
+  };
+
+  const handleAuthSuccess = (user) => {
+    setAuthUser(user);
+    setShowGameView(true);
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOutUser();
+    } catch (err) {
+      console.warn('[Auth] Erro ao sair:', err);
+    } finally {
+      setAuthUser(null);
+      setShowGameView(false);
+    }
+  };
+
+  const cloudAccountKey = walletState?.address || (authUser?.id ? `auth_${authUser.id}` : null);
+  const activePlayerId = cloudAccountKey || DEFAULT_PLAYER_ID;
 
   // Sincroniza o mapa individual se a conta do jogador for alterada
   useEffect(() => {
@@ -748,6 +799,51 @@ export default function App() {
     return true;
   };
 
+  // Evolução de heróis com 80 dias de serviço ativo: Poções + Fragmentos + Coins.
+  const handleEvolveHero = (heroId, recipe) => {
+    if (!heroId || !recipe) return false;
+    if (
+      rejuvenationPotions < recipe.potions ||
+      constructionFragments < recipe.fragments ||
+      bcoin < recipe.coins
+    ) {
+      return false;
+    }
+
+    let evolved = false;
+    setMiners((prev) =>
+      prev.map((m) => {
+        if (m.id !== heroId) return m;
+        const currentStars = m.stars || 1;
+        if (currentStars >= 3) return m;
+        evolved = true;
+        const bonusFactor = 1 + (recipe.powerBonusPct || 5) / 100;
+        const basePower = Number(m.power || m.basePower || 1);
+        return {
+          ...m,
+          stars: recipe.nextStars || currentStars + 1,
+          power: parseFloat((basePower * bonusFactor).toFixed(2)),
+          activeDays: 0,
+          createdAt: Date.now(),
+          energy: m.maxEnergy || 100,
+          weaponDurability: 100,
+        };
+      })
+    );
+
+    if (!evolved) return false;
+
+    setRejuvenationPotions((prev) => Math.max(0, prev - recipe.potions));
+    const nextFragments = Math.max(0, constructionFragments - recipe.fragments);
+    saveStoredConstructionFragments(nextFragments);
+    setConstructionFragments(nextFragments);
+    const nextMnc = parseFloat(Math.max(0, bcoin - recipe.coins).toFixed(3));
+    setBcoin(nextMnc);
+    localStorage.setItem('crypto_miners_bcoin', nextMnc.toString());
+    try { sfx.levelUp(); } catch (e) {}
+    return true;
+  };
+
   // Baús de Heróis adquiridos em USDT guardados no Inventário
   const [purchasedChests, setPurchasedChests] = useState(() => {
     const saved = localStorage.getItem('crypto_miners_purchased_chests');
@@ -993,10 +1089,10 @@ export default function App() {
   useEffect(() => {
     let isMounted = true;
     async function initCloudSync() {
-      if (!isSupabaseConfigured || !walletState?.address) return;
+      if (!isSupabaseConfigured || !cloudAccountKey) return;
       try {
         setIsCloudSyncing(true);
-        const cloudData = await loadPlayerDataFromSupabase(walletState.address);
+        const cloudData = await loadPlayerDataFromSupabase(cloudAccountKey);
         if (cloudData && isMounted) {
           if (cloudData.profile?.mncBalance !== undefined) {
             setBcoin(cloudData.profile.mncBalance);
@@ -1025,7 +1121,7 @@ export default function App() {
           setCloudStatus('synced');
         } else if (isMounted) {
           // Primeira inicialização deste jogador no Supabase: migra os dados locais atuais
-          await syncProfileToSupabase(walletState.address, {
+          await syncProfileToSupabase(cloudAccountKey, {
             mncBalance: bcoin,
             usdtBalance: walletState.usdtBalance,
             totalInvested,
@@ -1033,9 +1129,9 @@ export default function App() {
             currentHouseId
           });
           if (miners && miners.length > 0) {
-            await syncHeroesToSupabase(walletState.address, miners);
+            await syncHeroesToSupabase(cloudAccountKey, miners);
           }
-          await syncInventoryToSupabase(walletState.address, {
+          await syncInventoryToSupabase(cloudAccountKey, {
             purchasedChests,
             gearStash
           });
@@ -1049,15 +1145,15 @@ export default function App() {
     }
     initCloudSync();
     return () => { isMounted = false; };
-  }, [walletState?.address]);
+  }, [cloudAccountKey]);
 
   // 2. Sincronização periódica inteligente (Debounce de 4 segundos para evitar sobrecarga)
   useEffect(() => {
-    if (!isSupabaseConfigured || !walletState?.address) return;
+    if (!isSupabaseConfigured || !cloudAccountKey) return;
 
     const timer = setTimeout(async () => {
       try {
-        await syncProfileToSupabase(walletState.address, {
+        await syncProfileToSupabase(cloudAccountKey, {
           mncBalance: bcoin,
           usdtBalance: walletState.usdtBalance,
           totalInvested,
@@ -1065,9 +1161,9 @@ export default function App() {
           currentHouseId
         });
         if (miners && miners.length > 0) {
-          await syncHeroesToSupabase(walletState.address, miners);
+          await syncHeroesToSupabase(cloudAccountKey, miners);
         }
-        await syncInventoryToSupabase(walletState.address, {
+        await syncInventoryToSupabase(cloudAccountKey, {
           purchasedChests,
           gearStash
         });
@@ -1078,7 +1174,7 @@ export default function App() {
     }, 4000);
 
     return () => clearTimeout(timer);
-  }, [bcoin, miners, totalInvested, studioRevenue, currentHouseId, purchasedChests, gearStash, walletState?.address]);
+  }, [bcoin, miners, totalInvested, studioRevenue, currentHouseId, purchasedChests, gearStash, cloudAccountKey]);
 
   const toggleSound = () => {
     const nextState = !soundEnabled;
@@ -1592,6 +1688,26 @@ export default function App() {
     });
   };
 
+  if (!showGameView || !authUser) {
+    return (
+      <>
+        <LandingPage
+          authUser={authUser}
+          onOpenAuth={handleOpenAuth}
+          onEnterGame={() => setShowGameView(true)}
+          onSignOut={handleSignOut}
+          config={cryptoZombiesConfig}
+        />
+        <AuthModal
+          isOpen={isAuthModalOpen}
+          onClose={() => setIsAuthModalOpen(false)}
+          initialMode={authModalMode}
+          onAuthSuccess={handleAuthSuccess}
+        />
+      </>
+    );
+  }
+
   return (
     <div className="flex flex-col h-screen w-screen bg-slate-950 text-slate-100 font-tech overflow-hidden select-none">
       
@@ -1705,16 +1821,24 @@ export default function App() {
             <span>CATÁLOGO</span>
           </button>
 
-          {/* NOVO MENU: ESTATÍSTICAS & RETORNO DE ROI */}
+          {/* BOTÃO ROI EM TEMPO REAL (ESTATÍSTICAS REAIS DA CONTA) */}
           <button
             onClick={() => setIsStatisticsOpen(true)}
+            title="Estatísticas e Cálculo de ROI em Tempo Real (baseado nos seus upgrades e investimentos)"
             className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-purple-950/70 hover:bg-purple-900/80 text-purple-300 border border-purple-500/50 font-tech text-xs font-bold transition cursor-pointer shadow-md shadow-purple-950/40 active:scale-95"
           >
             <BarChart3 size={14} className="text-purple-400" />
-            <span>ESTATÍSTICAS</span>
-            <span className="px-1 py-0.1 rounded-full bg-purple-500 text-slate-950 text-[9px] font-bold font-mono">
-              ROI
-            </span>
+            <span>ROI REAL</span>
+          </button>
+
+          {/* BOTÃO RESPAWN (MAPA DE ZUMBIS & HERÓIS) */}
+          <button
+            onClick={() => setIsSpawnZonesOpen(true)}
+            title="Visualizar zonas de respawn de Zumbis e Heróis"
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-emerald-950/70 hover:bg-emerald-900/80 text-emerald-300 border border-emerald-500/40 font-tech text-xs font-bold transition cursor-pointer shadow-sm active:scale-95"
+          >
+            <Crosshair size={14} className="text-emerald-400" />
+            <span>RESPAWN</span>
           </button>
 
           {/* BOTÃO EQUIPE (JANELA FLUTUANTE) */}
@@ -1826,6 +1950,25 @@ export default function App() {
             <Pin size={13} className={isNavPinned ? 'rotate-45 text-amber-400' : ''} />
             <span className="hidden xl:inline text-[9px]">{isNavPinned ? 'FIXO' : 'AUTO'}</span>
           </button>
+
+          {/* Voltar ao Portal / Site */}
+          <button
+            onClick={() => setShowGameView(false)}
+            title="Voltar para a página inicial do site"
+            className="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition border border-slate-700 cursor-pointer text-xs font-bold"
+          >
+            <Globe size={13} className="text-sky-400" />
+            <span className="hidden xl:inline text-[9px]">SITE</span>
+          </button>
+
+          {/* Sair da Conta */}
+          <button
+            onClick={handleSignOut}
+            title="Sair da conta"
+            className="p-1.5 rounded-lg bg-slate-800 hover:bg-rose-950/70 text-slate-300 hover:text-rose-300 transition border border-slate-700 hover:border-rose-500/40 cursor-pointer"
+          >
+            <LogOut size={15} />
+          </button>
         </div>
       </header>
 
@@ -1863,20 +2006,13 @@ export default function App() {
                   🧟 <b className="text-white">{mapData?.deposits?.filter(d => d.type === 'zombie' && !d.isCompleted).length ?? 20}</b>/30 Zumbis
                 </span>
 
-                {/* STATUS DO BOSS: 2X AO DIA EM HORÁRIOS RANDOMIZADOS */}
-                {bossScheduleState.isBossActiveNow ? (
+                {/* STATUS DO BOSS */}
+                {bossScheduleState.isBossActiveNow && (
                   <span 
                     className="flex items-center gap-1 text-xs bg-red-950/90 text-red-200 border border-red-500/80 px-2 py-0.5 rounded-md font-bold shadow-lg animate-pulse"
                     title="Invasão do Boss ativa agora! Derrote-o com sua equipe."
                   >
-                    💀 Boss: <b className="text-amber-300">ATIVO</b> ({bossScheduleState.defeatedCount + 1}/2 hoje)
-                  </span>
-                ) : (
-                  <span 
-                    className="flex items-center gap-1 text-xs bg-slate-900/90 text-amber-300 border border-amber-500/50 px-2 py-0.5 rounded-md font-bold shadow-sm"
-                    title={`Horários diários randomizados (2x/dia). Próxima invasão: ${bossScheduleState.nextEventTimeStr}`}
-                  >
-                    💀 Boss às <b>{bossScheduleState.nextEventTimeStr}</b> ({bossScheduleState.countdownText})
+                    💀 Boss: <b className="text-amber-300">ATIVO</b>
                   </span>
                 )}
 
@@ -1927,6 +2063,14 @@ export default function App() {
                   title="Desenhar bloqueios e caminhos diretamente no mapa (Clique e arraste)"
                 >
                   🧱 Desenhar Bloqueios
+                </button>
+
+                <button
+                  onClick={() => setIsSpawnZonesOpen(true)}
+                  className="text-[11px] bg-emerald-950/90 hover:bg-emerald-900 border border-emerald-500/60 text-emerald-200 hover:text-white px-2 py-0.5 rounded-md cursor-pointer transition-all active:scale-95 flex items-center gap-1 font-bold shadow"
+                  title="Visualizar e configurar zonas de respawn de Zumbis e Heróis"
+                >
+                  🎯 Respawns
                 </button>
 
                 <button
@@ -2029,6 +2173,7 @@ export default function App() {
               armorerContract={armorerContract}
               onOpenArmorerHire={() => setIsArmorerHireOpen(true)}
               onOpenHouseModal={() => setIsHouseOpen(true)}
+              onOpenEvolutionModal={() => setIsEvolutionModalOpen(true)}
             />
           </aside>
         )}
@@ -2057,6 +2202,15 @@ export default function App() {
         bcoinBalance={bcoin}
         minersCount={miners.length}
         onBatchMintPackage={handleBatchMintPackage}
+      />
+
+      {/* MODAL DE ZONAS DE RESPAWN (ZUMBIS & HERÓIS) */}
+      <SpawnZonesModal
+        isOpen={isSpawnZonesOpen}
+        onClose={() => setIsSpawnZonesOpen(false)}
+        miners={miners}
+        mapData={mapData}
+        houseLevel={currentHouse?.slots >= 15 ? 3 : currentHouse?.slots >= 10 ? 2 : 1}
       />
 
       {/* MODAL DA CASA DOS SOBREVIVENTES (HOUSE SYSTEM) */}
@@ -2322,11 +2476,23 @@ export default function App() {
                 armorerContract={armorerContract}
                 onOpenArmorerHire={() => setIsArmorerHireOpen(true)}
                 onOpenHouseModal={() => setIsHouseOpen(true)}
+                onOpenEvolutionModal={() => setIsEvolutionModalOpen(true)}
               />
             </div>
           </div>
         </div>
       )}
+
+      {/* MODAL DE EVOLUÇÃO DE HERÓIS (80 DIAS) */}
+      <HeroEvolutionModal
+        isOpen={isEvolutionModalOpen}
+        onClose={() => setIsEvolutionModalOpen(false)}
+        miners={miners}
+        bcoin={bcoin}
+        constructionFragments={constructionFragments}
+        rejuvenationPotions={rejuvenationPotions}
+        onEvolveHero={handleEvolveHero}
+      />
 
     </div>
   );

@@ -315,6 +315,7 @@ export function getPlayerMap(playerId = DEFAULT_PLAYER_ID) {
     }
 
     // MIGRAÇÃO AUTOMÁTICA & HORDA INFINITA: Garante SEMPRE exatamente 20 criaturas ativas no mapa
+    const hasWrongDimensions = parsed.grid.length !== GRID_ROWS || (parsed.grid[0]?.length !== GRID_COLS);
     const hasOldDeposits = parsed.deposits.some(d => 
       d.type === 'stone' || d.type === 'gold' || d.type === 'diamond' || d.type === 'emerald'
     );
@@ -322,7 +323,7 @@ export function getPlayerMap(playerId = DEFAULT_PLAYER_ID) {
     const hasAnyInBuilding = parsed.deposits.some(d => !d.isCompleted && isCityBuilding(d.c, d.r));
     const hasOldPillars = parsed.grid && parsed.grid[2] && parsed.grid[2][2] === BLOCK_BEDROCK && !isCityBuilding(2, 2);
 
-    if (hasOldDeposits || !hasZombies || hasAnyInBuilding || hasOldPillars) {
+    if (hasWrongDimensions || hasOldDeposits || !hasZombies || hasAnyInBuilding || hasOldPillars) {
       console.log('🔄 Migrando mapa individual para nova geometria da cidade de sobrevivência...');
       return generatePlayerMap(playerId, parsed.cycleNumber || 1);
     }
