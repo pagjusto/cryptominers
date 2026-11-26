@@ -422,13 +422,13 @@ export default function LandingPage({
       <section id="jogabilidade" className="max-w-7xl mx-auto px-4 sm:px-6 py-16 space-y-8">
         <div className="space-y-2">
           <span className="text-xs font-bold uppercase tracking-widest text-amber-400">
-            Como Funciona
+            {t.gameplay.eyebrow}
           </span>
           <h2 className="font-arcade text-2xl sm:text-3xl text-white">
-            JOGABILIDADE & SISTEMAS DA BASE
+            {t.gameplay.title}
           </h2>
           <p className="text-sm text-slate-400 max-w-2xl">
-            Um ciclo completo de combate tático, gerenciamento de energia, reparo de armas e economia sustentável.
+            {t.gameplay.subtitle}
           </p>
         </div>
 
@@ -437,10 +437,13 @@ export default function LandingPage({
             <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400">
               <Pickaxe size={20} />
             </div>
-            <h3 className="font-arcade text-sm text-white">1. Sobrevivência & Coleta de recursos</h3>
+            <h3 className="font-arcade text-sm text-white">
+              {lang === 'en' ? '1. Survival & Resource Gathering' : '1. Sobrevivência & Coleta de recursos'}
+            </h3>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Envie até {maxActiveMiners} heróis para a cidade infectada. Eles eliminam zumbis,
-              destroem depósitos e coletam Coins continuamente.
+              {lang === 'en'
+                ? `Deploy up to ${maxActiveMiners} heroes into the infected city. They eliminate zombies, destroy caches, and gather Coins continuously.`
+                : `Envie até ${maxActiveMiners} heróis para a cidade infectada. Eles eliminam zumbis, destroem depósitos e coletam Coins continuamente.`}
             </p>
           </div>
 
@@ -448,10 +451,13 @@ export default function LandingPage({
             <div className="w-10 h-10 rounded-xl bg-sky-500/15 border border-sky-500/30 flex items-center justify-center text-sky-400">
               <HeartPulse size={20} />
             </div>
-            <h3 className="font-arcade text-sm text-white">2. Enfermaria & Dra. Íris</h3>
+            <h3 className="font-arcade text-sm text-white">
+              {lang === 'en' ? '2. Infirmary & Dr. Iris' : '2. Enfermaria & Dra. Íris'}
+            </h3>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Quando a vida cai em combate, os heróis descansam nos leitos da Base sob cuidados
-              médicos para recuperar até 1.5x mais rápido dependendo da evolução de sua base.
+              {lang === 'en'
+                ? 'When HP drops in combat, heroes rest in Base medical beds under care to recover up to 1.5x faster depending on your base tier.'
+                : 'Quando a vida cai em combate, os heróis descansam nos leitos da Base sob cuidados médicos para recuperar até 1.5x mais rápido dependendo da evolução de sua base.'}
             </p>
           </div>
 
@@ -459,10 +465,13 @@ export default function LandingPage({
             <div className="w-10 h-10 rounded-xl bg-orange-500/15 border border-orange-500/30 flex items-center justify-center text-orange-400">
               <Wrench size={20} />
             </div>
-            <h3 className="font-arcade text-sm text-white">3. Armeiro & Durabilidade</h3>
+            <h3 className="font-arcade text-sm text-white">
+              {lang === 'en' ? '3. Armorer & Durability' : '3. Armeiro & Durabilidade'}
+            </h3>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Armas sofrem desgaste durante o combate (4h a 12h conforme a raridade). O Mestre
-              Armeiro realiza a manutenção para manter o DPS máximo.
+              {lang === 'en'
+                ? 'Weapons wear down during combat (4h to 12h by rarity). John the Armorer performs maintenance to keep maximum DPS.'
+                : 'Armas sofrem desgaste durante o combate (4h a 12h conforme a raridade). O Mestre Armeiro realiza a manutenção para manter o DPS máximo.'}
             </p>
           </div>
 
@@ -470,10 +479,13 @@ export default function LandingPage({
             <div className="w-10 h-10 rounded-xl bg-rose-500/15 border border-rose-500/30 flex items-center justify-center text-rose-400">
               <Swords size={20} />
             </div>
-            <h3 className="font-arcade text-sm text-white">4. Bosses & Mercado P2P</h3>
+            <h3 className="font-arcade text-sm text-white">
+              {lang === 'en' ? '4. Bosses & P2P Market' : '4. Bosses & Mercado P2P'}
+            </h3>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Chefões invadem o mapa periodicamente rendendo Baús de Construção e Fragmentos.
-              Negocie heróis extras no Mercado P2P ou faça saque em USDT.
+              {lang === 'en'
+                ? 'Bosses invade the map periodically, dropping Construction Chests and Fragments. Trade extra heroes on the P2P Market or withdraw in USDT.'
+                : 'Chefões invadem o mapa periodicamente rendendo Baús de Construção e Fragmentos. Negocie heróis extras no Mercado P2P ou faça saque em USDT.'}
             </p>
           </div>
         </div>
@@ -483,61 +495,73 @@ export default function LandingPage({
           <div className="space-y-2">
             <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-emerald-400">
               <ShieldCheck size={15} />
-              <span>Arquitetura Econômica de Longo Prazo</span>
+              <span>{lang === 'en' ? 'Long-Term Economic Architecture' : 'Arquitetura Econômica de Longo Prazo'}</span>
             </span>
             <h3 className="font-arcade text-xl sm:text-2xl text-white">
-              COMO O JOGO PRESERVA A ECONOMIA PARA DURAR MUITO MAIS
+              {lang === 'en'
+                ? 'HOW THE GAME PRESERVES THE ECONOMY TO LAST LONGER'
+                : 'COMO O JOGO PRESERVA A ECONOMIA PARA DURAR MUITO MAIS'}
             </h3>
             <p className="text-xs sm:text-sm text-slate-300 max-w-3xl leading-relaxed">
-              Ao contrário de projetos que colapsam por emissão sem freio, o CryptoZombies foi
-              projetado com múltiplos sumidouros (sinks), controle de produção e incentivos de
-              reinvestimento para manter a liquidez saudável por muito mais tempo.
+              {lang === 'en'
+                ? 'Unlike projects that collapse from unchecked emission, CryptoZombies is designed with multiple token sinks, production caps, and reinvestment incentives to keep liquidity healthy.'
+                : 'Ao contrário de projetos que colapsam por emissão sem freio, o CryptoZombies foi projetado com múltiplos sumidouros (sinks), controle de produção e incentivos de reinvestimento para manter a liquidez saudável por muito mais tempo.'}
             </p>
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 text-xs">
             <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-2">
-              <h4 className="font-arcade text-xs text-amber-300">Emissão Controlada</h4>
+              <h4 className="font-arcade text-xs text-amber-300">
+                {lang === 'en' ? 'Controlled Emission' : 'Emissão Controlada'}
+              </h4>
               <p className="text-slate-400 leading-relaxed">
-                A produção de <b className="text-slate-200">Coins</b> é limitada a até {maxActiveMiners} heróis
-                ativos simultâneos e calibrada por raridade, impedindo farm infinito ou explosão artificial de oferta.
+                {lang === 'en'
+                  ? `Coin production is capped at ${maxActiveMiners} active heroes and calibrated by rarity, preventing infinite farming or supply spikes.`
+                  : <>A produção de <b className="text-slate-200">Coins</b> é limitada a até {maxActiveMiners} heróis ativos simultâneos e calibrada por raridade, impedindo farm infinito ou explosão artificial de oferta.</>}
               </p>
             </div>
 
             <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-2">
-              <h4 className="font-arcade text-xs text-orange-300">Liquidez & Token Oficial</h4>
+              <h4 className="font-arcade text-xs text-orange-300">
+                {lang === 'en' ? 'Liquidity & Official Token' : 'Liquidez & Token Oficial'}
+              </h4>
               <p className="text-slate-400 leading-relaxed">
-                O jogo foi pensado com base em uma economia duradoura: alguns anúncios em momentos
-                específicos ajudam a manter a pool de liquidez sempre cheia. Em breve teremos a{' '}
-                <b className="text-slate-200">moeda oficial</b> que substituirá os Coins, com função
-                de queima de tokens para valorizar ainda mais o seu investimento!
+                {lang === 'en'
+                  ? 'Built for a lasting economy: targeted ads help keep the liquidity pool funded, and an official token with burn mechanics is planned to strengthen your investment.'
+                  : <>O jogo foi pensado com base em uma economia duradoura: alguns anúncios em momentos específicos ajudam a manter a pool de liquidez sempre cheia. Em breve teremos a <b className="text-slate-200">moeda oficial</b> que substituirá os Coins, com função de queima de tokens para valorizar ainda mais o seu investimento!</>}
               </p>
             </div>
 
             <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-2">
-              <h4 className="font-arcade text-xs text-sky-300">Revezamento & Evolução</h4>
+              <h4 className="font-arcade text-xs text-sky-300">
+                {lang === 'en' ? 'Rotation & Evolution' : 'Revezamento & Evolução'}
+              </h4>
               <p className="text-slate-400 leading-relaxed">
-                Heróis feridos passam pelos leitos da <b className="text-slate-200">Base Médica</b>. Expandir
-                de 5 para 10 ou 15 vagas consome <b className="text-slate-200">Fragmentos de Boss</b> e Coins,
-                desgaste das armas com reparo pelo <b className="text-slate-200">John Armeiro</b>, valorizando
-                a retenção e o progresso da conta.
+                {lang === 'en'
+                  ? 'Wounded heroes rest in the Medical Base. Expanding from 5 to 10 or 15 beds consumes Boss Fragments and Coins, plus weapon repairs by John the Armorer.'
+                  : <>Heróis feridos passam pelos leitos da <b className="text-slate-200">Base Médica</b>. Expandir de 5 para 10 ou 15 vagas consome <b className="text-slate-200">Fragmentos de Boss</b> e Coins, desgaste das armas com reparo pelo <b className="text-slate-200">John Armeiro</b>, valorizando a retenção e o progresso da conta.</>}
               </p>
             </div>
 
             <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-2">
-              <h4 className="font-arcade text-xs text-purple-300">Rejuvenescimento & Estrelas</h4>
+              <h4 className="font-arcade text-xs text-purple-300">
+                {lang === 'en' ? 'Rejuvenation & Stars' : 'Rejuvenescimento & Estrelas'}
+              </h4>
               <p className="text-slate-400 leading-relaxed">
-                O <b className="text-slate-200">Sistema de Rejuvenescimento</b> renova o ciclo útil
-                dos heróis com poções, enquanto a <b className="text-slate-200">Evolução de Estrelas</b>{' '}
-                (1★ a 3★) fortalece e amplia a produção (+5% a +15%), criando demanda contínua de ativos.
+                {lang === 'en'
+                  ? 'The Rejuvenation System renews hero cycles with potions, while Star Evolution (1★ to 3★) boosts production (+5% to +15%), driving steady asset demand.'
+                  : <>O <b className="text-slate-200">Sistema de Rejuvenescimento</b> renova o ciclo útil dos heróis com poções, enquanto a <b className="text-slate-200">Evolução de Estrelas</b> (1★ a 3★) fortalece e amplia a produção (+5% a +15%), criando demanda contínua de ativos.</>}
               </p>
             </div>
 
             <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-2">
-              <h4 className="font-arcade text-xs text-emerald-300">Mercado P2P & Taxa Anti-Drenagem</h4>
+              <h4 className="font-arcade text-xs text-emerald-300">
+                {lang === 'en' ? 'P2P Market & Anti-Drain Tax' : 'Mercado P2P & Taxa Anti-Drenagem'}
+              </h4>
               <p className="text-slate-400 leading-relaxed">
-                O comércio de heróis ocorre entre jogadores com taxa de mercado e imposto progressivo
-                de saque, protegendo o caixa contra saques predatórios de curto prazo.
+                {lang === 'en'
+                  ? 'Hero trading runs between players with a marketplace fee and progressive withdrawal tax, protecting the treasury against short-term predatory drains.'
+                  : 'O comércio de heróis ocorre entre jogadores com taxa de mercado e imposto progressivo de saque, protegendo o caixa contra saques predatórios de curto prazo.'}
               </p>
             </div>
           </div>
@@ -664,13 +688,13 @@ export default function LandingPage({
             <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 space-y-10">
               <div className="space-y-2">
                 <span className="text-xs font-bold uppercase tracking-widest text-emerald-400">
-                  Elenco Oficial
+                  {t.heroes.eyebrow}
                 </span>
                 <h2 className="font-arcade text-2xl sm:text-3xl text-white">
-                  HERÓIS, CLASSES & AMEAÇAS
+                  {t.heroes.title}
                 </h2>
                 <p className="text-sm text-slate-400 max-w-2xl">
-                  Os sobreviventes combatentes por raridade, os especialistas de suporte da Base e os inimigos do distrito.
+                  {t.heroes.subtitle}
                 </p>
               </div>
 
@@ -798,13 +822,13 @@ export default function LandingPage({
         <div className="space-y-6">
           <div className="space-y-2">
             <span className="text-xs font-bold uppercase tracking-widest text-purple-400">
-              Atributos & Produção
+              {t.rates.eyebrow}
             </span>
             <h2 className="font-arcade text-2xl sm:text-3xl text-white">
-              RATES POR RARIDADE
+              {t.rates.title}
             </h2>
             <p className="text-sm text-slate-400 max-w-2xl">
-              Parâmetros oficiais de poder, mineração por hora, energia máxima e recuperação.
+              {t.rates.subtitle}
             </p>
           </div>
 
@@ -812,12 +836,12 @@ export default function LandingPage({
             <table className="w-full text-left text-xs sm:text-sm">
               <thead className="bg-slate-950/90 text-slate-400 uppercase text-[11px] tracking-wider">
                 <tr>
-                  <th className="px-4 py-3.5">Raridade</th>
-                  <th className="px-4 py-3.5">Vida (PV)</th>
-                  <th className="px-4 py-3.5">Poder Base</th>
-                  <th className="px-4 py-3.5">Produção (Coins/h)</th>
-                  <th className="px-4 py-3.5">Durab. Arma</th>
-                  <th className="px-4 py-3.5">Recup. (Básica / Ref. / Avanç.)</th>
+                  <th className="px-4 py-3.5">{lang === 'en' ? 'Rarity' : 'Raridade'}</th>
+                  <th className="px-4 py-3.5">{lang === 'en' ? 'Health (HP)' : 'Vida (PV)'}</th>
+                  <th className="px-4 py-3.5">{lang === 'en' ? 'Base Power' : 'Poder Base'}</th>
+                  <th className="px-4 py-3.5">{lang === 'en' ? 'Output (Coins/h)' : 'Produção (Coins/h)'}</th>
+                  <th className="px-4 py-3.5">{lang === 'en' ? 'Weapon Durab.' : 'Durab. Arma'}</th>
+                  <th className="px-4 py-3.5">{lang === 'en' ? 'Recov. (Basic / Reinf. / Adv.)' : 'Recup. (Básica / Ref. / Avanç.)'}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800">
@@ -992,13 +1016,13 @@ export default function LandingPage({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 space-y-8">
           <div className="space-y-2">
             <span className="text-xs font-bold uppercase tracking-widest text-sky-400">
-              Recuperação de Energia
+              {t.bases.eyebrow}
             </span>
             <h2 className="font-arcade text-2xl sm:text-3xl text-white">
-              NÍVEIS DE BASE MÉDICA
+              {t.bases.title}
             </h2>
             <p className="text-sm text-slate-400 max-w-2xl">
-              Evolua sua base para liberar mais leitos simultâneos e acelerar a recuperação da equipe.
+              {t.bases.subtitle}
             </p>
           </div>
 
@@ -1016,7 +1040,7 @@ export default function LandingPage({
                   <div className="flex items-center justify-between">
                     <h3 className="font-arcade text-base text-white">{house.name}</h3>
                     <span className="text-xs font-mono font-bold text-sky-300 bg-sky-500/10 border border-sky-500/30 px-2.5 py-0.5 rounded-full">
-                      {house.recoverySpeedMultiplier}x Vel.
+                      {house.recoverySpeedMultiplier}x {lang === 'en' ? 'Speed' : 'Vel.'}
                     </span>
                   </div>
 
@@ -1036,10 +1060,10 @@ export default function LandingPage({
                 <div className="pt-3 border-t border-slate-800 flex flex-wrap items-center justify-between gap-2 text-xs">
                   <span className="flex items-center gap-1 text-slate-300">
                     <Home size={13} className="text-blue-400" />
-                    {house.slots} vagas
+                    {house.slots} {lang === 'en' ? 'slots' : 'vagas'}
                   </span>
                   {fragCost === 0 && coinsCost === 0 ? (
-                    <span className="font-arcade text-emerald-400">Grátis</span>
+                    <span className="font-arcade text-emerald-400">{lang === 'en' ? 'Free' : 'Grátis'}</span>
                   ) : (
                     <div className="flex items-center gap-2 font-mono font-bold">
                       <span className="text-emerald-400">🧱 {fragCost} Frag.</span>
@@ -1109,31 +1133,39 @@ export default function LandingPage({
 
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
               <div className="p-4 rounded-2xl bg-emerald-950/30 border border-emerald-500/40 space-y-1">
-                <div className="font-arcade text-xs text-emerald-300">0 a 49 Dias</div>
-                <div className="font-bold text-white">Ápice Físico</div>
+                <div className="font-arcade text-xs text-emerald-300">{lang === 'en' ? '0 to 49 Days' : '0 a 49 Dias'}</div>
+                <div className="font-bold text-white">{lang === 'en' ? 'Physical Peak' : 'Ápice Físico'}</div>
                 <p className="text-[11px] text-slate-300">
-                  <b>0% de penalidade.</b> Produção de Coins e velocidade de recuperação em 100%.
+                  {lang === 'en'
+                    ? <><b>0% penalty.</b> Coin output and recovery speed at 100%.</>
+                    : <><b>0% de penalidade.</b> Produção de Coins e velocidade de recuperação em 100%.</>}
                 </p>
               </div>
               <div className="p-4 rounded-2xl bg-amber-950/30 border border-amber-500/40 space-y-1">
-                <div className="font-arcade text-xs text-amber-300">50 a 69 Dias</div>
-                <div className="font-bold text-white">Desgaste Inicial</div>
+                <div className="font-arcade text-xs text-amber-300">{lang === 'en' ? '50 to 69 Days' : '50 a 69 Dias'}</div>
+                <div className="font-bold text-white">{lang === 'en' ? 'Early Wear' : 'Desgaste Inicial'}</div>
                 <p className="text-[11px] text-slate-300">
-                  <b>-15%</b> na produção de Coins e <b>-10%</b> na velocidade de recuperação de energia.
+                  {lang === 'en'
+                    ? <><b>-15%</b> Coin output and <b>-10%</b> energy recovery speed.</>
+                    : <><b>-15%</b> na produção de Coins e <b>-10%</b> na velocidade de recuperação de energia.</>}
                 </p>
               </div>
               <div className="p-4 rounded-2xl bg-orange-950/35 border border-orange-500/40 space-y-1">
-                <div className="font-arcade text-xs text-orange-300">70 a 79 Dias</div>
-                <div className="font-bold text-white">Fadiga Crítica</div>
+                <div className="font-arcade text-xs text-orange-300">{lang === 'en' ? '70 to 79 Days' : '70 a 79 Dias'}</div>
+                <div className="font-bold text-white">{lang === 'en' ? 'Critical Fatigue' : 'Fadiga Crítica'}</div>
                 <p className="text-[11px] text-slate-300">
-                  <b>-30%</b> na produção de Coins e <b>-20%</b> na recuperação de energia.
+                  {lang === 'en'
+                    ? <><b>-30%</b> Coin output and <b>-20%</b> energy recovery speed.</>
+                    : <><b>-30%</b> na produção de Coins e <b>-20%</b> na recuperação de energia.</>}
                 </p>
               </div>
               <div className="p-4 rounded-2xl bg-rose-950/40 border border-rose-500/45 space-y-1">
-                <div className="font-arcade text-xs text-rose-300">80+ Dias</div>
-                <div className="font-bold text-white">Ciclo Esgotado</div>
+                <div className="font-arcade text-xs text-rose-300">{lang === 'en' ? '80+ Days' : '80+ Dias'}</div>
+                <div className="font-bold text-white">{lang === 'en' ? 'Cycle Depleted' : 'Ciclo Esgotado'}</div>
                 <p className="text-[11px] text-slate-300">
-                  <b>-50%</b> na produção de Coins até evoluir com a <b>Poção de Rejuvenescimento</b>.
+                  {lang === 'en'
+                    ? <><b>-50%</b> Coin output until evolved with a <b>Rejuvenation Potion</b>.</>
+                    : <><b>-50%</b> na produção de Coins até evoluir com a <b>Poção de Rejuvenescimento</b>.</>}
                 </p>
               </div>
             </div>
