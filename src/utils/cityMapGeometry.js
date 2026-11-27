@@ -468,14 +468,13 @@ export function getSpawnZoneCells(cols = GRID_COLS, rows = GRID_ROWS) {
   return cells;
 }
 
-// Heróis nascem em estradas e gramados 100% livres e desimpedidos (fora da base central)
+export const MAX_HERO_SPAWN_POINTS = 15;
+
+// Heróis nascem em estradas e gramados 100% livres e desimpedidos (fora da base central) — máximo 15 pontos
 export const SAFE_HERO_SPAWN_POINTS = [
   { x: 1, y: 3 }, { x: 6, y: 2 }, { x: 10, y: 1 }, { x: 12, y: 1 }, { x: 13, y: 1 },
   { x: 3, y: 3 }, { x: 10, y: 2 }, { x: 12, y: 2 }, { x: 4, y: 3 }, { x: 1, y: 4 },
-  { x: 2, y: 5 }, { x: 12, y: 5 }, { x: 1, y: 6 }, { x: 2, y: 6 }, { x: 12, y: 6 },
-  { x: 1, y: 7 }, { x: 2, y: 7 }, { x: 1, y: 8 }, { x: 2, y: 8 }, { x: 1, y: 9 },
-  { x: 2, y: 9 }, { x: 3, y: 9 }, { x: 5, y: 9 }, { x: 6, y: 9 }, { x: 7, y: 9 },
-  { x: 9, y: 9 }, { x: 10, y: 9 }, { x: 13, y: 7 }
+  { x: 2, y: 5 }, { x: 12, y: 5 }, { x: 1, y: 6 }, { x: 2, y: 6 }, { x: 12, y: 6 }
 ];
 
 export function getEffectiveHeroSpawnPoints() {
@@ -485,7 +484,7 @@ export function getEffectiveHeroSpawnPoints() {
       if (raw) {
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
+          return parsed.slice(0, MAX_HERO_SPAWN_POINTS);
         }
       }
     } catch {}

@@ -15,6 +15,7 @@ import {
   GRID_COLS,
   GRID_ROWS,
   TILE_SIZE,
+  MAX_HERO_SPAWN_POINTS,
   isCityBuilding,
   isBaseCompound,
   isSpawnZoneCell,
@@ -171,9 +172,12 @@ export default function SpawnZonesModal({
         if (prev.length <= 1) return prev; // mantém ao menos 1 ponto de spawn
         return prev.filter((p) => !(p.x === cell.c && p.y === cell.r));
       }
+      if (prev.length >= MAX_HERO_SPAWN_POINTS) {
+        setSaveNotice(`Limite máximo de ${MAX_HERO_SPAWN_POINTS} pontos de respawn de heróis atingido. Remova um antes de adicionar outro.`);
+        return prev;
+      }
       return [...prev, { x: cell.c, y: cell.r }];
     });
-    setSaveNotice('');
   };
 
   const handleCellMouseDown = (cell) => {
@@ -344,7 +348,7 @@ export default function SpawnZonesModal({
               }`}
             >
               <Shield size={13} />
-              <span>Heróis ({gridAnalysis.heroValidCount}/{gridAnalysis.heroTotalCount} livres)</span>
+              <span>Heróis ({gridAnalysis.heroValidCount}/{MAX_HERO_SPAWN_POINTS})</span>
             </button>
 
             <button
