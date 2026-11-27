@@ -27,7 +27,7 @@ export default function MarketplaceModal({
 
   const filteredListings = listings.filter(item => {
     if (selectedClassFilter === 'all') return true;
-    return item.miner.classId === selectedClassFilter;
+    return (item.miner?.rarity || 'common') === selectedClassFilter;
   });
 
   const parsedPrice = parseFloat(sellPriceInput) || 0;
@@ -70,14 +70,14 @@ export default function MarketplaceModal({
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="font-arcade text-sm text-amber-400">
-                  MARKETPLACE P2P • COMÉRCIO DE MINERADORES
+                  MARKETPLACE P2P • COMÉRCIO DE HERÓIS
                 </h3>
                 <span className="text-[10px] font-bold font-tech px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
                   TAXA DE CORRETAGEM: {MARKETPLACE_FEE_PCT}%
                 </span>
               </div>
               <p className="text-xs text-slate-400 font-tech">
-                Compre e venda mineradores entre jogadores reais • Seu Saldo: <b className="text-amber-300 font-mono">{bcoinBalance.toFixed(3)} BCOIN</b>
+                Compre e venda heróis entre jogadores reais • Seu Saldo: <b className="text-amber-300 font-mono">{bcoinBalance.toFixed(3)} Coins</b>
               </p>
             </div>
           </div>
@@ -125,16 +125,16 @@ export default function MarketplaceModal({
         {activeTab === 'browse' && (
           <div className="flex-1 overflow-y-auto no-scrollbar py-2 space-y-3">
             
-            {/* Filtros de Classe */}
+            {/* Filtros de Raridade */}
             <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 text-xs font-tech">
               {[
                 { id: 'all', label: 'Todos' },
-                { id: 'miner', label: '🤖 Bomb-Bot' },
-                { id: 'brute', label: '🪓 Viking' },
-                { id: 'goblin', label: '🐸 Sapo Ninja' },
-                { id: 'engineer', label: '🧙‍♂️ Mago Arcano' },
-                { id: 'mage', label: '🧛 Vampiro' },
-                { id: 'legendary', label: '👑 Golem' }
+                { id: 'common', label: 'Comum' },
+                { id: 'rare', label: 'Raro' },
+                { id: 'super_rare', label: 'Super Raro' },
+                { id: 'epic', label: 'Épico' },
+                { id: 'legendary', label: 'Lendário' },
+                { id: 'super_legend', label: 'Super Lendário' }
               ].map(f => (
                 <button
                   key={f.id}
@@ -150,10 +150,10 @@ export default function MarketplaceModal({
               ))}
             </div>
 
-            {/* Grid dos Mineradores à Venda */}
+            {/* Grid dos Heróis à Venda */}
             {filteredListings.length === 0 ? (
               <div className="py-12 text-center text-slate-500 text-xs font-tech">
-                Nenhum minerador encontrado com o filtro selecionado no momento.
+                Nenhum herói à venda no momento.
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -361,7 +361,7 @@ export default function MarketplaceModal({
                 </div>
 
                 <p className="text-[10px] text-slate-500 font-tech mt-3">
-                  * Ao anunciar no mercado, o minerador sai temporariamente da mina até ser vendido ou cancelado.
+                  * Ao anunciar no mercado, o herói sai temporariamente da base até ser vendido ou cancelado.
                 </p>
               </div>
 
@@ -369,14 +369,14 @@ export default function MarketplaceModal({
               <div className="bg-slate-950/80 p-4 rounded-3xl border border-slate-800 flex flex-col justify-between">
                 <div>
                   <h4 className="font-tech font-bold text-xs text-amber-300 uppercase tracking-wider mb-3">
-                    2. Defina o Preço de Venda em BCOIN:
+                    2. Defina o Preço de Venda em Coins:
                   </h4>
 
                   {selectedMinerToSell ? (
                     <div className="space-y-3">
                       <div>
                         <label className="text-xs text-slate-400 font-tech block mb-1">
-                          Valor anunciado no Marketplace (BCOIN):
+                          Valor anunciado no Marketplace (Coins):
                         </label>
                         <div className="relative">
                           <input 
@@ -388,7 +388,7 @@ export default function MarketplaceModal({
                             className="w-full bg-slate-900 border-2 border-slate-700 focus:border-amber-400 rounded-2xl py-2.5 px-4 font-arcade text-base text-amber-300 outline-none"
                           />
                           <span className="absolute right-4 top-3 text-xs font-tech font-bold text-slate-400">
-                            BCOIN
+                            Coins
                           </span>
                         </div>
                       </div>
@@ -397,16 +397,16 @@ export default function MarketplaceModal({
                       <div className="bg-slate-900/90 p-3.5 rounded-2xl border border-slate-800 space-y-2 text-xs font-tech">
                         <div className="flex justify-between text-slate-400">
                           <span>Preço Bruto de Venda:</span>
-                          <span className="font-mono text-white font-bold">{parsedPrice.toFixed(3)} BCOIN</span>
+                          <span className="font-mono text-white font-bold">{parsedPrice.toFixed(3)} Coins</span>
                         </div>
                         <div className="flex justify-between text-rose-400 border-b border-slate-800 pb-1.5">
                           <span>Taxa da Plataforma ({MARKETPLACE_FEE_PCT}%):</span>
-                          <span className="font-mono font-bold">-{feeAmount.toFixed(3)} BCOIN</span>
+                          <span className="font-mono font-bold">-{feeAmount.toFixed(3)} Coins</span>
                         </div>
                         <div className="flex justify-between text-emerald-400 text-sm font-bold pt-0.5">
                           <span>Você Recebe Líquido:</span>
                           <span className="font-mono font-arcade text-base text-emerald-300">
-                            +{sellerNetAmount.toFixed(3)} BCOIN
+                            +{sellerNetAmount.toFixed(3)} Coins
                           </span>
                         </div>
                       </div>
