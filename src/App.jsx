@@ -172,46 +172,30 @@ export default function App() {
           if (hasObstaclePosition) {
             localStorage.setItem('crypto_miners_team', JSON.stringify(parsed));
           }
-          // Migração automática de bailarina para fada com asas
-          let hasBallerina = false;
-          let migrated = parsed.map(m => {
-            if (m.classId === 'ballerina') {
-              hasBallerina = true;
-              const fInfo = MINER_CLASSES.fairy;
+          // Migração automática de heróis legados (que não existem mais no HERO_ROSTER) para heróis oficiais
+          const validRosterIds = new Set(HERO_ROSTER.map(h => h.id));
+          let hasLegacyHeroes = false;
+          parsed = parsed.map((m, idx) => {
+            if (!m.heroId || !validRosterIds.has(m.heroId)) {
+              hasLegacyHeroes = true;
+              const rh = HERO_ROSTER[idx % HERO_ROSTER.length];
               return {
                 ...m,
-                classId: 'fairy',
-                avatar: fInfo.avatar,
-                color: fInfo.color,
-                name: m.name.includes('Bailarina') ? m.name.replace('Bailarina', 'Fadinha') : m.name
+                heroId: rh.id,
+                name: rh.name,
+                classId: rh.classId,
+                className: rh.className,
+                weaponId: rh.weaponId,
+                rarity: rh.rarity,
+                rarityName: rh.rarityName,
+                spriteIndex: rh.spriteIndex,
+                image: `/assets/heroes/${rh.id}.png`
               };
             }
             return m;
           });
-          if (hasBallerina) {
-            localStorage.setItem('crypto_miners_team', JSON.stringify(migrated));
-            return migrated;
-          }
-
-          const hasNewClasses = parsed.some(m => ['pirate', 'cowboy', 'fairy', 'spiderman', 'batman'].includes(m.classId));
-          const mageCount = parsed.filter(m => m.classId === 'mage').length;
-          if ((!hasNewClasses || mageCount > parsed.length * 0.25) && parsed.length >= 3) {
-            const classPool = ['miner', 'brute', 'goblin', 'engineer', 'mage', 'legendary', 'pirate', 'cowboy', 'fairy', 'spiderman', 'batman'];
-            const balanced = parsed.map((m, idx) => {
-              const newClassId = classPool[idx % classPool.length];
-              const cInfo = MINER_CLASSES[newClassId] || MINER_CLASSES.miner;
-              return {
-                ...m,
-                classId: newClassId,
-                avatar: cInfo.avatar,
-                color: cInfo.color,
-                name: m.name.startsWith('Resgatado') || m.name.includes('#')
-                  ? `${cInfo.name.split(' ')[0]} #${m.id.split('-').pop().slice(-3) || idx}`
-                  : m.name
-              };
-            });
-            localStorage.setItem('crypto_miners_team', JSON.stringify(balanced));
-            return balanced;
+          if (hasLegacyHeroes) {
+            localStorage.setItem('crypto_miners_team', JSON.stringify(parsed));
           }
 
           // Sanitização: Íris é a médica do abrigo (NPC / não jogador, não possui raridade de combate)
