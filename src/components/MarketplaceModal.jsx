@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { X, ShoppingBag, Tag, Sparkles, Flame, Zap, Battery, ShieldCheck, ArrowRight, DollarSign, Check, AlertCircle } from 'lucide-react';
+import { X, ShoppingBag, Tag, Sparkles, Flame, Zap, Battery, ShieldCheck, ArrowRight, DollarSign, Check, AlertCircle, Clock } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { MARKETPLACE_FEE_PCT } from '../data/marketplaceData';
 import { sfx } from '../utils/sfx';
+import { getMinerActiveDays } from './HeroEvolutionModal';
 
 export default function MarketplaceModal({ 
   isOpen, 
@@ -211,6 +212,11 @@ export default function MarketplaceModal({
                               <h4 className="font-tech font-bold text-sm text-white">
                                 {m.name}
                               </h4>
+                              {m.stars > 0 && (
+                                <span className="text-[10px] text-amber-300 font-bold">
+                                  {'★'.repeat(m.stars)}
+                                </span>
+                              )}
                             </div>
                             <span className="text-[10px] text-slate-400 font-tech">
                               {listing.listedAt}
@@ -218,21 +224,38 @@ export default function MarketplaceModal({
                           </div>
                         </div>
 
-                        {/* Atributos */}
-                        <div className="grid grid-cols-3 gap-1 bg-slate-900/80 p-2 rounded-xl text-center text-xs font-tech mb-2">
-                          <div>
-                            <span className="text-[10px] text-slate-400 block">FORÇA</span>
-                            <span className="font-arcade text-rose-400 font-bold">{m.power}</span>
-                          </div>
-                          <div>
-                            <span className="text-[10px] text-slate-400 block">VELOCIDADE</span>
-                            <span className="font-arcade text-amber-400 font-bold">{m.speed}</span>
-                          </div>
-                          <div>
-                            <span className="text-[10px] text-slate-400 block">ESTAMINA</span>
-                            <span className="font-arcade text-sky-400 font-bold">{m.maxStamina}</span>
-                          </div>
-                        </div>
+                        {/* Atributos + Idade */}
+                        {(() => {
+                          const ageDays = getMinerActiveDays(m);
+                          const ageColor =
+                            ageDays >= 80
+                              ? 'text-rose-400'
+                              : ageDays >= 70
+                              ? 'text-orange-400'
+                              : ageDays >= 50
+                              ? 'text-amber-300'
+                              : 'text-emerald-400';
+                          return (
+                            <div className="grid grid-cols-4 gap-1 bg-slate-900/80 p-2 rounded-xl text-center text-xs font-tech mb-2">
+                              <div>
+                                <span className="text-[10px] text-slate-400 block">FORÇA</span>
+                                <span className="font-arcade text-rose-400 font-bold">{m.power}</span>
+                              </div>
+                              <div>
+                                <span className="text-[10px] text-slate-400 block">VELOC.</span>
+                                <span className="font-arcade text-amber-400 font-bold">{m.speed}</span>
+                              </div>
+                              <div>
+                                <span className="text-[10px] text-slate-400 block">ESTAM.</span>
+                                <span className="font-arcade text-sky-400 font-bold">{m.maxStamina}</span>
+                              </div>
+                              <div>
+                                <span className="text-[10px] text-slate-400 block">IDADE</span>
+                                <span className={`font-arcade font-bold ${ageColor}`}>{ageDays}/80d</span>
+                              </div>
+                            </div>
+                          );
+                        })()}
 
                         {/* Passiva */}
                         {m.passiveTrait && (
@@ -315,11 +338,14 @@ export default function MarketplaceModal({
                             <div className="flex items-center gap-2.5">
                               <span className="text-2xl">{miner.avatar}</span>
                               <div className="text-left">
-                                <span className="font-tech font-bold text-xs text-white block">
-                                  {miner.name}
+                                <span className="font-tech font-bold text-xs text-white flex items-center gap-1">
+                                  <span>{miner.name}</span>
+                                  {miner.stars > 0 && (
+                                    <span className="text-[10px] text-amber-300">{'★'.repeat(miner.stars)}</span>
+                                  )}
                                 </span>
                                 <span className="text-[10px] text-slate-400 font-mono">
-                                  ⚔ {miner.power} | ⚡ {miner.speed} | 🔋 {miner.maxStamina}
+                                  ⚔ {miner.power} | ⚡ {miner.speed} | 🔋 {miner.maxStamina} | ⏳ {getMinerActiveDays(miner)}/80d
                                 </span>
                               </div>
                             </div>
