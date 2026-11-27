@@ -39,7 +39,7 @@ import {
 } from '../utils/upgradeSimulatorEngine';
 import { calculateRoiScenario } from '../utils/roiSimulatorEngine';
 import { getCryptoZombiesConfig } from '../data/cryptoZombiesConfig';
-import { MINER_CLASSES } from '../data/minersData';
+import { HERO_ROSTER, getHeroById, getRarityConfig } from '../data/heroRoster';
 
 export default function StatisticsModal({
   isOpen,
@@ -140,52 +140,71 @@ export default function StatisticsModal({
     return calculateUpgradeRoi(realStats, simStats, simOptions, config, currentHouse, miners);
   }, [realStats, simStats, simOptions, config, currentHouse, miners]);
 
-  // Lista dos Heróis com métricas individuais de desempenho
+  // Lista dos Heróis oficiais com métricas individuais de desempenho
   const analyzedHeroes = useMemo(() => {
-    const rate = config?.minerCoinUsdtRate || 1.0;
     const houseMultiplier = currentHouse?.recoverySpeedMultiplier || 1.0;
+    const rarityWeights = {
+      common: 1,
+      rare: 2,
+      super_rare: 3,
+      superRare: 3,
+      epic: 4,
+      legendary: 5,
+      super_legend: 6,
+    };
 
-    return miners.map(m => {
-      const classInfo = MINER_CLASSES[m.classId] || MINER_CLASSES.miner;
-      const power = m.power || 2;
-      const speed = m.speed || 1;
-      const maxEnergy = m.maxStamina || 100;
-      const currentEnergy = m.currentStamina !== undefined ? m.currentStamina : maxEnergy;
-      const drainPerMin = m.energyDrainRate || 1.0;
-      const coinsPerHour = m.coinsPerHour || (power * 0.05 * speed);
+    return (miners || [])
+      .map((m) => {
+        const rosterHero =
+          (m.heroId ? getHeroById(m.heroId) : null) ||
+          HERO_ROSTER.find((h) => h.id === m.id || h.classId === m.classId || h.name === m.name);
+        if (!rosterHero) return null;
 
-      // Tempo até esgotar energia
-      const minutesToDrain = drainPerMin > 0 ? Math.round(currentEnergy / drainPerMin) : 0;
+        const rarityKey = m.rarity || rosterHero.rarity || 'common';
+        const rarityCfg = getRarityConfig(rarityKey);
+        const power = m.power || 2;
+        const speed = m.speed || 1;
+        const maxEnergy = m.maxStamina || 100;
+        const currentEnergy = m.currentStamina !== undefined ? m.currentStamina : maxEnergy;
+        const drainPerMin = m.energyDrainRate || 1.0;
+        const coinsPerHour = m.coinsPerHour || (power * 0.05 * speed);
 
-      // Tempo até recuperar energia na casa atual
-      const missingEnergy = Math.max(0, maxEnergy - currentEnergy);
-      const recoveryRatePerMin = (maxEnergy / 240) * houseMultiplier;
-      const minutesToRecover = recoveryRatePerMin > 0 ? Math.round(missingEnergy / recoveryRatePerMin) : 0;
+        // Tempo até esgotar energia
+        const minutesToDrain = drainPerMin > 0 ? Math.round(currentEnergy / drainPerMin) : 0;
 
-      // Eficiência ponderada
-      const efficiency = (power * 1.5 + speed * 10 + coinsPerHour * 50) * Math.max(0.1, currentEnergy / maxEnergy);
+        // Tempo até recuperar energia na base atual
+        const missingEnergy = Math.max(0, maxEnergy - currentEnergy);
+        const recoveryRatePerMin = (maxEnergy / 240) * houseMultiplier;
+        const minutesToRecover = recoveryRatePerMin > 0 ? Math.round(missingEnergy / recoveryRatePerMin) : 0;
 
-      // Rarity weight
-      const rarityWeights = { common: 1, rare: 2, superRare: 3, epic: 4, legendary: 5 };
-      const rarityRank = rarityWeights[m.rarity || classInfo.rarity] || 1;
+        // Eficiência ponderada
+        const efficiency = (power * 1.5 + speed * 10 + coinsPerHour * 50) * Math.max(0.1, currentEnergy / maxEnergy);
+        const rarityRank = rarityWeights[rarityKey] || 1;
 
-      return {
-        ...m,
-        classInfo,
-        power,
-        speed,
-        maxEnergy,
-        currentEnergy,
-        drainPerMin,
-        coinsPerHour: parseFloat(coinsPerHour.toFixed(3)),
-        minutesToDrain,
-        minutesToRecover,
-        efficiencyScore: parseFloat(efficiency.toFixed(1)),
-        rarityRank,
-        rarityName: m.rarity || classInfo.badge || 'COMUM'
-      };
-    });
-  }, [miners, currentHouse, config]);
+        return {
+          ...m,
+          image: m.image || `/assets/heroes/${rosterHero.id}.png`,
+          className: m.className || rosterHero.className,
+          classInfo: {
+            color: rarityCfg.color || '#94a3b8',
+            badge: rarityCfg.name,
+            rarity: rarityKey,
+          },
+          power,
+          speed,
+          maxEnergy,
+          currentEnergy,
+          drainPerMin,
+          coinsPerHour: parseFloat(coinsPerHour.toFixed(3)),
+          minutesToDrain,
+          minutesToRecover,
+          efficiencyScore: parseFloat(efficiency.toFixed(1)),
+          rarityRank,
+          rarityName: rarityCfg.name || rosterHero.rarityName || 'Comum',
+        };
+      })
+      .filter(Boolean);
+  }, [miners, currentHouse]);
 
   // Ordenação e busca de heróis
   const filteredHeroes = useMemo(() => {
@@ -293,7 +312,7 @@ export default function StatisticsModal({
               }`}
             >
               <Users size={14} />
-              <span>2. DESEMPENHO ({miners.length})</span>
+              <span>2. DESEMPENHO ({analyzedHeroes.length})</span>
             </button>
 
             <button
@@ -550,15 +569,10 @@ export default function StatisticsModal({
                             }}
                           >
                             <img 
-                              src={hero.image || `/miners/${hero.classId}.png`} 
+                              src={hero.image || '/assets/heroes/hunter.png'} 
                               alt={hero.name} 
-                              className="w-full h-full object-cover"
-                              onError={(e) => {
-                                if (e.target.src.endsWith('.png')) e.target.src = `/miners/${hero.classId}.jpg`;
-                                else e.target.style.display = 'none';
-                              }}
+                              className="w-full h-full object-contain p-1"
                             />
-                            <span className="absolute -z-0">{hero.avatar}</span>
                           </div>
 
                           <div className="leading-tight">
