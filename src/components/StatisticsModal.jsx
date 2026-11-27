@@ -562,8 +562,13 @@ export default function StatisticsModal({
                           </div>
 
                           <div className="leading-tight">
-                            <h4 className="font-tech font-bold text-xs text-white truncate max-w-[140px]">
-                              {hero.name}
+                            <h4 className="font-tech font-bold text-xs text-white truncate max-w-[140px] flex items-center gap-1">
+                              <span className="truncate">{hero.name}</span>
+                              {hero.stars > 0 && (
+                                <span className="text-[10px] text-amber-300 shrink-0">
+                                  {'★'.repeat(hero.stars)}
+                                </span>
+                              )}
                             </h4>
                             <span 
                               className="text-[9px] font-bold font-mono px-1.5 py-0.2 rounded uppercase inline-block mt-0.5"
@@ -578,17 +583,17 @@ export default function StatisticsModal({
                         <div>
                           {isWorking && (
                             <span className="px-2 py-0.5 rounded-full text-[9px] font-bold font-tech bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 animate-pulse">
-                              CoinsANDO ⛏️
+                              EM COMBATE ⚔️
                             </span>
                           )}
                           {isInHouse && (
                             <span className="px-2 py-0.5 rounded-full text-[9px] font-bold font-tech bg-blue-500/20 text-blue-300 border border-blue-500/40">
-                              NA CASA 🏠
+                              ENFERMARIA 🏥
                             </span>
                           )}
                           {isWaiting && (
                             <span className="px-2 py-0.5 rounded-full text-[9px] font-bold font-tech bg-amber-500/20 text-amber-300 border border-amber-500/40">
-                              FILA CASA ⏳
+                              FILA BASE ⏳
                             </span>
                           )}
                           {!isWorking && !isInHouse && !isWaiting && (

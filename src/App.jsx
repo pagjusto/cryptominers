@@ -128,12 +128,12 @@ export default function App() {
     return saved !== null ? parseFloat(saved) : 18.500;
   });
 
-  // Listagens ativas no Marketplace P2P
+  // Listagens ativas no Marketplace P2P (inicia vazio, sem heróis fictícios)
   const [marketplaceListings, setMarketplaceListings] = useState(() => {
-    const saved = localStorage.getItem('crypto_miners_market');
+    const saved = localStorage.getItem('cryptozombies_market_v2');
     if (saved) {
       try {
-        let parsed = JSON.parse(saved);
+        const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) return parsed;
       } catch (e) {}
     }
@@ -1082,7 +1082,7 @@ export default function App() {
   }, [studioRevenue]);
 
   useEffect(() => {
-    localStorage.setItem('crypto_miners_market', JSON.stringify(marketplaceListings));
+    localStorage.setItem('cryptozombies_market_v2', JSON.stringify(marketplaceListings));
   }, [marketplaceListings]);
 
   useEffect(() => {
