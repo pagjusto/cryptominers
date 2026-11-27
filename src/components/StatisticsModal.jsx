@@ -249,14 +249,14 @@ export default function StatisticsModal({
             <div className="text-left">
               <div className="flex items-center gap-2">
                 <h2 className="font-arcade text-base sm:text-lg text-amber-400 tracking-wide">
-                  ESTATÍSTICAS & RETORNO DE ROI (OFICIAL)
+                  ESTATÍSTICAS & ROI REAL DA CONTA
                 </h2>
                 <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold font-mono">
-                  DADOS REAIS & 3 CENÁRIOS
+                  DADOS REAIS
                 </span>
               </div>
               <p className="text-xs text-slate-400 font-tech">
-                Métricas da operação de mineração, retorno de ROI da conta, simulador de baús/casas e simulação de upgrades
+                Métricas da operação em tempo real, desempenho dos heróis e retorno de ROI da conta
               </p>
             </div>
           </div>
@@ -297,33 +297,6 @@ export default function StatisticsModal({
             </button>
 
             <button
-              onClick={() => setActiveTab('simulator')}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl font-tech text-xs font-bold transition cursor-pointer ${
-                activeTab === 'simulator'
-                  ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-950/50'
-                  : 'bg-slate-800/70 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-700/50'
-              }`}
-            >
-              <Sliders size={14} />
-              <span>3. SIMULADOR UPGRADES</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('roi_chests')}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl font-tech text-xs font-bold transition cursor-pointer ${
-                activeTab === 'roi_chests'
-                  ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-950/50'
-                  : 'bg-slate-800/70 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-700/50'
-              }`}
-            >
-              <Calculator size={14} />
-              <span>4. SIMULADOR ROI (BAÚS & CASAS)</span>
-              <span className="ml-1 text-[9px] px-1.5 py-0.2 rounded bg-purple-500/30 text-purple-200 border border-purple-400/30">
-                3 CENÁRIOS
-              </span>
-            </button>
-
-            <button
               onClick={() => setActiveTab('roi')}
               className={`flex items-center gap-1.5 px-3 py-2 rounded-xl font-tech text-xs font-bold transition cursor-pointer ${
                 activeTab === 'roi' || activeTab === 'roi_real'
@@ -332,7 +305,7 @@ export default function StatisticsModal({
               }`}
             >
               <TrendingUp size={14} />
-              <span>5. ROI REAL DA CONTA</span>
+              <span>3. ROI REAL DA CONTA</span>
             </button>
           </div>
 

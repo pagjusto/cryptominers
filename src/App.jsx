@@ -1878,15 +1878,6 @@ export default function App() {
             <Settings size={15} />
           </button>
 
-          {/* Reset do Mapa */}
-          <button
-            onClick={handleResetCurrentMine}
-            title="Escanear Novo Veio da Mina"
-            className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition border border-slate-700 cursor-pointer"
-          >
-            <RefreshCw size={15} />
-          </button>
-
           {/* Taxa de Mineração Atual da Equipe */}
           <div 
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-950/80 border border-amber-500/30 text-[11px] font-mono shrink-0 cursor-help"
