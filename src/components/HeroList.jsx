@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { MINER_CLASSES } from '../data/minersData';
 import { HERO_ROSTER, getWeaponById, getRarityConfig } from '../data/heroRoster';
+import { getMinerActiveDays } from './HeroEvolutionModal';
 
 export default function HeroList({ 
   miners, 
@@ -229,8 +230,12 @@ export default function HeroList({
           const healthPct = Math.round(((miner.currentHealth ?? miner.maxHealth ?? 100) / (miner.maxHealth || 100)) * 100);
           const durability = miner.durability !== undefined ? Math.round(miner.durability) : 100;
           const isBroken = durability <= 0;
+          const ageDays = getMinerActiveDays(miner);
+          const ageReductionPct = ageDays >= 80 ? 50 : ageDays >= 70 ? 30 : ageDays >= 50 ? 15 : 0;
+          const weaponReductionPct = isBroken ? 100 : 0;
           const hourlyCoins = miner.coinsPerHour || ((miner.power || 2) * 0.05 * (miner.speed || 1.2));
           const ratePerMinute = hourlyCoins / 60;
+          const effectiveRatePerMinute = isBroken ? 0 : ratePerMinute * (1 - ageReductionPct / 100);
 
           return (
             <div 
@@ -402,16 +407,32 @@ export default function HeroList({
               {/* LINHA 2: BANDEJA DE ATRIBUTOS, BARRA DE VIDA E DURABILIDADE */}
               <div className="bg-slate-900/70 p-2 rounded-xl border border-slate-800/80 flex flex-col gap-1.5 w-full">
                 {/* Atributos Básicos & Porcentagem de Vida */}
-                <div className="flex items-center justify-between text-xs font-mono">
-                  <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-mono">
+                  <div className="flex flex-wrap items-center gap-2.5">
                     <span 
-                      className="flex items-center gap-1 text-amber-400 font-bold" 
-                      title={`Taxa de mineração: ${ratePerMinute.toFixed(4)} MNC/min (${hourlyCoins.toFixed(2)} MNC/h)`}
+                      className={`flex items-center gap-1 font-bold ${isBroken ? 'text-rose-400' : 'text-amber-400'}`}
+                      title={`Taxa base: ${ratePerMinute.toFixed(4)} MNC/min • Idade: -${ageReductionPct}% • Arma: -${weaponReductionPct}%`}
                     >
-                      <Pickaxe size={12} className="text-amber-400" /> {ratePerMinute.toFixed(3)} MNC/min
+                      <Pickaxe size={12} className={isBroken ? 'text-rose-400' : 'text-amber-400'} /> {effectiveRatePerMinute.toFixed(3)} MNC/min
                     </span>
                     <span className="flex items-center gap-1 text-sky-400 font-bold" title="Vida máxima">
                       <HeartPulse size={12} /> {miner.maxHealth || 100}
+                    </span>
+                    <span
+                      className={`flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded border ${
+                        ageDays >= 80
+                          ? 'bg-rose-500/15 text-rose-300 border-rose-500/40'
+                          : ageDays >= 70
+                            ? 'bg-orange-500/15 text-orange-300 border-orange-500/40'
+                            : ageDays >= 50
+                              ? 'bg-amber-500/15 text-amber-300 border-amber-500/40'
+                              : 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30'
+                      }`}
+                      title={`Idade do herói: ${ageDays}/80 dias • Redução por idade: -${ageReductionPct}% na produção de Coins`}
+                    >
+                      <Clock size={10} />
+                      <span>{ageDays}/80d</span>
+                      <span className="opacity-90">({ageReductionPct > 0 ? `-${ageReductionPct}%` : '0%'})</span>
                     </span>
                   </div>
 
@@ -446,9 +467,13 @@ export default function HeroList({
                         {durability}%
                       </span>
                     </span>
-                    {isBroken && (
-                      <span className="text-[9px] text-rose-400 font-bold whitespace-nowrap bg-rose-500/20 px-1 py-0.2 rounded border border-rose-500/30">
-                        QUEBRADA (INTERROMPIDO)
+                    {isBroken ? (
+                      <span className="text-[9px] text-rose-400 font-bold whitespace-nowrap bg-rose-500/20 px-1.5 py-0.2 rounded border border-rose-500/30">
+                        QUEBRADA (-100% MNC)
+                      </span>
+                    ) : (
+                      <span className="text-[9px] text-slate-400 font-mono whitespace-nowrap">
+                        (Redução arma: 0%)
                       </span>
                     )}
                   </span>
