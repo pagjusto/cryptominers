@@ -1897,15 +1897,6 @@ export default function App() {
             <span className="text-[9px] text-slate-400 hidden xl:inline">({activeWorkingMiners.length} ativos)</span>
           </div>
 
-          {/* Status da Nuvem Supabase */}
-          <div 
-            className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-slate-950/80 border border-slate-800 text-[10px] font-mono shrink-0 cursor-help"
-            title={isCloudSyncing ? "Sincronizando dados com o Supabase..." : "Supabase: Nuvem Conectada e Sincronizada"}
-          >
-            <div className={`w-2 h-2 rounded-full ${isCloudSyncing ? 'bg-amber-400 animate-spin' : 'bg-emerald-400 animate-pulse'}`} />
-            <span className="text-slate-400 font-bold hidden xl:inline">NUVEM</span>
-          </div>
-
           {/* Som */}
           <button
             onClick={toggleSound}
