@@ -8,6 +8,7 @@ import {
 import confetti from 'canvas-confetti';
 import { sfx } from '../utils/sfx';
 import { getCryptoZombiesConfig } from '../data/cryptoZombiesConfig';
+import { signWithdrawalAuthorization } from '../utils/web3Wallet';
 import {
   REFERRAL_COMMISSION_PCT,
   getUserReferralCode,
@@ -174,8 +175,8 @@ export default function UserProfileModal({
   const withdrawFeeUsdt = parseFloat(((withdrawGrossUsdt * currentWithdrawalTax) / 100).toFixed(2));
   const withdrawNetUsdt = parseFloat((withdrawGrossUsdt - withdrawFeeUsdt).toFixed(2));
 
-  // Executar Saque
-  const handleConfirmWithdraw = () => {
+  // Executar Saque com Assinatura Web3 Real
+  const handleConfirmWithdraw = async () => {
     if (!isConnected) {
       setActiveTab('wallet');
       return;
@@ -185,7 +186,19 @@ export default function UserProfileModal({
       return;
     }
     if (!hasEnoughBalance) {
-      alert('Saldo insuficiente de MINER para realizar este saque.');
+      alert('Saldo insuficiente de Coins para realizar este saque.');
+      return;
+    }
+
+    let authProof;
+    try {
+      authProof = await signWithdrawalAuthorization({
+        address,
+        netUsdt: withdrawNetUsdt,
+        grossCoins: parsedWithdrawAmount,
+      });
+    } catch (err) {
+      alert(err?.message || 'Assinatura Web3 cancelada na carteira.');
       return;
     }
 
@@ -195,21 +208,28 @@ export default function UserProfileModal({
       grossMiner: parsedWithdrawAmount,
       taxPct: currentWithdrawalTax,
       feeUsdt: withdrawFeeUsdt,
-      // O gas é pago pelo projeto com a taxa percentual; o valor real só existe após a transação on-chain.
       gasPayer: 'project',
-      gasNetwork: 'solana',
-      gasAsset: 'SOL',
+      gasNetwork: network || 'BNB Smart Chain',
+      gasAsset: 'BNB/SOL',
       gasCostUsdt: null,
-      gasStatus: 'pending_onchain_integration',
+      gasStatus: 'signed_pending_payout',
+      signature: authProof?.signature,
       projectFeeAfterGasUsdt: null,
       netUsdt: withdrawNetUsdt,
       walletAddress: address,
       walletType: walletType || 'metamask'
     };
 
-    // Callback para App.jsx deduzir bcoin e creditar usdt na carteira
+    // Callback para App.jsx deduzir Coins e registrar solicitação assinada
     if (onWithdraw) {
-      onWithdraw(parsedWithdrawAmount, withdrawNetUsdt, currentWithdrawalTax, { gasPayer: 'project', gasNetwork: 'solana', gasAsset: 'SOL', gasCostUsdt: null, gasStatus: 'pending_onchain_integration' });
+      onWithdraw(parsedWithdrawAmount, withdrawNetUsdt, currentWithdrawalTax, {
+        gasPayer: 'project',
+        gasNetwork: network || 'BNB Smart Chain',
+        gasAsset: 'BNB/SOL',
+        gasCostUsdt: null,
+        gasStatus: 'signed_pending_payout',
+        signature: authProof?.signature
+      });
     }
 
     // Salvar no histórico
@@ -675,21 +695,21 @@ export default function UserProfileModal({
                     </div>
                   </div>
 
-                  {/* Sandbox de Fundos Demo */}
+                  {/* Atualização de Saldo Real On-Chain */}
                   <div className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-950/50 border border-slate-800 text-xs">
                     <div>
-                      <span className="font-bold text-slate-300 block">Ambiente Sandbox de Testes:</span>
-                      <span className="text-slate-500 text-[11px]">Adicione USDT demo para testar compras e depósitos livremente.</span>
+                      <span className="font-bold text-slate-300 block">Saldo Real On-Chain ({network || 'Web3'}):</span>
+                      <span className="text-slate-500 text-[11px]">Consulte novamente seu saldo real de USDT direto da blockchain.</span>
                     </div>
                     <button
-                      onClick={() => {
-                        if (onAddDemoFunds) onAddDemoFunds();
+                      onClick={async () => {
+                        if (onAddDemoFunds) await onAddDemoFunds();
                         sfx.playLevelUp();
                       }}
-                      className="flex items-center gap-1 px-3.5 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-bold transition cursor-pointer active:scale-95 shrink-0"
+                      className="flex items-center gap-1 px-3.5 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-xs font-bold transition cursor-pointer active:scale-95 shrink-0"
                     >
-                      <Zap size={14} className="text-amber-400" />
-                      <span>+100 USDT Demo</span>
+                      <RefreshCw size={14} className="text-emerald-400" />
+                      <span>Atualizar Saldo</span>
                     </button>
                   </div>
 

@@ -86,7 +86,14 @@ import {
 } from './utils/constructionChestEngine';
 import { calculateMinerEfficiency } from './utils/minerRotationEngine';
 import { Calculator, Settings } from 'lucide-react';
-import { getSavedWalletState, saveWalletState, requestWalletConnection, disconnectWalletFromStorage } from './utils/web3Wallet';
+import {
+  getSavedWalletState,
+  saveWalletState,
+  requestWalletConnection,
+  disconnectWalletFromStorage,
+  executeRealUsdtPayment,
+  refreshWalletUsdtBalance
+} from './utils/web3Wallet';
 import MinerCatalogModal from './components/MinerCatalogModal';
 import MineSelectorModal from './components/MineSelectorModal';
 import InventoryModal from './components/InventoryModal';
@@ -368,7 +375,7 @@ export default function App() {
     });
   };
 
-  const handleHireArmorer = (plan, currency) => {
+  const handleHireArmorer = async (plan, currency) => {
     if (currency === 'coins') {
       if (bcoin < plan.costCoins) {
         alert(`Saldo insuficiente de Coins. Você precisa de ${plan.costCoins.toLocaleString('pt-BR')} Coins.`);
@@ -384,12 +391,16 @@ export default function App() {
         alert(`Saldo insuficiente de USDT. Você precisa de $${plan.costUsdt.toFixed(2)} USDT.`);
         return false;
       }
-      setWalletState(prev => {
-        const nextUsdt = parseFloat(Math.max(0, prev.usdtBalance - plan.costUsdt).toFixed(2));
-        const updated = { ...prev, usdtBalance: nextUsdt };
-        saveWalletState(updated);
-        return updated;
-      });
+      try {
+        const payment = await executeRealUsdtPayment({
+          amountUsdt: plan.costUsdt,
+          memo: `Contrato Armeiro ${plan.durationDays}d`
+        });
+        if (payment?.updatedState) setWalletState(payment.updatedState);
+      } catch (err) {
+        alert(err?.message || 'Transação Web3 cancelada ou falhou.');
+        return false;
+      }
     }
 
     const durationMs = plan.durationDays * 24 * 60 * 60 * 1000;
@@ -586,13 +597,9 @@ export default function App() {
     setWalletState(newState);
   };
 
-  const handleAddDemoFunds = () => {
-    setWalletState(prev => {
-      const nextBalance = parseFloat((prev.usdtBalance + 100).toFixed(2));
-      const nextState = { ...prev, usdtBalance: nextBalance };
-      saveWalletState(nextState);
-      return nextState;
-    });
+  const handleAddDemoFunds = async () => {
+    const refreshed = await refreshWalletUsdtBalance();
+    setWalletState(refreshed);
   };
   const [isInventoryOpen, setIsInventoryOpen] = useState(false);
 
@@ -1361,8 +1368,8 @@ export default function App() {
     setIsChestOpeningOpen(true);
   };
 
-  // 2. COMPRAR E GUARDAR NO INVENTÁRIO DE BAÚS DE HERÓIS (USDT OU CoinsCOIN CONFORME COTAÇÃO)
-  const handleBuyAndStoreChest = (chest, currency = 'miner') => {
+  // 2. COMPRAR E GUARDAR NO INVENTÁRIO DE BAÚS DE HERÓIS (USDT ON-CHAIN OU COINS)
+  const handleBuyAndStoreChest = async (chest, currency = 'miner') => {
     const isMiner = currency.toLowerCase() === 'miner';
     const costUsdt = chest.costUsdt || chest.costBcoin || 10;
     const costMiner = currentMinerRate > 0 ? parseFloat((costUsdt / currentMinerRate).toFixed(2)) : costUsdt;
@@ -1389,13 +1396,25 @@ export default function App() {
         alert(`Saldo insuficiente em USDT na carteira. Necessário: $${costUsdt} USDT (atual: $${walletState.usdtBalance.toFixed(2)}).`);
         return false;
       }
-      // Deduz USDT da carteira Web3
-      setWalletState(prev => {
-        const nextBalance = parseFloat((prev.usdtBalance - costUsdt).toFixed(2));
-        const next = { ...prev, usdtBalance: nextBalance };
-        saveWalletState(next);
-        return next;
-      });
+      try {
+        const payment = await executeRealUsdtPayment({
+          amountUsdt: costUsdt,
+          memo: `Compra ${chest.name || chest.id}`
+        });
+        if (payment?.updatedState) setWalletState(payment.updatedState);
+        if (isSupabaseConfigured && walletState?.address) {
+          logTransactionToSupabase(walletState.address, {
+            type: 'chest_purchase_usdt',
+            amountUsdt: costUsdt,
+            txHash: payment?.txHash,
+            network: payment?.network,
+            packageId: chest.id
+          });
+        }
+      } catch (err) {
+        alert(err?.message || 'Transação Web3 cancelada ou falhou.');
+        return false;
+      }
       setTotalInvested(prev => parseFloat((prev + costUsdt).toFixed(3)));
       recordReferralPurchaseReward({
         authUser,
