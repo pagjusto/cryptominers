@@ -9,7 +9,14 @@ export default function AdminConfigModal({
   isOpen,
   onClose,
   onConfigUpdated,
-  miners = []
+  miners = [],
+  onOpenSpawnZones,
+  onToggleCollisionEditor,
+  isCollisionEditorOpen = false,
+  onOpenTowerModal,
+  onOpenBillboardModal,
+  onToggleBossTest,
+  isBossActiveNow = false
 }) {
   const [config, setConfig] = useState(() => getCryptoZombiesConfig());
   const [activeTab, setActiveTab] = useState('chests'); // 'chests' | 'houses' | 'rarities' | 'general'
@@ -260,6 +267,17 @@ export default function AdminConfigModal({
           >
             <span>🗺️</span>
             <span>8. Mapas & Jazidas</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('tools')}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 shrink-0 ${
+              activeTab === 'tools'
+                ? 'bg-amber-500 text-slate-950 shadow-sm'
+                : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
+            }`}
+          >
+            <span>🛠️</span>
+            <span>9. Calibração & Mapa</span>
           </button>
         </div>
 
@@ -756,6 +774,99 @@ export default function AdminConfigModal({
                 }
               }}
             />
+          )}
+
+          {/* ABA 9: FERRAMENTAS DE CALIBRAÇÃO, RESPAWN & BLOQUEIOS */}
+          {activeTab === 'tools' && (
+            <div className="space-y-4">
+              <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-1">
+                <h3 className="font-arcade text-xs sm:text-sm text-amber-400">
+                  FERRAMENTAS DE CALIBRAÇÃO & EDITOR DO MAPA
+                </h3>
+                <p className="text-xs text-slate-400">
+                  Acesse os modais administrativos de configuração do mapa quando precisar ajustar respawns, bloqueios, sombras ou testar o Boss.
+                </p>
+              </div>
+
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    if (onOpenSpawnZones) onOpenSpawnZones();
+                  }}
+                  className="p-4 rounded-2xl bg-emerald-950/40 hover:bg-emerald-900/50 border border-emerald-500/40 text-left space-y-1.5 transition cursor-pointer"
+                >
+                  <div className="font-arcade text-xs text-emerald-300">🎯 Mapa de Respawns</div>
+                  <p className="text-[11px] text-slate-300">
+                    Editar zonas de nascimento de Zumbis e pontos de respawn dos Heróis.
+                  </p>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    if (onToggleCollisionEditor) onToggleCollisionEditor();
+                  }}
+                  className={`p-4 rounded-2xl border text-left space-y-1.5 transition cursor-pointer ${
+                    isCollisionEditorOpen
+                      ? 'bg-amber-500/20 border-amber-400'
+                      : 'bg-amber-950/35 hover:bg-amber-900/45 border-amber-500/40'
+                  }`}
+                >
+                  <div className="font-arcade text-xs text-amber-300">
+                    🧱 {isCollisionEditorOpen ? 'Desativar Bloqueios' : 'Desenhar Bloqueios'}
+                  </div>
+                  <p className="text-[11px] text-slate-300">
+                    Abrir toolbar e pintar células bloqueadas e caminhos diretamente no mapa.
+                  </p>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    if (onOpenTowerModal) onOpenTowerModal();
+                  }}
+                  className="p-4 rounded-2xl bg-sky-950/40 hover:bg-sky-900/50 border border-sky-500/40 text-left space-y-1.5 transition cursor-pointer"
+                >
+                  <div className="font-arcade text-xs text-sky-300">🗼 Torre & Sombra</div>
+                  <p className="text-[11px] text-slate-300">
+                    Abrir calibrador manual da posição e sombra da Torre.
+                  </p>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    if (onOpenBillboardModal) onOpenBillboardModal();
+                  }}
+                  className="p-4 rounded-2xl bg-teal-950/40 hover:bg-teal-900/50 border border-teal-500/40 text-left space-y-1.5 transition cursor-pointer"
+                >
+                  <div className="font-arcade text-xs text-teal-300">🪧 Sombra Outdoor</div>
+                  <p className="text-[11px] text-slate-300">
+                    Abrir calibrador da sombra retangular do Outdoor.
+                  </p>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (onToggleBossTest) onToggleBossTest();
+                  }}
+                  className="p-4 rounded-2xl bg-rose-950/40 hover:bg-rose-900/50 border border-rose-500/40 text-left space-y-1.5 transition cursor-pointer"
+                >
+                  <div className="font-arcade text-xs text-rose-300">
+                    ⚡ {isBossActiveNow ? 'Encerrar Boss (Teste)' : 'Testar Invasão do Boss'}
+                  </div>
+                  <p className="text-[11px] text-slate-300">
+                    Força início ou encerramento imediato da invasão do Boss Mutante para testes.
+                  </p>
+                </button>
+              </div>
+            </div>
           )}
         </div>
 

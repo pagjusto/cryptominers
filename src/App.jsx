@@ -1847,16 +1847,6 @@ export default function App() {
             <span>ROI REAL</span>
           </button>
 
-          {/* BOTÃO RESPAWN (MAPA DE ZUMBIS & HERÓIS) */}
-          <button
-            onClick={() => setIsSpawnZonesOpen(true)}
-            title="Visualizar zonas de respawn de Zumbis e Heróis"
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-emerald-950/70 hover:bg-emerald-900/80 text-emerald-300 border border-emerald-500/40 font-tech text-xs font-bold transition cursor-pointer shadow-sm active:scale-95"
-          >
-            <Crosshair size={14} className="text-emerald-400" />
-            <span>RESPAWN</span>
-          </button>
-
           {/* BOTÃO EQUIPE (JANELA FLUTUANTE) */}
           <button
             onClick={() => setIsTeamDrawerOpen(prev => !prev)}
@@ -1895,20 +1885,6 @@ export default function App() {
             className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition border border-slate-700 cursor-pointer"
           >
             <RefreshCw size={15} />
-          </button>
-
-          {/* BOTÃO DESENHAR BLOQUEIOS NO MAPA */}
-          <button
-            onClick={() => setIsCollisionEditorOpen(prev => !prev)}
-            title="Desenhar Bloqueios e Caminhos no Mapa (Clique e Arraste com o Mouse)"
-            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg font-tech text-xs font-bold border transition cursor-pointer shadow-md active:scale-95 ${
-              isCollisionEditorOpen
-                ? 'bg-amber-500 text-slate-950 border-amber-300 ring-2 ring-amber-400/60 shadow-[0_0_15px_rgba(245,158,11,0.6)]'
-                : 'bg-amber-950/80 hover:bg-amber-900/90 text-amber-300 border-amber-500/50'
-            }`}
-          >
-            <span>🧱</span>
-            <span className="hidden sm:inline">BLOQUEIOS</span>
           </button>
 
           {/* BOTÃO PÁGINA TODA / TELA CHEIA */}
@@ -2031,63 +2007,6 @@ export default function App() {
                     💀 Boss: <b className="text-amber-300">ATIVO</b>
                   </span>
                 )}
-
-                <button
-                  onClick={() => {
-                    const heroTiles = (miners || []).filter(m => m.status === 'work').map(m => ({ c: Math.round(m.x), r: Math.round(m.y) }));
-                    if (bossScheduleState.isBossActiveNow) {
-                      const updated = removeBossFromPlayerMap(activePlayerId);
-                      setMapData(updated);
-                      recordBossDefeatInSchedule();
-                      setBossScheduleState(evaluateBossSchedule());
-                    } else {
-                      forceBossInvasionNow(20);
-                      const updated = spawnBossInPlayerMap(activePlayerId, { heroTiles });
-                      setMapData(updated);
-                      setBossScheduleState(evaluateBossSchedule());
-                    }
-                  }}
-                  className="text-[11px] bg-red-950/80 hover:bg-red-900 text-red-300 hover:text-white border border-red-500/50 hover:border-red-400 px-2 py-0.5 rounded-md cursor-pointer transition-all active:scale-95 flex items-center gap-1 font-bold shadow-sm"
-                  title="Testar Invasão do Boss imediatamente (força início ou encerramento da batalha de teste)"
-                >
-                  ⚡ {bossScheduleState.isBossActiveNow ? 'Encerrar' : 'Invasão (Teste)'}
-                </button>
-
-                <button
-                  onClick={() => setIsTowerModalOpen(prev => !prev)}
-                  className="text-[11px] bg-sky-950/90 hover:bg-sky-900 border border-sky-500/60 text-sky-200 hover:text-white px-2 py-0.5 rounded-md cursor-pointer transition-all active:scale-95 flex items-center gap-1 font-bold shadow"
-                  title="Abrir Calibrador Manual da Torre e da Sombra"
-                >
-                  🗼 Torre & Sombra
-                </button>
-
-                <button
-                  onClick={() => setIsBillboardModalOpen(prev => !prev)}
-                  className="text-[11px] bg-emerald-950/90 hover:bg-emerald-900 border border-emerald-500/60 text-emerald-200 hover:text-white px-2 py-0.5 rounded-md cursor-pointer transition-all active:scale-95 flex items-center gap-1 font-bold shadow"
-                  title="Abrir Calibrador da Sombra Retangular do Outdoor"
-                >
-                  🪧 Sombra Outdoor
-                </button>
-
-                <button
-                  onClick={() => setIsCollisionEditorOpen(prev => !prev)}
-                  className={`text-[11px] ${
-                    isCollisionEditorOpen 
-                      ? 'bg-amber-600 text-white border-amber-300 ring-2 ring-amber-400/50 shadow-[0_0_12px_rgba(245,158,11,0.6)]' 
-                      : 'bg-amber-950/90 hover:bg-amber-900 border-amber-500/60 text-amber-200 hover:text-white'
-                  } border px-2 py-0.5 rounded-md cursor-pointer transition-all active:scale-95 flex items-center gap-1 font-bold shadow`}
-                  title="Desenhar bloqueios e caminhos diretamente no mapa (Clique e arraste)"
-                >
-                  🧱 Desenhar Bloqueios
-                </button>
-
-                <button
-                  onClick={() => setIsSpawnZonesOpen(true)}
-                  className="text-[11px] bg-emerald-950/90 hover:bg-emerald-900 border border-emerald-500/60 text-emerald-200 hover:text-white px-2 py-0.5 rounded-md cursor-pointer transition-all active:scale-95 flex items-center gap-1 font-bold shadow"
-                  title="Visualizar e configurar zonas de respawn de Zumbis e Heróis"
-                >
-                  🎯 Respawns
-                </button>
 
                 <button
                   onClick={() => setIsFullPageMap(prev => !prev)}
@@ -2340,6 +2259,26 @@ export default function App() {
           setCryptoZombiesConfig(newCfg);
         }}
         miners={miners}
+        onOpenSpawnZones={() => setIsSpawnZonesOpen(true)}
+        onToggleCollisionEditor={() => setIsCollisionEditorOpen(prev => !prev)}
+        isCollisionEditorOpen={isCollisionEditorOpen}
+        onOpenTowerModal={() => setIsTowerModalOpen(prev => !prev)}
+        onOpenBillboardModal={() => setIsBillboardModalOpen(prev => !prev)}
+        isBossActiveNow={bossScheduleState.isBossActiveNow}
+        onToggleBossTest={() => {
+          const heroTiles = (miners || []).filter(m => m.status === 'work').map(m => ({ c: Math.round(m.x), r: Math.round(m.y) }));
+          if (bossScheduleState.isBossActiveNow) {
+            const updated = removeBossFromPlayerMap(activePlayerId);
+            setMapData(updated);
+            recordBossDefeatInSchedule();
+            setBossScheduleState(evaluateBossSchedule());
+          } else {
+            forceBossInvasionNow(20);
+            const updated = spawnBossInPlayerMap(activePlayerId, { heroTiles });
+            setMapData(updated);
+            setBossScheduleState(evaluateBossSchedule());
+          }
+        }}
       />
 
       {/* MODAL DO CATÁLOGO DE CoinsADORES */}
