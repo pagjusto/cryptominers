@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, HeartPulse, Check, Users, Wrench, ShieldCheck, Sparkles, Clock, AlertTriangle } from 'lucide-react';
+import { X, HeartPulse, Check, Users, Wrench, ShieldCheck, Sparkles, Clock, AlertTriangle, Coins, Lock } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { HOUSE_TIERS, resolveHouseTier } from '../data/housesData';
 import { STAFF_PLANS, STAFF_MEMBERS } from '../data/staffCatalog';
@@ -466,127 +466,196 @@ export default function HouseModal({
           </div>
         )}
 
-        {/* CONTEÚDO DA ABA 3: IMOBILIÁRIA / 4 CASAS OFICIAIS */}
-        {activeTab === 'upgrade' && (
-          <div className="flex-1 overflow-y-auto no-scrollbar py-4 space-y-3">
-            
-            {/* Banner de Fragmentos de Construção */}
-            <div className="p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/20 via-slate-950 to-purple-500/20 border border-amber-500/40 flex items-center justify-between gap-3 text-xs">
-              <div className="flex items-center gap-2.5">
-                <div className="w-10 h-10 rounded-xl bg-amber-950/40 border border-amber-500/50 p-1 flex items-center justify-center shrink-0 shadow-inner">
-                  <img src="/items/construction_fragment.png" alt="Fragmentos" className="w-full h-full object-contain filter drop-shadow" />
-                </div>
-                <div>
-                  <span className="font-arcade text-xs text-amber-300 block">
-                    {constructionFragments} FRAGMENTO{constructionFragments === 1 ? '' : 'S'} DE CONSTRUÇÃO DISPONÍVEIS
-                  </span>
-                  <span className="text-[11px] text-slate-400">
-                    Fragmentos obtidos nos Baús de Construção. Evolução permanente da base.
-                  </span>
-                </div>
+        {/* CONTEÚDO DA ABA 3: EVOLUÇÃO DA BASE (MESMO PADRÃO DA EVOLUÇÃO DE HERÓIS) */}
+        {activeTab === 'upgrade' && (() => {
+          const nextUpgradeHouse = HOUSE_TIERS[houseIndex + 1] || null;
+          const nextFragCost = nextUpgradeHouse?.fragmentCost || 0;
+          const nextMncCost = nextUpgradeHouse?.mncCost || 0;
+          const hasNextFrags = constructionFragments >= nextFragCost;
+          const hasNextCoins = minerBalance >= nextMncCost;
+          const canAffordNext = Boolean(nextUpgradeHouse && hasNextFrags && hasNextCoins);
+
+          return (
+          <div className="flex-1 overflow-y-auto no-scrollbar py-4 space-y-5">
+            {/* Passo 1: Níveis da Base */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="font-arcade text-xs text-purple-300 uppercase">
+                  1. Níveis da Base Médica (Sequencial)
+                </h3>
+                <span className="text-[11px] font-mono text-slate-400">
+                  Atual: <b className="text-amber-300">{currentHouse.name}</b>
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {HOUSE_TIERS.filter(h => h.id !== 'none').map(house => {
+                  const targetIndex = HOUSE_TIERS.findIndex(h => h.id === house.id);
+                  const isOwned = currentHouse.id === house.id;
+                  const isPast = targetIndex < houseIndex;
+                  const isNext = targetIndex === houseIndex + 1;
+
+                  return (
+                    <div
+                      key={house.id}
+                      className={`p-3.5 rounded-2xl border-2 transition flex flex-col justify-between text-left ${
+                        isOwned
+                          ? 'border-amber-400 bg-amber-950/30 ring-1 ring-amber-400/50 shadow-md'
+                          : isNext
+                          ? 'border-purple-400/70 bg-purple-950/20 shadow-lg'
+                          : isPast
+                          ? 'border-slate-800 bg-slate-950/40 opacity-50'
+                          : 'border-slate-800 bg-slate-950/60 opacity-70'
+                      }`}
+                    >
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-lg">{house.icon}</span>
+                          <span
+                            className="font-arcade text-[10px] font-bold px-2 py-0.5 rounded-lg border"
+                            style={{
+                              borderColor: `${house.color}40`,
+                              color: house.color,
+                              backgroundColor: `${house.color}15`
+                            }}
+                          >
+                            {house.slots} LEITOS • NV {house.level}
+                          </span>
+                        </div>
+
+                        {house.image && (
+                          <div className="w-full h-36 rounded-xl bg-slate-900/90 border border-slate-800 p-1.5 mb-2 flex items-center justify-center overflow-hidden">
+                            <img
+                              src={house.image}
+                              alt={house.name}
+                              className="w-full h-full object-contain drop-shadow-lg scale-105"
+                            />
+                          </div>
+                        )}
+
+                        <h4 className="font-tech font-bold text-sm text-white mb-0.5">
+                          {house.name}
+                        </h4>
+                        <p className="text-[11px] text-slate-400 font-tech leading-relaxed mb-2">
+                          {house.description}
+                        </p>
+                      </div>
+
+                      <div className="pt-2 border-t border-slate-800/80">
+                        {isOwned ? (
+                          <span className="text-[11px] font-tech font-bold text-emerald-400 flex items-center justify-center gap-1 py-1 bg-emerald-950/40 rounded-lg border border-emerald-500/30">
+                            <Check size={13} /> Base Ativa
+                          </span>
+                        ) : isPast ? (
+                          <span className="text-[11px] font-tech text-slate-500 text-center block py-1 bg-slate-900/50 rounded-lg">
+                            Nível Superado
+                          </span>
+                        ) : isNext ? (
+                          <span className="text-[11px] font-tech font-bold text-purple-300 text-center block py-1 bg-purple-950/40 rounded-lg border border-purple-500/35">
+                            Próxima Evolução Selecionada
+                          </span>
+                        ) : (
+                          <span className="text-[11px] font-tech text-slate-500 flex items-center justify-center gap-1 py-1 bg-slate-900/50 rounded-lg border border-slate-800">
+                            <Lock size={11} /> Requer {HOUSE_TIERS[targetIndex - 1]?.name || 'Nível Anterior'}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
-            <p className="text-xs text-slate-400">
-              A evolução é permanente e sequencial. Cada nível aumenta os leitos visíveis e a capacidade real do ambulatório.
-            </p>
+            {/* Passo 2: Itens Necessários (igual à Evolução de Heróis) */}
+            {nextUpgradeHouse ? (
+              <div className="space-y-3 pt-2 border-t border-slate-800">
+                <h3 className="font-arcade text-xs text-amber-300 uppercase">
+                  2. Itens Necessários ({currentHouse.name} ➔ {nextUpgradeHouse.name})
+                </h3>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {HOUSE_TIERS.filter(h => h.id !== 'none').map(house => {
-                const targetIndex = HOUSE_TIERS.findIndex(h => h.id === house.id);
-                const isOwned = currentHouse.id === house.id;
-                const isPast = targetIndex < houseIndex;
-                const fragCost = house.fragmentCost || 0;
-                const mncCost = house.mncCost || 0;
-                const canAffordFrags = constructionFragments >= fragCost && minerBalance >= mncCost;
-
-                return (
-                  <div 
-                    key={house.id}
-                    className={`p-4 rounded-3xl border-2 transition flex flex-col justify-between text-left ${
-                      isOwned 
-                        ? 'border-amber-400 bg-amber-950/30 ring-1 ring-amber-400/50 shadow-md' 
-                        : (isPast ? 'border-slate-800 bg-slate-950/40 opacity-50' : 'border-slate-800 bg-slate-950/80 hover:border-slate-700')
+                <div className="grid sm:grid-cols-2 gap-3">
+                  {/* Fragmentos de Construção */}
+                  <div
+                    className={`p-3.5 rounded-2xl border flex items-center gap-3 ${
+                      hasNextFrags
+                        ? 'bg-emerald-950/25 border-emerald-500/35'
+                        : 'bg-rose-950/20 border-rose-500/35'
                     }`}
                   >
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-xl">{house.icon}</span>
-                        <span 
-                          className="font-arcade text-xs font-bold px-2.5 py-0.5 rounded-lg border"
-                          style={{
-                            borderColor: `${house.color}40`,
-                            color: house.color,
-                            backgroundColor: `${house.color}15`
-                          }}
-                        >
-                          {house.slots} LEITOS • NÍVEL {house.level}
-                        </span>
+                    <img
+                      src="/items/construction_fragment.png"
+                      alt="Fragmentos de Construção"
+                      className="w-10 h-10 object-contain shrink-0"
+                    />
+                    <div className="min-w-0">
+                      <div className="text-[11px] font-bold text-white leading-tight">
+                        Fragmentos de Construção
                       </div>
-
-                      {house.image && (
-                        <div className="w-full h-44 rounded-2xl bg-slate-900/90 border border-slate-800 p-1.5 mb-2.5 flex items-center justify-center overflow-hidden">
-                          <img
-                            src={house.image}
-                            alt={house.name}
-                            className="w-full h-full object-contain drop-shadow-lg scale-105"
-                          />
-                        </div>
-                      )}
-
-                      <h4 className="font-tech font-bold text-sm text-white mb-1">
-                        {house.name}
-                      </h4>
-
-                      <p className="text-[11px] text-slate-400 font-tech leading-relaxed mb-3">
-                        {house.description}
-                      </p>
-                    </div>
-
-                    <div className="pt-2 border-t border-slate-800/80 space-y-2">
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="font-tech text-slate-400">Fragmentos:</span>
-                        <span className="font-mono text-emerald-400 font-bold">🧱 {fragCost}</span>
+                      <div
+                        className={`text-xs font-mono font-bold mt-0.5 ${
+                          hasNextFrags ? 'text-emerald-400' : 'text-rose-400'
+                        }`}
+                      >
+                        {constructionFragments} / {nextFragCost}
                       </div>
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="font-tech text-slate-400">Custo em Coins:</span>
-                        <span className="font-mono text-amber-300 font-bold">🪙 {mncCost.toLocaleString('pt-BR')} Coins</span>
-                      </div>
-
-                      {isOwned ? (
-                        <span className="text-xs font-tech font-bold text-emerald-400 flex items-center justify-center gap-1 py-1.5 bg-emerald-950/40 rounded-xl border border-emerald-500/30">
-                          <Check size={14} /> Base Ativa do Jogador
-                        </span>
-                      ) : isPast ? (
-                        <span className="text-xs font-tech text-slate-500 text-center block py-1.5 bg-slate-900/50 rounded-xl">
-                          Nível Anterior (Superado)
-                        </span>
-                      ) : targetIndex === houseIndex + 1 ? (
-                        /* Apenas a próxima casa sequencial pode ser evoluída por crafting */
-                        <button
-                          onClick={() => handleBuyUpgradeWithFragments(house)}
-                          disabled={!canAffordFrags}
-                          className={`w-full py-2.5 px-3 rounded-xl font-arcade text-xs font-bold transition shadow-sm cursor-pointer flex items-center justify-center gap-2 ${
-                            canAffordFrags 
-                              ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 shadow-emerald-950/40' 
-                              : 'bg-slate-800/80 text-slate-500 border border-slate-700/50 cursor-not-allowed'
-                          }`}
-                        >
-                          🔨 EVOLUIR BASE
-                        </button>
-                      ) : (
-                        /* Proibido pular níveis */
-                        <span className="text-xs font-tech text-slate-500 text-center block py-1.5 bg-slate-900/50 rounded-xl border border-slate-800">
-                          🔒 Requer {HOUSE_TIERS[targetIndex - 1]?.name || 'Nível Anterior'}
-                        </span>
-                      )}
                     </div>
                   </div>
-                );
-              })}
-            </div>
+
+                  {/* Coins */}
+                  <div
+                    className={`p-3.5 rounded-2xl border flex items-center gap-3 ${
+                      hasNextCoins
+                        ? 'bg-emerald-950/25 border-emerald-500/35'
+                        : 'bg-rose-950/20 border-rose-500/35'
+                    }`}
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-400/30 flex items-center justify-center text-amber-300 shrink-0">
+                      <Coins size={20} />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-[11px] font-bold text-white leading-tight">
+                        Coins
+                      </div>
+                      <div
+                        className={`text-xs font-mono font-bold mt-0.5 ${
+                          hasNextCoins ? 'text-emerald-400' : 'text-rose-400'
+                        }`}
+                      >
+                        {Math.floor(minerBalance).toLocaleString('pt-BR')} / {nextMncCost.toLocaleString('pt-BR')}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 text-[11px] text-slate-300 flex flex-wrap items-center justify-between gap-3">
+                  <span>
+                    Bônus da evolução: <b className="text-sky-300">{nextUpgradeHouse.slots} Leitos</b> e{' '}
+                    <b className="text-emerald-300">{nextUpgradeHouse.recoverySpeedMultiplier}x Velocidade de Recuperação</b>.
+                  </span>
+
+                  <button
+                    type="button"
+                    onClick={() => handleBuyUpgradeWithFragments(nextUpgradeHouse)}
+                    disabled={!canAffordNext}
+                    className={`px-5 py-2.5 rounded-xl font-arcade text-xs flex items-center gap-2 transition ${
+                      canAffordNext
+                        ? 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 shadow-lg cursor-pointer'
+                        : 'bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed'
+                    }`}
+                  >
+                    <Sparkles size={14} />
+                    <span>EVOLUIR BASE</span>
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="p-4 rounded-2xl bg-emerald-950/30 border border-emerald-500/40 text-center text-xs font-bold text-emerald-300">
+                🏆 Sua Base Médica já está no nível máximo ({currentHouse.slots} Leitos)!
+              </div>
+            )}
           </div>
-        )}
+          );
+        })()}
 
       </div>
     </div>
