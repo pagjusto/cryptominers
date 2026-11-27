@@ -2227,6 +2227,18 @@ export default function App() {
         miners={miners}
         mapData={mapData}
         houseLevel={currentHouse?.slots >= 15 ? 3 : currentHouse?.slots >= 10 ? 2 : 1}
+        onApplySpawns={() => {
+          const updatedMap = generatePlayerMap(activePlayerId, mapData?.cycleNumber || 1);
+          setMapData(updatedMap);
+          setMiners((prev) => {
+            const next = prev.map((m, idx) => {
+              const pt = getSafeHeroSpawn(idx);
+              return { ...m, x: pt.x, y: pt.y, visualX: pt.x, visualY: pt.y };
+            });
+            localStorage.setItem('crypto_miners_team', JSON.stringify(next));
+            return next;
+          });
+        }}
       />
 
       {/* MODAL DA CASA DOS SOBREVIVENTES (HOUSE SYSTEM) */}

@@ -410,12 +410,52 @@ export function getCornerSpawnPoint(index = 0) {
 // Sul: faixa de gramado inferior, contornando ruínas e complexo central.
 // Personagens podem caminhar pelo mapa todo; estas zonas são somente os pontos de nascimento.
 export const SPAWN_ZONE_VERSION = 3;
-export function isSpawnZoneCell(c, r) {
+export const CUSTOM_ZOMBIE_SPAWNS_KEY = 'cryptozombies_custom_zombie_spawns_v1';
+export const CUSTOM_HERO_SPAWNS_KEY = 'cryptozombies_custom_hero_spawns_v1';
+
+export function isDefaultZombieSpawnCell(c, r) {
+  if (c <= 0 || c >= GRID_COLS - 1 || r <= 0 || r >= GRID_ROWS - 1) return false;
   const inNorthSpawn = r >= 1 && r <= 2 && c >= 1 && c <= 13;
   const inSouthSpawn = r >= 9 && r <= 10 && c >= 1 && c <= 13;
   const inWestSpawn = c >= 1 && c <= 3 && r >= 1 && r <= 9;
   const inEastSpawn = c >= 11 && c <= 14 && r >= 1 && r <= 8;
   return (inNorthSpawn || inSouthSpawn || inWestSpawn || inEastSpawn) && !isCityBuilding(c, r) && !isBaseCompound(c, r);
+}
+
+export function getCustomZombieSpawnKeys() {
+  if (typeof localStorage === 'undefined') return null;
+  try {
+    const raw = localStorage.getItem(CUSTOM_ZOMBIE_SPAWNS_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+export function saveCustomZombieSpawns(keysArray) {
+  if (typeof localStorage === 'undefined') return;
+  try {
+    localStorage.setItem(CUSTOM_ZOMBIE_SPAWNS_KEY, JSON.stringify(keysArray));
+  } catch {}
+}
+
+export function resetCustomZombieSpawns() {
+  if (typeof localStorage === 'undefined') return;
+  try {
+    localStorage.removeItem(CUSTOM_ZOMBIE_SPAWNS_KEY);
+  } catch {}
+}
+
+export function isSpawnZoneCell(c, r) {
+  if (c <= 0 || c >= GRID_COLS - 1 || r <= 0 || r >= GRID_ROWS - 1) return false;
+  if (isCityBuilding(c, r) || isBaseCompound(c, r)) return false;
+  const customKeys = getCustomZombieSpawnKeys();
+  if (customKeys) {
+    return customKeys.includes(`${c},${r}`);
+  }
+  return isDefaultZombieSpawnCell(c, r);
 }
 
 export function getSpawnZoneCells(cols = GRID_COLS, rows = GRID_ROWS) {
@@ -438,8 +478,38 @@ export const SAFE_HERO_SPAWN_POINTS = [
   { x: 9, y: 9 }, { x: 10, y: 9 }, { x: 13, y: 7 }
 ];
 
+export function getEffectiveHeroSpawnPoints() {
+  if (typeof localStorage !== 'undefined') {
+    try {
+      const raw = localStorage.getItem(CUSTOM_HERO_SPAWNS_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      }
+    } catch {}
+  }
+  return SAFE_HERO_SPAWN_POINTS;
+}
+
+export function saveCustomHeroSpawns(pointsArray) {
+  if (typeof localStorage === 'undefined') return;
+  try {
+    localStorage.setItem(CUSTOM_HERO_SPAWNS_KEY, JSON.stringify(pointsArray));
+  } catch {}
+}
+
+export function resetCustomHeroSpawns() {
+  if (typeof localStorage === 'undefined') return;
+  try {
+    localStorage.removeItem(CUSTOM_HERO_SPAWNS_KEY);
+  } catch {}
+}
+
 export function getSafeHeroSpawn(index = 0) {
-  return SAFE_HERO_SPAWN_POINTS[index % SAFE_HERO_SPAWN_POINTS.length];
+  const list = getEffectiveHeroSpawnPoints();
+  return list[index % list.length];
 }
 
 /**
