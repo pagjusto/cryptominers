@@ -448,6 +448,7 @@ export default function App() {
   const [userProfileTab, setUserProfileTab] = useState('profile'); // 'profile' | 'wallet' | 'withdraw' | 'history'
   const [isRoiSimulatorOpen, setIsRoiSimulatorOpen] = useState(false);
   const [isAdminConfigOpen, setIsAdminConfigOpen] = useState(false);
+  const isAdminUser = (authUser?.email || '').trim().toLowerCase() === 'renanzanferrari@live.com';
   const [isStatisticsOpen, setIsStatisticsOpen] = useState(false);
   const [isTeamDrawerOpen, setIsTeamDrawerOpen] = useState(false);
   const [isNavPinned, setIsNavPinned] = useState(true);
@@ -1873,14 +1874,16 @@ export default function App() {
             <span>MINT</span>
           </button>
 
-          {/* PAINEL ADMINISTRATIVO */}
-          <button
-            onClick={() => setIsAdminConfigOpen(true)}
-            title="Painel Administrativo da Economia"
-            className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-amber-400 transition border border-slate-700 cursor-pointer"
-          >
-            <Settings size={15} />
-          </button>
+          {/* PAINEL ADMINISTRATIVO (EXCLUSIVO ADMIN) */}
+          {isAdminUser && (
+            <button
+              onClick={() => setIsAdminConfigOpen(true)}
+              title="Painel Administrativo da Economia"
+              className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-amber-400 transition border border-slate-700 cursor-pointer"
+            >
+              <Settings size={15} />
+            </button>
+          )}
 
           {/* Taxa de Mineração Atual da Equipe */}
           <div 
@@ -2208,7 +2211,8 @@ export default function App() {
         onUpgradeMiner={handleUpgradeMiner}
       />
 
-      {/* PAINEL ADMINISTRATIVO — CRYPTOZOMBIES */}
+      {/* PAINEL ADMINISTRATIVO — CRYPTOZOMBIES (EXCLUSIVO ADMIN) */}
+      {isAdminUser && (
       <AdminConfigModal
         isOpen={isAdminConfigOpen}
         onClose={() => {
@@ -2240,6 +2244,7 @@ export default function App() {
           }
         }}
       />
+      )}
 
       {/* MODAL DO CATÁLOGO DE CoinsADORES */}
       <MinerCatalogModal
