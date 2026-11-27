@@ -1712,6 +1712,7 @@ export default function App() {
       <>
         <LandingPage
           authUser={authUser}
+          heroCount={miners.length}
           onOpenAuth={handleOpenAuth}
           onEnterGame={() => setShowGameView(true)}
           onSignOut={handleSignOut}

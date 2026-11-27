@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Skull,
   LogIn,
@@ -18,14 +18,23 @@ import {
   Users,
   BookOpen,
   Gift,
-  Globe
+  Globe,
+  Copy,
+  Check,
+  Lock,
+  Share2
 } from 'lucide-react';
 import { HERO_ROSTER, RARITY_CONFIG, getRarityConfig, getWeaponById } from '../data/heroRoster';
 import { DEFAULT_CRYPTO_ZOMBIES_CONFIG } from '../data/cryptoZombiesConfig';
 import { getHeroBaseHP } from '../utils/heroHealth';
 import { ENEMIES } from '../data/enemiesCatalog';
 import { HOUSE_TIERS } from '../data/housesData';
-import { REFERRAL_COMMISSION_PCT, getUserReferralCode } from '../services/referralService';
+import {
+  REFERRAL_COMMISSION_PCT,
+  getUserReferralCode,
+  getUserReferralLink,
+  fetchReferralSummary
+} from '../services/referralService';
 import { SITE_TRANSLATIONS, SITE_LANG_STORAGE_KEY, getStoredSiteLang } from '../data/siteTranslations';
 import RoiSimulatorTab from './RoiSimulatorTab';
 
@@ -88,6 +97,7 @@ const OFFICIAL_RARITY_RATES = [
 
 export default function LandingPage({
   authUser,
+  heroCount = 0,
   onOpenAuth,
   onEnterGame,
   onSignOut,
@@ -95,7 +105,41 @@ export default function LandingPage({
 }) {
   const [activeTab, setActiveTab] = useState('home');
   const [lang, setLang] = useState(() => getStoredSiteLang());
+  const [refCopied, setRefCopied] = useState(false);
+  const [referralSummary, setReferralSummary] = useState({
+    referralCode: getUserReferralCode(authUser),
+    referredCount: 0,
+    totalCoinsEarned: 0,
+    rewards: []
+  });
   const t = SITE_TRANSLATIONS[lang] || SITE_TRANSLATIONS.pt;
+
+  useEffect(() => {
+    if (!authUser) {
+      setReferralSummary({
+        referralCode: getUserReferralCode(null),
+        referredCount: 0,
+        totalCoinsEarned: 0,
+        rewards: []
+      });
+      return;
+    }
+    fetchReferralSummary(authUser).then((summary) => {
+      if (summary) setReferralSummary(summary);
+    });
+  }, [authUser, activeTab]);
+
+  const hasHeroToPromote = heroCount >= 1;
+  const referralLink = getUserReferralLink(authUser);
+
+  const handleCopyReferralLink = () => {
+    if (!authUser || !hasHeroToPromote) return;
+    try {
+      navigator.clipboard.writeText(referralLink);
+      setRefCopied(true);
+      setTimeout(() => setRefCopied(false), 2000);
+    } catch (e) {}
+  };
 
   const handleToggleLang = (nextLang) => {
     const resolved = nextLang === 'en' ? 'en' : 'pt';
@@ -1308,44 +1352,151 @@ export default function LandingPage({
             </div>
           </div>
 
-          {/* Exemplo e CTA */}
-          <div className="p-6 rounded-3xl bg-slate-900/95 border border-amber-500/40 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-xl">
-            <div className="space-y-2">
-              <div className="text-xs font-bold uppercase tracking-wider text-amber-300">
-                Exemplo de Comissão
-              </div>
-              <p className="text-sm text-slate-200">
-                Seu indicado compra um Baú de <b className="text-white">US$ 100,00</b> ➔ Você recebe{' '}
-                <b className="text-amber-300">100 Coins</b> (equivalente a US$ 1,00 na cotação oficial de 1 Coin = US$ {minerRate.toFixed(2)}).
-              </p>
-              {authUser && (
-                <p className="text-xs text-slate-400">
-                  Seu código de indicação: <b className="font-mono text-emerald-300">{getUserReferralCode(authUser)}</b> (acesse <b>Perfil ➔ Indicações</b> no jogo para copiar seu link).
+          {/* Exemplo e Painel de Indicação no Site */}
+          <div className="p-6 rounded-3xl bg-slate-900/95 border border-amber-500/40 space-y-6 shadow-xl">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div className="space-y-2">
+                <div className="text-xs font-bold uppercase tracking-wider text-amber-300">
+                  Exemplo de Comissão
+                </div>
+                <p className="text-sm text-slate-200">
+                  Seu indicado compra um Baú de <b className="text-white">US$ 100,00</b> ➔ Você recebe{' '}
+                  <b className="text-amber-300">100 Coins</b> (equivalente a US$ 1,00 na cotação oficial de 1 Coin = US$ {minerRate.toFixed(2)}).
                 </p>
+              </div>
+
+              {!authUser && (
+                <div className="flex flex-wrap gap-3 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => onOpenAuth('register')}
+                    className="px-5 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-arcade text-xs flex items-center gap-2 shadow-lg cursor-pointer"
+                  >
+                    <Gift size={15} />
+                    <span>{t.referral.ctaGuest}</span>
+                  </button>
+                </div>
               )}
             </div>
 
-            <div className="flex flex-wrap gap-3 shrink-0">
-              {authUser ? (
-                <button
-                  type="button"
-                  onClick={onEnterGame}
-                  className="px-5 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-arcade text-xs flex items-center gap-2 shadow-lg cursor-pointer"
-                >
-                  <Gift size={15} />
-                  <span>ACESSAR INDICAÇÕES NO JOGO</span>
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => onOpenAuth('register')}
-                  className="px-5 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-arcade text-xs flex items-center gap-2 shadow-lg cursor-pointer"
-                >
-                  <Gift size={15} />
-                  <span>CRIAR CONTA PARA INDICAR</span>
-                </button>
-              )}
-            </div>
+            {authUser && (
+              <div className="pt-5 border-t border-slate-800 space-y-5">
+                <div className="p-5 rounded-2xl bg-gradient-to-br from-purple-950/60 via-slate-900 to-slate-950 border border-purple-500/40 space-y-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                      <h3 className="font-arcade text-sm sm:text-base text-white flex items-center gap-2">
+                        <Share2 size={16} className="text-purple-400" />
+                        <span>SEU PAINEL DE INDICAÇÃO</span>
+                      </h3>
+                      <p className="text-xs text-slate-300 mt-1">
+                        Gerencie seu link exclusivo, acompanhe indicados e veja suas comissões diretamente pelo site.
+                      </p>
+                    </div>
+                    <span className="px-3 py-1 rounded-xl bg-amber-500/15 border border-amber-400/40 font-mono text-xs font-bold text-amber-300">
+                      Comissão: {REFERRAL_COMMISSION_PCT}% Coins
+                    </span>
+                  </div>
+
+                  {!hasHeroToPromote ? (
+                    <div className="p-4 rounded-xl bg-rose-950/40 border border-rose-500/40 flex items-start gap-3">
+                      <Lock size={18} className="text-rose-400 shrink-0 mt-0.5" />
+                      <div className="space-y-1 text-xs">
+                        <div className="font-bold text-rose-200">
+                          Divulgação bloqueada: é necessário ter pelo menos 1 herói
+                        </div>
+                        <p className="text-slate-300 leading-relaxed">
+                          Para liberar seu link exclusivo de indicação e receber {REFERRAL_COMMISSION_PCT}% em Coins, adquira ou invoque pelo menos <b>1 herói</b> na sua conta.
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <label className="text-[11px] font-bold uppercase tracking-wider text-purple-300 block">
+                        Seu Link Exclusivo de Indicação (Código: {referralSummary.referralCode})
+                      </label>
+                      <div className="flex flex-col sm:flex-row gap-2">
+                        <input
+                          type="text"
+                          readOnly
+                          value={referralLink}
+                          className="flex-1 px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-xs font-mono text-emerald-300 select-all focus:outline-none"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleCopyReferralLink}
+                          className="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-arcade text-xs flex items-center justify-center gap-2 transition cursor-pointer shrink-0"
+                        >
+                          {refCopied ? <Check size={14} /> : <Copy size={14} />}
+                          <span>{refCopied ? 'COPIADO!' : 'COPIAR LINK'}</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Cards de Resumo */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="p-4 rounded-2xl bg-slate-950/90 border border-slate-800 space-y-1">
+                    <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold">
+                      Indicados Cadastrados
+                    </span>
+                    <div className="font-arcade text-xl text-white">
+                      {referralSummary.referredCount}
+                    </div>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-slate-950/90 border border-slate-800 space-y-1">
+                    <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold">
+                      Total Ganho em Coins
+                    </span>
+                    <div className="font-arcade text-xl text-amber-300">
+                      {referralSummary.totalCoinsEarned.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </div>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-slate-950/90 border border-slate-800 space-y-1">
+                    <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold">
+                      Status de Divulgação
+                    </span>
+                    <div className={`font-arcade text-sm ${hasHeroToPromote ? 'text-emerald-400' : 'text-rose-400'}`}>
+                      {hasHeroToPromote ? 'LIBERADO (1+ Herói)' : 'BLOQUEADO (0 Heróis)'}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Histórico de Comissões */}
+                <div className="space-y-2.5">
+                  <h4 className="font-arcade text-xs text-slate-300 uppercase">
+                    Histórico de Comissões Recebidas
+                  </h4>
+                  {referralSummary.rewards.length === 0 ? (
+                    <div className="p-6 rounded-2xl bg-slate-950/70 border border-slate-800 text-center text-xs text-slate-400">
+                      Nenhuma comissão registrada ainda. Compartilhe seu link após liberar com 1+ herói!
+                    </div>
+                  ) : (
+                    <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+                      {referralSummary.rewards.map((item, idx) => (
+                        <div
+                          key={item.id || idx}
+                          className="p-3 rounded-xl bg-slate-950/90 border border-slate-800 flex items-center justify-between gap-3 text-xs"
+                        >
+                          <div>
+                            <div className="font-bold text-white">
+                              {item.referred_name || 'Comandante'} • {item.package_id || 'Baú USDT'}
+                            </div>
+                            <div className="text-[10px] text-slate-400">
+                              Compra: US$ {Number(item.purchase_usdt || 0).toFixed(2)} •{' '}
+                              {item.created_at ? new Date(item.created_at).toLocaleDateString('pt-BR') : 'Hoje'}
+                            </div>
+                          </div>
+                          <div className="font-mono font-bold text-amber-300 shrink-0">
+                            +{Number(item.coins_rewarded || 0).toFixed(2)} Coins
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </section>
