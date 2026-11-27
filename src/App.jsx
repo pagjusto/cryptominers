@@ -1887,20 +1887,6 @@ export default function App() {
             <RefreshCw size={15} />
           </button>
 
-          {/* BOTÃO PÁGINA TODA / TELA CHEIA */}
-          <button
-            onClick={() => setIsFullPageMap(prev => !prev)}
-            title={isFullPageMap ? "Voltar ao modo normal com lista de heróis" : "Expandir mapa para a página toda (tela cheia)"}
-            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg font-tech text-xs font-bold border transition cursor-pointer shadow-md active:scale-95 ${
-              isFullPageMap
-                ? 'bg-indigo-600 text-white border-indigo-300 ring-2 ring-indigo-400/60 shadow-[0_0_15px_rgba(99,102,241,0.6)]'
-                : 'bg-indigo-950/80 hover:bg-indigo-900/90 text-indigo-300 border-indigo-500/50'
-            }`}
-          >
-            <span>{isFullPageMap ? '🗗' : '🖥️'}</span>
-            <span className="hidden sm:inline">{isFullPageMap ? 'PAINEL NORMAL' : 'PÁGINA TODA'}</span>
-          </button>
-
           {/* Taxa de Mineração Atual da Equipe */}
           <div 
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-950/80 border border-amber-500/30 text-[11px] font-mono shrink-0 cursor-help"
@@ -2007,18 +1993,6 @@ export default function App() {
                     💀 Boss: <b className="text-amber-300">ATIVO</b>
                   </span>
                 )}
-
-                <button
-                  onClick={() => setIsFullPageMap(prev => !prev)}
-                  className={`text-[11px] ${
-                    isFullPageMap 
-                      ? 'bg-indigo-600 text-white border-indigo-300 ring-2 ring-indigo-400/50 shadow-[0_0_12px_rgba(99,102,241,0.6)]' 
-                      : 'bg-indigo-950/90 hover:bg-indigo-900 border-indigo-500/60 text-indigo-200 hover:text-white'
-                  } border px-2 py-0.5 rounded-md cursor-pointer transition-all active:scale-95 flex items-center gap-1 font-bold shadow`}
-                  title={isFullPageMap ? "Restaurar layout normal com lista de heróis" : "Expandir mapa para a página toda (tela cheia)"}
-                >
-                  {isFullPageMap ? '🗗 Painel Normal' : '🖥️ Página Toda'}
-                </button>
               </div>
 
               <GameBoard
