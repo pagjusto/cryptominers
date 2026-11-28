@@ -20,36 +20,46 @@ export function calculateRoiScenario({
   const totalHeroes = chest.heroesCount * chestQuantity;
 
   // 2. Distribuição das Raridades por Cenário
-  let rarities = { common: 0, rare: 0, epic: 0, legendary: 0 };
+  let rarities = { common: 0, rare: 0, super_rare: 0, epic: 0, legendary: 0, super_legend: 0 };
 
   if (scenario === 'conservative') {
     // Cenário Conservador: Mais comuns, menos épicos/lendários que a média
-    const cPct = Math.min(100, probs.common + 15);
-    const rPct = Math.max(0, probs.rare - 5);
-    const ePct = Math.max(0, probs.epic - 7);
-    const lPct = Math.max(0, 100 - cPct - rPct - ePct);
+    const cPct = Math.min(100, (probs.common || 0) + 15);
+    const rPct = Math.max(0, (probs.rare || 0) - 5);
+    const srPct = Math.max(0, (probs.super_rare || 0) - 3);
+    const ePct = Math.max(0, (probs.epic || 0) - 5);
+    const lPct = Math.max(0, (probs.legendary || 0) - 2);
+    const slPct = Math.max(0, 100 - cPct - rPct - srPct - ePct - lPct);
 
     rarities.common = Math.round(totalHeroes * (cPct / 100));
     rarities.rare = Math.round(totalHeroes * (rPct / 100));
+    rarities.super_rare = Math.round(totalHeroes * (srPct / 100));
     rarities.epic = Math.round(totalHeroes * (ePct / 100));
-    rarities.legendary = Math.max(0, totalHeroes - rarities.common - rarities.rare - rarities.epic);
+    rarities.legendary = Math.round(totalHeroes * (lPct / 100));
+    rarities.super_legend = Math.max(0, totalHeroes - rarities.common - rarities.rare - rarities.super_rare - rarities.epic - rarities.legendary);
   } else if (scenario === 'optimistic') {
     // Cenário Otimista: Menos comuns, mais raros/épicos/lendários que a média
-    const lPct = Math.min(100, probs.legendary + 8);
-    const ePct = Math.min(100, probs.epic + 12);
-    const rPct = Math.min(100, probs.rare + 5);
-    const cPct = Math.max(0, 100 - lPct - ePct - rPct);
+    const slPct = Math.min(100, (probs.super_legend || 0) + 3);
+    const lPct = Math.min(100, (probs.legendary || 0) + 6);
+    const ePct = Math.min(100, (probs.epic || 0) + 10);
+    const srPct = Math.min(100, (probs.super_rare || 0) + 4);
+    const rPct = Math.min(100, (probs.rare || 0) + 5);
+    const cPct = Math.max(0, 100 - slPct - lPct - ePct - srPct - rPct);
 
+    rarities.super_legend = Math.round(totalHeroes * (slPct / 100));
     rarities.legendary = Math.round(totalHeroes * (lPct / 100));
     rarities.epic = Math.round(totalHeroes * (ePct / 100));
+    rarities.super_rare = Math.round(totalHeroes * (srPct / 100));
     rarities.rare = Math.round(totalHeroes * (rPct / 100));
-    rarities.common = Math.max(0, totalHeroes - rarities.legendary - rarities.epic - rarities.rare);
+    rarities.common = Math.max(0, totalHeroes - rarities.super_legend - rarities.legendary - rarities.epic - rarities.super_rare - rarities.rare);
   } else {
     // Cenário Esperado (Média Ponderada Exata das Probabilidades)
-    rarities.common = parseFloat((totalHeroes * (probs.common / 100)).toFixed(1));
-    rarities.rare = parseFloat((totalHeroes * (probs.rare / 100)).toFixed(1));
-    rarities.epic = parseFloat((totalHeroes * (probs.epic / 100)).toFixed(1));
-    rarities.legendary = parseFloat((totalHeroes * (probs.legendary / 100)).toFixed(1));
+    rarities.common = parseFloat((totalHeroes * ((probs.common || 0) / 100)).toFixed(2));
+    rarities.rare = parseFloat((totalHeroes * ((probs.rare || 0) / 100)).toFixed(2));
+    rarities.super_rare = parseFloat((totalHeroes * ((probs.super_rare || 0) / 100)).toFixed(2));
+    rarities.epic = parseFloat((totalHeroes * ((probs.epic || 0) / 100)).toFixed(2));
+    rarities.legendary = parseFloat((totalHeroes * ((probs.legendary || 0) / 100)).toFixed(2));
+    rarities.super_legend = parseFloat((totalHeroes * ((probs.super_legend || 0) / 100)).toFixed(2));
   }
 
   // 3. Produção Base e Tempo de Trabalho / Descanso por Raridade
@@ -58,7 +68,7 @@ export function calculateRoiScenario({
   let weightedDrainPerMin = 0;
   let weightedRecoveryMins = 0;
 
-  const tiers = ['common', 'rare', 'epic', 'legendary'];
+  const tiers = ['common', 'rare', 'super_rare', 'epic', 'legendary', 'super_legend'];
   tiers.forEach(tier => {
     const count = rarities[tier] || 0;
     const attr = config.rarityAttributes[tier];
