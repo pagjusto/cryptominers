@@ -1812,7 +1812,12 @@ export default function App() {
   }
 
   return (
-    <div className="flex flex-col h-screen w-screen bg-[#03110b] text-slate-100 font-tech overflow-hidden select-none">
+    <div className="landing-rusty-theme relative flex flex-col h-screen w-screen bg-[#03110b] text-slate-100 font-tech overflow-hidden select-none">
+      {/* Atmosfera verde de sobrevivência igual ao site */}
+      <div className="pointer-events-none fixed inset-0 -z-0 overflow-hidden">
+        <div className="absolute -top-24 -left-24 w-[520px] h-[380px] rounded-full bg-emerald-500/15 blur-[120px]" />
+        <div className="absolute bottom-0 right-0 w-[520px] h-[380px] rounded-full bg-lime-500/10 blur-[130px]" />
+      </div>
       
       {/* ABA INDICADORA DE MENU NO TOPO (QUANDO NAVBAR ESTÁ RECOLHIDO) */}
       <div 
