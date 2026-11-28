@@ -1866,7 +1866,7 @@ export default function App() {
             onClick={() => setIsMarketplaceOpen(true)}
             className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-emerald-950/60 hover:bg-emerald-900/70 text-emerald-300 border border-emerald-500/40 font-tech text-xs font-bold transition cursor-pointer shadow-sm"
           >
-            <ShoppingBag size={13} className="text-emerald-400" />
+            <img src="/assets/icons/marketplace_shop.webp" alt="Mercado" className="w-4 h-4 object-contain" />
             <span>MERCADO</span>
             <span className="px-1 py-0.1 rounded-full bg-emerald-500 text-slate-950 text-[9px] font-bold font-mono">
               {marketplaceListings.length}

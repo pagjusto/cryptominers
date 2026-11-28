@@ -64,8 +64,8 @@ export default function MarketplaceModal({
         {/* Cabeçalho */}
         <div className="flex items-center justify-between pb-3 border-b border-slate-800 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-2xl border border-amber-500/30">
-              🛒
+            <div className="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500/30 overflow-hidden p-0.5">
+              <img src="/assets/icons/marketplace_shop.webp" alt="Marketplace" className="w-full h-full object-contain drop-shadow" />
             </div>
             <div>
               <div className="flex items-center gap-2">
