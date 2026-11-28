@@ -125,7 +125,7 @@ export default function RoiSimulatorTab({ lang = 'pt' }) {
       });
       setSelectedHeroIds(next);
       setDailyMiningHours(12);
-      setSelectedBaseId('basic');
+      setSelectedBaseId('reinforced'); // simula transição Basic → Reforçada (~dia 59)
       setIncludeIris(true);
       setIncludeArmorer(false);
     } else if (mode === 'all_rare') {
@@ -250,11 +250,15 @@ export default function RoiSimulatorTab({ lang = 'pt' }) {
     const uptimeRatio = simulateBaseUptime(houseSlots, recSpeedPct);
     const basicUptimeRatio = selectedBase?.id === 'basic' ? uptimeRatio : simulateBaseUptime(5, 100);
 
-    const effectiveActiveHoursPerDay = dailyMiningHours * uptimeRatio;
-    const dailyCoins = grossCoinsPerHour * effectiveActiveHoursPerDay;
+    // A simulação de uptime roda 24h e captura a fração real de produção.
+    // dailyMiningHours representa o tempo que o jogador interage com o jogo, mas
+    // NÃO deve reduzir a produção internamente (heróis continuam em leito mesmo offline).
+    // A produção diária é: grossCoinsPerHour × 24h × uptimeRatio
+    const effectiveHoursPerDay = 24; // simulação interna sempre em 24h
+    const dailyCoins = grossCoinsPerHour * effectiveHoursPerDay * uptimeRatio;
     const dailyUsdt = dailyCoins * minerRate;
 
-    const basicDailyCoins = grossCoinsPerHour * (dailyMiningHours * basicUptimeRatio);
+    const basicDailyCoins = grossCoinsPerHour * effectiveHoursPerDay * basicUptimeRatio;
     const basicDailyUsdt = basicDailyCoins * minerRate;
 
     // Simulação real dia-a-dia: começa na Base Básica até juntar Fragmentos do Boss + Coins da Base escolhida,
@@ -305,7 +309,6 @@ export default function RoiSimulatorTab({ lang = 'pt' }) {
       totalInvestedUsdt,
       grossCoinsPerHour,
       uptimeRatio,
-      effectiveActiveHoursPerDay,
       dailyCoins,
       dailyUsdt,
       roiDays,
@@ -782,7 +785,7 @@ export default function RoiSimulatorTab({ lang = 'pt' }) {
             </div>
             <p className="text-[10px] text-slate-500 leading-relaxed">
               * Estimativa real com taxa base atualizada, {Math.round((simulation.uptimeRatio || 1) * 100)}% de uptime
-              (~{simulation.effectiveActiveHoursPerDay.toFixed(1)}h/dia efetivas descontando descanso na {selectedBase.name}).
+              ({Math.round((simulation.uptimeRatio || 1) * 24 * 10) / 10}h/dia efetivas descontando descanso na {selectedBase.name}).
             </p>
           </div>
         </div>
