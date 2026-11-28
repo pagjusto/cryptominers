@@ -44,7 +44,7 @@ const OFFICIAL_RARITY_RATES = [
     name: 'Comum',
     hp: getHeroBaseHP('common'),
     power: '1.5 – 3.0',
-    coinsPerHour: '1.25 – 1.55',
+    coinsPerHour: '2.33 – 2.88',
     weaponCycle: '~4h',
     recovery: '6h40 / 5h20 / 4h26'
   },
@@ -53,7 +53,7 @@ const OFFICIAL_RARITY_RATES = [
     name: 'Raro',
     hp: getHeroBaseHP('rare'),
     power: '3.5 – 6.5',
-    coinsPerHour: '2.25 – 2.75',
+    coinsPerHour: '4.19 – 5.12',
     weaponCycle: '~6h',
     recovery: '8h / 6h24 / 5h20'
   },
@@ -62,7 +62,7 @@ const OFFICIAL_RARITY_RATES = [
     name: 'Super Raro',
     hp: getHeroBaseHP('super_rare'),
     power: '5.5 – 9.5',
-    coinsPerHour: '2.90 – 3.40',
+    coinsPerHour: '5.39 – 6.32',
     weaponCycle: '~8h',
     recovery: '9h20 / 7h28 / 6h13'
   },
@@ -71,7 +71,7 @@ const OFFICIAL_RARITY_RATES = [
     name: 'Épico',
     hp: getHeroBaseHP('epic'),
     power: '7.0 – 13.0',
-    coinsPerHour: '3.50 – 4.10',
+    coinsPerHour: '6.51 – 7.63',
     weaponCycle: '~10h',
     recovery: '10h40 / 8h32 / 7h06'
   },
@@ -80,7 +80,7 @@ const OFFICIAL_RARITY_RATES = [
     name: 'Lendário',
     hp: getHeroBaseHP('legendary'),
     power: '14.0 – 24.0',
-    coinsPerHour: '6.00 – 6.84',
+    coinsPerHour: '11.16 – 12.72',
     weaponCycle: '~12h',
     recovery: '12h / 9h36 / 8h'
   },
@@ -89,7 +89,7 @@ const OFFICIAL_RARITY_RATES = [
     name: 'Super Lendário',
     hp: getHeroBaseHP('super_legend'),
     power: '22.0 – 32.0',
-    coinsPerHour: '7.80 – 9.20',
+    coinsPerHour: '14.51 – 17.11',
     weaponCycle: '~12h',
     recovery: '13h20 / 10h40 / 8h53'
   }

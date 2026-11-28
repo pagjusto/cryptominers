@@ -23,15 +23,15 @@ import { STAFF_PLANS } from '../data/staffCatalog';
 import { SITE_TRANSLATIONS } from '../data/siteTranslations';
 import { getHeroBaseHP } from '../utils/heroHealth';
 
-const MINING_PRODUCTION_MULTIPLIER = 1.86;
+const MINING_PRODUCTION_MULTIPLIER = 1.0;
 
 const RARITY_AVG_COINS_HOUR = {
-  common: 1.4,
-  rare: 2.5,
-  super_rare: 3.15,
-  epic: 3.8,
-  legendary: 6.42,
-  super_legend: 8.5
+  common: 2.60,
+  rare: 4.65,
+  super_rare: 5.86,
+  epic: 7.07,
+  legendary: 11.94,
+  super_legend: 15.81
 };
 
 const RARITY_ORDER = {
@@ -737,7 +737,7 @@ export default function RoiSimulatorTab({ lang = 'pt' }) {
               </div>
             </div>
             <p className="text-[10px] text-slate-500 leading-relaxed">
-              * Estimativa real com taxa do jogo (1.86x), {Math.round((simulation.uptimeRatio || 1) * 100)}% de uptime
+              * Estimativa real com taxa base atualizada, {Math.round((simulation.uptimeRatio || 1) * 100)}% de uptime
               (~{simulation.effectiveActiveHoursPerDay.toFixed(1)}h/dia efetivas descontando descanso na {selectedBase.name}).
             </p>
           </div>

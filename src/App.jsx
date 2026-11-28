@@ -287,6 +287,21 @@ export default function App() {
             return updated;
           }
 
+          // Migração única da taxa base 1.0x para a nova taxa base 1.86x salva no atributo do herói
+          if (!localStorage.getItem('crypto_miners_rate_186_migrated')) {
+            const baseMins = { common: 2.33, rare: 4.19, super_rare: 5.39, epic: 6.51, legendary: 11.16, super_legend: 14.51 };
+            parsed = parsed.map(m => {
+              const r = (m.rarity || 'common').toLowerCase();
+              const minExpected = baseMins[r] || 2.33;
+              if (typeof m.coinsPerHour === 'number' && m.coinsPerHour > 0 && m.coinsPerHour < minExpected * 0.95) {
+                return { ...m, coinsPerHour: parseFloat((m.coinsPerHour * 1.86).toFixed(3)) };
+              }
+              return m;
+            });
+            localStorage.setItem('crypto_miners_rate_186_migrated', '1');
+            localStorage.setItem('crypto_miners_team', JSON.stringify(parsed));
+          }
+
           // Aplica recuperação automática offline para heróis no ambulatório / fila desde o último acesso
           try {
             const lastRecoveryTs = Number(localStorage.getItem('crypto_miners_last_recovery_ts') || 0);

@@ -212,8 +212,8 @@ export const DEFAULT_CRYPTO_ZOMBIES_CONFIG = {
       color: '#94a3b8',
       basePowerMin: 1.5,
       basePowerMax: 3.0,
-      coinsPerHourMin: 1.25,
-      coinsPerHourMax: 1.55, // média 1.40 Coins/h
+      coinsPerHourMin: 2.33,
+      coinsPerHourMax: 2.88, // média 2.60 Coins/h (nova base 1.86x)
       maxEnergy: 100, // Regra Oficial: 100
       energyDrainPerHour: 12, // Regra Oficial: 12/h (0.2/min)
       energyDrainPerMinute: 0.20,
@@ -226,8 +226,8 @@ export const DEFAULT_CRYPTO_ZOMBIES_CONFIG = {
       color: '#38bdf8',
       basePowerMin: 3.5,
       basePowerMax: 6.5,
-      coinsPerHourMin: 2.25,
-      coinsPerHourMax: 2.75, // média 2.50 Coins/h
+      coinsPerHourMin: 4.19,
+      coinsPerHourMax: 5.12, // média 4.65 Coins/h (nova base 1.86x)
       maxEnergy: 120, // Regra Oficial: 120
       energyDrainPerHour: 12, // Regra Oficial: 12/h (0.2/min)
       energyDrainPerMinute: 0.20,
@@ -240,8 +240,8 @@ export const DEFAULT_CRYPTO_ZOMBIES_CONFIG = {
       color: '#38bdf8',
       basePowerMin: 5.5,
       basePowerMax: 9.5,
-      coinsPerHourMin: 2.90,
-      coinsPerHourMax: 3.40,
+      coinsPerHourMin: 5.39,
+      coinsPerHourMax: 6.32, // média 5.86 Coins/h (nova base 1.86x)
       maxEnergy: 130,
       energyDrainPerHour: 12,
       energyDrainPerMinute: 0.20,
@@ -254,8 +254,8 @@ export const DEFAULT_CRYPTO_ZOMBIES_CONFIG = {
       color: '#a855f7',
       basePowerMin: 7.0,
       basePowerMax: 13.0,
-      coinsPerHourMin: 3.50,
-      coinsPerHourMax: 4.10, // média 3.80 Coins/h
+      coinsPerHourMin: 6.51,
+      coinsPerHourMax: 7.63, // média 7.07 Coins/h (nova base 1.86x)
       maxEnergy: 140, // Regra Oficial: 140
       energyDrainPerHour: 12, // Regra Oficial: 12/h (0.2/min)
       energyDrainPerMinute: 0.20,
@@ -268,8 +268,8 @@ export const DEFAULT_CRYPTO_ZOMBIES_CONFIG = {
       color: '#f59e0b',
       basePowerMin: 14.0,
       basePowerMax: 24.0,
-      coinsPerHourMin: 6.00,
-      coinsPerHourMax: 6.84, // média 6.42 Coins/h
+      coinsPerHourMin: 11.16,
+      coinsPerHourMax: 12.72, // média 11.94 Coins/h (nova base 1.86x)
       maxEnergy: 160, // Regra Oficial: 160
       energyDrainPerHour: 12, // Regra Oficial: 12/h (0.2/min)
       energyDrainPerMinute: 0.20,
@@ -282,8 +282,8 @@ export const DEFAULT_CRYPTO_ZOMBIES_CONFIG = {
       color: '#ef4444',
       basePowerMin: 22.0,
       basePowerMax: 32.0,
-      coinsPerHourMin: 7.80,
-      coinsPerHourMax: 9.20,
+      coinsPerHourMin: 14.51,
+      coinsPerHourMax: 17.11, // média 15.81 Coins/h (nova base 1.86x)
       maxEnergy: 180,
       energyDrainPerHour: 12,
       energyDrainPerMinute: 0.20,
@@ -400,7 +400,9 @@ export function getCryptoZombiesConfig() {
         };
         return acc;
       }, {}),
-      rarityAttributes: { ...DEFAULT_CRYPTO_ZOMBIES_CONFIG.rarityAttributes, ...(parsed.rarityAttributes || {}) },
+      rarityAttributes: parsed.rarityAttributes?.common?.coinsPerHourMin === 1.25
+        ? DEFAULT_CRYPTO_ZOMBIES_CONFIG.rarityAttributes
+        : { ...DEFAULT_CRYPTO_ZOMBIES_CONFIG.rarityAttributes, ...(parsed.rarityAttributes || {}) },
       upgradesConfig: {
         ...DEFAULT_CRYPTO_ZOMBIES_CONFIG.upgradesConfig,
         ...savedUpgradesConfig,

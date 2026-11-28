@@ -72,8 +72,8 @@ import { getHeroById, getWeaponById, getDurabilityLossPerStrike } from '../data/
 
 const BOSS_BATTLE_DURATION_MS = 5 * 60 * 1000;
 
-// Fator econômico calibrado para atingir payback bruto de 90 dias no ciclo real completo (com recuperação, Base Reforçada, Íris e Armeiro).
-const MINING_PRODUCTION_MULTIPLIER = 1.86;
+// O fator 1.86x foi incorporado diretamente na taxa base dos atributos de cada raridade.
+const MINING_PRODUCTION_MULTIPLIER = 1.0;
 
 /**
  * Retorna todos os heróis sobreviventes que participaram da batalha contra o Boss
