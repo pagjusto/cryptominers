@@ -113,13 +113,13 @@ import { applyHeroBaseHP, applyOfflineHeroRecovery } from './utils/heroHealth';
 export default function App() {
   const [bcoin, setBcoin] = useState(() => {
     const saved = localStorage.getItem('crypto_miners_bcoin');
-    return saved !== null ? parseFloat(saved) : 50.000;
+    return saved !== null ? parseFloat(saved) : 0;
   });
 
   // Total BCOIN Investido (para cálculo do ROI do CryptoZombies)
   const [totalInvested, setTotalInvested] = useState(() => {
     const saved = localStorage.getItem('crypto_miners_invested');
-    return saved !== null ? parseFloat(saved) : 30.000;
+    return saved !== null ? parseFloat(saved) : 0;
   });
 
   // ROI de saque: considera somente USDT efetivamente sacado (valor líquido recebido).
@@ -163,6 +163,7 @@ export default function App() {
     if (saved) {
       try {
         let parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length === 0) return [];
         if (Array.isArray(parsed) && parsed.length > 0) {
           // Sanitização de coordenadas: garante que nenhum herói carregado do localStorage permaneça dentro de escombros ou base
           let hasObstaclePosition = false;
@@ -361,7 +362,7 @@ export default function App() {
         }
       } catch (e) {}
     }
-    return INITIAL_MINERS;
+    return [];
   });
 
   // Aplica a tabela única de HP por raridade a toda a equipe, inclusive heróis já salvos e recém-adquiridos.
@@ -889,17 +890,8 @@ export default function App() {
         if (Array.isArray(parsed)) return parsed;
       } catch (e) {}
     }
-    // Baú Miner inicial de demonstração no inventário caso novo usuário
-    return [
-      {
-        instanceId: 'purchased-welcome-miner',
-        id: 'miner',
-        name: 'Baú Miner',
-        icon: '📦',
-        heroesCount: 1,
-        purchasedAt: 'Início da Jornada'
-      }
-    ];
+    // Contas novas iniciam zeradas, sem baú gratuito de demonstração
+    return [];
   });
 
   // Modais de Anúncios Recompensados: Abertura de Baús com Bônus & Recuperação 100% de Energia
