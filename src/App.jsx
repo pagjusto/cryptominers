@@ -1949,7 +1949,7 @@ export default function App() {
               title="Painel Administrativo da Economia"
               className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-amber-400 transition border border-slate-700 cursor-pointer"
             >
-              <Settings size={15} />
+              <img src="/assets/icons/settings_gear.webp" alt="Configurações" className="w-4 h-4 object-contain" />
             </button>
           )}
 

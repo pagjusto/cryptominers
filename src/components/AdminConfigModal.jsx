@@ -152,8 +152,8 @@ export default function AdminConfigModal({
         {/* CABEÇALHO ADMIN */}
         <div className="flex items-center justify-between pb-3 border-b border-slate-800 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center text-2xl text-amber-400">
-              ⚙️
+            <div className="w-11 h-11 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center overflow-hidden p-1">
+              <img src="/assets/icons/settings_gear.webp" alt="Configurações" className="w-full h-full object-contain drop-shadow" />
             </div>
             <div>
               <div className="flex items-center gap-2">
