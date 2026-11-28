@@ -1076,6 +1076,8 @@ export default function App() {
     localStorage.setItem('crypto_miners_bcoin', bcoin.toString());
   }, [bcoin]);
 
+  const initialRecoveryTsRef = useRef(Number(localStorage.getItem('crypto_miners_last_recovery_ts') || 0));
+
   useEffect(() => {
     localStorage.setItem('crypto_miners_team', JSON.stringify(miners));
     localStorage.setItem('crypto_miners_last_recovery_ts', String(Date.now()));
@@ -1106,13 +1108,21 @@ export default function App() {
       }
     };
 
+    const handleBeforeUnload = () => {
+      localStorage.setItem('crypto_miners_last_recovery_ts', String(Date.now()));
+    };
+
     if (showGameView) {
       runOfflineCatchup();
     }
 
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener('pagehide', handleBeforeUnload);
     document.addEventListener('visibilitychange', handleVisibility);
     const bgInterval = !showGameView ? setInterval(runOfflineCatchup, 15000) : null;
     return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('pagehide', handleBeforeUnload);
       document.removeEventListener('visibilitychange', handleVisibility);
       if (bgInterval) clearInterval(bgInterval);
     };
@@ -1172,8 +1182,12 @@ export default function App() {
             const resolvedHouse = cloudData.profile?.currentHouseId
               ? resolveHouseTier(cloudData.profile.currentHouseId)
               : currentHouse;
-            const lastTs = Number(localStorage.getItem('crypto_miners_last_recovery_ts') || 0);
-            const elapsedSec = lastTs > 0 ? Math.max(0, (Date.now() - lastTs) / 1000) : 0;
+            const cloudTs = cloudData.profile?.lastActiveAt ? Date.parse(cloudData.profile.lastActiveAt) : 0;
+            const localInitialTs = initialRecoveryTsRef.current || 0;
+            const refTs = (cloudTs > 0 && localInitialTs > 0)
+              ? Math.max(cloudTs, localInitialTs)
+              : (cloudTs || localInitialTs);
+            const elapsedSec = refTs > 0 ? Math.max(0, (Date.now() - refTs) / 1000) : 0;
             const recoveredHeroes = elapsedSec > 1
               ? applyOfflineHeroRecovery(cloudData.heroes, elapsedSec, {
                   houseSlots: resolvedHouse.slots,

@@ -78,7 +78,8 @@ export async function loadPlayerDataFromSupabase(walletAddress) {
         usdtBalance: Number(profile.usdt_balance),
         totalInvested: Number(profile.total_invested),
         studioRevenue: Number(profile.studio_revenue),
-        currentHouseId: profile.current_house_id
+        currentHouseId: profile.current_house_id,
+        lastActiveAt: profile.last_login_at || profile.updated_at || null
       },
       heroes: mappedHeroes.length > 0 ? mappedHeroes : null,
       inventory: inventory ? {
