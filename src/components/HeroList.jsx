@@ -48,6 +48,7 @@ export default function HeroList({
           {/* Linha 1: Título e Contadores de Combate */}
           <div className="flex items-center justify-between gap-2 flex-wrap">
             <div className="flex items-center gap-2 flex-wrap">
+              <img src="/assets/icons/team_squad.webp" alt="Equipe" className="w-6 h-6 object-contain shrink-0" />
               <h3 className="font-arcade text-xs sm:text-sm text-amber-400 tracking-wide">
                 EQUIPE DE SOBREVIVENTES
               </h3>

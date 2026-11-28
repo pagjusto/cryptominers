@@ -1926,7 +1926,7 @@ export default function App() {
             className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-tech text-xs font-bold border border-amber-500/40 transition cursor-pointer shadow-md shadow-amber-950/30 active:scale-95"
             title="Abrir Painel da Equipe de Heróis"
           >
-            <Users size={14} className="text-amber-400" />
+            <img src="/assets/icons/team_squad.webp" alt="Equipe" className="w-4 h-4 object-contain" />
             <span>EQUIPE</span>
             <span className="px-1 py-0.1 rounded-full bg-amber-500 text-slate-950 text-[9px] font-bold font-mono">
               {miners.filter(m => m.status === 'work').length}/15
@@ -2445,7 +2445,7 @@ export default function App() {
             {/* Header da Janela Flutuante */}
             <div className="flex items-center justify-between px-5 py-3.5 bg-slate-900 border-b border-slate-800 shadow-md">
               <div className="flex items-center gap-2.5">
-                <Users className="text-amber-400" size={20} />
+                <img src="/assets/icons/team_squad.webp" alt="Equipe" className="w-6 h-6 object-contain" />
                 <h2 className="font-arcade text-amber-300 text-sm tracking-wide">
                   PAINEL DA EQUIPE DE HERÓIS
                 </h2>
