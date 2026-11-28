@@ -1826,7 +1826,7 @@ export default function App() {
                 : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700'
             }`}
           >
-            <Package size={13} className={(purchasedChests.length + constructionChests.length) > 0 ? 'text-amber-400' : 'text-slate-400'} />
+            <img src="/assets/icons/backpack.png" alt="Inventário" className="w-4 h-4 object-contain" />
             <span>INVENTÁRIO</span>
             <span className="px-1 py-0.1 rounded-full bg-amber-500 text-slate-950 text-[9px] font-bold font-mono">
               {purchasedChests.length + constructionChests.length}
