@@ -68,7 +68,7 @@ export default function HouseModal({
                 backgroundColor: `${currentHouse.color}20`
               }}
             >
-              <img src="/assets/icons/shelter_bunker.webp" alt={currentHouse.name} className="w-full h-full object-contain drop-shadow" />
+              <img src="/assets/icons/shelter_bunker.webp" alt={currentHouse.name} className="w-full h-full object-contain icon-white-border" />
             </div>
             <div>
               <div className="flex items-center gap-2">

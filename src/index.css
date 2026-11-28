@@ -90,3 +90,13 @@ canvas.pixelated {
 .landing-rusty-theme [class*="border-slate-700"] {
   border-color: rgba(146, 74, 34, 0.62) !important;
 }
+
+/* Borda branca nítida nos ícones táticos */
+.icon-white-border {
+  filter:
+    drop-shadow(1px 0 0 rgba(255, 255, 255, 0.95))
+    drop-shadow(-1px 0 0 rgba(255, 255, 255, 0.95))
+    drop-shadow(0 1px 0 rgba(255, 255, 255, 0.95))
+    drop-shadow(0 -1px 0 rgba(255, 255, 255, 0.95))
+    drop-shadow(0 0 3px rgba(255, 255, 255, 0.45));
+}

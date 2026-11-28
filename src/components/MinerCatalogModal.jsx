@@ -21,8 +21,8 @@ export default function MinerCatalogModal({ isOpen, onClose, onOpenMintModal }) 
         {/* CABEÇALHO */}
         <div className="flex items-center justify-between pb-3 border-b border-slate-800 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500/30 overflow-hidden p-0.5">
-              <img src="/assets/icons/catalog_book.webp" alt="Catálogo de Sobreviventes" className="w-full h-full object-contain drop-shadow" />
+            <div className="w-11 h-11 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center border border-white/60 overflow-hidden p-0.5 shadow-md">
+              <img src="/assets/icons/catalog_book.webp" alt="Catálogo de Sobreviventes" className="w-full h-full object-contain icon-white-border" />
             </div>
             <div>
               <h3 className="font-arcade text-base text-amber-400">

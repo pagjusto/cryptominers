@@ -44,8 +44,8 @@ export default function InventoryModal({
         {/* Cabeçalho do Inventário */}
         <div className="flex items-center justify-between pb-3 border-b border-slate-800 shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500/30 overflow-hidden p-1">
-              <img src="/assets/icons/backpack.png" alt="Mochila do Inventário" className="w-full h-full object-contain drop-shadow" />
+            <div className="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center border border-white/60 overflow-hidden p-1 shadow-md">
+              <img src="/assets/icons/backpack.png" alt="Mochila do Inventário" className="w-full h-full object-contain icon-white-border" />
             </div>
             <div>
               <h3 className="font-arcade text-sm text-amber-400">
