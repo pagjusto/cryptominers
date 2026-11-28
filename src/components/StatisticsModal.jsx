@@ -262,8 +262,8 @@ export default function StatisticsModal({
         {/* CABEÇALHO PRINCIPAL DO MODAL */}
         <div className="flex items-center justify-between p-4 sm:p-5 border-b border-slate-800 bg-slate-950/70 relative z-10 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-2xl bg-gradient-to-br from-purple-500/30 to-amber-500/20 text-amber-300 border border-amber-500/30 shadow-inner">
-              <BarChart3 size={24} className="text-amber-400" />
+            <div className="w-11 h-11 p-1 rounded-2xl bg-gradient-to-br from-purple-500/30 to-amber-500/20 text-amber-300 border border-amber-500/30 shadow-inner flex items-center justify-center overflow-hidden">
+              <img src="/assets/icons/roi_stats.webp" alt="Estatísticas e ROI" className="w-full h-full object-contain drop-shadow" />
             </div>
             <div className="text-left">
               <div className="flex items-center gap-2">

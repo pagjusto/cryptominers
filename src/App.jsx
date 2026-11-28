@@ -1916,7 +1916,7 @@ export default function App() {
             title="Estatísticas e Cálculo de ROI em Tempo Real (baseado nos seus upgrades e investimentos)"
             className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-purple-950/70 hover:bg-purple-900/80 text-purple-300 border border-purple-500/50 font-tech text-xs font-bold transition cursor-pointer shadow-md shadow-purple-950/40 active:scale-95"
           >
-            <BarChart3 size={14} className="text-purple-400" />
+            <img src="/assets/icons/roi_stats.webp" alt="ROI e Estatísticas" className="w-4 h-4 object-contain" />
             <span>ROI REAL</span>
           </button>
 
