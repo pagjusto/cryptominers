@@ -1878,7 +1878,7 @@ export default function App() {
             onClick={() => setIsHouseOpen(true)}
             className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-blue-950/60 hover:bg-blue-900/70 text-blue-300 border border-blue-500/40 font-tech text-xs font-bold transition cursor-pointer shadow-sm"
           >
-            <Home size={13} className="text-blue-400" />
+            <img src="/assets/icons/shelter_bunker.webp" alt="Abrigo" className="w-4 h-4 object-contain" />
             <span>ABRIGO</span>
             <span className="px-1 py-0.1 rounded-full bg-blue-500 text-slate-950 text-[9px] font-bold font-mono">
               {minersInHouse.length}/{currentHouse.slots}
