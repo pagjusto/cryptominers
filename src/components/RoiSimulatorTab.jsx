@@ -193,37 +193,37 @@ export default function RoiSimulatorTab({ lang = 'pt' }) {
     });
     const grossCoinsPerHour = heroesSim.reduce((sum, h) => sum + h.cph, 0);
 
-    // Simula ciclo real de desgaste (142.5 PV/h) + recuperação nos leitos da Base selecionada
-    const houseSlots = Number(selectedBase?.slots ?? 5);
-    const recSpeedPct = Number(selectedBase?.recoverySpeedPct ?? 100);
-    const drainPerMin = 142.5 / 60;
-    const healPerMin = (142.5 * (recSpeedPct / 100)) / 60;
-    let seqCounter = 0;
-    let simCoins = 0;
-    const simDays = 5;
-    const simTotalMins = simDays * 1440;
+    // Helper: simula ciclo real de desgaste (142.5 PV/h) + recuperação + fila nos leitos
+    const simulateBaseUptime = (slots, recPct) => {
+      if (heroesSim.length === 0 || grossCoinsPerHour <= 0) return 1;
+      const list = heroesSim.map((h) => ({ ...h, hp: h.maxHp, status: 'work', seq: 0 }));
+      const drainPerMin = 142.5 / 60;
+      const healPerMin = (142.5 * (recPct / 100)) / 60;
+      let seqCounter = 0;
+      let simCoins = 0;
+      const simDays = 5;
+      const simTotalMins = simDays * 1440;
 
-    if (heroesSim.length > 0 && grossCoinsPerHour > 0) {
       for (let m = 0; m < simTotalMins; m++) {
-        let inHouse = heroesSim.filter((h) => h.status === 'house').length;
-        if (inHouse < houseSlots) {
-          heroesSim
+        let inHouse = list.filter((h) => h.status === 'house').length;
+        if (inHouse < slots) {
+          list
             .filter((h) => h.status === 'waiting')
             .sort((a, b) => a.seq - b.seq)
             .forEach((h) => {
-              if (inHouse < houseSlots) {
+              if (inHouse < slots) {
                 h.status = 'house';
                 inHouse++;
               }
             });
         }
-        for (const h of heroesSim) {
+        for (const h of list) {
           if (h.status === 'work') {
             simCoins += h.cph / 60;
             h.hp -= drainPerMin;
             if (h.hp <= h.maxHp * 0.05) {
               h.hp = h.maxHp * 0.05;
-              if (inHouse < houseSlots) {
+              if (inHouse < slots) {
                 h.status = 'house';
                 inHouse++;
               } else {
@@ -240,16 +240,60 @@ export default function RoiSimulatorTab({ lang = 'pt' }) {
           }
         }
       }
-    }
+      const coins24hReal = simCoins / simDays;
+      const gross24h = grossCoinsPerHour * 24;
+      return gross24h > 0 ? Math.min(1, coins24hReal / gross24h) : 1;
+    };
 
-    const coins24hReal = simCoins / simDays;
-    const gross24h = grossCoinsPerHour * 24;
-    const uptimeRatio = gross24h > 0 ? Math.min(1, coins24hReal / gross24h) : 1;
+    const houseSlots = Number(selectedBase?.slots ?? 5);
+    const recSpeedPct = Number(selectedBase?.recoverySpeedPct ?? 100);
+    const uptimeRatio = simulateBaseUptime(houseSlots, recSpeedPct);
+    const basicUptimeRatio = selectedBase?.id === 'basic' ? uptimeRatio : simulateBaseUptime(5, 100);
+
     const effectiveActiveHoursPerDay = dailyMiningHours * uptimeRatio;
-
     const dailyCoins = grossCoinsPerHour * effectiveActiveHoursPerDay;
     const dailyUsdt = dailyCoins * minerRate;
-    const roiDays = dailyUsdt > 0 ? Math.ceil(totalInvestedUsdt / dailyUsdt) : 0;
+
+    const basicDailyCoins = grossCoinsPerHour * (dailyMiningHours * basicUptimeRatio);
+    const basicDailyUsdt = basicDailyCoins * minerRate;
+
+    // Simulação real dia-a-dia: começa na Base Básica até juntar Fragmentos do Boss + Coins da Base escolhida,
+    // e renova Dra. Íris / John Armeiro periodicamente com a própria mineração.
+    const chanceByRarity = { common: 2.0, rare: 2.2, super_rare: 2.3, epic: 2.4, legendary: 2.6667, super_legend: 3.0 };
+    const bossChestChance = Math.min(0.40, activeSlots.reduce((sum, hId) => {
+      const r = getHeroById(hId)?.rarity || 'common';
+      return sum + (chanceByRarity[r] || 2.0) / 100;
+    }, 0));
+    const fragsPerDay = Math.max(0.01, 2 * bossChestChance * 0.55);
+    const daysToUnlockBase = baseFragCost > 0 ? Math.ceil(baseFragCost / fragsPerDay) : 0;
+    const staffCycleDays = Number(selectedStaffPlan?.durationDays || 30);
+
+    let freeUsd = 0;
+    let baseUnlocked = daysToUnlockBase === 0;
+    let realPaybackDays = 0;
+    const returnsByDay = { 15: 0, 30: 0, 60: 0, 90: 0 };
+
+    if (chestCostUsdt > 0 && (dailyUsdt > 0 || basicDailyUsdt > 0)) {
+      for (let d = 1; d <= 730; d++) {
+        freeUsd += baseUnlocked ? dailyUsdt : basicDailyUsdt;
+        if (staffCostUsdt > 0 && (d === 1 || (d - 1) % staffCycleDays === 0)) {
+          freeUsd -= staffCostUsdt;
+        }
+        if (!baseUnlocked && d >= daysToUnlockBase && freeUsd >= baseCostUsdt) {
+          freeUsd -= baseCostUsdt;
+          baseUnlocked = true;
+        }
+        if (d === 15 || d === 30 || d === 60 || d === 90) {
+          returnsByDay[d] = Math.max(0, freeUsd);
+        }
+        if (!realPaybackDays && freeUsd >= chestCostUsdt) {
+          realPaybackDays = d;
+          if (d >= 90) break;
+        }
+      }
+    }
+
+    const roiDays = realPaybackDays || (dailyUsdt > 0 ? Math.ceil(totalInvestedUsdt / dailyUsdt) : 0);
     const dailyRoiPct = totalInvestedUsdt > 0 ? (dailyUsdt / totalInvestedUsdt) * 100 : 0;
 
     return {
@@ -266,10 +310,10 @@ export default function RoiSimulatorTab({ lang = 'pt' }) {
       dailyUsdt,
       roiDays,
       dailyRoiPct,
-      return15d: dailyUsdt * 15,
-      return30d: dailyUsdt * 30,
-      return60d: dailyUsdt * 60,
-      return90d: dailyUsdt * 90
+      return15d: returnsByDay[15],
+      return30d: returnsByDay[30],
+      return60d: returnsByDay[60],
+      return90d: returnsByDay[90]
     };
   }, [
     selectedChest,
