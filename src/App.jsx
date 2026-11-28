@@ -1906,7 +1906,7 @@ export default function App() {
             onClick={() => setIsCatalogOpen(true)}
             className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-sky-300 font-tech text-xs font-bold border border-slate-700 transition cursor-pointer"
           >
-            <BookOpen size={13} />
+            <img src="/assets/icons/catalog_book.webp" alt="Catálogo" className="w-6 h-6 object-contain icon-white-border" />
             <span>CATÁLOGO</span>
           </button>
 
