@@ -22,7 +22,8 @@ import {
   Copy,
   Check,
   Lock,
-  Share2
+  Share2,
+  X
 } from 'lucide-react';
 import { HERO_ROSTER, RARITY_CONFIG, getRarityConfig, getWeaponById } from '../data/heroRoster';
 import { DEFAULT_CRYPTO_ZOMBIES_CONFIG } from '../data/cryptoZombiesConfig';
@@ -105,6 +106,7 @@ export default function LandingPage({
 }) {
   const [activeTab, setActiveTab] = useState('home');
   const [lang, setLang] = useState(() => getStoredSiteLang());
+  const [legalModalType, setLegalModalType] = useState(null); // null | 'terms' | 'privacy'
   const [refCopied, setRefCopied] = useState(false);
   const [referralSummary, setReferralSummary] = useState({
     referralCode: getUserReferralCode(authUser),
@@ -1508,33 +1510,118 @@ export default function LandingPage({
 
       {/* FOOTER */}
       <footer className="border-t border-emerald-900/50 bg-[#020d08]/95 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-          <div className="flex items-center gap-2">
-            <Skull size={16} className="text-amber-400" />
-            <span className="font-arcade text-slate-300">CRYPTOZOMBIES</span>
-            <span>• {t.footer.portal}</span>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-4">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
+            <div className="flex items-center gap-2">
+              <Skull size={16} className="text-amber-400" />
+              <span className="font-arcade text-slate-300">CRYPTOZOMBIES</span>
+              <span>• {t.footer.portal}</span>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-center gap-4">
+              <button
+                type="button"
+                onClick={() => setLegalModalType('terms')}
+                className="text-slate-400 hover:text-amber-300 underline underline-offset-2 transition cursor-pointer"
+              >
+                {lang === 'en' ? 'Terms of Use' : 'Termos de Uso'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setLegalModalType('privacy')}
+                className="text-slate-400 hover:text-amber-300 underline underline-offset-2 transition cursor-pointer"
+              >
+                {lang === 'en' ? 'Privacy Policy' : 'Política de Privacidade'}
+              </button>
+              {!authUser ? (
+                <button
+                  type="button"
+                  onClick={() => onOpenAuth('login')}
+                  className="text-amber-400 hover:text-amber-300 font-bold cursor-pointer"
+                >
+                  {lang === 'en' ? 'Sign In / Create Account →' : 'Entrar / Criar Conta →'}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={onEnterGame}
+                  className="text-emerald-400 hover:text-emerald-300 font-bold cursor-pointer"
+                >
+                  {lang === 'en' ? 'Enter Game →' : 'Ir para o Jogo →'}
+                </button>
+              )}
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            {!authUser ? (
-              <button
-                type="button"
-                onClick={() => onOpenAuth('login')}
-                className="text-amber-400 hover:text-amber-300 font-bold cursor-pointer"
-              >
-                Entrar / Criar Conta →
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={onEnterGame}
-                className="text-emerald-400 hover:text-emerald-300 font-bold cursor-pointer"
-              >
-                Ir para o Jogo →
-              </button>
-            )}
+
+          <div className="pt-3 border-t border-emerald-950/80 text-[11px] text-slate-500 text-center leading-relaxed">
+            {lang === 'en'
+              ? 'Web3 Risk Notice: Digital assets, blockchain transactions, and play-to-earn games involve market and operational risks. ROI projections are estimates based on simulated parameters and do not guarantee future returns.'
+              : 'Aviso de Risco Web3: Ativos digitais, transações em blockchain e jogos Web3 envolvem riscos operacionais e de mercado. Projeções de ROI são estimativas baseadas em parâmetros simulados e não garantem rentabilidade futura.'}
           </div>
         </div>
       </footer>
+
+      {/* MODAL LEGAL (TERMOS DE USO & POLÍTICA DE PRIVACIDADE) */}
+      {legalModalType && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md"
+          onClick={() => setLegalModalType(null)}
+        >
+          <div
+            className="w-full max-w-2xl max-h-[82vh] rounded-3xl bg-slate-900 border border-slate-700 p-6 flex flex-col overflow-hidden shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800 shrink-0">
+              <h3 className="font-arcade text-sm sm:text-base text-amber-400">
+                {legalModalType === 'terms'
+                  ? (lang === 'en' ? 'TERMS OF USE • CRYPTOZOMBIES' : 'TERMOS DE USO • CRYPTOZOMBIES')
+                  : (lang === 'en' ? 'PRIVACY POLICY • CRYPTOZOMBIES' : 'POLÍTICA DE PRIVACIDADE • CRYPTOZOMBIES')}
+              </h3>
+              <button
+                type="button"
+                onClick={() => setLegalModalType(null)}
+                className="p-1.5 rounded-full text-slate-400 hover:text-white hover:bg-slate-800 cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto py-4 space-y-3 text-xs sm:text-sm text-slate-300 leading-relaxed pr-1">
+              {legalModalType === 'terms' ? (
+                lang === 'en' ? (
+                  <>
+                    <p><b>1. Eligibility & Account:</b> Players are responsible for maintaining the security of their login credentials and connected Web3 wallets. Never share your private keys or seed phrases.</p>
+                    <p><b>2. On-Chain Transactions:</b> All USDT chest purchases and support hires confirmed on blockchain networks are irreversible. Gas fees are borne by the user.</p>
+                    <p><b>3. Game Economy & Balancing:</b> CryptoZombies reserves the right to adjust economic parameters, drop rates, and anti-abuse rules to preserve ecosystem sustainability.</p>
+                    <p><b>4. Risk Disclaimer:</b> Participation does not constitute financial advice or guaranteed profit. Only allocate resources you understand and are comfortable using in Web3 environments.</p>
+                  </>
+                ) : (
+                  <>
+                    <p><b>1. Elegibilidade e Conta:</b> O jogador é integralmente responsável pela segurança de suas credenciais de acesso e carteiras Web3 conectadas. Nunca compartilhe suas chaves privadas ou frases-semente.</p>
+                    <p><b>2. Transações On-Chain:</b> Todas as compras de Baús e contratações em USDT confirmadas na blockchain são irreversíveis. Taxas de rede (gas) são de responsabilidade do usuário.</p>
+                    <p><b>3. Economia e Balanceamento:</b> O CryptoZombies reserva-se o direito de ajustar parâmetros econômicos, taxas e regras antifraude para preservar a sustentabilidade do ecossistema.</p>
+                    <p><b>4. Aviso de Risco:</b> A participação no jogo não constitui recomendação financeira nem garantia de lucro. Utilize apenas valores adequados ao seu perfil de risco em ambientes Web3.</p>
+                  </>
+                )
+              ) : lang === 'en' ? (
+                <>
+                  <p><b>1. Data Collected:</b> We store your account email, player profile preferences, public Web3 wallet address, and in-game progression securely via Supabase.</p>
+                  <p><b>2. Use of Data:</b> Data is used strictly for authentication, cloud save synchronization, referral tracking, and transaction auditing.</p>
+                  <p><b>3. Wallet Security:</b> We never request or store private keys. Wallet connections and signatures occur strictly through your browser Web3 provider.</p>
+                  <p><b>4. User Rights:</b> You may request account review or deletion at any time through official support channels.</p>
+                </>
+              ) : (
+                <>
+                  <p><b>1. Dados Coletados:</b> Armazenamos seu e-mail de cadastro, preferências de perfil, endereço público da carteira Web3 e progresso no jogo com segurança via Supabase.</p>
+                  <p><b>2. Uso das Informações:</b> Os dados são utilizados exclusivamente para autenticação, sincronização em nuvem, controle de indicações e auditoria de transações.</p>
+                  <p><b>3. Segurança da Carteira:</b> Nunca solicitamos nem armazenamos chaves privadas. Conexões e assinaturas ocorrem exclusivamente na extensão/carteira do seu navegador.</p>
+                  <p><b>4. Direitos do Usuário:</b> Você pode solicitar revisão ou exclusão dos seus dados cadastrais a qualquer momento pelos canais oficiais de suporte.</p>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
