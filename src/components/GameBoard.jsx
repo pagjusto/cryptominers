@@ -72,8 +72,8 @@ import { getHeroById, getWeaponById, getDurabilityLossPerStrike } from '../data/
 
 const BOSS_BATTLE_DURATION_MS = 5 * 60 * 1000;
 
-// Fator econômico aprovado para a produção contínua de mineração (cenário FIFO de 90 dias).
-const MINING_PRODUCTION_MULTIPLIER = 1.7074;
+// Fator econômico calibrado para atingir payback líquido próximo a 90 dias no ciclo real completo (com recuperação, Base Reforçada, Íris e Armeiro).
+const MINING_PRODUCTION_MULTIPLIER = 2.10;
 
 /**
  * Retorna todos os heróis sobreviventes que participaram da batalha contra o Boss
