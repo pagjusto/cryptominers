@@ -108,7 +108,7 @@ import MiningStatsModal from './components/MiningStatsModal';
 import GearInventoryModal from './components/GearInventoryModal';
 import CampaignMapModal from './components/CampaignMapModal';
 import { INITIAL_GEAR_STASH } from './data/gearData';
-import { applyHeroBaseHP } from './utils/heroHealth';
+import { applyHeroBaseHP, applyOfflineHeroRecovery } from './utils/heroHealth';
 
 export default function App() {
   const [bcoin, setBcoin] = useState(() => {
@@ -287,17 +287,36 @@ export default function App() {
             return updated;
           }
 
+          // Aplica recuperação automática offline para heróis no ambulatório / fila desde o último acesso
+          try {
+            const lastRecoveryTs = Number(localStorage.getItem('crypto_miners_last_recovery_ts') || 0);
+            if (lastRecoveryTs > 0) {
+              const elapsedSec = Math.max(0, (Date.now() - lastRecoveryTs) / 1000);
+              const savedHouse = resolveHouseTier(localStorage.getItem('crypto_miners_house') || 'basic');
+              parsed = applyOfflineHeroRecovery(parsed, elapsedSec, {
+                houseSlots: savedHouse.slots,
+                recoverySpeedPct: savedHouse.recoverySpeedPct || 100
+              });
+            }
+            localStorage.setItem('crypto_miners_last_recovery_ts', String(Date.now()));
+          } catch (e) {}
+
           // Garante que a equipe ativa tenha 15 heróis saudáveis prontos para combate
           const isWounded = m => {
             const maxHealth = Number(m.maxHealth) > 0 ? Number(m.maxHealth) : 100;
             const currentHealth = Number.isFinite(Number(m.currentHealth)) ? Number(m.currentHealth) : maxHealth;
             return m.status === 'injured' || m.injuredAwaitingRescue || (currentHealth / maxHealth) * 100 <= 5;
           };
-          // Migra antigos estados de descanso por estamina para reserva.
-          // Mantém house/waiting_house apenas para feridos em tratamento ou aguardando leito.
+          const isFullyRecovered = m => {
+            const maxHealth = Number(m.maxHealth) > 0 ? Number(m.maxHealth) : 100;
+            const currentHealth = Number.isFinite(Number(m.currentHealth)) ? Number(m.currentHealth) : maxHealth;
+            return currentHealth >= maxHealth;
+          };
+          // Mantém house/waiting_house enquanto ainda estão recuperando vida (< 100%).
+          // Se já atingiram 100% de vida, libera para a reserva.
           const normalizedStatuses = parsed.map(m => {
-            if ((m.status === 'house' || m.status === 'waiting_house') && !isWounded(m)) {
-              return { ...m, status: 'reserve' };
+            if ((m.status === 'house' || m.status === 'waiting_house') && isFullyRecovered(m)) {
+              return { ...m, status: 'reserve', injuredAwaitingRescue: false };
             }
             return m;
           });
@@ -1059,7 +1078,45 @@ export default function App() {
 
   useEffect(() => {
     localStorage.setItem('crypto_miners_team', JSON.stringify(miners));
+    localStorage.setItem('crypto_miners_last_recovery_ts', String(Date.now()));
   }, [miners]);
+
+  // Recarga automática contínua enquanto o jogo não está aberto (site aberto, aba em segundo plano ou retorno)
+  useEffect(() => {
+    const runOfflineCatchup = () => {
+      const lastTs = Number(localStorage.getItem('crypto_miners_last_recovery_ts') || 0);
+      if (lastTs <= 0) {
+        localStorage.setItem('crypto_miners_last_recovery_ts', String(Date.now()));
+        return;
+      }
+      const elapsedSec = Math.max(0, (Date.now() - lastTs) / 1000);
+      if (elapsedSec < 2) return;
+      localStorage.setItem('crypto_miners_last_recovery_ts', String(Date.now()));
+      setMiners(prev => applyOfflineHeroRecovery(prev, elapsedSec, {
+        houseSlots: currentHouse.slots,
+        recoverySpeedPct: currentHouse.recoverySpeedPct || 100
+      }));
+    };
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        runOfflineCatchup();
+      } else {
+        localStorage.setItem('crypto_miners_last_recovery_ts', String(Date.now()));
+      }
+    };
+
+    if (showGameView) {
+      runOfflineCatchup();
+    }
+
+    document.addEventListener('visibilitychange', handleVisibility);
+    const bgInterval = !showGameView ? setInterval(runOfflineCatchup, 15000) : null;
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility);
+      if (bgInterval) clearInterval(bgInterval);
+    };
+  }, [showGameView, currentHouse.slots, currentHouse.recoverySpeedPct]);
 
   useEffect(() => {
     localStorage.setItem('crypto_miners_invested', totalInvested.toString());
@@ -1112,7 +1169,18 @@ export default function App() {
             setCurrentHouseId(resolveHouseTier(cloudData.profile.currentHouseId).id);
           }
           if (cloudData.heroes && cloudData.heroes.length > 0) {
-            setMiners(cloudData.heroes);
+            const resolvedHouse = cloudData.profile?.currentHouseId
+              ? resolveHouseTier(cloudData.profile.currentHouseId)
+              : currentHouse;
+            const lastTs = Number(localStorage.getItem('crypto_miners_last_recovery_ts') || 0);
+            const elapsedSec = lastTs > 0 ? Math.max(0, (Date.now() - lastTs) / 1000) : 0;
+            const recoveredHeroes = elapsedSec > 1
+              ? applyOfflineHeroRecovery(cloudData.heroes, elapsedSec, {
+                  houseSlots: resolvedHouse.slots,
+                  recoverySpeedPct: resolvedHouse.recoverySpeedPct || 100
+                })
+              : cloudData.heroes;
+            setMiners(recoveredHeroes);
           }
           if (cloudData.inventory?.purchasedChests) {
             setPurchasedChests(cloudData.inventory.purchasedChests);
