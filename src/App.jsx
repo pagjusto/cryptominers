@@ -1866,7 +1866,7 @@ export default function App() {
             onClick={() => setIsMarketplaceOpen(true)}
             className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-emerald-950/60 hover:bg-emerald-900/70 text-emerald-300 border border-emerald-500/40 font-tech text-xs font-bold transition cursor-pointer shadow-sm"
           >
-            <img src="/assets/icons/marketplace_shop.webp" alt="Mercado" className="w-4 h-4 object-contain icon-white-border" />
+            <img src="/assets/icons/marketplace_shop.webp" alt="Mercado" className="w-6 h-6 object-contain icon-white-border" />
             <span>MERCADO</span>
             <span className="px-1 py-0.1 rounded-full bg-emerald-500 text-slate-950 text-[9px] font-bold font-mono">
               {marketplaceListings.length}
@@ -1878,7 +1878,7 @@ export default function App() {
             onClick={() => setIsHouseOpen(true)}
             className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-blue-950/60 hover:bg-blue-900/70 text-blue-300 border border-blue-500/40 font-tech text-xs font-bold transition cursor-pointer shadow-sm"
           >
-            <img src="/assets/icons/shelter_bunker.webp" alt="Abrigo" className="w-4 h-4 object-contain icon-white-border" />
+            <img src="/assets/icons/shelter_bunker.webp" alt="Abrigo" className="w-6 h-6 object-contain icon-white-border" />
             <span>ABRIGO</span>
             <span className="px-1 py-0.1 rounded-full bg-blue-500 text-slate-950 text-[9px] font-bold font-mono">
               {minersInHouse.length}/{currentHouse.slots}
@@ -1894,7 +1894,7 @@ export default function App() {
                 : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700'
             }`}
           >
-            <img src="/assets/icons/backpack.png" alt="Inventário" className="w-4 h-4 object-contain icon-white-border" />
+            <img src="/assets/icons/backpack.png" alt="Inventário" className="w-6 h-6 object-contain icon-white-border" />
             <span>INVENTÁRIO</span>
             <span className="px-1 py-0.1 rounded-full bg-amber-500 text-slate-950 text-[9px] font-bold font-mono">
               {purchasedChests.length + constructionChests.length}
@@ -1916,7 +1916,7 @@ export default function App() {
             title="Estatísticas e Cálculo de ROI em Tempo Real (baseado nos seus upgrades e investimentos)"
             className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-purple-950/70 hover:bg-purple-900/80 text-purple-300 border border-purple-500/50 font-tech text-xs font-bold transition cursor-pointer shadow-md shadow-purple-950/40 active:scale-95"
           >
-            <img src="/assets/icons/roi_stats.webp" alt="ROI e Estatísticas" className="w-4 h-4 object-contain icon-white-border" />
+            <img src="/assets/icons/roi_stats.webp" alt="ROI e Estatísticas" className="w-6 h-6 object-contain icon-white-border" />
             <span>ROI REAL</span>
           </button>
 
@@ -1926,7 +1926,7 @@ export default function App() {
             className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-tech text-xs font-bold border border-amber-500/40 transition cursor-pointer shadow-md shadow-amber-950/30 active:scale-95"
             title="Abrir Painel da Equipe de Heróis"
           >
-            <img src="/assets/icons/team_squad.webp" alt="Equipe" className="w-4 h-4 object-contain icon-white-border" />
+            <img src="/assets/icons/team_squad.webp" alt="Equipe" className="w-6 h-6 object-contain icon-white-border" />
             <span>EQUIPE</span>
             <span className="px-1 py-0.1 rounded-full bg-amber-500 text-slate-950 text-[9px] font-bold font-mono">
               {miners.filter(m => m.status === 'work').length}/15
@@ -1949,7 +1949,7 @@ export default function App() {
               title="Painel Administrativo da Economia"
               className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-amber-400 transition border border-slate-700 cursor-pointer"
             >
-              <img src="/assets/icons/settings_gear.webp" alt="Configurações" className="w-4 h-4 object-contain icon-white-border" />
+              <img src="/assets/icons/settings_gear.webp" alt="Configurações" className="w-6 h-6 object-contain icon-white-border" />
             </button>
           )}
 
@@ -2445,7 +2445,7 @@ export default function App() {
             {/* Header da Janela Flutuante */}
             <div className="flex items-center justify-between px-5 py-3.5 bg-slate-900 border-b border-slate-800 shadow-md">
               <div className="flex items-center gap-2.5">
-                <img src="/assets/icons/team_squad.webp" alt="Equipe" className="w-6 h-6 object-contain icon-white-border" />
+                <img src="/assets/icons/team_squad.webp" alt="Equipe" className="w-8 h-8 object-contain icon-white-border" />
                 <h2 className="font-arcade text-amber-300 text-sm tracking-wide">
                   PAINEL DA EQUIPE DE HERÓIS
                 </h2>
