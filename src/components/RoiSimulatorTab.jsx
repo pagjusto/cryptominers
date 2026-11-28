@@ -112,6 +112,19 @@ export default function RoiSimulatorTab({ lang = 'pt' }) {
         return idx % 2 === 0 ? 'hunter' : 'scarlet';
       });
       setSelectedHeroIds(next);
+    } else if (mode === 'medium') {
+      const next = Array.from({ length: heroCount }, (_, idx) => {
+        if (heroCount >= 15 && idx === 0) return 'nox';
+        if (heroCount >= 10 && idx === 1) return 'verdant';
+        if (heroCount >= 5 && idx === 0) return 'polar';
+        if (heroCount >= 10 && idx === 2) return 'sombra';
+        return idx % 2 === 0 ? 'hunter' : 'scarlet';
+      });
+      setSelectedHeroIds(next);
+      setDailyMiningHours(12);
+      setSelectedBaseId('basic');
+      setIncludeIris(true);
+      setIncludeArmorer(false);
     } else if (mode === 'all_rare') {
       setSelectedHeroIds(
         Array.from({ length: heroCount }, (_, i) => (i % 2 === 0 ? 'polar' : 'sombra'))
@@ -188,6 +201,7 @@ export default function RoiSimulatorTab({ lang = 'pt' }) {
       dailyUsdt,
       roiDays,
       dailyRoiPct,
+      return15d: dailyUsdt * 15,
       return30d: dailyUsdt * 30,
       return60d: dailyUsdt * 60,
       return90d: dailyUsdt * 90
@@ -294,6 +308,13 @@ export default function RoiSimulatorTab({ lang = 'pt' }) {
                 className="px-2.5 py-1 rounded-lg bg-slate-950 hover:bg-slate-800 border border-slate-700 text-slate-300 cursor-pointer"
               >
                 Todos Comuns
+              </button>
+              <button
+                type="button"
+                onClick={() => applyPreset('medium')}
+                className="px-2.5 py-1 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/50 text-amber-300 font-bold cursor-pointer"
+              >
+                Cenário Médio (12h)
               </button>
               <button
                 type="button"
@@ -632,7 +653,11 @@ export default function RoiSimulatorTab({ lang = 'pt' }) {
               <TrendingUp size={14} className="text-emerald-400" />
               <span>{tr.accumulated}</span>
             </div>
-            <div className="grid grid-cols-3 gap-2 text-center text-xs">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
+              <div className="p-2 rounded-xl bg-slate-900 border border-amber-500/40">
+                <span className="text-[10px] text-amber-300 block">15 Dias</span>
+                <b className="font-mono text-amber-300">US$ {simulation.return15d.toFixed(2)}</b>
+              </div>
               <div className="p-2 rounded-xl bg-slate-900 border border-slate-800">
                 <span className="text-[10px] text-slate-400 block">30 Dias</span>
                 <b className="font-mono text-emerald-400">US$ {simulation.return30d.toFixed(2)}</b>

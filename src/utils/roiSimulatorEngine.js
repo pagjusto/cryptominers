@@ -151,6 +151,7 @@ export function calculateRoiScenario({
   const paybackDays = dailyUsd > 0 ? totalInvestment / dailyUsd : 999;
 
   // Retornos Acumulados Projetados
+  const projectedReturn15d = dailyUsd * 15;
   const projectedReturn30d = dailyUsd * 30;
   const projectedReturn60d = dailyUsd * 60;
   const projectedReturn90d = dailyUsd * 90;
@@ -180,6 +181,7 @@ export function calculateRoiScenario({
     monthlyUsd: parseFloat(monthlyUsd.toFixed(2)),
     roiDailyPct: parseFloat(roiDailyPct.toFixed(2)),
     paybackDays: Math.round(paybackDays),
+    projectedReturn15d: parseFloat(projectedReturn15d.toFixed(2)),
     projectedReturn30d: parseFloat(projectedReturn30d.toFixed(2)),
     projectedReturn60d: parseFloat(projectedReturn60d.toFixed(2)),
     projectedReturn90d: parseFloat(projectedReturn90d.toFixed(2)),
