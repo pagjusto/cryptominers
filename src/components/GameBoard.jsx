@@ -1723,7 +1723,8 @@ export default function GameBoard({
           } else if (miner.targetBlock.x > miner.x) {
             miner.targetDir = 1;
           }
-          miner.swingTimer = (miner.swingTimer || 0) - dt * (miner.speed * 0.9);
+          const effSpeed = Number(miner.speed) > 0 ? Number(miner.speed) : 1.0;
+          miner.swingTimer = (Number.isFinite(miner.swingTimer) ? miner.swingTimer : 0) - dt * (effSpeed * 0.9);
 
           if (miner.swingTimer <= 0) {
             miner.swingTimer = 0.85;
@@ -1734,10 +1735,11 @@ export default function GameBoard({
             const targetEnemy = state.enemies?.find(e => (miner.lockedEnemyId && e.id === miner.lockedEnemyId) || (e.gx === tx && e.gy === ty));
             const curHp = state.hpMap[cellKey] ?? targetEnemy?.hp ?? 2;
 
-            if (curHp === undefined || curHp <= 0 || (blockType === BLOCK_EMPTY && !targetEnemy) || blockType === BLOCK_BEDROCK) {
+            if (curHp === undefined || curHp <= 0 || blockType === BLOCK_EMPTY || blockType === BLOCK_BEDROCK) {
               miner.lockedEnemyId = null;
               miner.targetBlock = null;
               miner.isMining = false;
+              miner.swingTimer = 0;
               miner.moveCooldown = 0;
               return;
             }

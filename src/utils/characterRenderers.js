@@ -5066,21 +5066,9 @@ export function drawRosterHero(ctx, hero, weapon, now, swingAngle, legAngle, swi
       hitGrad.addColorStop(1, 'rgba(239, 68, 68, 0)');
       ctx.fillStyle = hitGrad;
       ctx.beginPath();
-      ctx.arc(impactX, impactY, 6, 0, Math.PI * 2);
+      ctx.arc(impactX, impactY, 5, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
-    }
-
-    // Faíscas incandescentes
-    for (let i = 0; i < 6; i++) {
-      const spkAngle = Math.PI - 0.8 + (i * 0.32) + Math.sin(now * 0.05 + i) * 0.2;
-      const spkDist = 6 + ((now * 0.08 + i * 5) % 24);
-      const sx = impactX + Math.cos(spkAngle) * spkDist;
-      const sy = impactY + Math.sin(spkAngle) * spkDist * 0.75;
-      ctx.fillStyle = i % 2 === 0 ? '#fef08a' : (i % 3 === 0 ? '#f97316' : '#ef4444');
-      ctx.beginPath();
-      ctx.arc(sx, sy, 2.0, 0, Math.PI * 2);
-      ctx.fill();
     }
   }
 
