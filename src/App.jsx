@@ -448,7 +448,6 @@ export default function App() {
   const [userProfileTab, setUserProfileTab] = useState('profile'); // 'profile' | 'wallet' | 'withdraw' | 'history'
   const [isRoiSimulatorOpen, setIsRoiSimulatorOpen] = useState(false);
   const [isAdminConfigOpen, setIsAdminConfigOpen] = useState(false);
-  const isAdminUser = (authUser?.email || '').trim().toLowerCase() === 'renanzanferrari@live.com';
   const [isStatisticsOpen, setIsStatisticsOpen] = useState(false);
   const [isTeamDrawerOpen, setIsTeamDrawerOpen] = useState(false);
   const [isNavPinned, setIsNavPinned] = useState(true);
@@ -470,6 +469,7 @@ export default function App() {
   const [cryptoZombiesConfig, setCryptoZombiesConfig] = useState(() => getCryptoZombiesConfig());
   const [walletState, setWalletState] = useState(() => getSavedWalletState());
   const [authUser, setAuthUser] = useState(null);
+  const isAdminUser = (authUser?.email || '').trim().toLowerCase() === 'renanzanferrari@live.com';
   const [showGameView, setShowGameView] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState('login');
