@@ -302,9 +302,9 @@ export default function SummonModal({
             {/* CABEÇALHO */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3 pb-3 border-b border-slate-800 shrink-0">
               <div>
-                <h3 className="font-arcade text-base text-amber-400 flex items-center gap-2">
-                  <UserPlus size={18} />
-                  <span>AQUISIÇÃO DE CoinsADORES</span>
+                <h3 className="font-arcade text-base text-amber-400 flex items-center gap-2.5">
+                  <img src="/assets/icons/mint_coin.webp" alt="Mint" className="w-10 h-10 object-contain icon-white-border" />
+                  <span>AQUISIÇÃO DE HERÓIS (MINT)</span>
                 </h3>
                 <p className="text-xs text-slate-400 mt-0.5">
                   Compre baús com <b>Coins</b> ou <b>USDT</b> e abra-os um por um no Inventário.

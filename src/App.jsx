@@ -1938,7 +1938,7 @@ export default function App() {
             onClick={() => setIsSummonOpen(true)}
             className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-arcade text-xs font-bold transition shadow-lg shadow-amber-950/40 active:scale-95 cursor-pointer"
           >
-            <Sparkles size={13} />
+            <img src="/assets/icons/mint_coin.webp" alt="Mint" className="w-6 h-6 object-contain icon-white-border" />
             <span>MINT</span>
           </button>
 
