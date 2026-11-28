@@ -95,8 +95,8 @@ export default function AuthModal({
         {/* HEADER */}
         <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border-b border-slate-800">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-amber-500/15 border border-amber-500/40 flex items-center justify-center text-amber-400">
-              <Skull size={20} />
+            <div className="w-14 h-14 rounded-2xl bg-amber-500/15 border border-white/60 flex items-center justify-center overflow-hidden p-0.5 shadow-md">
+              <img src="/assets/icons/shelter_bunker.webp" alt="Abrigo" className="w-full h-full object-contain icon-white-border" />
             </div>
             <div>
               <h2 className="font-arcade text-sm sm:text-base text-amber-400 tracking-wide">
