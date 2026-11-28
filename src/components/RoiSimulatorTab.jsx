@@ -21,6 +21,9 @@ import { DEFAULT_CRYPTO_ZOMBIES_CONFIG } from '../data/cryptoZombiesConfig';
 import { HOUSE_TIERS } from '../data/housesData';
 import { STAFF_PLANS } from '../data/staffCatalog';
 import { SITE_TRANSLATIONS } from '../data/siteTranslations';
+import { getHeroBaseHP } from '../utils/heroHealth';
+
+const MINING_PRODUCTION_MULTIPLIER = 1.86;
 
 const RARITY_AVG_COINS_HOUR = {
   common: 1.4,
@@ -173,15 +176,76 @@ export default function RoiSimulatorTab({ lang = 'pt' }) {
 
     const totalInvestedUsdt = chestCostUsdt + baseCostUsdt + staffCostUsdt;
 
-    // Soma da produção bruta por hora dos heróis escolhidos
+    // Soma da produção bruta por hora dos heróis escolhidos (já com o multiplicador oficial 1.86x do jogo)
     const activeSlots = selectedHeroIds.slice(0, heroCount);
-    const grossCoinsPerHour = activeSlots.reduce((sum, hId) => {
+    const heroesSim = activeSlots.map((hId, i) => {
       const h = getHeroById(hId);
       const r = h?.rarity || 'common';
-      return sum + (RARITY_AVG_COINS_HOUR[r] || 1.4);
-    }, 0);
+      const maxHp = getHeroBaseHP(r);
+      return {
+        id: i,
+        maxHp,
+        hp: maxHp,
+        cph: (RARITY_AVG_COINS_HOUR[r] || 1.4) * MINING_PRODUCTION_MULTIPLIER,
+        status: 'work',
+        seq: 0
+      };
+    });
+    const grossCoinsPerHour = heroesSim.reduce((sum, h) => sum + h.cph, 0);
 
-    const effectiveActiveHoursPerDay = dailyMiningHours;
+    // Simula ciclo real de desgaste (142.5 PV/h) + recuperação nos leitos da Base selecionada
+    const houseSlots = Number(selectedBase?.slots ?? 5);
+    const recSpeedPct = Number(selectedBase?.recoverySpeedPct ?? 100);
+    const drainPerMin = 142.5 / 60;
+    const healPerMin = (142.5 * (recSpeedPct / 100)) / 60;
+    let seqCounter = 0;
+    let simCoins = 0;
+    const simDays = 5;
+    const simTotalMins = simDays * 1440;
+
+    if (heroesSim.length > 0 && grossCoinsPerHour > 0) {
+      for (let m = 0; m < simTotalMins; m++) {
+        let inHouse = heroesSim.filter((h) => h.status === 'house').length;
+        if (inHouse < houseSlots) {
+          heroesSim
+            .filter((h) => h.status === 'waiting')
+            .sort((a, b) => a.seq - b.seq)
+            .forEach((h) => {
+              if (inHouse < houseSlots) {
+                h.status = 'house';
+                inHouse++;
+              }
+            });
+        }
+        for (const h of heroesSim) {
+          if (h.status === 'work') {
+            simCoins += h.cph / 60;
+            h.hp -= drainPerMin;
+            if (h.hp <= h.maxHp * 0.05) {
+              h.hp = h.maxHp * 0.05;
+              if (inHouse < houseSlots) {
+                h.status = 'house';
+                inHouse++;
+              } else {
+                h.status = 'waiting';
+                h.seq = ++seqCounter;
+              }
+            }
+          } else if (h.status === 'house') {
+            h.hp += healPerMin;
+            if (h.hp >= h.maxHp) {
+              h.hp = h.maxHp;
+              h.status = 'work';
+            }
+          }
+        }
+      }
+    }
+
+    const coins24hReal = simCoins / simDays;
+    const gross24h = grossCoinsPerHour * 24;
+    const uptimeRatio = gross24h > 0 ? Math.min(1, coins24hReal / gross24h) : 1;
+    const effectiveActiveHoursPerDay = dailyMiningHours * uptimeRatio;
 
     const dailyCoins = grossCoinsPerHour * effectiveActiveHoursPerDay;
     const dailyUsdt = dailyCoins * minerRate;
@@ -196,6 +260,7 @@ export default function RoiSimulatorTab({ lang = 'pt' }) {
       staffCostUsdt,
       totalInvestedUsdt,
       grossCoinsPerHour,
+      uptimeRatio,
       effectiveActiveHoursPerDay,
       dailyCoins,
       dailyUsdt,
@@ -672,8 +737,8 @@ export default function RoiSimulatorTab({ lang = 'pt' }) {
               </div>
             </div>
             <p className="text-[10px] text-slate-500 leading-relaxed">
-              * Estimativa baseada na média de Coins/h por raridade e ~{simulation.effectiveActiveHoursPerDay.toFixed(1)}h/dia
-              de atividade efetiva com a {selectedBase.name}.
+              * Estimativa real com taxa do jogo (1.86x), {Math.round((simulation.uptimeRatio || 1) * 100)}% de uptime
+              (~{simulation.effectiveActiveHoursPerDay.toFixed(1)}h/dia efetivas descontando descanso na {selectedBase.name}).
             </p>
           </div>
         </div>
